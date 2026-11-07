@@ -550,12 +550,12 @@ const ACH = [
   ['outs5', 'アウツチャレンジ', [1, 3, 10], n => `アウツチャレンジ（5問連続正解）をヒントなしで${n}回成功`, ['アウツ見習い', 'アウツ名人', '確率の鬼']],
   // バッジアタック（15分を最後までやり切ったときだけ数える）
   ['atk_done', 'アタック完走', [1, 5, 20], n => `バッジアタックを${n}回、時間いっぱいやり切る`, ['キックオフ', '常連アタッカー', 'アタックの鬼']],
-  ['atk_bp', 'アタック得点', [300, 800, 1400], n => `1回のバッジアタックで${n}BP以上`, ['得点王候補', 'ゴールゲッター', '得点王']],
+  ['atk_bp', 'アタック得点', [300, 700, 1000], n => `1回のバッジアタックで${n}BP以上`, ['得点王候補', 'ゴールゲッター', '得点王']],
   // 式の図鑑
   ['zukan', '図鑑登録', [10, 50, 200], n => `式の図鑑に${n}式を登録`, ['式の見習い', '式の収集家', '式の博士']],
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
   ['chart', '早見表', [1, 10, 37], n => n >= 37 ? '早見表をすべて完成（37行）' : `早見表の行を${n}行完成（すべての待ちを自分の式で埋める）`, ['早見表の一行目', '早見表の職人', '早見表マスター']],
-  ['atk_badges', 'アタック収集', [10, 20, 35], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
+  ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
 const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
@@ -708,7 +708,7 @@ function catTalk(k) {
 // バッジを押すと、マサが説明する
 // モードごとの関連バッジ（各系統の今の段階。未獲得は影で）
 const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'toushi', 'qualify_strong', 'champion_strong'];
-const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'];
+const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'], MB_CHART = ['chart'];
 const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS).includes(k));
 // 各系統の全段階（銅・銀・金）を並べる。未獲得は影
 function tierBadges(keys) {
@@ -1121,7 +1121,7 @@ function huntCardHTML() {
 // ホーム：早見表を作成（ここで式を入れて作る。対局中は、完成した行を見るだけ）
 function chartCardHTML() {
   const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
-  return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>
+  return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>${modeBadgeRows(MB_CHART, true)}
     <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。ヒントなし。完成した行は、対局中に見返せます。</p>
     <div class="facts"><span>3枚26組・2枚11組</span><span>${done}/${total}面</span><span>完成 ${full}行</span></div>
     <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
