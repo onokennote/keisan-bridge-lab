@@ -8,9 +8,9 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.goto('file://' + path.join(__dirname, 'page.html')); await pg.waitForTimeout(500);
   const men = await pg.evaluate(() => KBAPP.chartMen().map((m, i) => KBAPP.CHART_ROWS[i].length + ':' + m.length));
   ok(men.length === 37 && men.slice(0, 26).every(x => +x.split(':')[1] >= 9) && men.slice(26).every(x => +x.split(':')[1] >= 3), '37行（3枚は9面以上・2枚は3面以上）合計 ' + men.reduce((a, x) => a + +x.split(':')[1], 0) + '面');
-  await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(800);
+  // 作るのはホームから
   await pg.click('[data-act="chart-open"]'); await pg.waitForTimeout(300);
-  ok(await pg.evaluate(() => !!KBAPP.S.paused), '開いている間は対局が止まる');
+  ok(!!(await pg.$('#modal .ch-keys')), 'ホームから開くと入力できる');
   const tap = async sel => { await pg.click(sel); await pg.waitForTimeout(60); };
   // A・2・6 の行で (6 − 2) × A = 4。カッコは自動で閉じる
   await tap('[data-cko="("]'); await tap('[data-ckc="2"]'); await tap('[data-cko="−"]'); await tap('[data-ckc="1"]');
@@ -31,11 +31,21 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   for (const k of ['6', '+', '2', '-', 'a']) { await pg.keyboard.press(k); await pg.waitForTimeout(60); }
   ok(await pg.evaluate(() => /もう埋まって/.test(document.querySelector('.ch-expr').innerText)), '同じ答えは「もう埋まっています」');
   await pg.waitForTimeout(1000);
+  // 2・6 の行（3・4・8・Q）を全部埋めて完成させる
   await pg.click('tr[data-crow="26"]'); await pg.waitForTimeout(200);
+  for (const ks of [['6', '/', '2'], ['6', '-', '2'], ['6', '+', '2'], ['6', '*', '2']]) { for (const k of ks) { await pg.keyboard.press(k); await pg.waitForTimeout(50); } await pg.waitForTimeout(900); }
   await pg.screenshot({ path: path.join(__dirname, 'out', 'chart.png') });
+  await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /6\/279面/.test(document.body.innerText) && /完成 1行/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
+  // 対局中は見るだけ（完成した行だけ）
+  await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(800);
+  ok(await pg.evaluate(() => /早見表（完成1行）/.test(document.body.innerText)), '対局画面のボタンに完成行数が出る');
+  await pg.click('[data-act="chart-view"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => !!KBAPP.S.paused), '開いている間は対局が止まる');
+  ok(await pg.evaluate(() => !document.querySelector('#modal .ch-keys') && document.querySelectorAll('#modal tr.full').length === 1 && document.querySelectorAll('#modal td.ok').length === 4), '対局中は入力できず、完成した行（2・6）だけ表示');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_view.png') });
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(200);
   ok(await pg.evaluate(() => !KBAPP.S.paused), '閉じると対局が再開する');
-  ok(await pg.evaluate(() => /早見表を作成（2\//.test(document.body.innerText)), 'ボタンに進み具合が出る');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();
 })();

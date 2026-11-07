@@ -1115,6 +1115,14 @@ function huntCardHTML() {
     <button class="btn primary" data-act="hunt-start">狩りに出る</button></div>`;
 }
 // ホーム：アウツチャレンジ（モードの1つ）
+// ホーム：早見表を作成（ここで式を入れて作る。対局中は、完成した行を見るだけ）
+function chartCardHTML() {
+  const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
+  return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>
+    <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。ヒントなし。完成した行は、対局中に見返せます。</p>
+    <div class="facts"><span>3枚26組・2枚11組</span><span>${done}/${total}面</span><span>完成 ${full}行</span></div>
+    <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
+}
 function outsCardHTML() {
   const g = G_(), d = g.drill || null, c = g.cnt || {};
   return `<div class="mode outs-card"><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2>${modeBadgeRows(MB_OUTS, true)}
@@ -1823,6 +1831,7 @@ function chartMen() {
 }
 const chartGet = () => store.get('chart', null) || {};
 const chartTotal = () => chartMen().reduce((a, m) => a + m.length, 0);
+const chartFullRows = () => { const c = chartGet(), men = chartMen(); return CHART_ROWS.map((r, i) => i).filter(i => men[i].every(t => (c[CHART_ROWS[i].join(',')] || {})[t])); };
 const chartDone = () => { const c = chartGet(); return CHART_ROWS.reduce((a, r) => a + Object.keys(c[r.join(',')] || {}).length, 0); };
 // 式の計算：整数だけ。割り算は割り切れるときだけ（ゲームのルールと同じ）
 function chartEval(tok) {
@@ -1834,9 +1843,10 @@ function chartEval(tok) {
   const v = expr(); if (i < tok.length) err('式の形がちがいます'); return v;
 }
 const chartStr = tok => tok.map(t => t.k === 'c' ? KB.vname(t.v) : t.k).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
-function chartOpen() { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
+function chartOpen(view) { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.view = !!view; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
 function chartRender() {
   const C = S.chart, men = chartMen(), data = chartGet(), row = CHART_ROWS[C.row], key = row.join(','), mine = data[key] || {};
+  if (C.view) return chartViewRender(men, data);
   const head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
   const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + CHART_ROWS.slice(from, to).map((r, k) => {
     const i = from + k, d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
@@ -1866,8 +1876,19 @@ function chartRender() {
   m.querySelectorAll('[data-ckb]').forEach(b => b.onclick = () => chartKey(null));
   const on = m.querySelector('tr.on'); if (on && C.scroll !== C.row) { C.scroll = C.row; on.scrollIntoView({ block: 'nearest' }); }
 }
+// 対局中：完成した行だけを見る（入力はできない。作るのはホームから）
+function chartViewRender(men, data) {
+  const full = chartFullRows(), head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
+  const rows = full.map(i => { const r = CHART_ROWS[i], d = data[r.join(',')] || {}; return `<tr class="full"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[i].length}面</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : '<td></td>').join('')}</tr>`; }).join('');
+  modal(`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表</h2><span class="small">完成 ${full.length}/${CHART_ROWS.length}行</span></div>
+    <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
+    ${full.length ? `<div class="ch-wrap" style="max-height:52vh"><table class="ch-table">${head}${rows}</table></div><p class="small muted" style="margin:0">○をタップすると、自分で作った式が見られます。</p>` : '<p class="small" style="margin:0">まだ完成した行がありません。ホームの「早見表を作成」で、行のすべての待ちを自分の式で埋めると、ここに表示されます。</p>'}
+    <p class="small muted" style="margin:0">対局中は見るだけです。表を作るのはホームから。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  const m = $('#modal'); if (m) m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = () => toast(td.dataset.cexp));
+}
 function chartKey(t) {
-  const C = S.chart; if (!C || C.lock) return;
+  const C = S.chart; if (!C || C.lock || C.view) return;
   C.msg = null;
   if (!t) C.tok.pop(); else C.tok.push(t);
   // カッコの自動補助：「(」のあとに札を2枚入れたら「)」を閉じる
@@ -1887,7 +1908,7 @@ function chartKey(t) {
 }
 // パソコンではキーボードでも入力できる
 document.addEventListener('keydown', e => {
-  if (!S.chart || !$('#modal .chart-modal') || e.isComposing) return;
+  if (!S.chart || S.chart.view || !$('#modal .chart-modal') || e.isComposing) return;
   const row = CHART_ROWS[S.chart.row], used = new Set(S.chart.tok.filter(t => t.k === 'c').map(t => t.i));
   const kv = { a: 1, j: 11, q: 12, k: 13, t: 10, '0': 10 }[e.key.toLowerCase()] || (/^[1-9]$/.test(e.key) ? +e.key : null);
   const op = { '+': '+', '-': '−', '*': '×', '/': '÷', '(': '(', ')': ')' }[e.key];
@@ -1995,6 +2016,7 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
   ${attackCardHTML()}
   ${huntCardHTML()}
   ${outsCardHTML()}
+  ${chartCardHTML()}
 </div>
 ${growthCardHTML()}
 <div class="row" style="margin-top:14px">
@@ -2664,7 +2686,7 @@ function renderSide() {
     else if (e.type === 'draw') lines.push(`<div class="muted">${esc(nm(g.players[e.p]))}：引いた（残${e.left}）</div>`);
     else if (e.type === 'reshuffle') lines.push(`<div class="muted">捨て札を切り直して山札に</div>`);
   }
-  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-open">📋 早見表を作成（${chartDone()}/${chartTotal()}）</button></div>
+  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button></div>
     ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>`;
   renderPrev();
   $('#sidepanel').innerHTML = `<div><div class="lbl" style="margin-bottom:4px">記録</div><div class="log" id="log">${lines.join('')}</div></div>`;
@@ -4312,7 +4334,7 @@ function modal(html) {
   bindModal(bg);
   bindTBNext();
 }
-function closeModal() { const m = $('#modal'), ch = m && m.querySelector('.chart-modal'); if (m) m.remove(); resumeGame(); if (ch && S.view === 'game') renderGame(); } // 早見表を閉じたら、ボタンの進み具合を更新
+function closeModal() { const m = $('#modal'), ch = m && m.querySelector('.chart-modal'); if (m) m.remove(); resumeGame(); if (ch && S.view === 'game') renderGame(); else if (ch && S.view === 'home') render(); } // 早見表を閉じたら、ボタンの進み具合を更新
 // お知らせは下から積み上げる（バッジ・冠・アイテムのお知らせが重ならないように）
 function toastStack() { let st = document.getElementById('toast-stack'); if (!st) { st = document.createElement('div'); st.id = 'toast-stack'; document.body.appendChild(st); } return st; }
 function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; toastStack().appendChild(d); setTimeout(() => d.remove(), 2600); }
@@ -4472,6 +4494,7 @@ function act(a, el) {
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartOpen(); break;
+    case 'chart-view': chartOpen(true); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
