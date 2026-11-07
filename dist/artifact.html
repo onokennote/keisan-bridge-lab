@@ -1563,10 +1563,38 @@ body.spectate .me .hand .card{cursor:default}
 .watch-sum .ws-pps .ws-pp.win{flex-direction:row!important;justify-content:flex-start!important;text-align:left!important}
 .seat .open-hand{grid-column:1/-1;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center;gap:3px}
 .seat .open-hand .oh{display:inline-flex!important;flex:none;width:auto}
+
+/* チュートリアル */
+.watch-sm{display:block;margin:2px 0 6px;font-size:13px}
+.tut{display:flex;flex-direction:column;gap:10px}
+.tut-top{display:flex;justify-content:space-between;align-items:center}
+.tut-prog{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.tut-prog i{display:block;height:100%;background:#f2b632;transition:width .35s}
+.tut-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:60px}
+.tut-hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tut-hand .card{animation:pop .3s ease-out both}
+.tut-hand.pick .card{cursor:pointer}
+.tut-field{display:flex;justify-content:center}
+.tut-field .fieldcard{position:relative;transform:none}
+.tut-cap{margin:0;font-size:13px;color:#c9c2ad}
+.tut-msg{min-height:22px;text-align:center;font-weight:700}
+.tut-msg.good{color:#69db7c}
+.tut-msg.bad{color:#ff8787}
+.tut-opts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tut-opts .btn{min-width:90px;font-size:17px}
+.tut-exprs{display:grid;grid-template-columns:auto auto;gap:6px 12px;align-items:center}
+.tut-exprs .mono{font-size:18px;font-weight:900;color:#ffd43b}
+.tut-exprs small{color:#c9c2ad}
+.tut-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+.tut-flow span{padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.3);font-weight:700}
+.tut-menu{margin:0;padding-left:1.1em;line-height:1.7;font-size:14px;text-align:left}
+.tut-nav{justify-content:space-between;gap:8px}
+.tut .op-lines{min-height:0!important;margin:0}
+.tut.tut-static .op-line{animation:none!important;opacity:1!important;transform:none!important}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='3256986770';
+window.KB_BUILD='dccc58eec2';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6912,6 +6940,61 @@ function importData(text) {
   if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
   toast(`「${name}」として読み込みました`); switchProfile(id);
 }
+// ---------- チュートリアル：博士とマサが会話でルールとコツを説明（例を触りながら・簡単な選択つき） ----------
+function tutInvite(name) {
+  const nmS = san(name || S.settings.name || 'あなた');
+  const L = [['root', `ようこそ、${nmS}。私は解説のルート博士です。計算ブリッジのルールは、もうご存じですか？`], ['masa', 'ワイは実況のマサや！知らんかったら、3分でサクッと教えたるで！']];
+  modal(`<div class="watch-invite"><div class="wi-title">はじめまして！</div>
+    <div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.2 + i * 1.1}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns"><button class="btn" data-act="close">知ってるので大丈夫</button><button class="btn primary" data-act="tut-start">ルールを教えて！</button></div>
+    <p class="small muted" style="margin:0;text-align:center">あとからでも「ルール」の画面から見られます。</p></div>`);
+  KB.sfx('banner');
+}
+const TC = (v, s) => ({ v, s: s == null ? (v * 7) % 4 : s, id: 900 + v * 4 + (s || 0) });
+// 各ステップ：casters（会話）、show（例の表示）、task（操作：pick=札を選んで場を作る / choice=選択）
+const TUT = [
+  { cast: [['root', 'ゴールはかんたん。手札の7枚を、だれよりも先に出し切ることです。'], ['masa', '出し切った人が「上がり」や！サッカーで言うたら先制ゴールやな！']], show: () => tutHand([1, 4, 6, 9, 11, 12, 13].map(v => TC(v))) + '<p class="tut-cap">はじめの手札は7枚</p>' },
+  { cast: [['root', '毎巡、山札から1枚めくった札が「場」になります。この数を、手札で作るのです。A＝1、J＝11、Q＝12、K＝13 として数えます。'], ['masa', '場がJなら11を作る、ってことやな！']], show: () => tutField(TC(11, 1)) },
+  { cast: [['root', '手札の1〜3枚を、＋ − × ÷ とかっこで組み合わせて、場の数を作れば出せます。やってみましょう。場は7。手札から札を選んでください。'], ['masa', 'タップで選ぶんや！選んだら「出す」！']], show: () => tutField(TC(7, 2)), task: { kind: 'pick', t: 7, hand: [11, 4, 1, 9, 2] } },
+  { cast: [['root', '作れないときは、山札から1枚引きます。手札が増えるので、できれば出したいところ。では問題です。場はK（13）、手札は A・2・3。どうしますか？'], ['masa', 'よう考えてや〜']], show: () => tutField(TC(13, 0)) + tutHand([1, 2, 3].map(v => TC(v))), task: { kind: 'choice', opts: ['出す', '引く'], ok: 1, good: 'そのとおり。A・2・3 では、どう組み合わせても13は作れません。こういうときは引くしかありません。', bad: '実は、A・2・3 では13は作れないのです。3 ×（2 ＋ A）でも9まで。こういうときは引きます。' } },
+  { cast: [['root', 'だれかが上がると、そのゲームは終わり。残った人は、手札の数字の合計が「PP」（失点）になります。PPは少ないほど良い点です。問題。残りが K と 2 なら、PPはいくつ？'], ['masa', 'Kは13やで！']], show: () => tutHand([13, 2].map(v => TC(v))), task: { kind: 'choice', opts: ['2', '13', '15'], ok: 2, good: '正解です。13 ＋ 2 で15。大きい札が残るほど、失点は大きくなります。', bad: 'K（13）＋2 で15です。大きい札が残るほど、失点は大きくなります。' } },
+  { cast: [['root', 'ここでコツその1。出せる手が複数あるなら、大きい札から処分するのが基本です。場は9、手札は Q・3・7・2。どちらを出しますか？'], ['masa', 'ここが分かれ道や！']], show: () => tutField(TC(9, 3)) + tutHand([12, 3, 7, 2].map(v => TC(v))), task: { kind: 'choice', opts: ['Q − 3', '7 + 2'], ok: 0, good: 'お見事。Q − 3 なら手札の合計が15減ります。上がられたときの失点もぐっと小さくなります。', bad: '7 + 2 でも出せますが、Q − 3 なら合計が15減って、大きいQも手放せます。' } },
+  { cast: [['root', 'コツその2。3枚出しで一気に減らす、割り算で大きい札を小さな数にする。たとえば Q ÷ 4 = 3 です。'], ['masa', 'でかい札を割って逃がす、ここが計算ブリッジの気持ちええとこや！']], show: () => `<div class="tut-exprs"><span class="mono">8 ＋ 4 − 3 ＝ 9</span><small>3枚出しで一気に</small><span class="mono">Q ÷ 4 ＝ 3</span><small>割り算で大きい札を処分</small><span class="mono">J − 4 × A ＝ 7</span><small>かっこや×÷も自由に</small></div>` },
+  { cast: [['root', 'コツその3。手札が2〜3枚になったら「待ち」を意識します。たとえば A・2・6 の3枚は、13個の数のうち12個で上がれる、すごい形です。'], ['masa', 'ポーカーで言うたら、どのカードが来てもええ最強の待ちや！']], show: () => tutHand([1, 2, 6].map(v => TC(v))) + '<p class="tut-cap">A・2・6 ＝ 12面待ち（2〜Kで上がれる）</p>' },
+  { cast: [['root', '5ゲームで1セット。セットのPPの合計で順位が決まります。大会では、予選を何セットか戦って、上位が決勝に進みます。'], ['masa', '1ゲームの負けは取り返せる、長丁場の勝負や！']], show: () => `<div class="tut-flow"><span>1ゲーム</span><b>→</b><span>5ゲームで1セット</span><b>→</b><span>大会：予選 → 決勝</span></div>` },
+  { cast: [['root', 'この研究所でできることを紹介しましょう。'], ['masa', 'ぜんぶ遊びながら強くなれるで！']], show: () => `<ul class="tut-menu"><li><b>1セット練習</b>：相手の強さを選んで打つ。手ごとにAIの読みと比べられます</li><li><b>大会</b>：予選から決勝まで。思わぬ強敵も…</li><li><b>特訓</b>：式ハンター（3分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（15分の腕試し）</li><li><b>早見表</b>：多面待ちの札を、自分の式で埋めていく</li><li><b>バッジ・図鑑・アバター</b>：がんばりが形になって残ります</li><li><b>観戦</b>：達人の打ち方を見る（中級者向け）</li></ul>` },
+  { cast: [['root', '説明は以上です。あとは実際に打つのがいちばんの近道。まずは1セット練習から始めてみましょう。'], ['masa', 'ほな、キックオフや！ワイらも横で実況したるで！']], show: () => '', end: true }
+];
+function tutStart() { S.tut = { i: 0, sel: [], done: {} }; tutRender(); }
+function tutGo(d) { const T = S.tut; if (!T) return; T.i = Math.max(0, Math.min(TUT.length - 1, T.i + d)); T.sel = []; T.msg = null; tutRender(); }
+const tutHand = cs => `<div class="tut-hand">${cs.map(c => `<span class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></span>`).join('')}</div>`;
+const tutField = c => `<div class="tut-field"><div class="fieldcard top ${c.s === 1 || c.s === 2 ? 'red' : ''} deal"><span class="tag">場</span><span class="big">${KB.vname(c.v)}</span><span class="val">${KB.SUITS[c.s]} ${c.v}</span></div></div>`;
+function tutRender() {
+  const T = S.tut; if (!T) return;
+  const st = TUT[T.i], tk = st.task, done = !tk || T.done[T.i];
+  let task = '';
+  if (tk && tk.kind === 'pick') {
+    const cards = tk.hand.map((v, k) => ({ v, s: k % 4, id: k }));
+    const vals = T.sel.map(k => tk.hand[k]), m = vals.length ? KB.evalSelection(vals, tk.t) : null;
+    task = `<div class="tut-hand pick">${cards.map(c => `<button class="card ${c.s === 1 || c.s === 2 ? 'red' : ''} ${T.sel.includes(c.id) ? 'sel' : ''}" data-tutc="${c.id}" ${T.done[T.i] ? 'disabled' : ''}><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></button>`).join('')}</div>
+      <div class="tut-msg ${T.msg ? T.msg.cls : ''}">${T.msg ? esc(T.msg.t) : vals.length ? (m ? `${esc(m.expr)} ＝ ${tk.t}　出せます！` : `${vals.map(KB.vname).join('・')} では ${tk.t} を作れません`) : '札を1〜3枚タップ'}</div>
+      ${T.done[T.i] ? '' : `<button class="btn primary" data-tutplay="1" ${m ? '' : 'disabled'}>出す</button>`}`;
+  } else if (tk && tk.kind === 'choice') {
+    task = `<div class="tut-opts">${tk.opts.map((o, k) => `<button class="btn ${T.done[T.i] ? (k === tk.ok ? 'primary' : '') : ''}" data-tuto="${k}" ${T.done[T.i] ? 'disabled' : ''}>${esc(o)}</button>`).join('')}</div>${T.msg ? `<div class="tut-msg ${T.msg.cls}">${esc(T.msg.t)}</div>` : ''}`;
+  }
+  const cast = st.cast.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.1 + i * 0.7}s"><div class="cm-av">${KB.casterSVG(who, T.msg && T.msg.cls === 'bad' && who === 'masa' ? 'worried' : 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('');
+  const again = T.shown === T.i; T.shown = T.i; // 同じステップの描き直しでは、会話の登場アニメーションをくり返さない
+  const html = `<div class="tut ${again ? 'tut-static' : ''}"><div class="tut-top"><span class="small">ルールの説明　${T.i + 1}/${TUT.length}</span><button class="btn ghost sm" data-act="tut-close">とじる</button></div>
+    <div class="tut-prog"><i style="width:${Math.round((T.i + 1) / TUT.length * 100)}%"></i></div>
+    <div class="op-lines">${cast}</div><div class="tut-stage">${st.show()}${task}</div>
+    <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<button class="btn primary" data-act="tut-end">1セット練習へ</button>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
+  const cur = $('#modal .tut'); if (cur) { cur.parentElement.innerHTML = html; bindModal($('#modal')); } else modal(html);
+  const md = $('#modal'); if (!md) return;
+  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select'); tutRender(); });
+  md.querySelectorAll('[data-tutplay]').forEach(b => b.onclick = () => { const vals = T.sel.map(k => tk.hand[k]), m = KB.evalSelection(vals, tk.t); if (!m) return; T.done[T.i] = true; T.msg = { cls: 'good', t: `${m.expr} ＝ ${tk.t}　ナイス！ ほかにも 9 − 2、J − 4 × A など、作り方はいろいろあります。` }; KB.sfx('play3'); tutRender(); });
+  md.querySelectorAll('[data-tuto]').forEach(b => b.onclick = () => { const k = +b.dataset.tuto, ok = k === tk.ok; T.done[T.i] = true; T.msg = { cls: ok ? 'good' : 'bad', t: (ok ? '⭕ ' : '❌ ') + (ok ? tk.good : tk.bad) }; KB.sfx(ok ? 'capture' : 'foul'); tutRender(); });
+}
+
 // ---------- 観戦：★5の達人4人の1セットを、博士とマサの実況・ゲームごとの感想つきで見る（速さはいつも「ふつう」・いつでもやめられる） ----------
 function watchInvite(name) {
   const nmS = san(name || S.settings.name || 'あなた');
@@ -7204,11 +7287,11 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
-<button class="btn watch-home" data-act="watch-start">👀 達人のゲームを観戦する</button>
 <div class="mode-grid">
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     <div class="facts"><span>2〜5人卓</span><span>レベル・性格を指定</span><span>セット得点つき</span></div>
+    <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦（中級者向け）</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
   <div class="mode"><div class="lbl">TOURNAMENT</div><h2>大会モード</h2>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
@@ -9507,6 +9590,7 @@ function charProfile(id) {
 }
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>
+  <div class="panel row" style="justify-content:space-between;gap:8px;flex-wrap:wrap;max-width:70ch"><span class="small">博士とマサが、例を使って3分でルールとコツを説明します。</span><button class="btn primary sm" data-act="tut-start">チュートリアルで学ぶ</button></div>
   <div class="panel stack" style="max-width:70ch">
   <p style="margin:0">${esc(RULES_TXT)}</p>
   <div><b>このアプリでの前提</b><ul class="small">
@@ -9669,7 +9753,7 @@ function act(a, el) {
     case 'new-profile': askName(true); break;
     case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
     case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') watchInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }
@@ -9701,6 +9785,11 @@ function act(a, el) {
     case 'chart-open': chartOpen(); break;
     case 'watch-start': closeModal(); watchStart(); break;
     case 'watch-first': closeModal(); watchStart(true); break;
+    case 'tut-start': tutStart(); break;
+    case 'tut-next': tutGo(1); break;
+    case 'tut-back': tutGo(-1); break;
+    case 'tut-end': closeModal(); S.tut = null; go('setup-practice'); break;
+    case 'tut-close': closeModal(); S.tut = null; break;
     case 'watch-next': watchNext(); break;
     case 'watch-quit': closeModal(); watchEnd(); go('home'); break;
     case 'watch-again': closeModal(); watchStart(); break;
@@ -9788,7 +9877,7 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>

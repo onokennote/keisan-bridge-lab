@@ -1558,3 +1558,31 @@ body.spectate .me .hand .card{cursor:default}
 .watch-sum .ws-pps .ws-pp.win{flex-direction:row!important;justify-content:flex-start!important;text-align:left!important}
 .seat .open-hand{grid-column:1/-1;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center;gap:3px}
 .seat .open-hand .oh{display:inline-flex!important;flex:none;width:auto}
+
+/* チュートリアル */
+.watch-sm{display:block;margin:2px 0 6px;font-size:13px}
+.tut{display:flex;flex-direction:column;gap:10px}
+.tut-top{display:flex;justify-content:space-between;align-items:center}
+.tut-prog{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.tut-prog i{display:block;height:100%;background:#f2b632;transition:width .35s}
+.tut-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:60px}
+.tut-hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tut-hand .card{animation:pop .3s ease-out both}
+.tut-hand.pick .card{cursor:pointer}
+.tut-field{display:flex;justify-content:center}
+.tut-field .fieldcard{position:relative;transform:none}
+.tut-cap{margin:0;font-size:13px;color:#c9c2ad}
+.tut-msg{min-height:22px;text-align:center;font-weight:700}
+.tut-msg.good{color:#69db7c}
+.tut-msg.bad{color:#ff8787}
+.tut-opts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tut-opts .btn{min-width:90px;font-size:17px}
+.tut-exprs{display:grid;grid-template-columns:auto auto;gap:6px 12px;align-items:center}
+.tut-exprs .mono{font-size:18px;font-weight:900;color:#ffd43b}
+.tut-exprs small{color:#c9c2ad}
+.tut-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+.tut-flow span{padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.3);font-weight:700}
+.tut-menu{margin:0;padding-left:1.1em;line-height:1.7;font-size:14px;text-align:left}
+.tut-nav{justify-content:space-between;gap:8px}
+.tut .op-lines{min-height:0!important;margin:0}
+.tut.tut-static .op-line{animation:none!important;opacity:1!important;transform:none!important}
