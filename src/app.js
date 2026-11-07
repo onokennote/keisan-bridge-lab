@@ -8,7 +8,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
+const PROFILE_KEYS = { chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
@@ -1811,6 +1811,91 @@ function importData(text) {
   if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
   toast(`「${name}」として読み込みました`); switchProfile(id);
 }
+// ---------- 早見表を作成：多面待ちの2枚・3枚を、自分で式を入れて埋めていく（ヒントなし） ----------
+// 行：2枚は3面以上（A・○は法則の一行にまとめる）、3枚は9面以上。面数の多い順
+const CHART_ROWS = [[1, 2, 6], [1, 2, 4], [1, 2, 5], [1, 2, 7], [1, 2, 9], [1, 2, 10], [2, 3, 7], [1, 2, 3], [1, 2, 8], [1, 2, 12], [1, 3, 3], [1, 3, 4], [1, 3, 9], [2, 2, 8], [2, 3, 3], [2, 3, 4], [2, 3, 5], [2, 3, 8], [2, 3, 9], [2, 3, 12], [2, 4, 5], [2, 4, 10], [3, 3, 12], [3, 4, 5], [3, 5, 6], [3, 6, 9],
+  [2, 6], [2, 3], [2, 4], [2, 5], [2, 8], [2, 10], [3, 3], [3, 4], [3, 6], [3, 9], [4, 8]];
+let CHART_MEN = null; // 行ごとの待ち（全部の札を使って作れる場）
+function chartMen() {
+  if (CHART_MEN) return CHART_MEN;
+  CHART_MEN = CHART_ROWS.map(vals => { const c = KB.countsOf(vals), out = []; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) out.push(t); return out; });
+  return CHART_MEN;
+}
+const chartGet = () => store.get('chart', null) || {};
+const chartTotal = () => chartMen().reduce((a, m) => a + m.length, 0);
+const chartDone = () => { const c = chartGet(); return CHART_ROWS.reduce((a, r) => a + Object.keys(c[r.join(',')] || {}).length, 0); };
+// 式の計算：整数だけ。割り算は割り切れるときだけ（ゲームのルールと同じ）
+function chartEval(tok) {
+  let i = 0;
+  const peek = () => tok[i], err = m => { throw new Error(m); };
+  function atom() { const t = tok[i++]; if (!t) err('…'); if (t.k === 'c') return t.v; if (t.k === '(') { const v = expr(); if (!tok[i] || tok[i].k !== ')') err('…'); i++; return v; } err('式の形がちがいます'); }
+  function term() { let v = atom(); while (peek() && (peek().k === '×' || peek().k === '÷')) { const o = tok[i++].k, w = atom(); if (o === '×') v *= w; else { if (w === 0 || v % w !== 0) err('割り切れない割り算は使えません'); v /= w; } } return v; }
+  function expr() { let v = term(); while (peek() && (peek().k === '+' || peek().k === '−')) { const o = tok[i++].k, w = term(); v = o === '+' ? v + w : v - w; } return v; }
+  const v = expr(); if (i < tok.length) err('式の形がちがいます'); return v;
+}
+const chartStr = tok => tok.map(t => t.k === 'c' ? KB.vname(t.v) : t.k).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
+function chartOpen() { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
+function chartRender() {
+  const C = S.chart, men = chartMen(), data = chartGet(), row = CHART_ROWS[C.row], key = row.join(','), mine = data[key] || {};
+  const head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
+  const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + CHART_ROWS.slice(from, to).map((r, k) => {
+    const i = from + k, d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
+    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : '<td></td>').join('')}</tr>`;
+  }).join('');
+  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
+  let preview = '';
+  if (C.tok.length) { try { const v = chartEval(C.tok); preview = `= ${v}`; } catch (e) { preview = e.message === '…' ? '' : e.message; } }
+  const done = chartDone(), total = chartTotal();
+  const cur = $('#modal .chart-modal'), html = (`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表を作成</h2><span class="small">${done}/${total}</span></div>
+    <p class="small" style="margin:0">行を選び、札と記号で式を作ると答えの列に○。○をタップすると自分の式が見られます。</p>
+    <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
+    <div class="ch-wrap"><table class="ch-table">${head}${sec('3枚（9面以上）', 0, 26)}${sec('2枚（3面以上）', 26, CHART_ROWS.length)}</table></div>
+    <div class="ch-input">
+      <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small></div>
+      <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
+      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
+        ${['+', '−', '×', '÷', '(', ')'].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button></div>
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  if (cur) { const keep = cur.querySelector('.ch-wrap'), st = keep ? keep.scrollTop : 0; cur.parentElement.innerHTML = html; bindModal($('#modal')); const w = $('#modal .ch-wrap'); if (w) w.scrollTop = st; } else modal(html); // 打つたびに作り直しても、対局は止めたまま
+  const m = $('#modal'); if (!m) return;
+  m.querySelectorAll('[data-crow]').forEach(tr => tr.onclick = () => { C.row = +tr.dataset.crow; C.tok = []; C.msg = null; chartRender(); });
+  m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = e => { e.stopPropagation(); toast(td.dataset.cexp); });
+  m.querySelectorAll('[data-ckc]').forEach(b => b.onclick = () => chartKey({ k: 'c', i: +b.dataset.ckc, v: row[+b.dataset.ckc] }));
+  m.querySelectorAll('[data-cko]').forEach(b => b.onclick = () => chartKey({ k: b.dataset.cko }));
+  m.querySelectorAll('[data-ckb]').forEach(b => b.onclick = () => chartKey(null));
+  const on = m.querySelector('tr.on'); if (on && C.scroll !== C.row) { C.scroll = C.row; on.scrollIntoView({ block: 'nearest' }); }
+}
+function chartKey(t) {
+  const C = S.chart; if (!C || C.lock) return;
+  C.msg = null;
+  if (!t) C.tok.pop(); else C.tok.push(t);
+  // カッコの自動補助：「(」のあとに札を2枚入れたら「)」を閉じる
+  if (t && t.k === 'c') { let depth = 0, open = -1; C.tok.forEach((x, k) => { if (x.k === '(') { depth++; open = k; } else if (x.k === ')') depth--; }); if (depth > 0 && C.tok.slice(open).filter(x => x.k === 'c').length >= 2) C.tok.push({ k: ')' }); }
+  const row = CHART_ROWS[C.row], nC = C.tok.filter(x => x.k === 'c').length;
+  if (nC === row.length) {
+    let v = null, e = null; try { v = chartEval(C.tok); } catch (x) { e = x.message; }
+    if (e && e !== '…') C.msg = { t: e };
+    else if (v != null) {
+      const key = row.join(','), data = chartGet(), mine = data[key] = data[key] || {};
+      if (v < 1 || v > 13 || v !== Math.floor(v)) C.msg = { t: `= ${v}（待ちになりません）` };
+      else if (mine[v]) { C.msg = { t: `${KB.vname(v)} はもう埋まっています` }; C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 900); }
+      else { mine[v] = chartStr(C.tok); store.set('chart', data); C.msg = { ok: true, t: `= ${KB.vname(v)}　○` }; KB.sfx('capture'); C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 700); }
+    }
+  }
+  chartRender();
+}
+// パソコンではキーボードでも入力できる
+document.addEventListener('keydown', e => {
+  if (!S.chart || !$('#modal .chart-modal') || e.isComposing) return;
+  const row = CHART_ROWS[S.chart.row], used = new Set(S.chart.tok.filter(t => t.k === 'c').map(t => t.i));
+  const kv = { a: 1, j: 11, q: 12, k: 13, t: 10, '0': 10 }[e.key.toLowerCase()] || (/^[1-9]$/.test(e.key) ? +e.key : null);
+  const op = { '+': '+', '-': '−', '*': '×', '/': '÷', '(': '(', ')': ')' }[e.key];
+  if (kv) { const i = row.findIndex((v, k) => v === kv && !used.has(k)); if (i >= 0) { e.preventDefault(); chartKey({ k: 'c', i, v: kv }); } }
+  else if (op) { e.preventDefault(); chartKey({ k: op }); }
+  else if (e.key === 'Backspace') { e.preventDefault(); chartKey(null); }
+});
+
 // ---------- 引っ越し（アーティファクト版 → 公開版） ----------
 // 全プレイヤーの記録（localStorage の kb.*）を圧縮して、公開版URLの「#kbmove=」以降に入れて開く
 const MIG_SKIP = { 'kb.recentLines': 1, 'kb.migDone': 1, 'kb.testAskName': 1 };
@@ -2579,7 +2664,7 @@ function renderSide() {
     else if (e.type === 'draw') lines.push(`<div class="muted">${esc(nm(g.players[e.p]))}：引いた（残${e.left}）</div>`);
     else if (e.type === 'reshuffle') lines.push(`<div class="muted">捨て札を切り直して山札に</div>`);
   }
-  $('#unseenpanel').innerHTML = `<div><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button>
+  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-open">📋 早見表を作成（${chartDone()}/${chartTotal()}）</button></div>
     ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>`;
   renderPrev();
   $('#sidepanel').innerHTML = `<div><div class="lbl" style="margin-bottom:4px">記録</div><div class="log" id="log">${lines.join('')}</div></div>`;
@@ -4227,7 +4312,7 @@ function modal(html) {
   bindModal(bg);
   bindTBNext();
 }
-function closeModal() { const m = $('#modal'); if (m) m.remove(); resumeGame(); }
+function closeModal() { const m = $('#modal'), ch = m && m.querySelector('.chart-modal'); if (m) m.remove(); resumeGame(); if (ch && S.view === 'game') renderGame(); } // 早見表を閉じたら、ボタンの進み具合を更新
 // お知らせは下から積み上げる（バッジ・冠・アイテムのお知らせが重ならないように）
 function toastStack() { let st = document.getElementById('toast-stack'); if (!st) { st = document.createElement('div'); st.id = 'toast-stack'; document.body.appendChild(st); } return st; }
 function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; toastStack().appendChild(d); setTimeout(() => d.remove(), 2600); }
@@ -4386,6 +4471,7 @@ function act(a, el) {
     case 'quit': if (S.attack) { modal(`<div class="stack"><h3 style="margin:0">アタックを中止しますか？</h3><p class="small muted" style="margin:0">中止すると、ここまでのBPで終了します。完走のバッジ（バッジアタックの系統）は数えません。</p><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="attack-abort">中止する</button></div></div>`); break; } clearTimeout(S.timer); S.game = null; S.tiebreak = null; go('home'); break;
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
+    case 'chart-open': chartOpen(); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
@@ -4468,6 +4554,6 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();

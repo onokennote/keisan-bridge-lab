@@ -1479,3 +1479,32 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .aim-get b{font-family:var(--f-display);font-size:26px;color:#ffd43b}
 .aim-get small{color:#e9e3cf;line-height:1.5}
 .aim-get.out{animation:txOut .4s ease both}
+
+/* 早見表を作成 */
+.chart-modal{display:flex;flex-direction:column;gap:8px}
+.ch-rule{padding:6px 8px;border-radius:8px;background:rgba(242,182,50,.1);border:1px solid rgba(242,182,50,.4)}
+.ch-wrap{max-height:34vh;overflow:auto;border:1px solid var(--line,#2a4a3c);border-radius:10px}
+.ch-table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+.ch-table th{position:sticky;top:0;background:#123326;color:#f2b632;padding:4px 0;font-weight:700;z-index:1}
+.ch-table th:first-child{text-align:left;padding-left:6px}
+.ch-table td{text-align:center;padding:3px 0;border-top:1px solid rgba(255,255,255,.06);min-width:18px}
+.ch-table tr[data-crow]{cursor:pointer}
+.ch-table tr.on{background:rgba(242,182,50,.16)}
+.ch-table tr.full .ch-cards small{color:#ffd43b}
+.ch-table td.ok{color:#ffd43b;font-weight:900;cursor:pointer}
+.ch-table .ch-sec td{text-align:left;padding:5px 6px;color:#c9c2ad;font-weight:700;background:rgba(0,0,0,.25)}
+.ch-cards{text-align:left!important;padding-left:6px!important;white-space:nowrap}
+.ch-cards span,.ch-row-now span{display:inline-block;min-width:16px;margin-right:2px;padding:1px 2px;border-radius:3px;background:#fbf3dc;color:#1b1b1b;font-weight:900;text-align:center}
+.ch-cards small{display:block;font-size:10px;line-height:1.1;color:#c9c2ad}
+.ch-input{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:12px;background:rgba(0,0,0,.25)}
+.ch-row-now{display:flex;align-items:center;gap:4px}
+.ch-row-now span{font-size:16px;padding:2px 6px}
+.ch-row-now small{margin-left:auto;color:#c9c2ad}
+.ch-expr{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:36px;padding:6px 10px;border-radius:8px;background:#0b1a14;font-size:18px}
+.ch-expr b{font-size:15px;white-space:nowrap}
+.ch-expr.good b{color:#69db7c}
+.ch-expr.bad b{color:#ff8787}
+.ch-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ch-k{min-height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#173d2f;color:#fbf7ee;font-size:18px;font-weight:900;cursor:pointer}
+.ch-k.card-k{background:#fbf3dc;color:#1b1b1b}
+.ch-k:disabled{opacity:.3;cursor:default}
