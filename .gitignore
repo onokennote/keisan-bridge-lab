@@ -2,3 +2,5 @@ node_modules/
 test/page.html
 test/out/
 tools/.fonts/
+shots/
+test/page_mig.html

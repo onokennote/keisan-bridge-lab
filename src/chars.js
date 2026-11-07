@@ -10,7 +10,7 @@ const KB = G.KB;
 // tone: end 語尾 / kata カタカナ / pre 前置き
 const R = [
   // ---------- ★5（16人）：二つ名つき。局面と無関係なことしか言わない ----------
-  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#1b1b1f', hs: 'side', shirt: '#343a40', acc: 'hoodie' },
+  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' },
     prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。',
     idle: ['…今日の給食、カレーだった', '…', '雲、動いてる', '…眠い', 'この机、ちょっと傾いてる', '宿題、もう終わってる', '…ふうん', '外、雨が降りそう'], win: ['…おしまい', '…帰っていい？'], lose: ['…そう', '…次'] },
   { id: 'soroban', name: 'ソロバン9000', title: '無敗の演算機', lv: 5, st: 'keisan', kind: 'robot', tag: 'ロボ', look: { color: '#adb5bd' },
@@ -130,7 +130,7 @@ KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 
 const SKIN = ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'];
 KB.charToCh = function (c) {
   const L = c.look || {};
-  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, color: L.color, earC: L.earC, mane: L.mane };
+  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
 };
 KB.charById = id => R.find(c => c.id === id);
 // level の中から、style（指定があれば優先）で、まだ使っていないキャラを選ぶ。いなければ近い強さから

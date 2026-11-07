@@ -36,7 +36,8 @@ const FRAME = (id, ring, bg) => `<defs><clipPath id="${id}"><rect x="4" y="4" wi
 const LV5 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#e5dbff" stroke-width="1" stroke-dasharray="3 4"/>';
 KB.avatarSVG = function (ch, opts) {
   opts = opts || {};
-  const mood = opts.mood || 'normal';
+  // ch.cool：いつも無表情（クールで謎めいたキャラ。気分で表情を変えない）
+  const mood = ch.cool ? 'cool' : (opts.mood || 'normal');
   const st = opts.style ? KB.style(opts.style) : null;
   const lv = opts.level || 0;
   // 人間以外のキャラ（動物・ロボ・妖怪など）
@@ -57,13 +58,16 @@ KB.avatarSVG = function (ch, opts) {
   const ring = lv ? LEVEL_RING[lv - 1] : 'transparent';
   const bg = st ? st.color : (ch.bg && !String(ch.bg).startsWith('pat:') ? ch.bg : '#8a9a93');
   const H = ch.hair, S = ch.skin;
-  let back = '', front = '';
+  let back = '', front = '', over = '';
   const top = fy - ry;
   switch (ch.hs) {
     case 'short': front = `<path d="M${50 - rx - 2} ${fy - 2} Q${50 - rx - 3} ${top - 6} 50 ${top - 6} Q${50 + rx + 3} ${top - 6} ${50 + rx + 2} ${fy - 2} Q${50 + rx - 2} ${top + 10} 56 ${top + 9} Q44 ${top + 14} ${50 - rx + 2} ${fy - 4}Z" fill="${H}"/>`; break;
     case 'spiky': front = `<path d="M${50 - rx - 2} ${fy}L${50 - rx - 6} ${top + 2}L${50 - rx + 6} ${top + 4}L${44} ${top - 10}L${52} ${top + 2}L${60} ${top - 9}L${62} ${top + 4}L${50 + rx + 6} ${top - 1}L${50 + rx + 2} ${fy}Q${50 + rx - 4} ${top + 12} 50 ${top + 10}Q${50 - rx + 4} ${top + 12} ${50 - rx - 2} ${fy}Z" fill="${H}"/>`; break;
     case 'side': front = `<path d="M${50 - rx - 2} ${fy}Q${50 - rx - 4} ${top - 6} 52 ${top - 6}Q${50 + rx + 4} ${top - 4} ${50 + rx + 2} ${fy - 4}Q${50 + rx} ${top + 8} ${40} ${top + 14}Q${36} ${top + 6} ${50 - rx + 2} ${fy}Z" fill="${H}"/>`; break;
     case 'buzz': front = `<path d="M${50 - rx} ${fy - 6}Q${50 - rx} ${top - 3} 50 ${top - 3}Q${50 + rx} ${top - 3} ${50 + rx} ${fy - 6}Q${50 + rx - 3} ${top + 6} 50 ${top + 5}Q${50 - rx + 3} ${top + 6} ${50 - rx} ${fy - 6}Z" fill="${H}"/>`; break;
+    case 'veil': // 短めの髪＋片目を隠す長い前髪（謎めいた雰囲気）。前髪は目より手前に描く（下の over）
+      front = `<path d="M${50 - rx - 2} ${fy - 2}Q${50 - rx - 3} ${top - 6} 50 ${top - 7}Q${50 + rx + 3} ${top - 6} ${50 + rx + 2} ${fy - 2}Q${50 + rx - 2} ${top + 8} 58 ${top + 8}Q46 ${top + 10} ${50 - rx + 3} ${fy - 6}Z" fill="${H}"/>`;
+      over = `<path d="M43 ${top + 2}Q64 ${top - 1} ${50 + rx + 2} ${fy - 6}L${50 + rx} ${fy + 10}Q61 ${fy + 9} 53 ${fy - 5}Q49 ${top + 12} 43 ${top + 2}Z" fill="${H}"/>`; break;
     case 'bald': front = `<path d="M${50 - rx - 1} ${fy + 2}Q${50 - rx - 2} ${fy - 12} ${50 - rx + 5} ${fy - 14}L${50 - rx + 6} ${fy - 2}Z M${50 + rx + 1} ${fy + 2}Q${50 + rx + 2} ${fy - 12} ${50 + rx - 5} ${fy - 14}L${50 + rx - 6} ${fy - 2}Z" fill="${H}"/>`; break;
     case 'bob': back = `<path d="M${50 - rx - 5} ${fy + 14}Q${50 - rx - 7} ${top - 6} 50 ${top - 7}Q${50 + rx + 7} ${top - 6} ${50 + rx + 5} ${fy + 14}Z" fill="${H}"/>`;
       front = `<path d="M${50 - rx - 1} ${fy - 2}Q${50 - rx} ${top - 4} 50 ${top - 4}Q${50 + rx} ${top - 4} ${50 + rx + 1} ${fy - 2}Q${50 + rx - 6} ${top + 13} 50 ${top + 12}Q${50 - rx + 6} ${top + 13} ${50 - rx - 1} ${fy - 2}Z" fill="${H}"/>`; break;
@@ -90,14 +94,16 @@ KB.avatarSVG = function (ch, opts) {
   if (mood === 'happy') eyes = `<path d="M${50 - ex - 4} ${eyY + 1}Q${50 - ex} ${eyY - 4} ${50 - ex + 4} ${eyY + 1}M${50 + ex - 4} ${eyY + 1}Q${50 + ex} ${eyY - 4} ${50 + ex + 4} ${eyY + 1}" stroke="${ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
   else if (mood === 'smug' || mood === 'sleepy') eyes = `<path d="M${50 - ex - 4} ${eyY}L${50 - ex + 4} ${eyY}M${50 + ex - 4} ${eyY}L${50 + ex + 4} ${eyY}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
   else if (mood === 'shock') eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 + ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 - ex}" cy="${eyY}" r="1.5" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="1.5" fill="${ink}"/>`;
+  else if (mood === 'cool') eyes = `<path d="M${50 - ex - 4.5} ${eyY - 1}L${50 - ex + 4.5} ${eyY - 1.6}M${50 + ex - 4.5} ${eyY - 1.6}L${50 + ex + 4.5} ${eyY - 1}" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="${50 - ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><ellipse cx="${50 + ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><circle cx="${50 - ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/><circle cx="${50 + ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/>`;
   else eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 - ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/><circle cx="${50 + ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/>`;
   const my = fy + 13;
   if (mood === 'happy') mouth = `<path d="M43 ${my - 1}Q50 ${my + 8} 57 ${my - 1}Z" fill="#8c2f2f"/>`;
   else if (mood === 'worried') mouth = `<path d="M44 ${my + 3}Q50 ${my - 2} 56 ${my + 3}" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
   else if (mood === 'shock') mouth = `<ellipse cx="50" cy="${my + 1}" rx="3.5" ry="4.5" fill="#8c2f2f"/>`;
   else if (mood === 'smug') mouth = `<path d="M44 ${my}Q52 ${my + 4} 57 ${my - 2}" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+  else if (mood === 'cool') mouth = `<path d="M47 ${my + 1}L53 ${my + 1}" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
   else mouth = `<path d="M45 ${my}Q50 ${my + 3} 55 ${my}" stroke="${ink}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
-  if (child || ch.gender === 'f') extra += `<ellipse cx="${50 - ex - 4}" cy="${eyY + 7}" rx="3.5" ry="2" fill="#f08c8c" opacity=".45"/><ellipse cx="${50 + ex + 4}" cy="${eyY + 7}" rx="3.5" ry="2" fill="#f08c8c" opacity=".45"/>`;
+  if ((child || ch.gender === 'f') && mood !== 'cool') extra += `<ellipse cx="${50 - ex - 4}" cy="${eyY + 7}" rx="3.5" ry="2" fill="#f08c8c" opacity=".45"/><ellipse cx="${50 + ex + 4}" cy="${eyY + 7}" rx="3.5" ry="2" fill="#f08c8c" opacity=".45"/>`;
   if (senior) extra += `<path d="M${50 - ex - 6} ${eyY + 4}l3 1.5M${50 + ex + 6} ${eyY + 4}l-3 1.5M44 ${fy - ry + 12}q6 -2 12 0" stroke="#9a7a66" stroke-width="1" fill="none" opacity=".7"/>`;
   { const gl = ch.gl || ((ch.glasses || (st && st.id === 'keisan' && !ch.charId)) ? 'round' : null); if (gl && KB.glSVG) extra += KB.glSVG(gl, eyY, ex); }
   if (mood === 'worried') extra += `<path d="M${50 + rx - 2} ${fy - 12}q4 6 0 9q-4 -3 0 -9Z" fill="#74c0fc"/>`;
@@ -122,7 +128,7 @@ ${FRAME(id, ring, bg)}
 <rect x="44" y="${fy + ry - 6}" width="12" height="10" fill="${S}"/>
 <ellipse cx="${50 - rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/><ellipse cx="${50 + rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/>
 <ellipse cx="50" cy="${fy}" rx="${rx}" ry="${ry}" fill="${S}"/>
-${co.front}${front}${brows}${eyes}${mouth}${extra}${ch.face && KB.faceSVG ? KB.faceSVG(ch.face, fy, eyY, ex) : ''}${acc}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>
+${co.front}${front}${brows}${eyes}${mouth}${extra}${over}${ch.face && KB.faceSVG ? KB.faceSVG(ch.face, fy, eyY, ex) : ''}${acc}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>
 ${lv >= 5 ? LV5 : ''}
 </svg>`;
 };

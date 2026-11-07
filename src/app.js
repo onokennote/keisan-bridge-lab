@@ -1629,7 +1629,7 @@ function attackFinish(quit) {
   // ふだんの成長記録に、アタックのバッジを記録（途中でやめたときは数えない）
   if (!quit) { const gr = G_(); gr.cnt.atk_done = (gr.cnt.atk_done || 0) + 1; gr.cnt.atk_bp = Math.max(gr.cnt.atk_bp || 0, bp); gr.cnt.atk_badges = Math.max(gr.cnt.atk_badges || 0, nb); ['atk_done', 'atk_bp', 'atk_badges'].forEach(k => checkAch(gr, k)); G_save(gr); }
   S.attackResult.quit = !!quit;
-  whistle(quit ? 'アタック中止' : 'タイムアップ！', `${quit ? 'ここまでで' : ATTACK_MIN + '分で'} 獲得 ${bp} BP`, () => { document.body.classList.remove('atk-on'); go('attack-result'); }, { end: true, kind: quit ? (bp ? 'atkQuit' : 'atkQuit0') : isBest ? 'atkEndBest' : 'atkEnd', d: { bp, m: ATTACK_MIN } });
+  whistle(quit ? 'アタック中止' : 'タイムアップ！', `${quit ? 'ここまでで' : ATTACK_MIN + '分で'} 獲得 ${bp} BP`, () => { document.body.classList.remove('atk-on'); go('attack-result'); }, { end: true, kind: quit ? (bp ? 'atkQuit' : 'atkQuit0') : !bp ? 'atkQuit0' : isBest ? 'atkEndBest' : 'atkEnd', d: { bp, m: ATTACK_MIN } });
 }
 // 開始の演出：博士とマサの前振り → スタートボタン → マサ「ほなキックオフや！」＋ホイッスルで試合開始
 function attackIntro(then) {
@@ -3200,7 +3200,7 @@ function showGameSummary(keep) {
   const head = S.tiebreak ? '' : (T.phase === 'final' ? '決勝' : (T.cfg.kind === 'practice' ? '練習' : `予選 第${T.set}セット`)) + ` 第${T.game}ゲーム`;
   const next = T.game < T.cfg.games ? '次のゲームへ' : 'セット結果へ';
   modal(`${progHTML(T, true) || `<div class="lbl">${esc(head)} 終了</div>`}
-  <div class="banner">${g.winner === me ? 'あなたの上がり！' : `あなたはこのゲーム${g.pp.filter(x => x < g.pp[me]).length + 1}位`}</div>
+  <div class="banner">${g.winner === me ? `${esc(rvName())}の上がり！` : `${esc(rvName())}はこのゲーム${g.pp.filter(x => x < g.pp[me]).length + 1}位`}</div>
   <div class="result-cast">${sorted.map(o => `<div class="pc ${o.i === me ? 'me-pc' : ''}">${av(o.p, moodOf(g, o.i))}<span class="pc-name">${esc(o.i === me ? 'あなた' : nm(o.p))}</span><span class="pc-lab">今回のPP</span><b>${o.pp}</b>${S.tiebreak ? '' : `<span class="pc-set">セット計 <b>${setTotal(T, o.p.id)}</b></span>`}</div>`).join('')}</div>
   <div class="stack" style="gap:6px"><div class="lbl">AIの総括</div><p style="margin:0">${esc(comment)}</p>
   ${rows ? `<div class="dec-list">${rows}</div>
