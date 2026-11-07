@@ -1619,10 +1619,13 @@ body.spectate .me .hand .card{cursor:default}
 .nb-row{display:grid;grid-template-columns:40px 1fr 34px;align-items:center;gap:6px;font-size:12px}
 .nb-row i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#f2b632,#ffd43b)}
 .nb-row b{text-align:right;font-variant-numeric:tabular-nums}
+.story-text{display:flex;flex-direction:column;gap:12px;padding:4px 6px}
+.story-text p{margin:0;font-size:16px;line-height:1.9;animation:txIn .6s ease both}
+.story-note{margin:0;padding:0 6px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='e59200ff62';
+window.KB_BUILD='05f314eb41';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9634,58 +9637,19 @@ function charProfile(id) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
+// 段取りより衝動を伝える。短く、事実だけ
 const STORY = [
-  { ic: '😣', h: '親子で、惨敗', t: '2026年10月25日、第4回計算ブリッジ・日本一決定戦に、息子と初めて参加しました。結果は、二人とも決勝に上がれず惨敗。正直、なめていました。' },
-  { ic: '🔥', h: '雪辱のための特訓アプリ', t: '大会で痛感したのは、「その場で出せる手」と「勝つための手」は違うということ。そこで、本番そっくりの卓でAIと対戦し、自分の一手とAIの最善手を「上がれる確率」「失点の見込み」で比べられる特訓アプリを作り始めました。' },
-  { ic: '🤝', h: 'AI（Claude）と一緒に作る', t: '作り方はシンプルです。「こうしたい」を日本語で伝える → AIが作ってテストする → 親子でスマホで遊んで感想を返す → また直す。プログラムはAIに任せ、こちらはアイデアと「遊んでみた気持ち」を出し続けました。' },
-  { ic: '🦉', h: '負けた理由が分かるように', t: '解説のルート博士と、実況のナニワのマサが生まれました。1ゲームごとに「いちばんの分かれ道」と「最善手ならどう変わったか」を話してくれます。親子で読んで笑いながら学べることを目指しました。' },
-  { ic: '⚖️', h: '結果と、選び方を分ける', t: 'たまたま上がれた手をほめすぎない。正しく選んだのに負けたときは「気にせんでええで」。運の良し悪しと判断の良し悪しを分けて伝えるよう、総評を何度も磨きました。' },
-  { ic: '🏅', h: '続けたくなる仕掛け', t: 'バッジ、式の図鑑、自分のアバター。3分で式を集める「式ハンター」、上がれる札を数える「アウツチャレンジ」、15分の「バッジアタック」、自分の式で埋める「早見表」。短い時間でも鍛えられるようにしました。' },
-  { ic: '👁️', h: '遊び心も、本気で', t: '倶楽部には、強さも性格も違うオリジナルのキャラがたくさん。大会の決勝には、山札の底まで見通す奥義を持つ★6が、まれに現れます。' },
-  { ic: '🔰', h: 'はじめての人にも', t: '博士とマサが会話でルールを教えるチュートリアルと、達人の打ち方を見られる観戦モードを用意しました。' },
-  { ic: '📮', h: '考案者への相談', t: '「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、上野さんにご相談したうえで進めています。キャラクターはすべてオリジナルです。' },
-  { ic: '🔁', h: '230回以上の更新', t: '親子の「ここがおかしい」「もっとこうしたい」を一つずつ形にして、公開版の更新は230回を超えました。次の大会で、親子そろって決勝に進むのが目標です。' }
+  '2026年10月25日、第4回計算ブリッジ・日本一決定戦。息子と初めて出て、ふたりとも決勝に行けずに惨敗しました。正直、なめてました。',
+  '悔しかったので、特訓用のアプリを作りはじめました。AI（Claude）に「こういうのがほしい」と言っては遊び、また言っては遊び。',
+  '気づいたら、博士とマサがしゃべりだし、倶楽部のメンバーは60人になり、決勝には山札の底まで見通す★6が出るようになり、更新は230回を超えていました。',
+  '特訓のつもりが、思いのほか遊べるものになったので、みなさんにも遊んでもらうことにしました。'
 ];
-// ---------- 数字で見る研究所（こだわりの量を、実際に数えた数字で見せる） ----------
-let NUMS = null;
-function numbersData() {
-  if (NUMS) return NUMS;
-  let moves = 0; for (let t = 1; t <= 13; t++) moves += KB.MOVES.all[t].length;
-  const men = vals => { const c = KB.countsOf(vals); let n = 0; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) n++; return n; };
-  const tri = []; for (let a = 1; a <= 13; a++) for (let b = a; b <= 13; b++) for (let c = b; c <= 13; c++) tri.push({ v: [a, b, c], n: men([a, b, c]) });
-  const hist = {}; tri.forEach(x => hist[x.n] = (hist[x.n] || 0) + 1);
-  tri.sort((x, y) => y.n - x.n);
-  const charLines = KB.ROSTER.concat([KB.KANATA]).reduce((a, c) => a + (c.idle || []).length + (c.win || []).length + (c.lose || []).length, 0);
-  NUMS = { moves, tri, hist, zukan: ZUKAN.length, chart: chartTotal(), chartRows: CHART_ROWS.length, chars: KB.ROSTER.length, cast: KB.countLines(), charLines, badges: ACH_TOTAL };
-  return NUMS;
-}
-function numbersHTML() {
-  const N = numbersData(), fmt = n => n.toLocaleString('ja-JP'), vn = v => v.map(KB.vname).join('・');
-  const maxH = Math.max(...Object.values(N.hist));
-  const bars = Object.keys(N.hist).map(Number).sort((a, b) => b - a).map(k => `<div class="nb-row"><span>${k}面</span><i style="width:${Math.max(2, Math.round(N.hist[k] / maxH * 100))}%"></i><b>${N.hist[k]}</b></div>`).join('');
-  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}</div>`;
-  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">数字で見る研究所</div><div></div></div>
-  <div class="story"><div class="story-hero"><div class="sh-t">数字で見る<br>作戦研究所</div><p class="small">ぜんぶ、実際に数えた数字です</p></div>
-  <div class="num-grid">
-    ${card(fmt(N.moves), '通り', '1〜3枚で場を作る組み合わせ', 'A〜Kの札1〜3枚と、＋−×÷・かっこのすべての組み合わせを計算し、場（1〜13）を作れる札の組を全部表にしています。AIも、あなたの「出せます」の判定も、この表から。')}
-    ${card('455', '通り', '3枚の手札、全部の「待ち」', `手札が3枚になったとき、何種類の場で上がれるか（何面待ちか）を、455通りすべて数えました。最強は <b>${vn(N.tri[0].v)}</b> の<b>${N.tri[0].n}面待ち</b>。13の場のうち、上がれないのは1つだけです。`, `<div class="num-bars">${bars}</div><p class="small muted" style="margin:4px 0 0">面数ごとの組の数</p>`)}
-    ${card(fmt(N.zukan), '式', '式の図鑑', '÷ や「かっこ ×」を使う3枚の式を、場ごとにすべて図鑑にしました。式ハンターで1つずつ捕まえていきます。')}
-    ${card(fmt(12000), '回', '「AIの読み」1回あたりの先読み', 'あなたが「AIの読み」を開くたびに、残りの山札や相手の手札をランダムに想定して、ゲームの最後まで1万2千回シミュレーションし、上がれる確率と失点の見込みを出しています。★5の達人も、自分の番のたびに数百回の先読みをしています。')}
-    ${card(N.chars + 1, '人', 'ごちゃまぜ倶楽部のメンバー', `強さ★1〜5のオリジナルキャラが${N.chars}人。性格（打ち方）も4種類。そして大会の決勝にだけ現れる★6が1人。強い人ほど、セリフから手の内が読めません。`)}
-    ${card(fmt(N.cast + N.charLines), 'セリフ', '博士・マサ・キャラのセリフ', `解説のルート博士と実況のナニワのマサの実況・解説が${fmt(N.cast)}、キャラの口ぐせが${fmt(N.charLines)}。同じセリフが続かないよう、最近言ったものは避けて選びます。総評は文章生成AIではなく、対局のデータから組み立てています。`)}
-    ${card(N.badges, '個', 'バッジ', '上がり、最善手の連続、割り算、早撃ち、図鑑、早見表…。がんばりの種類ごとに、銅・銀・金のバッジがあります。')}
-    ${card(N.chart, '面', '早見表', `多面待ちの${N.chartRows}組の待ちを、ぜんぶ自分の式で埋める表。ヒントはなし。計算ブリッジの醍醐味です。`)}
-    ${card('230', '回以上', '公開版の更新', '親子で遊んで「ここがおかしい」「もっとこうしたい」を伝え、AIと一緒に直す。その繰り返しの数です。')}
-    ${card('0', '', '使っている公式キャラクター・画像', 'キャラクターはすべてこのアプリのオリジナル。非公式のファン制作です。')}
-  </div>
-  <div class="op-lines story-cast">${[['root', '数えられるものは、すべて数えました。数えた先に、良い一手が見えてきます。'], ['masa', '455通りぜんぶ数えるて、ほんまアホやろ！…せやけど、こういうアホが勝つんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button><button class="btn primary" data-go="home">ホームへ</button></div></div>`;
-}
 function storyHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
-  <div class="story"><div class="story-hero"><div class="sh-t">惨敗から生まれた<br>特訓アプリ</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
-  <ol class="story-tl">${STORY.map((x, i) => `<li style="animation-delay:${0.1 + i * 0.08}s"><span class="st-ic" aria-hidden="true">${x.ic}</span><div><b>${esc(x.h)}</b><p>${esc(x.t)}</p></div></li>`).join('')}</ol>
-  <div class="op-lines story-cast">${[['root', '負けた日のくやしさが、学びの入り口になりました。'], ['masa', 'ほな、次はワイらと一緒に決勝や！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="story"><div class="story-hero"><div class="sh-t">悔しかったので、<br>作りました。</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
+  <div class="story-text">${STORY.map((t, i) => `<p style="animation-delay:${0.15 + i * 0.25}s">${esc(t)}</p>`).join('')}</div>
+  <p class="small muted story-note">「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、キャラクターはすべてオリジナルです。</p>
+  <div class="op-lines story-cast">${[['masa', '要するに、負けず嫌いが止まらんかったっちゅうことや！'], ['root', 'くやしさは、いちばん強い学びの入り口です。']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
   <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る研究所</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
 }
 function rulesHTML() {
