@@ -1586,3 +1586,4 @@ body.spectate .me .hand .card{cursor:default}
 .tut-nav{justify-content:space-between;gap:8px}
 .tut .op-lines{min-height:0!important;margin:0}
 .tut.tut-static .op-line{animation:none!important;opacity:1!important;transform:none!important}
+.about-tut{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)}

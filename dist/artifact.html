@@ -1591,10 +1591,11 @@ body.spectate .me .hand .card{cursor:default}
 .tut-nav{justify-content:space-between;gap:8px}
 .tut .op-lines{min-height:0!important;margin:0}
 .tut.tut-static .op-line{animation:none!important;opacity:1!important;transform:none!important}
+.about-tut{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='10065bc266';
+window.KB_BUILD='6694875514';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7339,6 +7340,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }

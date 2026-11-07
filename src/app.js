@@ -2219,6 +2219,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
