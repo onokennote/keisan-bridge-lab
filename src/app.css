@@ -1465,3 +1465,17 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .kanata-ent{margin:6px auto 0;max-width:520px;text-align:center;color:#e5dbff;font-weight:700;line-height:1.6}
 .kanata-ent small{color:#c9c2ad;font-weight:400}
 @media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}
+
+/* ご褒美アイテム「自動照準」 */
+.aim-btn{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid #f2b632;background:rgba(242,182,50,.12)}
+.aim-btn small{font-size:11px;font-weight:400;color:var(--muted,#c9c2ad)}
+.aim-bar{margin:0 0 8px;padding:6px 10px;border-radius:10px;background:rgba(242,182,50,.16);border:1px solid #f2b632;color:#ffe8a3;font-size:13px;text-align:center;animation:aimPulse 1s ease-in-out infinite alternate}
+.aim-bar b{font-size:16px;color:#ffd43b}
+.aim-fact{border-color:#f2b632!important;color:#ffd43b}
+@keyframes aimPulse{from{box-shadow:0 0 0 rgba(242,182,50,0)}to{box-shadow:0 0 14px rgba(242,182,50,.45)}}
+.aim-get{position:fixed;inset:0;z-index:115;display:flex;align-items:center;justify-content:center;background:rgba(5,10,8,.72);pointer-events:none;animation:txIn .3s ease both}
+.aim-get .ag-in{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 22px;max-width:340px;text-align:center;border:2px solid #f2b632;border-radius:18px;background:#0e2a20;color:#fbf7ee}
+.aim-get .ag-in svg{width:90px;height:90px}
+.aim-get b{font-family:var(--f-display);font-size:26px;color:#ffd43b}
+.aim-get small{color:#e9e3cf;line-height:1.5}
+.aim-get.out{animation:txOut .4s ease both}

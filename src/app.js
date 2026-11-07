@@ -851,12 +851,14 @@ function huntDeal(H) {
   if (H.started) { KB.sfx('deal'); if (best.n) setTimeout(() => KB.sfx('lockon'), 650); }
 }
 function huntStart() {
-  const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], made: [], missed: [], sel: [], msg: null, started: false, over: false };
+  const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], autoRegs: [], auto: false, autoLeft: 0, made: [], missed: [], sel: [], msg: null, started: false, over: false };
   huntDeal(H); go('hunt');
 }
-function huntGo() {
+function huntGo(aim) {
   const H = S.hunt; if (!H || H.started) return;
-  huntOverlay('狩り開始', `${HUNT_SEC / 60}分間、未登録の式を捕まえろ`, 1);
+  if (aim) { const g = G_(); if ((g.aim || 0) > 0) { g.aim--; G_save(g); H.auto = true; H.autoLeft = AIM_N; H.usedAim = true; } }
+  huntOverlay(H.auto ? '自動照準 起動' : '狩り開始', H.auto ? `獲物${AIM_N}匹を自動で捕獲（得点には入りません）` : `${HUNT_SEC / 60}分間、未登録の式を捕まえろ`, 1);
+  if (H.auto) { clearTimeout(S.huntAutoT); S.huntAutoT = setTimeout(huntAutoStep, 1800); }
   H.started = true; H.end = Date.now() + HUNT_SEC * 1000 + 1600; H.fieldAt = Date.now() + 1600; render();
   clearInterval(S.huntTimer);
   S.huntTimer = setInterval(() => {
@@ -865,6 +867,27 @@ function huntGo() {
     document.querySelectorAll('.hunt-clock').forEach(el => { el.textContent = fmtClock(left); el.classList.toggle('hurry', left < 20000); });
     if (left <= 0) huntFinish();
   }, 250);
+}
+// ---------- ご褒美アイテム「自動照準」：「図鑑の場」銀バッジを持って大会の決勝に進むと1発もらえる（何発でもためられる） ----------
+// 使うと、獲物を20匹捕まえるまで（時間切れ・制覇でも終わり）カードを自動で選んで撃つ。札の選び方以外は手で打つときと同じ。
+// 自動で捕まえた式は図鑑に登録される（図鑑のバッジにも数える）が、得点・捕獲数・自己ベストには入れない
+const AIM_N = 20;
+const aimCount = () => G_().aim || 0;
+function aimReward(T) {
+  const g = G_(); if (!g.ach['zukan_cat:3']) return;
+  g.aim = (g.aim || 0) + 1; G_save(g); T.aimGot = true;
+  setTimeout(() => { const el = document.createElement('div'); el.className = 'aim-get'; el.innerHTML = `<div class="ag-in">${huntReticle('ov')}<b>ご褒美：自動照準</b><small>決勝進出のご褒美！式ハンターで、獲物${AIM_N}匹を自動で捕まえる（所持 ${g.aim}発）</small></div>`; document.body.appendChild(el); KB.sfx('lockon'); setTimeout(() => el.classList.add('out'), 2600); setTimeout(() => el.remove(), 3000); }, 900);
+}
+function huntAutoStep() {
+  const H = S.hunt; if (!H || H.over || !H.auto) return;
+  const again = ms => { clearTimeout(S.huntAutoT); S.huntAutoT = setTimeout(huntAutoStep, ms); };
+  if (H.blocked || !H.field || H.pausedAt || Date.now() < H.fieldAt || S.view !== 'hunt') return again(250);
+  const pats = huntPatterns(H.hand, H.field.v, H.used, zukanGet());
+  if (!pats.length) { huntPass(); return again(600); }
+  const pick = pats[(Math.random() * pats.length) | 0];
+  H.sel = []; H.blocked = true; render();
+  pick.forEach((id, i) => setTimeout(() => { if (S.hunt !== H || H.over) return; H.sel.push(id); KB.sfx('select'); render(); }, 300 + i * 260)); // タン、タン、タン
+  setTimeout(() => { if (S.hunt !== H || H.over) return; H.blocked = false; huntPlay(); again(1300); }, 300 + 3 * 260 + 200); // バン
 }
 function huntPlay() {
   const H = S.hunt; if (!H || !H.started || H.over || H.blocked) return;
@@ -879,13 +902,14 @@ function huntPlay() {
   H.used.add(f.use);
   const secs = (Date.now() - H.fieldAt) / 1000;
   let pts = 10 + (f.s.includes('−') ? 2 : 0) + (f.s.includes('×') ? 4 : 0) + (f.s.includes('÷') ? 6 : 0) + (f.s.includes('(') ? 4 : 0);
-  if (secs <= HUNT_QUICK) { H.streak++; pts += Math.min(10, 2 * H.streak); } else H.streak = 0;
-  H.score += pts;
+  const auto = H.auto;
+  if (auto) pts = 0; // 自動照準の間は得点に入れない
+  else { if (secs <= HUNT_QUICK) { H.streak++; pts += Math.min(10, 2 * H.streak); } else H.streak = 0; H.score += pts; }
   const isNew = f.id && !z[f.id];
-  if (isNew) { z[f.id] = { at: Date.now() }; store.set('zukan', z); H.regs.push({ s: f.s, t }); huntCapture(f.s, t, zukanCount(z)); zukanBadges(z); const lf = ZUKAN.filter(e => e.n === 3 && e.t === t && !z[e.id]).length; if (lf > 0 && (lf <= 10 || lf % 10 === 0)) huntLeftCall(t, lf); }
+  if (isNew) { z[f.id] = { at: Date.now() }; store.set('zukan', z); (auto ? H.autoRegs : H.regs).push({ s: f.s, t }); if (auto && --H.autoLeft <= 0) { H.auto = false; setTimeout(() => toast(`自動照準：${AIM_N}匹を捕獲して終了。ここからは手で狩ろう`), 1200); } huntCapture(f.s, t, zukanCount(z)); zukanBadges(z); const lf = ZUKAN.filter(e => e.n === 3 && e.t === t && !z[e.id]).length; if (lf > 0 && (lf <= 10 || lf % 10 === 0)) huntLeftCall(t, lf); }
   else huntCapture(f.s, t, 0, f.id ? 'reg' : 'out');
-  H.made.push({ s: f.s, t, pts, isNew: !!isNew, zk: !!f.id });
-  H.msg = { ok: true, text: `${f.s} = ${t}　+${pts}点${isNew ? '　捕獲！' : ''}`, isNew };
+  H.made.push({ s: f.s, t, pts, isNew: !!isNew, zk: !!f.id, auto });
+  H.msg = { ok: true, text: `${f.s} = ${t}　${auto ? '自動照準' : `+${pts}点`}${isNew ? '　捕獲！' : ''}`, isNew };
   if (!isNew) KB.sfx('play3');
   // 撃った演出を見せてから、次の標的と手札を配る（その間は操作できない）
   H.sel = []; H.blocked = true; H.hand = H.hand.map(c => Object.assign({}, c, { gone: cards.includes(c) })); render();
@@ -907,7 +931,7 @@ function huntLeftCall(t, n) {
 function huntConquer(t) {
   const H = S.hunt; if (!H || H.over) return;
   const z = zukanGet(), list = ZUKAN.filter(e => e.n === 3 && e.t === t), nPar = list.filter(e => e.expr.includes('(')).length, nDiv = list.filter(e => e.expr.includes('÷')).length;
-  const mine = H.regs.filter(r => r.t === t).length, doneT = [];
+  const mine = H.regs.concat(H.autoRegs || []).filter(r => r.t === t).length, doneT = [];
   for (let v = 1; v <= 13; v++) if (!ZUKAN.some(e => e.n === 3 && e.t === v && !z[e.id])) doneT.push(v);
   const allDone = doneT.length === 13, fixed = H.target === t;
   H.pausedAt = Date.now(); clearInterval(S.huntTimer);
@@ -955,7 +979,7 @@ function huntPass(fail) {
 }
 function huntFinish(quit) {
   const H = S.hunt; if (!H || H.over) return;
-  H.over = true; clearInterval(S.huntTimer); document.querySelectorAll('.hunt-esc').forEach(e => e.remove());
+  H.over = true; H.auto = false; clearTimeout(S.huntAutoT); clearInterval(S.huntTimer); document.querySelectorAll('.hunt-esc').forEach(e => e.remove());
   // 最後の場で作れた未登録の式も「見逃し」に入れる
   if (H.started && H.field) { const z = zukanGet(); huntNew(H.hand.map(c => c.v), H.field.v, H.used, z).slice(0, 3).forEach(f => { if (!H.missed.some(m => m.id === f.id)) H.missed.push({ id: f.id, s: f.s, t: f.t }); }); }
   const best = store.get('huntBest', null), rec = { regs: H.regs.length, score: H.score, made: H.made.length, at: Date.now() };
@@ -1044,16 +1068,18 @@ function huntHTML() {
       <li>札を選ぶと、獲物（未登録の式）の筋があるか色でわかります。<b>金色</b>＝その札を含む獲物がいる、<b>青灰色</b>＝いない。1枚目から筋を探せます。</li>
       <li>図鑑に入る（獲物になる）のは、<b>÷ か「かっこ ×」を使う式</b>だけ。＋−だけの式などは「図鑑外」で、出しても登録されません。</li>
       <li>「獲物の気配」は、その手札で作れる未登録の式の数。配られる札は、獲物がいるものが少し出やすくなっています。</li>
+      <li>🎯 ご褒美「自動照準」：バッジ「図鑑の場」の銀（場を3つ制覇）を持って大会の決勝に進むと1発もらえます。使うと獲物${AIM_N}匹を自動で捕獲（得点には入りません）。</li>
     </ul>
     <p class="small muted" style="margin:0">図鑑 ${nAll}/${ZUKAN.length}</p>
     <div class="stack" style="gap:6px"><b class="small">標的（場の数）</b>
       <div class="hunt-tsel">${(() => { const left = {}; ZUKAN.forEach(e => { if (e.n === 3 && !z[e.id]) left[e.t] = (left[e.t] || 0) + 1; }); const all = Object.values(left).reduce((a, b) => a + b, 0);
         return [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<button class="hts ${H.target === v ? 'on' : ''} ${v && !left[v] ? 'done' : ''}" data-act="hunt-target" data-v="${v || ''}"><b>${v ? KB.vname(v) : 'ランダム'}</b><small>${v ? (left[v] ? `残り${left[v]}` : '👑制覇') : `残り${all}`}</small></button>`).join(''); })()}</div>
       <p class="small muted" style="margin:0">数字を選ぶと、標的がずっとその数になります（「図鑑の場」バッジを狙うときに）。残りは、手札3枚で作れる未登録の式の数。</p></div>
-    <button class="btn primary" data-act="hunt-go">狩りを始める</button></div>`;
+    <button class="btn primary" data-act="hunt-go">狩りを始める</button>
+    ${aimCount() > 0 ? `<button class="btn aim-btn" data-act="hunt-go-aim">🎯 自動照準を使って始める<small>獲物${AIM_N}匹を自動で捕獲（得点には入りません）・残り${aimCount()}発</small></button>` : ''}</div>`;
   const pats = huntPatterns(H.hand, t, H.used, z), selOn = H.sel.length > 0 && pats.some(p => H.sel.every(id => p.includes(id)));
   const selHint = !H.sel.length ? '' : selOn ? (H.sel.length === 3 ? '◎ この3枚は獲物（未登録）を作れます' : `◎ 筋あり（この${H.sel.length}枚を含む獲物がいます）`) : (H.sel.length === 3 ? (() => { const fs = (ZK.byCombo[H.sel.map(i => H.hand.find(c => c.id === i).v).sort((x, y) => x - y).join(',')] || {})[t] || []; return !fs.length ? 'この3枚では作れません' : fs.some(f => f.id) ? 'この3枚の図鑑の式は登録ずみです' : '図鑑外の式です（図鑑に入るのは ÷ か「かっこ×」を使う式）'; })() : `この${H.sel.length}枚を含む獲物はいません`);
-  return top + `<div class="hunt-stats"><span>捕獲<b>${H.regs.length}</b></span><span>得点<b>${H.score}</b></span><span>連続<b>${H.streak}</b></span></div>
+  return top + `${H.auto ? `<div class="aim-bar">🎯 自動照準 作動中　あと<b>${H.autoLeft}</b>匹（自動捕獲 ${H.autoRegs.length}・得点には入りません）</div>` : ''}<div class="hunt-stats"><span>捕獲<b>${H.regs.length}</b></span><span>得点<b>${H.score}</b></span><span>連続<b>${H.streak}</b></span></div>
   <div class="panel hunt-board">
     <div class="hunt-field"><div class="hunt-scope ${nNew ? 'lock' : ''} ${S.huntShownField !== H.fieldNo ? 'fresh' : ''}">${huntReticle()}${S.huntShownField !== H.fieldNo && H.started && H.fieldNo > 1 ? '<span class="tgt-new">新しい標的！</span>' : ''}<div class="fieldcard top ${H.field.s === 1 || H.field.s === 2 ? 'red' : ''}" data-k="${H.fieldNo}"><span class="tag">標的</span><span class="big">${KB.vname(t)}</span><span class="val">${KB.SUITS[H.field.s]} ${t}</span></div></div>
       <div class="hunt-hint ${nNew ? 'on' : huntLeft(H, z).length ? '' : 'done'}">${nNew ? `<small>獲物の気配</small><b>${nNew}<small>匹</small></b><span class="hunt-par ${nPar ? '' : 'zero'}">うちカッコ付き <b>${nPar}</b></span><small>（未登録の式）</small>` : (huntLeft(H, z).length ? '<small>この手札に</small>獲物なし<small>見送りも手</small>' : `<small>${H.target ? `標的${KB.vname(H.target)}` : '図鑑'}は</small><span class="hd-crown">👑</span><b>制覇済み</b><small>${H.target ? '別の標的で狩ろう' : 'おめでとう！'}</small>`)}</div></div>
@@ -1070,7 +1096,8 @@ function huntResultHTML() {
   <div class="panel stack" style="align-items:center;text-align:center">
     <div class="hunt-trophy">${huntReticle('res')}</div><div class="dq-title ok">${H.quit ? '狩りを中断' : '狩りの成果'}</div>
     <div class="atk-score"><b>${H.regs.length}</b><span>式を捕獲</span></div>
-    <p style="margin:0">得点 ${H.score}・作った式 ${H.made.length}</p>
+    <p style="margin:0">得点 ${H.score}・作った式 ${H.made.filter(m => !m.auto).length}</p>
+    ${H.usedAim ? `<p class="small" style="margin:0">🎯 自動照準で捕獲：<b>${H.autoRegs.length}式</b>（図鑑には登録。得点・自己ベストには入りません）</p>` : ''}
     <p style="margin:0">${H.isBest ? '<b class="ok">自己ベスト更新！</b>' : H.prevBest ? `自己ベストは ${H.prevBest.regs}式・${H.prevBest.score}点` : ''}</p>
     <p class="small muted" style="margin:0">図鑑 ${zukanCount(z)}/${ZUKAN.length}</p>
   </div>
@@ -1083,7 +1110,7 @@ function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
   return `<div class="mode hunt-card"><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2>${modeBadgeRows(MB_HUNT, true)}
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
-    <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span></div>
+    <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span>${aimCount() ? `<span class="aim-fact">🎯 自動照準 ×${aimCount()}</span>` : ''}</div>
     ${b ? `<p class="small" style="margin:0">自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</p>` : ''}
     <button class="btn primary" data-act="hunt-start">狩りに出る</button></div>`;
 }
@@ -4030,7 +4057,7 @@ function startFinal() {
   const T = S.T; T.phase = 'final'; T.set = 1; T.game = 1; T.finalPP = {}; S.T.setLog = []; T.setT0 = Date.now(); T.pbSnap = rvSnap();
   T.finalists.forEach(id => T.finalPP[id] = 0);
   seatSet(T);
-  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; startGame(); return; }
+  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); aimReward(T); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; startGame(); return; }
   // 観戦：全ゲーム自動
   const pls = T.tables[0].map(id => P(id));
   for (let gI = 0; gI < T.cfg.games; gI++) { const gm = KB.autoGame(pls, starterFor(T.tables[0], gI + 1)); pls.forEach((p, i) => { T.setPP[p.id].push(gm.pp[i]); T.finalPP[p.id] += gm.pp[i]; }); }
@@ -4362,11 +4389,12 @@ function act(a, el) {
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
-    case 'hunt-card': { const H = S.hunt; if (!H || !H.started || H.over || H.blocked) break; const id = +el.dataset.id; if (H.sel.includes(id)) H.sel = H.sel.filter(x => x !== id); else if (H.sel.length < 3) H.sel.push(id); else break;
+    case 'hunt-go-aim': huntGo(true); break;
+    case 'hunt-card': { const H = S.hunt; if (!H || !H.started || H.over || H.blocked || H.auto) break; const id = +el.dataset.id; if (H.sel.includes(id)) H.sel = H.sel.filter(x => x !== id); else if (H.sel.length < 3) H.sel.push(id); else break;
       if (H.sel.length === 3) { const vals = H.sel.map(i => H.hand.find(c => c.id === i).v).sort((a, b) => a - b); if (!((ZK.byCombo[vals.join(',')] || {})[H.field.v] || []).length) { H.sel = H.sel.slice(); render(); huntPass(`${vals.map(KB.vname).join('・')} では ${KB.vname(H.field.v)} を作れない`); break; } }
       KB.sfx('select'); render(); break; }
-    case 'hunt-play': huntPlay(); break;
-    case 'hunt-pass': huntPass(); break;
+    case 'hunt-play': if (!(S.hunt && S.hunt.auto)) huntPlay(); break;
+    case 'hunt-pass': if (!(S.hunt && S.hunt.auto)) huntPass(); break;
     case 'hunt-quit': if (S.hunt && S.hunt.started && !S.hunt.over) huntFinish(true); else { clearInterval(S.huntTimer); S.hunt = null; go('home'); } break;
     case 'avatar-edit': S.avDraft = myAvatar(); avatarEditor(); break;
     case 'av-locked': { const key = el.dataset.k + ':' + el.dataset.v; KB.sfx('back'); toast(`🔒 ${avItemName(key)}：${avLockText(key)}で使えます`); break; }
@@ -4440,6 +4468,6 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
