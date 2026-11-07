@@ -12,7 +12,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.screenshot({ path: path.join(__dirname, 'out', 'watch_invite.png') });
   await pg.click('.watch-invite [data-act="watch-first"]'); await pg.waitForTimeout(4000);
   ok(await pg.evaluate(() => KBAPP.S.view === 'game' && !!KBAPP.S.spectate), '本戦と同じ対局画面で観戦が始まる');
-  ok(await pg.evaluate(() => document.querySelectorAll('.open-hand').length === 3 && !!document.querySelector('.me .hand .card')), '全員の手札が見える（手元は達人）');
+  ok(await pg.evaluate(() => document.querySelectorAll('.open-hand').length === 3 && !document.querySelector('.opps .handcount i') && !!document.querySelector('.me .hand .card')), '全員の手札が見える（手元は達人）');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'watch_game.png') });
   let t0 = Date.now(); await pg.waitForSelector('.watch-sum', { timeout: 300000 });
   console.log('1ゲーム目の所要 ' + Math.round((Date.now() - t0) / 1000) + '秒');

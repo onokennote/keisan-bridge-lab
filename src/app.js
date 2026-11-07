@@ -2670,9 +2670,9 @@ function renderGame0() {
       <div class="av" ${p.ch && p.ch.charId ? `data-char="${p.ch.charId}" role="button" aria-label="${esc(nm(p))}のプロフィール"` : ''}>${av(p, S.thinking === i ? 'normal' : moodOf(g, i))}${bubble}</div>
       <div class="nm"><span>${esc(nm(p))}</span><span class="ord">${ordInRound}番手</span>${pvr ? `<span class="prov"><span class="lv-full">暫定</span>${pvr.rank[p.id]}位</span>` : ''}</div>
       <div class="meta">${lvChip(p) || `<span class="chip lvchip">${esc(p.ch.ageJa)}</span>`}</div>
-      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over ? '' : handBacks(n)}</span>
+      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over || S.spectate ? '' : handBacks(n)}</span>
         <span>${g.over ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${setpp}</b>`}</span></div>
-      ${S.spectate && !g.over && n ? `<div class="played open-hand"><span class="pl-l">手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
+      ${S.spectate && !g.over && n ? `<div class="open-hand">${g.hands[i].map(c => `<i class="oh ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>`).join('')}</div>` : ''}${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
   }
   const fieldsAll = g.log.filter(e => e.type === 'field');
   const dispRound = S.showRound ? g.round - 1 : g.round;

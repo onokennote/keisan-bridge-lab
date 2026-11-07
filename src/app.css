@@ -1542,7 +1542,10 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .watch-home{display:block;width:100%;margin:14px 0 4px;padding:14px;font-size:17px;font-weight:900;border:2px solid #f2b632;background:linear-gradient(180deg,rgba(242,182,50,.22),rgba(242,182,50,.08))}
 body.spectate .me .controls,body.spectate .me .actions,body.spectate #hintpanel,body.spectate #prevpanel{display:none!important}
 body.spectate .me .hand .card{cursor:default}
-.played.open-hand .pg .mc{min-width:18px;height:23px;font-size:12px}
+.open-hand{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 2px}
+.open-hand .oh{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:24px;height:32px;padding:0 1px;border-radius:5px;background:var(--card);color:var(--card-ink);font-weight:900;font-size:14px;line-height:1;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.open-hand .oh small{font-size:9px;line-height:1}
+.open-hand .oh.red{color:var(--card-red)}
 .watch-sum .ws-pps{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
 .watch-sum .ws-pp{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.25);text-align:left}
 .watch-sum .ws-pp .av{width:36px;height:36px;flex:none}
@@ -1553,3 +1556,5 @@ body.spectate .me .hand .card{cursor:default}
 .watch-sum .gs-head{display:flex;flex-direction:column;align-items:center}
 .watch-sum .gs-head b{font-family:var(--f-display);font-size:24px;color:#ffd43b}
 .watch-sum .ws-pps .ws-pp.win{flex-direction:row!important;justify-content:flex-start!important;text-align:left!important}
+.seat .open-hand{grid-column:1/-1;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center;gap:3px}
+.seat .open-hand .oh{display:inline-flex!important;flex:none;width:auto}
