@@ -28,8 +28,13 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   }
   await pg.screenshot({ path: path.join(__dirname, 'out', 'tut_end.png') });
   await pg.click('[data-act="tut-end"]'); await pg.waitForTimeout(400);
-  ok(await pg.evaluate(() => KBAPP.S.view === 'setup-practice' && !document.querySelector('#modal')), '最後は1セット練習へ');
-  await pg.click('[data-go="home"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => KBAPP.S.view === 'game' && KBAPP.S.T && KBAPP.S.T.players.filter(p => !p.human).every(p => p.level <= 2)), '最後は弱めの相手3人と1セット練習が始まる');
+  await pg.evaluate(() => { clearTimeout(KBAPP.S.timer); KBAPP.go('home'); }); await pg.waitForTimeout(300);
+  // 説明を聞かないときも、ひと声かけて送り出す
+  await pg.evaluate(() => KBAPP.act('tut-skip')); await pg.waitForTimeout(1500);
+  ok(await pg.evaluate(() => /楽しんでな/.test(document.querySelector('#modal').innerText)), '説明を聞かないときも「ほな、楽しんでな！」');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'tut_bye.png') });
+  await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
   ok(await pg.evaluate(() => { const w = document.querySelector('.watch-sm'), s = document.querySelector('[data-go="setup-practice"]'); return w && s && (w.compareDocumentPosition(s) & 4); }), '観戦ボタンは練習開始ボタンの上（小さめ）');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();

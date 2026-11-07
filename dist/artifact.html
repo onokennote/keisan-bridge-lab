@@ -1594,7 +1594,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='f684fcd43f';
+window.KB_BUILD='81c1517173';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6946,7 +6946,7 @@ function tutInvite(name) {
   const L = [['root', `ようこそ、${nmS}。私は解説のルート博士です。計算ブリッジのルールは、もうご存じですか？`], ['masa', 'ワイは実況のマサや！知らんかったら、3分でサクッと教えたるで！']];
   modal(`<div class="watch-invite"><div class="wi-title">はじめまして！</div>
     <div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.2 + i * 1.1}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-    <div class="row wi-btns"><button class="btn" data-act="close">知ってるので大丈夫</button><button class="btn primary" data-act="tut-start">ルールを教えて！</button></div>
+    <div class="row wi-btns"><button class="btn" data-act="tut-skip">知ってるので大丈夫</button><button class="btn primary" data-act="tut-start">ルールを教えて！</button></div>
     <p class="small muted" style="margin:0;text-align:center">あとからでも「ルール」の画面から見られます。</p></div>`);
   KB.sfx('banner');
 }
@@ -6963,8 +6963,21 @@ const TUT = [
   { cast: [['root', 'コツその3。手札が2〜3枚になったら「待ち」を意識します。たとえば A・2・6 の3枚は、13個の数のうち12個で上がれる、すごい形です。'], ['masa', 'ポーカーで言うたら、どのカードが来てもええ最強の待ちや！']], show: () => tutHand([1, 2, 6].map(v => TC(v))) + '<p class="tut-cap">A・2・6 ＝ 12面待ち（2〜Kで上がれる）</p>' },
   { cast: [['root', '5ゲームで1セット。セットのPPの合計で順位が決まります。大会では、予選を何セットか戦って、上位が決勝に進みます。'], ['masa', '1ゲームの負けは取り返せる、長丁場の勝負や！']], show: () => `<div class="tut-flow"><span>1ゲーム</span><b>→</b><span>5ゲームで1セット</span><b>→</b><span>大会：予選 → 決勝</span></div>` },
   { cast: [['root', 'この研究所でできることを紹介しましょう。'], ['masa', 'ぜんぶ遊びながら強くなれるで！']], show: () => `<ul class="tut-menu"><li><b>1セット練習</b>：相手の強さを選んで打つ。手ごとにAIの読みと比べられます</li><li><b>大会</b>：予選から決勝まで。思わぬ強敵も…</li><li><b>特訓</b>：式ハンター（3分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（15分の腕試し）</li><li><b>早見表</b>：多面待ちの札を、自分の式で埋めていく</li><li><b>バッジ・図鑑・アバター</b>：がんばりが形になって残ります</li><li><b>観戦</b>：達人の打ち方を見る（中級者向け）</li></ul>` },
-  { cast: [['root', '説明は以上です。あとは実際に打つのがいちばんの近道。まずは1セット練習から始めてみましょう。'], ['masa', 'ほな、キックオフや！ワイらも横で実況したるで！']], show: () => '', end: true }
+  { cast: [['root', '説明は以上です。とはいえ、こればかりは打ってみるのがいちばん。'], ['masa', 'せや、いっぺんやってみんと分からんかもな！設定はワイらにまかせとき。まずは弱めの相手3人と1セットや。横で実況したるで！']], show: () => `<div class="tut-flow"><span>相手3人（★1〜2）</span><span>5ゲーム</span><span>博士とマサの実況つき</span></div>`, end: true }
 ];
+// おすすめ設定（弱め）でそのまま1セット練習を始める
+function tutPlay() {
+  S.T = newSession({ kind: 'practice', games: 5, mix: 'random', opps: [{ level: '1', style: 'r' }, { level: '2', style: 'r' }, { level: '2', style: 'r' }], points: [10, 8, 5, 2, 0], tie: 'janken' });
+  stat('pStart'); startSet();
+}
+// 説明を聞かないとき・練習をあとにするときも、ひと声かけて送り出す
+function tutBye(kind) {
+  const L = kind === 'skip' ? [['masa', 'ほな、楽しんでな！ 分からんことがあったら、ルールの画面からいつでも呼んでや！'], ['root', '良い一局を。達人の打ち方は、練習カードの「観戦」で見られますよ。']]
+    : [['masa', '了解や！ ほな、気が向いたらいつでもキックオフしてな！'], ['root', 'ホームの「1セット練習」から、いつでも始められます。']];
+  modal(`<div class="watch-invite tut-bye"><div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.1 + i * 0.6}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns" style="animation-delay:1.1s"><button class="btn primary" data-act="close">はじめる</button></div></div>`);
+  KB.sfx('select');
+}
 function tutStart() { S.tut = { i: 0, sel: [], done: {} }; tutRender(); }
 function tutGo(d) { const T = S.tut; if (!T) return; T.i = Math.max(0, Math.min(TUT.length - 1, T.i + d)); T.sel = []; T.msg = null; tutRender(); }
 const tutHand = cs => `<div class="tut-hand">${cs.map(c => `<span class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></span>`).join('')}</div>`;
@@ -6987,7 +7000,7 @@ function tutRender() {
   const html = `<div class="tut ${again ? 'tut-static' : ''}"><div class="tut-top"><span class="small">ルールの説明　${T.i + 1}/${TUT.length}</span><button class="btn ghost sm" data-act="tut-close">とじる</button></div>
     <div class="tut-prog"><i style="width:${Math.round((T.i + 1) / TUT.length * 100)}%"></i></div>
     <div class="op-lines">${cast}</div><div class="tut-stage">${st.show()}${task}</div>
-    <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<button class="btn primary" data-act="tut-end">1セット練習へ</button>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
+    <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<span class="row" style="gap:8px"><button class="btn ghost" data-act="tut-later">あとで</button><button class="btn primary" data-act="tut-end">打ってみる！</button></span>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
   const cur = $('#modal .tut'); if (cur) { cur.parentElement.innerHTML = html; bindModal($('#modal')); } else modal(html);
   const md = $('#modal'); if (!md) return;
   md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select'); tutRender(); });
@@ -9788,7 +9801,9 @@ function act(a, el) {
     case 'tut-start': tutStart(); break;
     case 'tut-next': tutGo(1); break;
     case 'tut-back': tutGo(-1); break;
-    case 'tut-end': closeModal(); S.tut = null; go('setup-practice'); break;
+    case 'tut-end': closeModal(); S.tut = null; tutPlay(); break;
+    case 'tut-skip': tutBye('skip'); break;
+    case 'tut-later': S.tut = null; tutBye('later'); break;
     case 'tut-close': closeModal(); S.tut = null; break;
     case 'watch-next': watchNext(); break;
     case 'watch-quit': closeModal(); watchEnd(); go('home'); break;
