@@ -396,6 +396,7 @@ function render() {
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
+  else if (S.view === 'numbers') app.innerHTML = numbersHTML();
   bind();
 }
 
@@ -2220,7 +2221,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button></div>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る研究所</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
@@ -4497,12 +4498,47 @@ const STORY = [
   { ic: '📮', h: '考案者への相談', t: '「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、上野さんにご相談したうえで進めています。キャラクターはすべてオリジナルです。' },
   { ic: '🔁', h: '230回以上の更新', t: '親子の「ここがおかしい」「もっとこうしたい」を一つずつ形にして、公開版の更新は230回を超えました。次の大会で、親子そろって決勝に進むのが目標です。' }
 ];
+// ---------- 数字で見る研究所（こだわりの量を、実際に数えた数字で見せる） ----------
+let NUMS = null;
+function numbersData() {
+  if (NUMS) return NUMS;
+  let moves = 0; for (let t = 1; t <= 13; t++) moves += KB.MOVES.all[t].length;
+  const men = vals => { const c = KB.countsOf(vals); let n = 0; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) n++; return n; };
+  const tri = []; for (let a = 1; a <= 13; a++) for (let b = a; b <= 13; b++) for (let c = b; c <= 13; c++) tri.push({ v: [a, b, c], n: men([a, b, c]) });
+  const hist = {}; tri.forEach(x => hist[x.n] = (hist[x.n] || 0) + 1);
+  tri.sort((x, y) => y.n - x.n);
+  const charLines = KB.ROSTER.concat([KB.KANATA]).reduce((a, c) => a + (c.idle || []).length + (c.win || []).length + (c.lose || []).length, 0);
+  NUMS = { moves, tri, hist, zukan: ZUKAN.length, chart: chartTotal(), chartRows: CHART_ROWS.length, chars: KB.ROSTER.length, cast: KB.countLines(), charLines, badges: ACH_TOTAL };
+  return NUMS;
+}
+function numbersHTML() {
+  const N = numbersData(), fmt = n => n.toLocaleString('ja-JP'), vn = v => v.map(KB.vname).join('・');
+  const maxH = Math.max(...Object.values(N.hist));
+  const bars = Object.keys(N.hist).map(Number).sort((a, b) => b - a).map(k => `<div class="nb-row"><span>${k}面</span><i style="width:${Math.max(2, Math.round(N.hist[k] / maxH * 100))}%"></i><b>${N.hist[k]}</b></div>`).join('');
+  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}</div>`;
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">数字で見る研究所</div><div></div></div>
+  <div class="story"><div class="story-hero"><div class="sh-t">数字で見る<br>作戦研究所</div><p class="small">ぜんぶ、実際に数えた数字です</p></div>
+  <div class="num-grid">
+    ${card(fmt(N.moves), '通り', '1〜3枚で場を作る組み合わせ', 'A〜Kの札1〜3枚と、＋−×÷・かっこのすべての組み合わせを計算し、場（1〜13）を作れる札の組を全部表にしています。AIも、あなたの「出せます」の判定も、この表から。')}
+    ${card('455', '通り', '3枚の手札、全部の「待ち」', `手札が3枚になったとき、何種類の場で上がれるか（何面待ちか）を、455通りすべて数えました。最強は <b>${vn(N.tri[0].v)}</b> の<b>${N.tri[0].n}面待ち</b>。13の場のうち、上がれないのは1つだけです。`, `<div class="num-bars">${bars}</div><p class="small muted" style="margin:4px 0 0">面数ごとの組の数</p>`)}
+    ${card(fmt(N.zukan), '式', '式の図鑑', '÷ や「かっこ ×」を使う3枚の式を、場ごとにすべて図鑑にしました。式ハンターで1つずつ捕まえていきます。')}
+    ${card(fmt(12000), '回', '「AIの読み」1回あたりの先読み', 'あなたが「AIの読み」を開くたびに、残りの山札や相手の手札をランダムに想定して、ゲームの最後まで1万2千回シミュレーションし、上がれる確率と失点の見込みを出しています。★5の達人も、自分の番のたびに数百回の先読みをしています。')}
+    ${card(N.chars + 1, '人', 'ごちゃまぜ倶楽部のメンバー', `強さ★1〜5のオリジナルキャラが${N.chars}人。性格（打ち方）も4種類。そして大会の決勝にだけ現れる★6が1人。強い人ほど、セリフから手の内が読めません。`)}
+    ${card(fmt(N.cast + N.charLines), 'セリフ', '博士・マサ・キャラのセリフ', `解説のルート博士と実況のナニワのマサの実況・解説が${fmt(N.cast)}、キャラの口ぐせが${fmt(N.charLines)}。同じセリフが続かないよう、最近言ったものは避けて選びます。総評は文章生成AIではなく、対局のデータから組み立てています。`)}
+    ${card(N.badges, '個', 'バッジ', '上がり、最善手の連続、割り算、早撃ち、図鑑、早見表…。がんばりの種類ごとに、銅・銀・金のバッジがあります。')}
+    ${card(N.chart, '面', '早見表', `多面待ちの${N.chartRows}組の待ちを、ぜんぶ自分の式で埋める表。ヒントはなし。計算ブリッジの醍醐味です。`)}
+    ${card('230', '回以上', '公開版の更新', '親子で遊んで「ここがおかしい」「もっとこうしたい」を伝え、AIと一緒に直す。その繰り返しの数です。')}
+    ${card('0', '', '使っている公式キャラクター・画像', 'キャラクターはすべてこのアプリのオリジナル。非公式のファン制作です。')}
+  </div>
+  <div class="op-lines story-cast">${[['root', '数えられるものは、すべて数えました。数えた先に、良い一手が見えてきます。'], ['masa', '455通りぜんぶ数えるて、ほんまアホやろ！…せやけど、こういうアホが勝つんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button><button class="btn primary" data-go="home">ホームへ</button></div></div>`;
+}
 function storyHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
   <div class="story"><div class="story-hero"><div class="sh-t">惨敗から生まれた<br>特訓アプリ</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
   <ol class="story-tl">${STORY.map((x, i) => `<li style="animation-delay:${0.1 + i * 0.08}s"><span class="st-ic" aria-hidden="true">${x.ic}</span><div><b>${esc(x.h)}</b><p>${esc(x.t)}</p></div></li>`).join('')}</ol>
   <div class="op-lines story-cast">${[['root', '負けた日のくやしさが、学びの入り口になりました。'], ['masa', 'ほな、次はワイらと一緒に決勝や！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る研究所</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
 }
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>

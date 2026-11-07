@@ -1600,3 +1600,17 @@ body.spectate .me .hand .card{cursor:default}
 .story-tl b{display:block;color:#ffe8a3;font-size:16px}
 .story-tl p{margin:2px 0 0;line-height:1.7;font-size:14px}
 .story-cast .op-line{animation:none;opacity:1}
+
+/* 数字で見る研究所 */
+.num-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:640px){.num-grid{grid-template-columns:1fr 1fr}}
+.num-card{padding:14px;border-radius:16px;background:rgba(0,0,0,.28);border:1px solid rgba(242,182,50,.3);animation:txIn .5s ease both}
+.num-card .nc-n{display:flex;align-items:baseline;gap:4px}
+.num-card .nc-n b{font-family:var(--f-display);font-size:clamp(34px,10vw,44px);line-height:1.1;color:#ffd43b;text-shadow:0 2px 0 #2b1d00}
+.num-card .nc-n small{font-weight:700;color:#ffe8a3}
+.num-card .nc-t{font-weight:900;font-size:15px;margin-top:2px}
+.num-card p{margin:6px 0 0;line-height:1.7;font-size:13.5px}
+.num-bars{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.nb-row{display:grid;grid-template-columns:40px 1fr 34px;align-items:center;gap:6px;font-size:12px}
+.nb-row i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#f2b632,#ffd43b)}
+.nb-row b{text-align:right;font-variant-numeric:tabular-nums}
