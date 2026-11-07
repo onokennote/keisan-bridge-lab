@@ -468,8 +468,8 @@ const CATS = {
   opening: '序盤（第1・2巡）', midgame: '中盤（第3巡以降・手札5枚以上）', endgame: '終盤（手札4枚以下）', heavy: '手札が重い（8枚以上）',
   oppNear: '相手が残り2枚以下', oppThree: '相手が残り3枚',
   smallField: '小さい場（4以下）', midField: '中くらいの場（5〜9）', bigField: '大きい場（10以上）',
-  three: '3枚出しもできる場面', bestThree: '3枚出しが最善', bestOne: 'あえて1枚出しが最善', leaveOne: '1枚残しが最善',
-  drawChoice: '引くかどうかの判断', hardExpr: '割り算・かっこが最善の場面'
+  three: '3枚出しもできる', bestThree: '3枚出しが最善', bestOne: 'あえて1枚出しが最善', leaveOne: '1枚残しが最善',
+  drawChoice: '引くかどうかの判断', hardExpr: '割り算・かっこが最善'
 };
 // 博士の解説：その場面の意味と考え方
 const CAT_INFO = {
@@ -3914,7 +3914,13 @@ const MASA_NETA = {
   // 待つ・こらえる場面（あえて引く・あえて1枚・捨て身）
   goodWait: ['ナッツ持ってじっくり待った、ええスロープレイや！', 'ポットオッズ計算して正しくコールしたプロの判断や！', 'ボール回して相手を動かしてから仕掛ける、大人のサッカーや！', 'あわてて打たんと、ええタイミングまで溜めたな！'],
   bad: ['キーパーと1対1で外したようなもんや！', 'ポケットエース持ってフォールドしたようなもんやで！', 'オフサイドトラップに見事にかかったな〜！', 'リバーで余計なコールしてもうたパターンや！', '自陣でのバックパス、危なっかしいで〜！', 'ティルトしとらんか？深呼吸や！'],
+  // 外し方の種類に合うたとえ：出せたのに引いた（＝降りた）／引くべきところで出した（＝余計に勝負した）／出す手の選び違い
+  badDraw: ['ポケットエース持ってフォールドしたようなもんやで！', 'シュートチャンスでバックパスや、もったいない！', 'ええ手で降りてもうたな、ポーカーやったら泣くとこや！'],
+  badPlay: ['リバーで余計なコールしてもうたパターンや！', '慌ててシュート打って、カウンター食らうパターンや！', '待つとこで勝負に行ってもうたな、ここは我慢やったで！'],
+  badPick: ['キーパーと1対1で外したようなもんや！', 'オフサイドトラップに見事にかかったな〜！', 'パスの出し先、ちょっとズレとったな！', 'ティルトしとらんか？深呼吸や！'],
   // 判断は良かったのに結果が出なかったとき（結果より判断をたたえ、気持ちを前に向ける）
+  // 判断にも課題が残った負け（「内容で負けたとは限らん」は使わない）
+  losePoor: ['ポーカーでも負けたハンドから学ぶのが本物のプロや。', 'アウェーの洗礼やな。次はホームで取り返そ！', 'チップは減っても、席に座っとる限りチャンスはあるで！'],
   goodLose: ['確率どおりに打てとるなら、結果は気にせんでええで！ポーカーのプロはそこしか見とらん！', '気を取り直して前に進むのみや！ええシュート打ち続けとったら、ゴールは必ず来る！', '正しいコールで負けるのもポーカーや。判断は胸張ってええで！', '内容で押しとった試合や。スコアは気にせんと、次のキックオフや！'],
   luckBad: ['バッドビートや！ポーカーやったら卓叩いてもええレベルや！', 'ポストに3回当たる日もあるんや、気にせんとこ！', 'リバーで逆転されるのもポーカーや。内容は勝っとったで！', '審判が見とらんかっただけや、内容は勝ちや！'],
   luckGood: ['ラッキーゴールもゴールはゴールや！でも次も入るとは限らんで！', 'ガットショットが刺さったな！せやけど毎回は来えへんで！', 'オウンゴールでもらった1点みたいなもんやな！', 'ランナーランナーで完成したみたいなもんや、反省会は必要やで！'],
@@ -3932,8 +3938,9 @@ const ROOT_NETA = {
   tend: ['誤りにも規則性があります。規則性が見えれば、直し方も見えてきます。', 'つまずく場所が分かったのは収穫です。問題が分かれば、半分は解けたも同然です。'],
   flow: ['数列の増減を見るように、判断の質の推移を眺めてみましょう。']
 };
-function rvNeta(who, k) { const T = who === 'root' ? ROOT_NETA : MASA_NETA, a = T[k] || (/^good/.test(k) ? T.good : null); return a ? RVP(a) : ''; }
+function rvNeta(who, k) { const T = who === 'root' ? ROOT_NETA : MASA_NETA, a = T[k] || (/^good/.test(k) ? T.good : /^bad/.test(k) ? T.bad : null); return a ? RVP(a) : ''; }
 // 名場面の種類に合うたとえの棚（速攻にスロープレイ、のような食い違いを防ぐ）
+const rvBadNeta = w => w.mine === 'あえて引く' ? 'badDraw' : w.best === 'あえて引く' ? 'badPlay' : 'badPick';
 const rvGoodNeta = k => k === 'defend' ? 'defend' : ['fast', 'three', 'run'].includes(k) ? 'goodFast' : ['aete', 'one', 'sutemi'].includes(k) ? 'goodWait' : 'good';
 // 判断の質（結果とは別に見る）：good=確率どおりに打てた / poor=最善が半分未満 / mid / none=選ぶ場面なし
 const rvQual = (n, b, g) => !n ? 'none' : (b / n >= 0.75 || (g / n >= 0.85 && b / n >= 0.5)) ? 'good' : b / n < 0.5 ? 'poor' : 'mid';
@@ -3951,7 +3958,7 @@ function rvGameSolo(who) {
   else if (f.won) B(`${nmY}の上がりです。PP0。最善を外した手もいくつかあったので、そこは結果と切り離して振り返りましょう。`, `${nmY}、上がりや！PP0！外した手もちょっとあったから、そこは振り返っとこな！`);
   else if (q === 'good') B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : '') + (f.luck === 'resultUnlucky' ? '' : '結果は伴いませんでしたが、判断は確率に沿っていました。大事なのはそちらです。'), RVP([`${nmY}、PP${f.pp}の${f.rank}位や。せやけど判断はしっかりしとった、結果は気にせんでええで！`, `PP${f.pp}で${f.n}人中${f.rank}位か。点は取られたけど、打ち方は間違うてへん。気を取り直して前に進むのみや！`]) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられたんは、巡り合わせや。` : ''));
   else B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : ''), (f.pp >= 25 ? RVP([`PP${f.pp}か〜、${nmY}、今回は大量失点やな…`, `うわ〜PP${f.pp}、ゴール前でボコボコにされたな${nmY}！`]) : RVP([`PP${f.pp}で${f.n}人中${f.rank}位やな。`, `${nmY}、PP${f.pp}の${f.rank}位や。`])) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられてもうた。` : ''));
-  if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : 'lose')); }
+  if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : 'lose')); }
   if (f.beatStar) B('★5の達人がいる卓での上がりです。価値ある一勝ですね。', 'しかも★5の達人がおる卓で上がったんやで！ジャイアントキリングや！');
   if (f.nDec) B(`選択肢のあった${f.nDec}回のうち、最善手は${f.nBest}回${f.nGood > f.nBest ? `、好手まで含めると${f.nGood}回` : ''}でした。${f.nHint ? `（AIの読みを見た${f.nHint}回は数えていません）` : ''}`, `最善手は${f.nDec}回中${f.nBest}回${f.nGood > f.nBest ? `、好手入れたら${f.nGood}回` : ''}や！${f.nBest === f.nDec && f.nDec >= 2 ? 'ハットトリックどころの騒ぎやないで！' : ''}`);
   else B('今回は選択の余地がない局面が続きました。', '今回は選ぶとこがほとんどなかったな！配られたカードで勝負するしかない日もあるんや。');
@@ -3980,7 +3987,7 @@ function rvGameSolo(who) {
       fast: `${pre}、第${f.round}巡という早い上がりです。序盤から無駄なく札を減らせていました。`
     }[h.k];
     const M = {
-      sutemi: `${preM}第${h.round}巡、上がれるのに上がらんかったやろ！捨て身や！`, aete: `${preM}第${h.round}巡、出せるのにあえて引いた我慢、しびれたで！`, divParen: `${preM}第${h.round}巡の「${h.mine}」、かっこ付きの割り算や！`, div: `${preM}第${h.round}巡の「${h.mine}」、割り算きれいに決めたな！`, three: `${preM}第${h.round}巡の「${h.mine}」、重い札まとめて3枚や！`, one: `${preM}第${h.round}巡、あえて1枚だけの「${h.mine}」！渋い！`, defend: `${preM}第${h.round}巡、相手リーチの場面で「${h.mine}」、ようしのいだ！`, perfect: `${preM}判断ぜんぶ最善やて！？パーフェクトゲームや！`, run: `${preM}最善手${f.run}連続や！流れ掴んどったで！`, fast: `${preM}第${f.round}巡で上がりや！速攻カウンターやな！`
+      sutemi: `${preM}第${h.round}巡、上がれるのに上がらんかったやろ！捨て身や！`, aete: `${preM}第${h.round}巡、出せるのにあえて引いた我慢、しびれたで！`, divParen: `${preM}第${h.round}巡の「${h.mine}」、かっこ付きの割り算や！`, div: `${preM}第${h.round}巡の「${h.mine}」、割り算きれいに決めたな！`, three: `${preM}第${h.round}巡の「${h.mine}」、重い札まとめて3枚や！`, one: `${preM}第${h.round}巡、あえて1枚だけの「${h.mine}」！渋い！`, defend: `${preM}第${h.round}巡、相手リーチの場面で「${h.mine}」、失点を抑える最善手や！ナイスディフェンス！`, perfect: `${preM}判断ぜんぶ最善やて！？パーフェクトゲームや！`, run: `${preM}最善手${f.run}連続や！流れ掴んどったで！`, fast: `${preM}第${f.round}巡で上がりや！速攻カウンターやな！`
     }[h.k];
     B(R, M); if (i === 0) N(rvGoodNeta(h.k));
   });
@@ -3991,7 +3998,7 @@ function rvGameSolo(who) {
     const rHead = i === 0 ? RVP([`一番差がついたのは第${w.round}巡、場${w.t}で「${w.mine}」を選んだ場面です。`, `最大の分かれ道は第${w.round}巡、場${w.t}です。選んだのは「${w.mine}」でした。`]) : RVP([`次に差がついたのは第${w.round}巡、場${w.t}の「${w.mine}」です。`, `第${w.round}巡、場${w.t}の「${w.mine}」も惜しい判断でした。`]);
     const mHead = i === 0 ? RVP([`せやけど第${w.round}巡、場${w.t}で「${w.mine}」はなんでやねん！`, `一番言いたいのはここや。第${w.round}巡の場${w.t}、「${w.mine}」はちゃうやろ〜！`]) : RVP([`ほんで第${w.round}巡の「${w.mine}」もな！`, `第${w.round}巡、場${w.t}の「${w.mine}」もツッコませて！`]);
     B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
-    if (i === 0) N('bad');
+    if (i === 0) N(rvBadNeta(w));
   });
   if (!f.misses.length && f.nDec >= 2) B('大きく外した手はなく、判断は安定していました。', '大きなミスはなしや。ええディフェンスやったで！');
   sec = 'danger'; // 5. 相手の動き
@@ -4071,7 +4078,7 @@ function rvSetSolo(who) {
   const sq = rvQual(nDec, nBest, nGood), top1 = c.rank === 1 || c.finalRank === 1;
   if (top1 && sq === 'poor') B('ただ、最善を外した手も多く、順位には運の後押しもありました。結果と判断は分けて振り返りましょう。', `…せやけど最善外した手も多いで。運も実力のうちやからな！中身はここから伸ばそ！`);
   else if (!top1 && sq === 'good') B('順位は伸びませんでしたが、判断は確率に沿っていました。結果はばらつきます。大事なのは、選び方が正しかったかどうかです。', `せやけど判断はしっかり確率どおりや。結果は気にせんでええで！`);
-  if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : 'lose'));
+  if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose'));
   if (!nDec) B(`上がりは${wins}回。採点の対象になる判断はありませんでした。`, `上がり${wins}回や！採点する場面はなかったけど、結果は結果や！`); else B(`上がりは${wins}回、判断は${nDec}回中${nBest}回が最善${nGood > nBest ? `、好手まで含めると${nGood}回` : ''}です${nDec ? `（最善率${Math.round(nBest / nDec * 100)}%）` : ''}。`, `上がり${wins}回、最善手は${nDec}回中${nBest}回やで！`);
   sec = 'games'; // 2. ゲームごとの一言
   if (Lg.length) {
@@ -4112,7 +4119,7 @@ function rvSetSolo(who) {
   if (top) {
     const where = top.round ? `第${top.game}ゲーム第${top.round}巡の` : `第${top.game}ゲームの`;
     const rTxt = { perfect: `${where}全手最善は見事でした。`, sutemi: `${where}上がりを見送った捨て身は、このセットの白眉です。`, divParen: `${where}「${top.mine}」、かっこ付きの割り算は見事でした。`, run: `${where}最善手の連続は、判断の安定を示しています。`, fast: `${where}速い上がりは、序盤の札の減らし方が良かった証拠です。`, aete: `${where}あえて引いた判断は、目先にとらわれない好判断でした。`, one: `${where}あえて1枚だけ出した判断は、気づきにくい好手です。`, div: `${where}「${top.mine}」の割り算は最善でした。`, defend: `${where}相手が残り少ない場面での「${top.mine}」は、失点を抑える最善手でした。`, three: `${where}「${top.mine}」で重い札をまとめて処分できました。` }[top.k];
-    const mTxt = { perfect: `${where}判断ぜんぶ最善、パーフェクトゲームや！`, sutemi: `${where}捨て身、上がれるのに見送ったやつ！しびれたで！`, divParen: `${where}「${top.mine}」、かっこ割り算や！`, run: `${where}最善の連続、流れ掴んどったな！`, fast: `${where}速攻の上がり、カウンター決まったな！`, aete: `${where}あえて引いた我慢、ええ判断やったで！`, one: `${where}あえて1枚、渋すぎるで！`, div: `${where}「${top.mine}」、割り算きれいに決めたな！`, defend: `${where}相手リーチをしのいだ「${top.mine}」、ナイスセーブや！`, three: `${where}「${top.mine}」で重い札まとめて処分、ナイスや！` }[top.k];
+    const mTxt = { perfect: `${where}判断ぜんぶ最善、パーフェクトゲームや！`, sutemi: `${where}捨て身、上がれるのに見送ったやつ！しびれたで！`, divParen: `${where}「${top.mine}」、かっこ割り算や！`, run: `${where}最善の連続、流れ掴んどったな！`, fast: `${where}速攻の上がり、カウンター決まったな！`, aete: `${where}あえて引いた我慢、ええ判断やったで！`, one: `${where}あえて1枚、渋すぎるで！`, div: `${where}「${top.mine}」、割り算きれいに決めたな！`, defend: `${where}相手リーチの場面で「${top.mine}」、失点を抑えるナイスディフェンスや！`, three: `${where}「${top.mine}」で重い札まとめて処分、ナイスや！` }[top.k];
     B(rTxt, mTxt); N(rvGoodNeta(top.k));
     sec = 'hlMore'; if (nSut || nAete) B(`このセットでは、${nSut ? `上がりを見送る捨て身の最善が${nSut}回` : ''}${nSut && nAete ? '、' : ''}${nAete ? `出せるのにあえて引く最善が${nAete}回` : ''}ありました。目先の1枚にとらわれない判断ができています。`, `${nSut ? `捨て身${nSut}回` : ''}${nSut && nAete ? '、' : ''}${nAete ? `あえて引く${nAete}回` : ''}、我慢のできる打ち手になってきたな！`);
   }
@@ -4123,7 +4130,7 @@ function rvSetSolo(who) {
     const why = rvWhy(w, who);
     B((i ? `次に大きかったのは第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」です。` : `最も差がついたのは第${w.game}ゲーム第${w.round}巡、場${w.t}で「${w.mine}」を選んだ場面です。`) + (w.gf ? w.gf.root : `最善は「${w.best}」でした。`) + why,
       (i ? `ほんで第${w.game}ゲーム第${w.round}巡の「${w.mine}」もな！` : `せやけど第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」はなんでやねん！`) + (w.gf ? w.gf.masa : `「${w.best}」やろ！`) + why);
-    if (i === 0) N('bad');
+    if (i === 0) N(rvBadNeta(w));
   });
   sec = 'tend'; // 6. 傾向とクセ（セット全体）、最近の自分との比較
   const mc = {}; F.forEach(f => f && Object.entries(f.missCats || {}).forEach(([k, n]) => mc[k] = (mc[k] || 0) + n));
