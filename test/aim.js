@@ -14,21 +14,23 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(await pg.evaluate(() => /自動照準 ×1/.test(document.body.innerText)), 'ホームの式ハンターに所持数が出る');
   await pg.click('[data-act="hunt-start"]'); await pg.waitForTimeout(300);
   ok(!!(await pg.$('[data-act="hunt-go-aim"]')), '開始前に「自動照準を使って始める」が出る');
+  ok(await pg.evaluate(() => /自動照準が1発あるで/.test(document.querySelector('.aim-talk').innerText)), '式ハンターの最初にマサが自動照準のことを言う');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_talk.png') });
   await pg.click('[data-act="hunt-go-aim"]');
   ok(await pg.evaluate(() => KBAPP.aimCount()) === 0, '使うと所持が減る');
   let shot = false;
-  for (let i = 0; i < 160; i++) {
+  for (let i = 0; i < 240; i++) {
     await pg.waitForTimeout(500);
     const st = await pg.evaluate(() => { const H = KBAPP.S.hunt; document.querySelectorAll('.hunt-conq [data-hq="go"],.hunt-conq [data-hq="random"]').forEach(b => b.click()); return { auto: H.auto, a: H.autoRegs.length, r: H.regs.length, sc: H.score, sel: H.sel.length, over: H.over }; });
     if (!shot && st.sel === 2) { shot = true; await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_hunt.png') }); }
     if (!st.auto || st.over) { console.log('state', JSON.stringify(st)); break; }
   }
   const H = await pg.evaluate(() => { const H = KBAPP.S.hunt; return { auto: H.auto, a: H.autoRegs.length, r: H.regs.length, sc: H.score, left: H.end - Date.now() }; });
-  ok(H.a === 20 && !H.auto, '20匹を自動で捕獲して止まる（' + H.a + '匹、残り' + Math.round(H.left / 1000) + '秒）');
+  ok(H.a === 30 && !H.auto, '30匹を自動で捕獲して止まる（' + H.a + '匹、残り' + Math.round(H.left / 1000) + '秒）');
   ok(H.sc === 0 && H.r === 0, '自動の間は得点・捕獲数に入らない（得点' + H.sc + '）');
   await pg.evaluate(() => { KBAPP.S.hunt.end = Date.now() + 200; }); await pg.waitForTimeout(2600);
   await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_result.png'), fullPage: true });
-  ok(await pg.evaluate(() => /自動照準で捕獲：20式/.test(document.body.innerText)), '結果に自動で捕獲した数が出る');
+  ok(await pg.evaluate(() => /自動照準で捕獲：30式/.test(document.body.innerText)), '結果に自動で捕獲した数が出る');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();
 })();

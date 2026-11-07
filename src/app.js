@@ -872,14 +872,21 @@ function huntGo(aim) {
   }, 250);
 }
 // ---------- ご褒美アイテム「自動照準」：「図鑑の場」銀バッジを持って大会の決勝に進むと1発もらえる（何発でもためられる） ----------
-// 使うと、獲物を20匹捕まえるまで（時間切れ・制覇でも終わり）カードを自動で選んで撃つ。札の選び方以外は手で打つときと同じ。
+// 使うと、獲物を30匹捕まえるまで（時間切れ・制覇でも終わり）カードを自動で選んで撃つ。札の選び方以外は手で打つときと同じ。
 // 自動で捕まえた式は図鑑に登録される（図鑑のバッジにも数える）が、得点・捕獲数・自己ベストには入れない
-const AIM_N = 20;
+const AIM_N = 30;
 const aimCount = () => G_().aim || 0;
 function aimReward(T) {
   const g = G_(); if (!g.ach['zukan_cat:3']) return;
   g.aim = (g.aim || 0) + 1; G_save(g); T.aimGot = true;
   setTimeout(() => { const el = document.createElement('div'); el.className = 'aim-get'; el.innerHTML = `<div class="ag-in">${huntReticle('ov')}<b>ご褒美：自動照準</b><small>決勝進出のご褒美！式ハンターで、獲物${AIM_N}匹を自動で捕まえる（所持 ${g.aim}発）</small></div>`; document.body.appendChild(el); KB.sfx('lockon'); setTimeout(() => el.classList.add('out'), 2600); setTimeout(() => el.remove(), 3000); }, 900);
+}
+// 式ハンターの最初に、マサが自動照準のことを教える（条件の「図鑑の場」銀バッジを持っているときだけ）
+function aimTalk() {
+  const g = G_(); if (!g.ach['zukan_cat:3']) return '';
+  const n = g.aim || 0;
+  const t = n ? `自動照準が${n}発あるで！下のボタンで使えるわ。大会で決勝に進んだら、また1発もらえるで！` : `「図鑑の場」の銀バッジ持っとるやん！大会で決勝に進んだら、ご褒美に自動照準がもらえるで！獲物${AIM_N}匹、自動で捕まえてくれるんや！`;
+  return `<div class="op-line masa aim-talk"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(t)}</div></div>`;
 }
 function huntAutoStep() {
   const H = S.hunt; if (!H || H.over || !H.auto) return;
@@ -1060,7 +1067,7 @@ function huntHTML() {
   const z = zukanGet(), t = H.field.v, preys = huntNew(H.hand.map(c => c.v), t, H.used, z), nNew = preys.length, nPar = preys.filter(f => f.s.includes('(')).length, nAll = zukanCount(z);
   const top = `<div class="topbar"><button class="btn ghost sm" data-act="hunt-quit">${H.started ? 'やめる' : '← ホーム'}</button><div class="where">式ハンター</div>${H.started ? `<span class="atk-clock hunt-clock">${fmtClock(H.end - Date.now())}</span>` : '<span></span>'}</div>`;
   if (!H.started) return top + `<div class="panel stack hunt-ready">
-    <h2 style="margin:0">式ハンター</h2>
+    <h2 style="margin:0">式ハンター</h2>${aimTalk()}
     <p class="small" style="margin:0">${HUNT_SEC / 60}分間、標的（場）の数を<b>手札の3枚</b>で作って、未登録の式＝獲物を捕獲しましょう。</p>
     <p class="small hunt-calm" style="margin:0">🍵 得点や速さで取れるバッジはありません。バッジにつながるのは図鑑に登録した式の数（と場のコンプリート）だけなので、時間を気にせず<b>じっくり考えてOK</b>です。得点は自己ベストの記録用です。</p>
     <ul class="small" style="margin:0;padding-left:1.2em;line-height:1.7">
