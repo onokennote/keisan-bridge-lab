@@ -35,6 +35,8 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.click('tr[data-crow="26"]'); await pg.waitForTimeout(200);
   for (const ks of [['6', '/', '2'], ['6', '-', '2'], ['6', '+', '2'], ['6', '*', '2']]) { for (const k of ks) { await pg.keyboard.press(k); await pg.waitForTimeout(50); } await pg.waitForTimeout(900); }
   await pg.screenshot({ path: path.join(__dirname, 'out', 'chart.png') });
+  ok(await pg.evaluate(() => { const g = JSON.parse(Object.entries(localStorage).find(([k]) => /growth$/.test(k))[1]); return g.cnt.chart === 1 && !!g.ach['chart:1']; }), '行を完成させるとバッジ「早見表の一行目」が付く');
+  await pg.evaluate(() => document.querySelectorAll('.ach-toast,.ach-pop,#achq').forEach(e => e.remove()));
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
   ok(await pg.evaluate(() => /6\/279面/.test(document.body.innerText) && /完成 1行/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
   // 対局中は見るだけ（完成した行だけ）

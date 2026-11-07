@@ -1512,10 +1512,40 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .ch-k{min-height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#173d2f;color:#fbf7ee;font-size:18px;font-weight:900;cursor:pointer}
 .ch-k.card-k{background:#fbf3dc;color:#1b1b1b}
 .ch-k:disabled{opacity:.3;cursor:default}
+
+/* 観戦：達人の1セット */
+.watch-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.w-table{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:16px;background:var(--felt,#0e3a2b);border:2px solid rgba(242,182,50,.35)}
+.w-field{display:flex;align-items:center;justify-content:center;gap:10px}
+.w-field .mc{min-width:44px;height:60px;font-size:26px;border-radius:7px}
+.w-seats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.w-seat{padding:8px;border-radius:12px;background:rgba(0,0,0,.25);border:2px solid transparent;display:flex;flex-direction:column;gap:5px;min-width:0}
+.w-seat.now{border-color:#f2b632}
+.w-seat.win{border-color:#69db7c;background:rgba(105,219,124,.12)}
+.w-head{display:flex;align-items:center;gap:6px}
+.w-head svg{width:34px;height:34px;flex:none}
+.w-head .av,.w-head > :first-child{flex:none}
+.w-head b{display:block;font-size:13px}
+.w-head small{display:block;font-size:10px;color:#c9c2ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-hand{display:flex;flex-wrap:wrap;gap:2px;min-height:20px}
+.w-last{font-size:12px;min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-cm{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:12px;background:rgba(0,0,0,.28)}
+.w-cm .cm-av{width:40px;height:40px;flex:none}
+.w-cm .cm-av svg{width:100%;height:100%}
+.w-cm .cm-name{display:block;font-size:11px;color:#f2b632;font-weight:700}
+.w-sum{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.watch-invite{display:flex;flex-direction:column;gap:10px}
+.watch-invite .wi-title{font-family:var(--f-display);font-size:24px;color:#ffd43b;text-align:center;animation:txName .6s cubic-bezier(.2,1.6,.4,1) both}
+.watch-invite .wi-btns{justify-content:center;gap:10px;flex-wrap:wrap;opacity:0;animation:txIn .4s 2.4s ease both}
+.w-hand .wc{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:26px;height:36px;border-radius:5px;background:var(--card,#fbf3dc);color:var(--card-ink,#1b1b1b);font-weight:900;font-size:14px;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.w-hand .wc small{font-size:10px;line-height:1}
+.w-hand .wc.red{color:var(--card-red,#d6336c)}
+.w-hand{gap:3px}
+.w-head > div{min-width:0}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='409993ba3a';
+window.KB_BUILD='3f7e547d2e';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5417,7 +5447,7 @@ function ctxFor(pIdx) {
 // アプリ更新の検知：プレイ中の画面にいたことを、ビルド番号と一緒に記録しておく
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
-function go(view) { S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+function go(view) { if (view !== 'watch' && S.W) watchStop(); S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 function render() {
   const app = $('#app');
   if (S.view === 'home') app.innerHTML = homeHTML();
@@ -5436,6 +5466,7 @@ function render() {
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
+  else if (S.view === 'watch') app.innerHTML = watchHTML();
   bind();
 }
 
@@ -5593,9 +5624,10 @@ const ACH = [
   // 式の図鑑
   ['zukan', '図鑑登録', [10, 50, 200], n => `式の図鑑に${n}式を登録`, ['式の見習い', '式の収集家', '式の博士']],
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
+  ['chart', '早見表', [1, 10, 37], n => n >= 37 ? '早見表をすべて完成（37行）' : `早見表の行を${n}行完成（すべての待ちを自分の式で埋める）`, ['早見表の一行目', '早見表の職人', '早見表マスター']],
   ['atk_badges', 'アタック収集', [10, 20, 35], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -6619,7 +6651,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
+const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
 const BP_CAT = 500;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
@@ -6860,6 +6892,136 @@ function importData(text) {
   if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
   toast(`「${name}」として読み込みました`); switchProfile(id);
 }
+// ---------- 観戦：★5の達人4人の1セットを、博士とマサの実況・ゲームごとの感想つきで見る（速さはいつも「ふつう」・いつでもやめられる） ----------
+function watchInvite(name) {
+  const nmS = san(name || S.settings.name || 'あなた');
+  const L = [['root', `ようこそ、${nmS}。とりあえず、達人のゲームを見てみましょう。★5の天才ゼロさんと、★3・★2・★1の3人の卓です。強さによって打ち方がどう違うか、比べながら見ると面白いですよ。`], ['masa', `まずは観戦からや！達人ゼロの打ち筋と、ほかの3人の違い、しっかり見とこ！見飽きたら、いつでも抜けてええで！`]];
+  modal(`<div class="watch-invite"><div class="wi-title">まずは、達人の一局を</div>
+    <div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.2 + i * 1.1}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns"><button class="btn" data-act="close">自分で打ってみる</button><button class="btn primary" data-act="watch-first">観戦する</button></div>
+    <p class="small muted" style="margin:0;text-align:center">観戦は「1セット練習」の画面からも、いつでも見られます。</p></div>`);
+  KB.sfx('banner');
+}
+// 卓の顔ぶれ：達人（★5）は必ず1人。ほかは★1〜4からばらばらに（強さの違いが見えるように）。
+// 初めての案内のときは、強さ（★5・3・2・1）も性格（4種）もそろった決まった顔ぶれにする
+const WATCH_FIRST = ['zero', 'shota', 'tome', 'tama'];
+function watchStart(first) {
+  watchStop();
+  KB.resetNames(); const used = new Set();
+  const fromChar = (id, i) => { const c = KB.charById(id); used.add(id); return { id: i, human: false, level: c.lv, style: c.st, ch: KB.charToCh(c), peek: !!c.peek }; };
+  const lv = KB.shuffle([1, 2, 3, 4]).slice(0, 3).sort((a, b) => b - a);
+  const players = first ? WATCH_FIRST.map(fromChar) : [makeAI(0, 5, null, used)].concat(lv.map((l, k) => makeAI(k + 1, l, null, used)));
+  KB.shuffle(players).forEach((p, i) => p.id = i); players.sort((a, b) => a.id - b.id);
+  S.W = { players, gi: 0, games: 5, tot: [0, 0, 0, 0], hist: [], cm: null, from: S.view === 'watch' ? (S.W0 || 'setup-practice') : (S.view === 'home' ? 'home' : 'setup-practice') };
+  S.W0 = S.W.from;
+  go('watch'); watchNextGame();
+}
+function watchStop() { if (!S.W) return; clearTimeout(S.W.timer); S.W.stopped = true; S.W = null; }
+function watchNextGame() {
+  const W = S.W; if (!W) return;
+  if (W.gi >= W.games) return;
+  W.gi++; W.summary = null; W.cm = null;
+  W.g = new KB.Game(W.players, (W.gi - 1) % 4); W.last = {};
+  W.cm = KB.commentLine('both', 'start', { g: W.gi });
+  render(); watchSched(1400);
+}
+function watchSched(ms) { const W = S.W; if (!W) return; clearTimeout(W.timer); W.timer = setTimeout(watchStep, ms); }
+function watchSay(kind, d) { const W = S.W; if (!W) return; try { const c = KB.commentLine('both', kind, d); if (c) W.cm = c; } catch (e) { } }
+function watchStep() {
+  const W = S.W; if (!W || W.stopped || S.view !== 'watch') return;
+  const g = W.g; if (g.over) return;
+  const p = g.current(), pl = g.players[p], r0 = g.round, n = san(pl.ch.name);
+  const before = g.hands[p].length, m = KB.aiMove(g, p, null);
+  // 強さの違いを解説：★4以下の人が、達人の読みと違う手を選んだら、その差を言う（最善手を言い続けるのではなく「違い」に注目）
+  let diff = null;
+  if (pl.level <= 4 && !g.over) {
+    try {
+      const counts = g.counts(p), t = g.field.v, key = x => x ? x.vals.slice().sort((a, b) => a - b).join(',') : 'draw';
+      const cands = KB.candidates(counts, t, 6).concat([null]); if (m && !cands.some(c => c && key(c) === key(m))) cands.push(m);
+      if (cands.length > 1) {
+        const ev = KB.evaluate(g.view(p), cands, 360), best = ev.slice().sort((a, b) => a.pp - b.pp)[0], mine = ev.find(e => key(e.m) === key(m));
+        if (best && mine && key(best.m) !== key(m) && mine.pp - best.pp >= 1.5) diff = { best: best.m, mine: m, d: mine.pp - best.pp };
+      }
+    } catch (e) { }
+  }
+  g.apply(m);
+  W.last[p] = m ? { t: 'play', e: m.expr, round: r0 } : { t: 'draw', round: r0 };
+  W.turn = p;
+  if (g.over) {
+    W.tot = W.tot.map((x, i) => x + g.pp[i]); W.hist.push(g.pp.slice());
+    watchSay('win', { n, e: m ? m.expr : '' });
+    W.summary = watchReview(g);
+    render(); return;
+  }
+  const h = g.hands[p].length, stars = '★'.repeat(pl.level), bs = diff && (diff.best ? `「${diff.best.expr}」` : '「あえて引く」'), ms = diff && (diff.mine ? `「${diff.mine.expr}」` : '「引く」');
+  W.diffs = W.diffs || [];
+  if (diff) {
+    W.diffs.push({ p, round: r0, best: bs, mine: ms, d: diff.d });
+    const big = diff.best && diff.best.vals.some(v => v >= 10), keep = !diff.best;
+    W.cm = Math.random() < 0.55 ? { who: 'root', mood: 'normal', text: `${stars}の${n}は${ms}。達人の読みなら${bs}です。${keep ? '出せる札を使わずに、手札の形を残す方が、次の場に強くなります。' : big ? '大きい札を処分できる場面でした。' : '残る手札の形に差が出ます。'}失点の見込みで${diff.d.toFixed(1)}点ほどの差です。` }
+      : { who: 'masa', mood: 'worried', text: `${n}、${ms}かぁ！達人やったら${bs}やで！${big ? 'でかい札を逃がすチャンスやったのに、パス回しで終わってもうたな！' : keep ? 'ここは攻めずにボールキープ、我慢の場面やったんや！' : 'ちょっとの差でも、積み重なったら試合が決まるで！'}` };
+  }
+  else if (m && h <= 2) watchSay('reach', { n, h });
+  else if (m && m.vals.length === 3 && Math.random() < 0.7) watchSay('play3', { n, e: m.expr });
+  else if (!m && Math.random() < 0.6) watchSay('draw', { n, h });
+  else if (m && /÷/.test(m.expr) && Math.random() < 0.6) watchSay('div', { n, e: m.expr });
+  render();
+  watchSched(g.round !== r0 ? 1900 : 1250 + Math.random() * 500); // ふつうの速さ
+}
+// ゲームごとの感想（博士とマサ）：ログから、上がり・名場面・あえて引く・失点を拾う
+function watchReview(g) {
+  const nm2 = i => san(g.players[i].ch.name), w = g.winner, plays = g.log.filter(x => x.type === 'play');
+  const lastW = plays.filter(x => x.p === w).pop(), sumOf = v => v.reduce((a, b) => a + b, 0);
+  const big = plays.filter(x => x.vals.length === 3 && x !== lastW).sort((a, b) => sumOf(b.vals) - sumOf(a.vals))[0]; // 決め手と同じ手は重ねて言わない
+  const lvOf = i => g.players[i].level, trivDiv = e => /(\d+|[AJQK]) ÷ \1(?!\d)/.test(e);
+  const divs = plays.filter(x => /÷/.test(x.expr) && !trivDiv(x.expr) && lvOf(x.p) >= 4 && x !== big && x !== lastW), div = divs.find(x => /\(/.test(x.expr)) || divs[0];
+  const dwp = g.drawsWhilePlayable.map((k, i) => ({ k, i })).filter(x => x.k > 0).sort((a, b) => b.k - a.k)[0];
+  const loser = g.pp.map((pp, i) => ({ pp, i })).sort((a, b) => b.pp - a.pp)[0];
+  const rest = loser ? g.hands[loser.i].map(c => KB.vname(c.v)).join('・') : '';
+  const R = [], M = [];
+  if (w >= 0) { R.push(`第${g.round}巡、${nm2(w)}の上がりです。決め手は「${lastW ? lastW.expr : ''} = ${lastW ? lastW.t : ''}」。`); M.push(RVP([`第${g.round}巡、${nm2(w)}が上がりや！「${lastW ? lastW.expr : ''}」でフィニッシュ、ゴラッソやな！`, `${nm2(w)}、第${g.round}巡で上がり！最後の「${lastW ? lastW.expr : ''}」、ナッツで勝負決めたって感じや！`])); }
+  else { R.push('山札が尽きて、上がりなしで終わりました。'); M.push('上がりなしのスコアレスドローや！守り合いの一戦やったな！'); }
+  if (big) { R.push(`光ったのは第${big.round}巡、${nm2(big.p)}の「${big.expr} = ${big.t}」。3枚で手札の合計を${sumOf(big.vals)}減らしました。`); M.push(`第${big.round}巡の${nm2(big.p)}「${big.expr}」、3枚で${sumOf(big.vals)}点分ごっそりや！ハットトリック級やで！`); }
+  if (div) { R.push(`${nm2(div.p)}の「${div.expr}」のように、割り算で大きい札を小さな数に変えるのは達人の定番です。`); M.push(`「${div.expr}」の割り算、うまいこと大きい札を逃がしとる！`); }
+  if (dwp && lvOf(dwp.i) >= 4) { R.push(`出せるのにあえて引いた場面が${dwp.k}回（${nm2(dwp.i)}）。目先の1枚より、次の場で使える形を残す判断です。`); M.push(`${nm2(dwp.i)}は出せるのにあえて引いとったで。ポーカーで言うたら、ええ手を見送って次を待つ判断や！`); }
+  else if (dwp) { R.push(`${nm2(dwp.i)}（★${lvOf(dwp.i)}）は、出せるのに引いた場面が${dwp.k}回ありました。★の低い人は、出せる組み合わせを見落としやすいのです。`); M.push(`${nm2(dwp.i)}、出せるのに引いてもうたのが${dwp.k}回や。シュートチャンスに気づかへんかったんやな！`); }
+  if (loser && loser.pp > 0) { R.push(`いちばん失点したのは${nm2(loser.i)}（PP${loser.pp}）。最後に${rest}が残りました。大きい札を抱えたまま上がられると、失点が大きくなります。`); M.push(`${nm2(loser.i)}はPP${loser.pp}、${rest}が残ってもうた。でかい札は早めにベンチに下げとかんとな！`); }
+  const W = S.W, ds = W && W.diffs ? W.diffs.splice(0) : [];
+  if (ds.length) {
+    const top = ds.sort((a, b) => b.d - a.d)[0], byP = {}; ds.forEach(x => byP[x.p] = (byP[x.p] || 0) + 1);
+    const most = Object.keys(byP).sort((a, b) => byP[b] - byP[a])[0];
+    R.push(`達人の読みと違う手は${ds.length}回。いちばん差が大きかったのは第${top.round}巡、${nm2(top.p)}の${top.mine}（達人なら${top.best}）。${byP[most] >= 2 ? `${nm2(+most)}（★${g.players[+most].level}）は${byP[most]}回で、強さの差が手の選び方に出ています。` : ''}`);
+    M.push(`達人と違う手が${ds.length}回あったで！一番もったいなかったんは${nm2(top.p)}の${top.mine}や。達人なら${top.best}、ここが★の差やな！`);
+  } else R.push('このゲームは、全員が達人の読みと大きくは違わない手を選びました。');
+  R.push(RVP(['1ゲームの結果には運が入ります。見るべきは、毎回の選び方です。', '自分ならこの場で何を出すか、一手ずつ考えながら見ると上達が早いですよ。', '上がった人より、失点を小さく抑えた人の打ち方にも学びがあります。']));
+  if (!M.some(t => /ゴール|サッカー|ハットトリック|ゴラッソ|ポーカー|ナッツ|ベンチ|ドロー|オールイン/.test(t))) M.push('サッカーでも、上手い人の試合を見るのがいちばんの練習や！');
+  return { root: R.join(''), masa: M.join('') };
+}
+function watchHTML() {
+  const W = S.W; if (!W) return '<div class="panel">観戦は終わりました。<button class="btn" data-go="home">ホームへ</button></div>';
+  if (!W.g) return '<div class="panel">卓を準備しています…</div>';
+  const g = W.g, cur = g.over ? -1 : g.current();
+  const seats = g.players.map((p, i) => { const l = W.last[i]; return `<div class="w-seat ${i === cur ? 'now' : ''} ${g.over && g.winner === i ? 'win' : ''}"><div class="w-head">${av(p, g.over && g.winner === i ? 'happy' : 'normal', true)}<div><b>${esc(p.ch.name)}</b><small>${'★'.repeat(p.level)}${p.level >= 5 && p.ch.title ? ' ' + esc(p.ch.title) : ''}</small><small>手札${g.hands[i].length}枚・PP計 ${W.tot[i]}</small></div></div>
+    <div class="w-hand">${g.hands[i].map(c => `<i class="wc ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>`).join('') || '<small>上がり！</small>'}</div>
+    <div class="w-last">${l ? (l.t === 'play' ? `<span class="mono">${esc(l.e)}</span>` : '<span class="muted">引いた</span>') : '<span class="muted">—</span>'}</div></div>`; }).join('');
+  const cm = W.cm ? `<div class="w-cm ${W.cm.who}"><div class="cm-av">${KB.casterSVG(W.cm.who, W.cm.mood || 'normal')}</div><div><span class="cm-name">${W.cm.who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(W.cm.text)}</div></div>` : '';
+  const sum = W.summary ? `<div class="panel w-sum"><div class="lbl">第${W.gi}ゲームの感想</div>
+    ${['root', 'masa'].map(who => `<div class="w-cm ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(W.summary[who])}</div></div>`).join('')}
+    <div class="small">このゲームのPP：${g.players.map((p, i) => `${esc(p.ch.name)} ${g.pp[i]}`).join('・')}</div>
+    ${W.gi < W.games ? `<button class="btn primary" data-act="watch-next">第${W.gi + 1}ゲームへ</button>` : watchSetEnd()}</div>` : '';
+  return `<div class="topbar"><button class="btn ghost sm" data-act="watch-quit">← 観戦をやめる</button><div class="where">達人の観戦　第${W.gi}/${W.games}ゲーム</div><div></div></div>
+  <div class="w-table"><div class="w-field"><small>場・第${g.round}巡</small>${g.field ? miniCard(g.field) : ''}<small>山札 ${g.deck.length}</small></div>
+  <div class="w-seats">${seats}</div>${cm}</div>${sum}`;
+}
+function watchSetEnd() {
+  const W = S.W, order = W.tot.map((t, i) => ({ t, i })).sort((a, b) => a.t - b.t), nm2 = i => san(W.players[i].ch.name), top = order[0];
+  const wins = W.hist.map(pp => pp.indexOf(0)), myWins = i => wins.filter(x => x === i).length;
+  const r = `セットの結果は、${order.map((o, k) => `${k + 1}位 ${esc(W.players[o.i].ch.name)}（★${W.players[o.i].level}・PP${o.t}）`).join('、')}。${nm2(top.i)}は上がり${myWins(top.i)}回。上がれなかったゲームでも、失点を小さく抑えたことが首位につながりました。${W.players[top.i].level < 5 ? '達人を抑えての首位、1セットでは運も大きく働きます。' : '強さの差は、1ゲームより1セットの合計にはっきり出ます。'}`;
+  const m = `1セット終了や！MVPは${nm2(top.i)}、セットPP${top.t}！上がるだけやなくて、失点を抑えるディフェンスもワールドクラスやったで！ほな、次は自分の番や！`;
+  return `<div class="w-cm root"><div class="cm-av">${KB.casterSVG('root', 'happy')}</div><div><span class="cm-name">解説・ルート博士</span>${r}</div></div><div class="w-cm masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div><span class="cm-name">実況・ナニワのマサ</span>${esc(m)}</div></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-go="setup-practice">自分で打つ（1セット練習）</button><button class="btn" data-act="watch-again">もう1セット観戦</button><button class="btn ghost" data-go="home">ホームへ</button></div>`;
+}
+
 // ---------- 早見表を作成：多面待ちの2枚・3枚を、自分で式を入れて埋めていく（ヒントなし） ----------
 // 行：2枚は3面以上（A・○は法則の一行にまとめる）、3枚は9面以上。面数の多い順
 const CHART_ROWS = [[1, 2, 6], [1, 2, 4], [1, 2, 5], [1, 2, 7], [1, 2, 9], [1, 2, 10], [2, 3, 7], [1, 2, 3], [1, 2, 8], [1, 2, 12], [1, 3, 3], [1, 3, 4], [1, 3, 9], [2, 2, 8], [2, 3, 3], [2, 3, 4], [2, 3, 5], [2, 3, 8], [2, 3, 9], [2, 3, 12], [2, 4, 5], [2, 4, 10], [3, 3, 12], [3, 4, 5], [3, 5, 6], [3, 6, 9],
@@ -6942,7 +7104,7 @@ function chartKey(t) {
       const key = row.join(','), data = chartGet(), mine = data[key] = data[key] || {};
       if (v < 1 || v > 13 || v !== Math.floor(v)) C.msg = { t: `= ${v}（待ちになりません）` };
       else if (mine[v]) { C.msg = { t: `${KB.vname(v)} はもう埋まっています` }; C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 900); }
-      else { mine[v] = chartStr(C.tok); store.set('chart', data); C.msg = { ok: true, t: `= ${KB.vname(v)}　○` }; KB.sfx('capture'); C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 700); }
+      else { mine[v] = chartStr(C.tok); store.set('chart', data); setMax('chart', chartFullRows().length); C.msg = { ok: true, t: `= ${KB.vname(v)}　○` }; KB.sfx('capture'); C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 700); }
     }
   }
   chartRender();
@@ -7114,6 +7276,7 @@ ${judgeHTML()}
 <div class="opp-edit">${rows.join('')}</div>
 <div class="badge-rule" id="rule-box"></div>
 <button class="btn primary" data-act="start-practice">この卓ではじめる</button>
+<div class="panel watch-entry"><div><b>おまけ：達人のゲームを観戦</b><div class="small muted">★5の達人1人と★1〜4の3人の1セット（5ゲーム）を、博士とマサの実況・感想つきで見られます。強さによる打ち方の違いが分かります。いつでもやめられます。</div></div><button class="btn" data-act="watch-start">観戦する</button></div>
 </div>`;
 }
 
@@ -9506,7 +9669,7 @@ function act(a, el) {
     case 'new-profile': askName(true); break;
     case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
     case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') watchInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }
@@ -9536,6 +9699,11 @@ function act(a, el) {
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartOpen(); break;
+    case 'watch-start': closeModal(); watchStart(); break;
+    case 'watch-first': closeModal(); watchStart(true); break;
+    case 'watch-next': watchNextGame(); break;
+    case 'watch-quit': { const back = S.W && S.W.from; watchStop(); go(back || 'setup-practice'); break; }
+    case 'watch-again': watchStart(); break;
     case 'chart-view': chartOpen(true); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
@@ -9619,7 +9787,7 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>

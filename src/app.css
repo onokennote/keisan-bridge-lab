@@ -1507,3 +1507,33 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .ch-k{min-height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#173d2f;color:#fbf7ee;font-size:18px;font-weight:900;cursor:pointer}
 .ch-k.card-k{background:#fbf3dc;color:#1b1b1b}
 .ch-k:disabled{opacity:.3;cursor:default}
+
+/* 観戦：達人の1セット */
+.watch-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.w-table{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:16px;background:var(--felt,#0e3a2b);border:2px solid rgba(242,182,50,.35)}
+.w-field{display:flex;align-items:center;justify-content:center;gap:10px}
+.w-field .mc{min-width:44px;height:60px;font-size:26px;border-radius:7px}
+.w-seats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.w-seat{padding:8px;border-radius:12px;background:rgba(0,0,0,.25);border:2px solid transparent;display:flex;flex-direction:column;gap:5px;min-width:0}
+.w-seat.now{border-color:#f2b632}
+.w-seat.win{border-color:#69db7c;background:rgba(105,219,124,.12)}
+.w-head{display:flex;align-items:center;gap:6px}
+.w-head svg{width:34px;height:34px;flex:none}
+.w-head .av,.w-head > :first-child{flex:none}
+.w-head b{display:block;font-size:13px}
+.w-head small{display:block;font-size:10px;color:#c9c2ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-hand{display:flex;flex-wrap:wrap;gap:2px;min-height:20px}
+.w-last{font-size:12px;min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-cm{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:12px;background:rgba(0,0,0,.28)}
+.w-cm .cm-av{width:40px;height:40px;flex:none}
+.w-cm .cm-av svg{width:100%;height:100%}
+.w-cm .cm-name{display:block;font-size:11px;color:#f2b632;font-weight:700}
+.w-sum{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.watch-invite{display:flex;flex-direction:column;gap:10px}
+.watch-invite .wi-title{font-family:var(--f-display);font-size:24px;color:#ffd43b;text-align:center;animation:txName .6s cubic-bezier(.2,1.6,.4,1) both}
+.watch-invite .wi-btns{justify-content:center;gap:10px;flex-wrap:wrap;opacity:0;animation:txIn .4s 2.4s ease both}
+.w-hand .wc{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:26px;height:36px;border-radius:5px;background:var(--card,#fbf3dc);color:var(--card-ink,#1b1b1b);font-weight:900;font-size:14px;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.w-hand .wc small{font-size:10px;line-height:1}
+.w-hand .wc.red{color:var(--card-red,#d6336c)}
+.w-hand{gap:3px}
+.w-head > div{min-width:0}
