@@ -1446,10 +1446,13 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .rv-line .cm-name{font-size:10px;color:var(--muted);font-weight:700}
 .rv-line .cm-text{font-size:13px;line-height:1.65}
 @keyframes rvIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* 引っ越し（アーティファクト版 → 公開版）の案内 */
+.mig-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px auto 0;max-width:420px;text-align:center}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='00f4ca6829';
+window.KB_BUILD='97fc99b744';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6007,7 +6010,13 @@ function growthCardHTML() {
 }
 // ---------- 成績をXでシェア：成績カード画像（スゲーだろ要素入り）＋ハッシュタグ・リンク付きの投稿 ----------
 // 公開先：claude.ai の外（独自のサイト）で開かれているときは、そのサイトのURLをシェアに使う
-const APP_URL = (typeof location !== 'undefined' && /^https?:$/.test(location.protocol) && !/claude\.(ai|site)|claudeusercontent/.test(location.hostname)) ? location.origin + '/' : 'https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD';
+// 公開版（デプロイナウ）の住所。アーティファクト版の中ではアーティファクトのURL、それ以外（公開版）では公開版のURLをシェアに使う
+const PUBLIC_URL = 'https://keisan-bridge.lolipop-now.app/';
+const ARTIFACT_URL = 'https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD';
+const IS_ARTIFACT = typeof location === 'undefined' || !/^https?:$/.test(location.protocol) || /claude\.(ai|site)|claudeusercontent/.test(location.hostname);
+const APP_URL = IS_ARTIFACT ? ARTIFACT_URL : PUBLIC_URL;
+// 引っ越しボタン（アーティファクト版 → 公開版）を出すか。考案者の了承が取れて公開版を出したら true にする
+const MIGRATE_ON = false;
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
 function shareBoasts() {
@@ -6675,6 +6684,69 @@ function importData(text) {
   if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
   toast(`「${name}」として読み込みました`); switchProfile(id);
 }
+// ---------- 引っ越し（アーティファクト版 → 公開版） ----------
+// 全プレイヤーの記録（localStorage の kb.*）を圧縮して、公開版URLの「#kbmove=」以降に入れて開く
+const MIG_SKIP = { 'kb.recentLines': 1, 'kb.migDone': 1, 'kb.testAskName': 1 };
+const b64u = {
+  enc(u8) { let s = ''; for (let i = 0; i < u8.length; i += 0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); },
+  dec(t) { const s = atob(t.replace(/-/g, '+').replace(/_/g, '/')); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) u[i] = s.charCodeAt(i); return u; }
+};
+async function zipText(txt, back) {
+  const fmt = 'deflate-raw', src = back ? txt : new TextEncoder().encode(txt);
+  const st = new Blob([src]).stream().pipeThrough(back ? new DecompressionStream(fmt) : new CompressionStream(fmt));
+  const buf = new Uint8Array(await new Response(st).arrayBuffer());
+  return back ? new TextDecoder().decode(buf) : buf;
+}
+function migCollect() {
+  const data = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !MIG_SKIP[k]) data[k] = localStorage.getItem(k); } } catch (e) { }
+  return data;
+}
+async function migrateOut() {
+  const data = migCollect(), n = profiles().length;
+  if (!Object.keys(data).length) { toast('引っ越す記録がまだありません'); return; }
+  let url;
+  try {
+    const payload = JSON.stringify({ app: 'keisan-bridge', mv: 1, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), at: new Date().toISOString(), data });
+    url = PUBLIC_URL + '#kbmove=' + b64u.enc(await zipText(payload));
+  } catch (e) { toast('この端末では引っ越しの準備ができませんでした。「プレイヤー」の書き出しを使ってください'); return; }
+  raw.set('kb.migSent', Date.now());
+  modal(`<h2>新しいサイトへ移る</h2>
+    <p class="small" style="margin:0">${n ? `${n}人分の` : ''}記録（成長記録・図鑑・アバター・ベスト記録など）をまとめました。下のボタンで新しいサイトを開くと、記録がそのまま引き継がれます。</p>
+    <p class="small muted" style="margin:0">新しいサイト：${esc(PUBLIC_URL)}<br>この画面の記録は消えません。うまく開けないときは、もう一度このボタンから試してください。</p>
+    <div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button class="btn" data-act="close">やめる</button><a class="btn primary" id="mig-go" href="${esc(url)}" target="_blank" rel="noopener">新しいサイトを開く</a></div>`);
+  const a = $('#mig-go'); if (a) a.onclick = () => setTimeout(closeModal, 300);
+}
+// 公開版：開いたときに「#kbmove=」のデータを読み込む。URLからはすぐ消す。同じデータの二重取り込みはしない
+const MIG_IN = (() => {
+  if (IS_ARTIFACT) return null;
+  const h = location.hash || ''; if (!h.startsWith('#kbmove=')) return null;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+  return h.slice(8);
+})();
+function migApply(o) {
+  const done = raw.get('kb.migDone', []);
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && k !== 'kb.migDone') ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  try { for (const k in o.data) if (k.startsWith('kb.') && !MIG_SKIP[k]) localStorage.setItem(k, o.data[k]); } catch (e) { toast('保存できませんでした（容量の上限かもしれません）'); return; }
+  done.push(o.id); raw.set('kb.migDone', done.slice(-20)); raw.set('kb.migAt', Date.now());
+  location.reload();
+}
+async function migrateIn(t) {
+  let o; try { o = JSON.parse(await zipText(b64u.dec(t), true)); } catch (e) { o = null; }
+  if (!o || o.app !== 'keisan-bridge' || !o.data || !o.id) { toast('引っ越しデータを読み込めませんでした'); S.askedName = false; render(); return; }
+  if (raw.get('kb.migDone', []).includes(o.id)) { toast('この記録は、もう引き継ぎ済みです'); S.askedName = false; render(); return; }
+  const names = (() => { try { return JSON.parse(o.data['kb.profiles'] || '[]').map(p => p.name); } catch (e) { return []; } })();
+  const have = profiles();
+  if (!have.length) { migApply(o); return; }
+  modal(`<h2>記録の引っ越し</h2>
+    <p class="small" style="margin:0">前のサイトの記録（${names.length ? esc(names.join('・')) : '名前なし'}）を引き継ぎます。</p>
+    <p class="small" style="margin:0"><b>このサイトにはすでに記録があります（${esc(have.map(p => p.name).join('・'))}）。</b>引き継ぐと、いまの記録は前のサイトの記録で上書きされます。</p>
+    <div class="row" style="justify-content:flex-end;flex-wrap:wrap"><button class="btn" id="mig-no">引き継がない</button><button class="btn primary" id="mig-yes">上書きして引き継ぐ</button></div>`);
+  $('#mig-yes').onclick = () => migApply(o);
+  $('#mig-no').onclick = () => { done0(); closeModal(); toast('引き継ぎをやめました'); };
+  function done0() { const d = raw.get('kb.migDone', []); d.push(o.id); raw.set('kb.migDone', d.slice(-20)); }
+}
+
 function homeHTML() {
   const saved = store.get('session', null);
   const demo = [];
@@ -6692,6 +6764,7 @@ function homeHTML() {
   <div class="logo">計算ブリッジ<small>作戦研究所</small></div>
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
+  ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${demo.join('')}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span></span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm" data-act="profiles">切り替え</button></span>
@@ -9154,6 +9227,7 @@ function act(a, el) {
     case 'back-summary': { const r = $('#peek-return'); if (r) r.remove(); showGameSummary(true); break; }
     case 'quit': if (S.attack) { modal(`<div class="stack"><h3 style="margin:0">アタックを中止しますか？</h3><p class="small muted" style="margin:0">中止すると、ここまでのBPで終了します。完走のバッジ（バッジアタックの系統）は数えません。</p><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="attack-abort">中止する</button></div></div>`); break; } clearTimeout(S.timer); S.game = null; S.tiebreak = null; go('home'); break;
     case 'hunt-start': huntStart(); break;
+    case 'migrate-out': migrateOut(); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
@@ -9234,7 +9308,8 @@ setInterval(() => {
 })();
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
-window.KBAPP = { S, act, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
+window.KBAPP = { S, act, migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>
