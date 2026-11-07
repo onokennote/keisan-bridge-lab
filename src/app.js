@@ -395,6 +395,7 @@ function render() {
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
+  else if (S.view === 'story') app.innerHTML = storyHTML();
   bind();
 }
 
@@ -2219,7 +2220,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button></div>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
@@ -4482,6 +4483,26 @@ function charProfile(id) {
     ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
+// ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
+const STORY = [
+  { ic: '😣', h: '親子で、惨敗', t: '2026年10月25日、第4回計算ブリッジ・日本一決定戦に、息子と初めて参加しました。結果は、二人とも決勝に上がれず惨敗。正直、なめていました。' },
+  { ic: '🔥', h: '雪辱のための特訓アプリ', t: '大会で痛感したのは、「その場で出せる手」と「勝つための手」は違うということ。そこで、本番そっくりの卓でAIと対戦し、自分の一手とAIの最善手を「上がれる確率」「失点の見込み」で比べられる特訓アプリを作り始めました。' },
+  { ic: '🤝', h: 'AI（Claude）と一緒に作る', t: '作り方はシンプルです。「こうしたい」を日本語で伝える → AIが作ってテストする → 親子でスマホで遊んで感想を返す → また直す。プログラムはAIに任せ、こちらはアイデアと「遊んでみた気持ち」を出し続けました。' },
+  { ic: '🦉', h: '負けた理由が分かるように', t: '解説のルート博士と、実況のナニワのマサが生まれました。1ゲームごとに「いちばんの分かれ道」と「最善手ならどう変わったか」を話してくれます。親子で読んで笑いながら学べることを目指しました。' },
+  { ic: '⚖️', h: '結果と、選び方を分ける', t: 'たまたま上がれた手をほめすぎない。正しく選んだのに負けたときは「気にせんでええで」。運の良し悪しと判断の良し悪しを分けて伝えるよう、総評を何度も磨きました。' },
+  { ic: '🏅', h: '続けたくなる仕掛け', t: 'バッジ、式の図鑑、自分のアバター。3分で式を集める「式ハンター」、上がれる札を数える「アウツチャレンジ」、15分の「バッジアタック」、自分の式で埋める「早見表」。短い時間でも鍛えられるようにしました。' },
+  { ic: '👁️', h: '遊び心も、本気で', t: '倶楽部には、強さも性格も違うオリジナルのキャラがたくさん。大会の決勝には、山札の底まで見通す奥義を持つ★6が、まれに現れます。' },
+  { ic: '🔰', h: 'はじめての人にも', t: '博士とマサが会話でルールを教えるチュートリアルと、達人の打ち方を見られる観戦モードを用意しました。' },
+  { ic: '📮', h: '考案者への相談', t: '「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、上野さんにご相談したうえで進めています。キャラクターはすべてオリジナルです。' },
+  { ic: '🔁', h: '230回以上の更新', t: '親子の「ここがおかしい」「もっとこうしたい」を一つずつ形にして、公開版の更新は230回を超えました。次の大会で、親子そろって決勝に進むのが目標です。' }
+];
+function storyHTML() {
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
+  <div class="story"><div class="story-hero"><div class="sh-t">惨敗から生まれた<br>特訓アプリ</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
+  <ol class="story-tl">${STORY.map((x, i) => `<li style="animation-delay:${0.1 + i * 0.08}s"><span class="st-ic" aria-hidden="true">${x.ic}</span><div><b>${esc(x.h)}</b><p>${esc(x.t)}</p></div></li>`).join('')}</ol>
+  <div class="op-lines story-cast">${[['root', '負けた日のくやしさが、学びの入り口になりました。'], ['masa', 'ほな、次はワイらと一緒に決勝や！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
 }
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>
