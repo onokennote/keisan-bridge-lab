@@ -124,11 +124,11 @@ const R = [
 ];
 KB.ROSTER = R;
 // ---------- ★6（唯一）：カナタ。ROSTER には入れない（予選・練習では当たらず、大会の決勝にだけ現れる） ----------
-// 大会に参加する確率は、ほかのキャラと同じ（参加AIの人数 ÷ キャラの総数）
+// 大会に参加する確率は、ほかのキャラの1.5倍（参加AIの人数 ÷ キャラの総数 × 1.5）
 KB.KANATA = { id: 'kanata', name: 'カナタ', title: '卓の彼方を視る者', lv: 6, st: 'keisan', kind: 'human', tag: '年齢不詳', look: { g: 'm', age: 'adult', skin: 0, hair: '#eef0f6', hs: 'long', shirt: '#1b2340', cool: true, closed: true, bgpat: 'pat:void' },
   prof: '計算ブリッジ倶楽部の初代チャンピオン。いつから倶楽部にいるのか、誰も知らない。ゼロに計算を教えた師。ふだんは目を閉じたまま打つが、奥義「絶対透視」で目を開くと、山札の底まで見通すという。',
   idle: ['……'], win: ['最初から、そう決まっていた'], lose: ['……面白い'] };
-KB.kanataRate = nAI => Math.min(1, nAI / (R.length + 1));
+KB.kanataRate = nAI => Math.min(1, nAI / (R.length + 1) * 1.5); // ほかのキャラが選ばれる割合の1.5倍（出会いやすく）
 // ライバル関係（同じ卓にいると、上がったときに相手が反応する）
 KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 'hidari', hidari: 'migi', pipo: 'omega' };
 

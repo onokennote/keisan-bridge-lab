@@ -201,7 +201,7 @@ function newSession(cfg) {
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
   // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
   if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : Math.random() < KB.kanataRate(cfg.nPlayers - 1))) {
-    T.kanata = true; if (cfg.finalists >= 5) T.cfg = Object.assign({}, cfg, { finalists: 4 });
+    T.kanata = true; if (cfg.finalists >= 5) { T.cfg = Object.assign({}, cfg, { finalists: 4 }); T.kanataCut = true; }
   }
   return T;
 }
@@ -4111,10 +4111,11 @@ function openingHTML() {
     ['root', `計算ブリッジ大会へようこそ。今日は${c.nPlayers}名が集まりました。予選${c.sets}セットを戦い抜いて、決勝へ進めるのは上位${c.finalists}名だけです。`],
     ['masa', `${c.nPlayers}人で${c.finalists}枠の取り合いや！席替えしながらの長丁場、最後まで目ぇ離されへんで！ほな、キックオフや！`]
   ];
+  if (S.T && S.T.kanata) lines.push(['root', `それから、今日はシード選手が1名います。予選には出ず、決勝から登場する選手です。${S.T.kanataCut ? `決勝の席が1つ埋まるので、予選から進めるのは上位${c.finalists}名になります。` : `決勝は、予選の上位${c.finalists}名にシード選手を加えた${c.finalists + 1}名で戦います。`}`], ['masa', 'シードやて…誰が来るんや？ 正体は決勝までのお楽しみや！']);
   const step = 2.2;
   return `<div class="stage opening"><div class="spot"></div>
   <div class="stage-title">計算ブリッジ大会</div>
-  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝${S.T && S.T.kanata ? '（決勝にはシード選手が1名加わります）' : ''}</div>
+  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝${S.T && S.T.kanata ? '＋シード1名' : ''}</div>
   <div class="op-lines">${lines.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.4 + i * step}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
   <div class="row" style="justify-content:center;gap:10px;margin-top:16px;position:relative">
     <button class="btn ghost" data-act="opening-skip">説明をすぐ表示</button>
@@ -4143,7 +4144,7 @@ function entranceHTML() {
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
-  ${T.kanata ? `<p class="kanata-ent">そして最後に、シード選手が入場します。倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタ。<br><small>奥義「絶対透視」：第2巡か第3巡に、山札の底まで見通すことがある</small></p>` : ''}
+  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、第2巡か第3巡に、全員の手札も山札の底まで見通すんや。ほんで、ゲームごとに出るか出えへんかは五分五分。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;

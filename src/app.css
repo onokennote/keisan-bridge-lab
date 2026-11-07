@@ -1462,8 +1462,7 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 @keyframes txGlow{from{box-shadow:0 0 0 3px #f2b632,0 0 24px 4px rgba(242,182,50,.35)}to{box-shadow:0 0 0 3px #ffd43b,0 0 56px 18px rgba(170,140,255,.55)}}
 @keyframes txName{from{transform:scale(2.2);opacity:0}to{transform:scale(1);opacity:1}}
 @keyframes txCard{0%{opacity:0;transform:translateY(4px)}40%{opacity:1;transform:none}100%{opacity:.55;background:rgba(208,191,255,.35);border-color:#d0bfff;box-shadow:0 0 8px #b197fc}}
-.kanata-ent{margin:6px auto 0;max-width:520px;text-align:center;color:#e5dbff;font-weight:700;line-height:1.6}
-.kanata-ent small{color:#c9c2ad;font-weight:400}
+.kanata-ent{margin:10px auto 0;max-width:560px;text-align:left}
 @media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}
 
 /* ご褒美アイテム「自動照準」 */

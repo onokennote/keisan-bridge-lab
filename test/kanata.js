@@ -14,7 +14,7 @@ const fs = require('fs');
   const mode = 'tour';
   await pg.evaluate(() => { KBAPP.S.settings.speed = 'fast'; window.KB_KANATA = 1; window.KB_KANATA_AT = 2; });
   if (mode === 'practice') { await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); }
-  else { await pg.click('[data-go="setup-tour"]'); await pg.fill('#t-n', '5'); await pg.fill('#t-sets', '1'); await pg.fill('#t-games', '2'); await pg.selectOption('#t-fin', '4').catch(() => {}); await pg.click('[data-act="start-tour"]'); await pg.waitForTimeout(100); await pg.evaluate(() => { if (KBAPP.S.view === 'opening') KBAPP.act('opening-start'); }); }
+  else { await pg.click('[data-go="setup-tour"]'); await pg.fill('#t-n', '5'); await pg.fill('#t-sets', '1'); await pg.fill('#t-games', '2'); await pg.selectOption('#t-fin', '4').catch(() => {}); await pg.click('[data-act="start-tour"]'); await pg.waitForTimeout(7000); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'kanata_opening.png'), fullPage: true }); await pg.waitForTimeout(100); await pg.evaluate(() => { if (KBAPP.S.view === 'opening') KBAPP.act('opening-start'); }); }
   await pg.waitForTimeout(400);
   let shots = 0;
   for (let step = 0; step < 4000; step++) {
@@ -39,7 +39,7 @@ const fs = require('fs');
       for (const v of best.vals) { const c = hand.find(c => c.v === v && !used.has(c.id)); used.add(c.id); S.sel.push(c.id); }
       return 'select';
     });
-    if (st === 'entshot') { await pg.waitForTimeout(3500); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'kanata_entrance.png'), fullPage: true }); console.log('entrance', await pg.evaluate(() => KBAPP.S.T.finalists.map(id => KBAPP.S.T.players.find(p => p.id === id).ch.name).join(','))); }
+    if (st === 'entshot') { await pg.waitForTimeout(8000); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'kanata_entrance.png'), fullPage: true }); console.log('entrance', await pg.evaluate(() => KBAPP.S.T.finalists.map(id => KBAPP.S.T.players.find(p => p.id === id).ch.name).join(','))); }
     if (st === 'txshot') { await pg.waitForTimeout(1200); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'kanata_fx.png') }); console.log('toushi fx shown'); }
     if (st === 'select') {
       // re-render with selection then click play
