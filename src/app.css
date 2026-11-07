@@ -1617,3 +1617,6 @@ body.spectate .me .hand .card{cursor:default}
 .story-text{display:flex;flex-direction:column;gap:12px;padding:4px 6px}
 .story-text p{margin:0;font-size:16px;line-height:1.9;animation:txIn .6s ease both}
 .story-note{margin:0;padding:0 6px}
+.nb-row.wide{grid-template-columns:96px 1fr auto}
+.nb-row.wide b{white-space:nowrap}
+.nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}

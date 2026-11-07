@@ -1622,10 +1622,13 @@ body.spectate .me .hand .card{cursor:default}
 .story-text{display:flex;flex-direction:column;gap:12px;padding:4px 6px}
 .story-text p{margin:0;font-size:16px;line-height:1.9;animation:txIn .6s ease both}
 .story-note{margin:0;padding:0 6px}
+.nb-row.wide{grid-template-columns:96px 1fr auto}
+.nb-row.wide b{white-space:nowrap}
+.nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='05f314eb41';
+window.KB_BUILD='4a1dbfe9c3';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7372,7 +7375,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る研究所</button></div>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
@@ -9644,13 +9647,73 @@ const STORY = [
   '気づいたら、博士とマサがしゃべりだし、倶楽部のメンバーは60人になり、決勝には山札の底まで見通す★6が出るようになり、更新は230回を超えていました。',
   '特訓のつもりが、思いのほか遊べるものになったので、みなさんにも遊んでもらうことにしました。'
 ];
+// ---------- 数字で見る計算ブリッジ（数字になったものの意味を見せる：期待PP・平均PP・順番の有利・決勝や優勝の確率） ----------
+let NUMS = null;
+// 大会の決勝進出と優勝の確率（estimateQualify と同じ考え方で、決勝の1セットまで続ける）
+function estimateTour(cfg, myMu, N) {
+  const n = cfg.nPlayers, sizes = KB.splitTables(n, 5), W = MIX[cfg.mix].w, tw = W.reduce((a, b) => a + b, 0);
+  const pick = () => { let x = KB.rand() * tw; for (let i = 0; i < 5; i++) { x -= W[i]; if (x <= 0) return i + 1; } return 5; };
+  const draw = m => Math.max(0, m[0] * cfg.games + KB.gauss() * m[1] * Math.sqrt(cfg.games));
+  let q = 0, w = 0;
+  for (let it = 0; it < N; it++) {
+    const mus = [[myMu, 9.0]]; for (let i = 1; i < n; i++) mus.push(LV_PP[pick()]);
+    const pts = new Array(n).fill(0), pp = new Array(n).fill(0);
+    for (let s = 0; s < cfg.sets; s++) { const ids = KB.shuffle([...Array(n).keys()]); let k = 0; for (const z of sizes) { const v = ids.slice(k, k + z).map(id => { const x = draw(mus[id]); pp[id] += x; return { id, x }; }).sort((a, b) => a.x - b.x); k += z; v.forEach((o, i) => { pts[o.id] += cfg.points[i] || 0; }); } }
+    const order = [...Array(n).keys()].sort((a, b) => pts[b] - pts[a] || pp[a] - pp[b]), fin = order.slice(0, cfg.finalists);
+    if (!fin.includes(0)) continue;
+    q++;
+    const fx = fin.map(id => ({ id, x: draw(mus[id]) })).sort((a, b) => a.x - b.x);
+    if (fx[0].id === 0) w++;
+  }
+  return { q: q / N, w: w / N };
+}
+function numbersData() {
+  if (NUMS) return NUMS;
+  // 順番の有利不利と、1ゲームの長さ：★3どうしの4人卓をAIだけで打たせて数える
+  const G = 3000, pos = [0, 0, 0, 0]; let rounds = 0, none = 0, losePP = 0, loseN = 0;
+  for (let i = 0; i < G; i++) {
+    const g = KB.autoGame([1, 2, 3, 4].map(id => ({ id, human: false, level: 3, style: 'keisan' })), i % 4);
+    if (g.winner >= 0) { pos[g.order.indexOf(g.winner)]++; rounds += g.round; } else none++;
+    g.pp.forEach((x, k) => { if (k !== g.winner) { losePP += x; loseN++; } });
+  }
+  const won = G - none;
+  // 3枚の待ち
+  const men = vals => { const c = KB.countsOf(vals); let n = 0; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) n++; return n; };
+  const tri = []; for (let a = 1; a <= 13; a++) for (let b = a; b <= 13; b++) for (let c = b; c <= 13; c++) tri.push({ v: [a, b, c], n: men([a, b, c]) });
+  const hist = {}; tri.forEach(x => hist[x.n] = (hist[x.n] || 0) + 1); tri.sort((x, y) => y.n - x.n);
+  // 大会（初期設定）の決勝進出・優勝の確率
+  const cfg = { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, mix: 'random' };
+  const tour = PLAY_STYLES.map(p => Object.assign({ label: p.label, mu: p.mu }, estimateTour(cfg, p.mu, 3000)));
+  NUMS = { G, pos: pos.map(x => x / won), rounds: rounds / won, none: none / G, losePP: losePP / loseN, tri, hist, avgMen: tri.reduce((a, x) => a + x.n, 0) / tri.length, tour, cfg };
+  return NUMS;
+}
+function numbersHTML() {
+  const N = numbersData(), pc = x => Math.round(x * 100) + '%', f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+  const bar = (label, v, max, txt, hi) => `<div class="nb-row wide ${hi ? 'hi' : ''}"><span>${label}</span><i style="width:${Math.max(3, Math.round(v / max * 100))}%"></i><b>${txt}</b></div>`;
+  const maxH = Math.max(...Object.values(N.hist));
+  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}</div>`;
+  const ps = PLAY_STYLES;
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">数字で見る計算ブリッジ</div><div></div></div>
+  <div class="story"><div class="story-hero"><div class="sh-t">数字で見る<br>計算ブリッジ</div><p class="small">勘を、数字にしてみました</p></div>
+  <div class="num-grid">
+    ${card('期待PP', '', '「このまま進んだら何点失うか」の見込み', 'たとえば期待PP 6.0 の手は、同じ場面を何度もくり返したら、平均で6点くらい失うという意味です。上がれた回は0点、上がられた回は残った札の合計。それを全部ならした数字です。「AIの読み」は、出せる手ごとにこの期待PPと上がれる確率を出して比べています。')}
+    ${card(f1(ps[0].mu), 'PP', '1ゲームの平均の失点（打ち方別）', `AIの最善手どおりに打つと、1ゲームの失点は平均${f1(ps[0].mu)}。★3相当の打ち方なら${f1(ps[2].mu)}。差は1ゲームでは${f1(ps[2].mu - ps[0].mu)}点でも、5ゲームの1セットなら約${Math.round((ps[2].mu - ps[0].mu) * 5)}点。順位がひっくり返る差です。`, `<div class="num-bars">${ps.map((p, i) => bar(p.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), p.mu, ps[2].mu, f1(p.mu), i === 0)).join('')}</div>`)}
+    ${card(pc(N.pos[0]), '', '親（1番手）の上がり率', `だれかが上がったら、その場で終わり。だから順番が大事です。★3どうしの4人卓を${N.G.toLocaleString('ja-JP')}ゲーム打たせると、上がった人のうち親が${pc(N.pos[0])}、4番手は${pc(N.pos[3])}。前のゲームで負けた人が親になるのは、ささやかな救済です。`, `<div class="num-bars">${['親（1番手）', '2番手', '3番手', '4番手'].map((l, i) => bar(l, N.pos[i], N.pos[0], pc(N.pos[i]), i === 0)).join('')}</div>`)}
+    ${card(f1(N.rounds), '巡', '上がりまでの平均', `ゲームは平均で第${f1(N.rounds)}巡に終わります。7枚の手札を4〜5回の手番で出し切る計算。1回の手番でおよそ2枚ずつ減らしていく速さが目安です。上がれずにいる人の失点は、平均${f1(N.losePP)}点でした。`)}
+    ${card(f1(N.avgMen), '面', '3枚の手札の、平均の待ち', `残り3枚になったとき、13種類の場のうち平均${f1(N.avgMen)}種類で上がれます。最強は <b>${N.tri[0].v.map(KB.vname).join('・')}</b> の${N.tri[0].n}面。弱い組は2面しかありません。残す札で、上がりやすさは何倍も変わります。`, `<div class="num-bars">${Object.keys(N.hist).map(Number).sort((a, b) => b - a).map(k => `<div class="nb-row"><span>${k}面</span><i style="width:${Math.max(2, Math.round(N.hist[k] / maxH * 100))}%"></i><b>${N.hist[k]}</b></div>`).join('')}</div><p class="small muted" style="margin:4px 0 0">面数ごとの組の数（全455通り）</p>`)}
+    ${card(pc(N.tour[0].w), '', '大会で優勝する確率（最善手どおりの場合）', `参加${N.cfg.nPlayers}人・予選${N.cfg.sets}セット・上位${N.cfg.finalists}人が決勝の大会で、AIの最善手どおりに打ち続けた場合の見込みです。決勝に進むだけなら${pc(N.tour[0].q)}。打ち方の差は、大会の結果にここまで響きます。`, `<div class="num-bars">${N.tour.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.w, N.tour[0].w, `${pc(t.w)}（決勝 ${pc(t.q)}）`, i === 0)).join('')}</div><p class="small muted" style="margin:4px 0 0">参加者の平均は優勝${pc(1 / N.cfg.nPlayers)}・決勝${pc(N.cfg.finalists / N.cfg.nPlayers)}</p>`)}
+  </div>
+  <p class="small muted" style="margin:0;padding:0 6px">※ 平均や確率は、このアプリのAIどうしの対戦と、その結果から作ったモデルで計算した見込みです。実際の大会の結果ではありません。</p>
+  <div class="op-lines story-cast">${[['root', '勘で打っていたところに、数字の裏づけがあると、迷いが減ります。'], ['masa', '数字は裏切らへん！でも1ゲームは運も大きいで。そこがおもろいんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button><button class="btn primary" data-go="home">ホームへ</button></div></div>`;
+}
 function storyHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
   <div class="story"><div class="story-hero"><div class="sh-t">悔しかったので、<br>作りました。</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
   <div class="story-text">${STORY.map((t, i) => `<p style="animation-delay:${0.15 + i * 0.25}s">${esc(t)}</p>`).join('')}</div>
   <p class="small muted story-note">「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、キャラクターはすべてオリジナルです。</p>
   <div class="op-lines story-cast">${[['masa', '要するに、負けず嫌いが止まらんかったっちゅうことや！'], ['root', 'くやしさは、いちばん強い学びの入り口です。']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る研究所</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
 }
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>
