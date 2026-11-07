@@ -1630,7 +1630,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='6d027850d1';
+window.KB_BUILD='24fdec7cc8';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7038,7 +7038,7 @@ const TUT = [
   { cast: [['root', 'コツその2。式の作り方は自由です。3枚出しは一気に減らせますが、小さい札まで使い切ると、次の場で困ることもあります。出す枚数より、何を残すかで選びましょう。大きい札は、割り算で小さな数にすると処分しやすくなります。'], ['masa', 'でかい札を割って逃がす、ここが計算ブリッジの気持ちええとこや！']], show: () => `<div class="tut-exprs"><span class="mono">K − 8 ＋ 4 ＝ 9</span><small>3枚出し：一気に減るが、残る札しだい</small><span class="mono">Q ÷ 4 ＝ 3</span><small>割り算で大きい札を処分</small><span class="mono">J − 4 × A ＝ 7</span><small>かっこや×÷も自由に</small></div>` },
   { cast: [['root', 'コツその3。手札が2〜3枚になったら「待ち」を意識します。たとえば A・2・6 の3枚は、13個の数のうち12個で上がれる、すごい形です。'], ['masa', 'ポーカーで言うたら、どのカードが来てもええ最強の待ちや！']], show: () => tutHand([1, 2, 6].map(v => TC(v))) + '<p class="tut-cap">A・2・6 ＝ 12面待ち（2〜Kで上がれる）</p>' },
   { cast: [['root', '5ゲームで1セット。セットのPPの合計で順位が決まります。大会では、予選を何セットか戦って、上位が決勝に進みます。'], ['masa', '1ゲームの負けは取り返せる、長丁場の勝負や！']], show: () => `<div class="tut-flow"><span>1ゲーム</span><b>→</b><span>5ゲームで1セット</span><b>→</b><span>大会：予選 → 決勝</span></div>` },
-  { cast: [['root', 'この研究所でできることを紹介しましょう。'], ['masa', 'ぜんぶ遊びながら強くなれるで！']], show: () => `<ul class="tut-menu"><li><b>1セット練習</b>：相手の強さを選んで打つ。手ごとにAIの読みと比べられます</li><li><b>大会</b>：予選から決勝まで。思わぬ強敵も…</li><li><b>特訓</b>：式ハンター（3分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（15分の腕試し）</li><li><b>早見表</b>：多面待ちの札を、自分の式で埋めていく</li><li><b>バッジ・図鑑・アバター</b>：がんばりが形になって残ります</li><li><b>観戦</b>：達人の打ち方を見る（中級者向け）</li></ul>` },
+  { cast: [['root', 'この研究所でできることを紹介しましょう。'], ['masa', 'ぜんぶ遊びながら強くなれるで！']], show: () => `<ul class="tut-menu"><li><b>1セット練習</b>：相手の強さを選んで打つ。手ごとにAIの読みと比べられます</li><li><b>大会</b>：予選から決勝まで。思わぬ強敵も…</li><li><b>特訓</b>：式ハンター（3分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（15分の腕試し）</li><li><b>早見表</b>：多面待ちの札を、自分の式で埋めていく</li><li><b>バッジ・図鑑・アバター</b>：がんばりが形になって残ります</li><li><b>観戦</b>：達人の打ち方を見る</li></ul>` },
   { cast: [['root', '説明は以上です。とはいえ、こればかりは打ってみるのがいちばん。'], ['masa', 'せや、いっぺんやってみんと分からんかもな！設定はワイらにまかせとき。まずは弱めの相手3人と、短めの3ゲームや。横で実況したるで！']], show: () => `<div class="tut-flow"><span>相手3人（★1〜2）</span><span>3ゲーム</span><span>博士とマサの実況つき</span></div>`, end: true }
 ];
 // おすすめ設定（弱め・短め3ゲーム）でそのまま1セット練習を始める
@@ -7380,7 +7380,7 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     <div class="facts"><span>2〜5人卓</span><span>レベル・性格を指定</span><span>セット得点つき</span></div>
-    <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦（中級者向け）</button>
+    <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
   <div class="mode"><div class="lbl">TOURNAMENT</div><h2>大会モード</h2>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
