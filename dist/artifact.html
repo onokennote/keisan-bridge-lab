@@ -1626,10 +1626,11 @@ body.spectate .me .hand .card{cursor:default}
 .nb-row.wide b{white-space:nowrap}
 .nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}
 .hunt-ready .aim-talk{animation:none;opacity:1}
+.hunt-rules summary{cursor:pointer;color:#f2b632;font-weight:700}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='1de404b1d1';
+window.KB_BUILD='6d027850d1';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6010,7 +6011,7 @@ function huntDeal(H) {
 }
 function huntStart() {
   const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], autoRegs: [], auto: false, autoLeft: 0, made: [], missed: [], sel: [], msg: null, started: false, over: false };
-  huntDeal(H); go('hunt');
+  const again = S.view === 'hunt-result'; huntDeal(H); go('hunt'); if (!again) huntIntro(); // もう一度のときは導入を省く
 }
 function huntGo(aim) {
   const H = S.hunt; if (!H || H.started) return;
@@ -6224,7 +6225,8 @@ function huntHTML() {
   if (!H.started) return top + `<div class="panel stack hunt-ready">
     <h2 style="margin:0">式ハンター</h2>${aimTalk()}
     <p class="small" style="margin:0">${HUNT_SEC / 60}分間、標的（場）の数を<b>手札の3枚</b>で作って、未登録の式＝獲物を捕獲しましょう。</p>
-    <p class="small hunt-calm" style="margin:0">🍵 得点や速さで取れるバッジはありません。バッジにつながるのは図鑑に登録した式の数（と場のコンプリート）だけなので、時間を気にせず<b>じっくり考えてOK</b>です。得点は自己ベストの記録用です。</p>
+    <details class="small hunt-rules"><summary>くわしいルール</summary>
+    <p class="small hunt-calm" style="margin:6px 0">🍵 得点や速さで取れるバッジはありません。バッジにつながるのは図鑑に登録した式の数（と場のコンプリート）だけなので、時間を気にせず<b>じっくり考えてOK</b>です。得点は自己ベストの記録用です。</p>
     <ul class="small" style="margin:0;padding-left:1.2em;line-height:1.7">
       <li>3枚を選んで「出す」。未登録の式（獲物）を作ると捕獲＝図鑑に登録。同じ札で作れる式が複数あるときは、未登録→この狩りで未使用の順に選ばれます。</li>
       <li>同じ式は1回の狩りで1度だけ。作れないときは「見送る」。そのとき手札に隠れていた式が少しのあいだ姿を見せます（その間は操作できません）。手札と標的（場）は毎回配り直し。</li>
@@ -6235,6 +6237,7 @@ function huntHTML() {
       <li>「獲物の気配」は、その手札で作れる未登録の式の数。配られる札は、獲物がいるものが少し出やすくなっています。</li>
       <li>🎯 ご褒美「自動照準」：バッジ「図鑑の場」の銀（場を3つ制覇）を持って大会の決勝に進むと1発もらえます。使うと獲物${AIM_N}匹を自動で捕獲（得点には入りません）。</li>
     </ul>
+    </details>
     <p class="small muted" style="margin:0">図鑑 ${nAll}/${ZUKAN.length}</p>
     <div class="stack" style="gap:6px"><b class="small">標的（場の数）</b>
       <div class="hunt-tsel">${(() => { const left = {}; ZUKAN.forEach(e => { if (e.n === 3 && !z[e.id]) left[e.t] = (left[e.t] || 0) + 1; }); const all = Object.values(left).reduce((a, b) => a + b, 0);
@@ -6837,6 +6840,34 @@ function attackFinish(quit) {
   whistle(quit ? 'アタック中止' : 'タイムアップ！', `${quit ? 'ここまでで' : ATTACK_MIN + '分で'} 獲得 ${bp} BP`, () => { document.body.classList.remove('atk-on'); go('attack-result'); }, { end: true, kind: quit ? (bp ? 'atkQuit' : 'atkQuit0') : !bp ? 'atkQuit0' : isBest ? 'atkEndBest' : 'atkEnd', d: { bp, m: ATTACK_MIN } });
 }
 // 開始の演出：博士とマサの前振り → スタートボタン → マサ「ほなキックオフや！」＋ホイッスルで試合開始
+// 特訓モードの導入（バッジアタックと同じ形）：タイトル・ひと言・博士とマサ・やめる／スタート
+function modeIntro(o) {
+  const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
+  const el = document.createElement('div'); el.className = 'whistle-ov';
+  el.innerHTML = `<div class="wh-box"><div class="wh-title" ${o.title.length >= 7 ? 'style="font-size:clamp(26px,8.5vw,40px)"' : ''}>${esc(o.title)}</div><div class="wh-sub">${esc(o.sub)}</div>
+    <div class="wh-cast">${bub('masa', o.masa, 0.3)}${bub('root', o.root, 1.1)}</div>
+    <div class="row" style="justify-content:center;margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn" data-x="cancel">やめる</button>${(o.extra || []).map((x, i) => `<button class="btn" data-x="e${i}">${esc(x.label)}</button>`).join('')}<button class="btn primary" data-x="go">${esc(o.goLabel || 'スタート')}</button></div></div>`;
+  document.body.appendChild(el);
+  const close = then => { el.classList.add('out'); setTimeout(() => { el.remove(); if (then) then(); }, 300); };
+  el.querySelector('[data-x="cancel"]').onclick = () => { KB.sfx('back'); close(o.onCancel); };
+  (o.extra || []).forEach((x, i) => el.querySelector(`[data-x="e${i}"]`).onclick = () => close(x.on));
+  el.querySelector('[data-x="go"]').onclick = () => { KB.sfx('whistle', 1); el.querySelector('.wh-box').innerHTML = `<div class="wh-title">${esc(o.goTitle || 'スタート！')}</div><div class="wh-cast">${bub('masa', o.goLine || 'ほな、いこか！', 0)}</div>`; setTimeout(() => close(o.onGo), 1100); };
+}
+function huntIntro() {
+  const n = aimCount(), t = store.get('huntT', null);
+  modeIntro({ title: '式ハンター', sub: `${HUNT_SEC / 60}分間、手札の3枚で場の数を作って、未登録の式を捕まえろ`,
+    masa: '狩りの時間や！3枚で場の数を作ったら捕獲や。図鑑にまだない式ほど獲物やで！作れんときは「見送る」でええ！',
+    root: '得点や速さで取れるバッジはありません。図鑑に登録した式の数がバッジにつながるので、じっくり考えて大丈夫ですよ。',
+    goLabel: '狩りに出る', goTitle: '狩り開始！', goLine: t ? `標的は${KB.vname(t)}や、いくで！` : 'ほな、狩りに出よか！',
+    extra: [{ label: '標的を選ぶ・ルール', on: () => { } }].concat(n ? [{ label: `🎯 自動照準（${n}発）`, on: () => huntGo(true) }] : []),
+    onGo: () => huntGo(), onCancel: () => go('home') });
+}
+function outsIntro() {
+  modeIntro({ title: 'アウツチャレンジ', sub: '5問連続で正解したらクリア',
+    masa: '次の番で上がれる札、いちばん多くなる出し方はどれや？5問連続で当てたらクリア！1問でも外したら最初からやで！',
+    root: '「アウツ」とは、次にめくれたら上がれる札のこと。何を残すかで、その数が変わります。問題はだんだん難しくなり、ヒントはありません。',
+    goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { }, onCancel: () => go('home') });
+}
 function attackIntro(then) {
   const pick = arr => (arr[(Math.random() * arr.length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN);
   const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
@@ -9887,7 +9918,7 @@ function act(a, el) {
     case 'discard-save': store.del('session'); render(); break;
     case 'show-stats': showStats(); break;
     case 'profiles': profileModal(); break;
-    case 'drill': S.drill = newDrill(); go('drill'); break;
+    case 'drill': { const again = S.view === 'drill'; S.drill = newDrill(); go('drill'); if (!again) outsIntro(); break; }
     case 'drill-next': drillNext(); break;
     case 'drill-submit': drillSubmit(); break;
     case 'drill-hint': S.drill.hint = true; render(); break;

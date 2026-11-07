@@ -12,7 +12,10 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(n0[0] && n0[1] === 1, 'ご褒美で自動照準が1発増える（所持 ' + n0[1] + '）');
   await pg.evaluate(() => KBAPP.go('home')); await pg.waitForTimeout(3500);
   ok(await pg.evaluate(() => /自動照準 ×1/.test(document.body.innerText)), 'ホームの式ハンターに所持数が出る');
-  await pg.click('[data-act="hunt-start"]'); await pg.waitForTimeout(300);
+  await pg.click('[data-act="hunt-start"]'); await pg.waitForTimeout(600);
+  ok(await pg.evaluate(() => /式ハンター/.test(document.querySelector('.whistle-ov .wh-title').innerText) && /自動照準/.test(document.querySelector('.whistle-ov').innerText)), '最初にバッジアタックと同じ形の導入が出る（自動照準のボタンつき）');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'hunt_intro.png') });
+  await pg.click('.whistle-ov [data-x="e0"]'); await pg.waitForTimeout(500);
   ok(!!(await pg.$('[data-act="hunt-go-aim"]')), '開始前に「自動照準を使って始める」が出る');
   ok(await pg.evaluate(() => /自動照準が1発あるで/.test(document.querySelector('.aim-talk').innerText)), '式ハンターの最初にマサが自動照準のことを言う');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_talk.png') });

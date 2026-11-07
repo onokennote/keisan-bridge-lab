@@ -1621,3 +1621,4 @@ body.spectate .me .hand .card{cursor:default}
 .nb-row.wide b{white-space:nowrap}
 .nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}
 .hunt-ready .aim-talk{animation:none;opacity:1}
+.hunt-rules summary{cursor:pointer;color:#f2b632;font-weight:700}
