@@ -8,10 +8,11 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.goto('file://' + path.join(__dirname, 'page.html'));
   await pg.evaluate(() => localStorage.setItem('kb.testAskName', '1')); await pg.reload(); await pg.waitForTimeout(600);
   await pg.fill('#new-name', 'おのけん'); await pg.click('[data-act="create-profile"]'); await pg.waitForTimeout(3200);
-  ok(!!(await pg.$('.watch-invite')), '新規登録のあとに観戦へ誘う');
+  ok(!!(await pg.$('[data-act="tut-start"]')), '新規登録のあとはチュートリアルへ誘う');
+  await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
   await pg.screenshot({ path: path.join(__dirname, 'out', 'watch_invite.png') });
-  await pg.click('.watch-invite [data-act="watch-first"]'); await pg.waitForTimeout(4000);
-  ok(await pg.evaluate(() => KBAPP.S.view === 'game' && !!KBAPP.S.spectate), '本戦と同じ対局画面で観戦が始まる');
+  await pg.click('.watch-sm'); await pg.waitForTimeout(4000);
+  ok(await pg.evaluate(() => KBAPP.S.view === 'game' && !!KBAPP.S.spectate && KBAPP.S.spectate.first), '本戦と同じ対局画面で観戦が始まる（初回は決まった顔ぶれ）');
   ok(await pg.evaluate(() => document.querySelectorAll('.open-hand').length === 3 && !document.querySelector('.opps .handcount i') && !!document.querySelector('.me .hand .card')), '全員の手札が見える（手元は達人）');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'watch_game.png') });
   let t0 = Date.now(); await pg.waitForSelector('.watch-sum', { timeout: 300000 });
@@ -25,7 +26,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.click('[data-act="watch-quit"]'); await pg.waitForTimeout(2500);
   ok(await pg.evaluate(() => !KBAPP.S.spectate && KBAPP.S.view === 'home' && !KBAPP.S.T && KBAPP.S.settings.speed !== undefined), 'いつでもやめられる（設定も元に戻る）');
   ok(await pg.evaluate(() => !localStorage.getItem(Object.keys(localStorage).find(k => /session$/.test(k)) || 'x')), '観戦は続きからの記録に残らない');
-  ok(await pg.evaluate(() => !!document.querySelector('[data-act="watch-start"].watch-home')), 'ホームの練習の上に観戦ボタン');
+  ok(await pg.evaluate(() => !!document.querySelector('.watch-sm')), 'ホームの練習カードに観戦ボタン');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();
 })();

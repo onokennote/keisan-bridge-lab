@@ -8,7 +8,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
+const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
@@ -4663,7 +4663,7 @@ function act(a, el) {
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartOpen(); break;
-    case 'watch-start': closeModal(); watchStart(); break;
+    case 'watch-start': { closeModal(); const first = !store.get('watched', false); store.set('watched', true); watchStart(first); break; } // 初めての観戦は、強さも性格もそろった決まった顔ぶれ
     case 'watch-first': closeModal(); watchStart(true); break;
     case 'tut-start': tutStart(); break;
     case 'tut-next': tutGo(1); break;
