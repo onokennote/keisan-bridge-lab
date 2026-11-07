@@ -1459,22 +1459,21 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .toushi-fx .tx-see{display:flex;flex-direction:column;gap:5px;max-width:440px;width:100%;transition:filter .5s,opacity .5s}
 .toushi-fx .tx-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;justify-content:center;font-size:12px;color:#d0bfff}
 .toushi-fx .tx-row b{min-width:4.5em;text-align:right;margin-right:4px;font-weight:700}
-.toushi-fx .tx-c{display:inline-block;min-width:20px;padding:2px 3px;border-radius:4px;background:rgba(251,243,220,.92);color:#1b1b1b;font-weight:900;font-size:12px;animation:txCard .4s ease both;animation-delay:.6s}
-.toushi-fx .tx-c.red{color:#d6336c}
+.toushi-fx .tx-c{display:inline-block;width:16px;height:22px;border-radius:3px;background:repeating-linear-gradient(45deg,#c92a2a 0 3px,#a61e1e 3px 6px);border:1px solid rgba(255,255,255,.6);animation:txCard 1.2s ease both}
 .toushi-fx.hide-cards .tx-see{filter:blur(6px);opacity:.15}
 .toushi-fx.out{animation:txOut .5s ease both}
 @keyframes txIn{from{opacity:0}to{opacity:1}}
 @keyframes txOut{to{opacity:0}}
 @keyframes txGlow{from{box-shadow:0 0 0 3px #f2b632,0 0 24px 4px rgba(242,182,50,.35)}to{box-shadow:0 0 0 3px #ffd43b,0 0 56px 18px rgba(170,140,255,.55)}}
 @keyframes txName{from{transform:scale(2.2);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes txCard{from{opacity:0;transform:rotateY(90deg)}to{opacity:1;transform:none}}
+@keyframes txCard{0%{opacity:0;transform:translateY(4px)}40%{opacity:1;transform:none}100%{opacity:.55;background:rgba(208,191,255,.35);border-color:#d0bfff;box-shadow:0 0 8px #b197fc}}
 .kanata-ent{margin:6px auto 0;max-width:520px;text-align:center;color:#e5dbff;font-weight:700;line-height:1.6}
 .kanata-ent small{color:#c9c2ad;font-weight:400}
 @media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='b88b787b60';
+window.KB_BUILD='0658b06d49';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -1720,8 +1719,9 @@ function sampleHands(view, pool, r, pol) {
     const hands = []; let k = 0;
     for (let p = 0; p < n; p++) {
       if (p === me) { hands.push(view.hands[me]); continue; }
-      const c = new Array(14).fill(0);
-      for (let j = 0; j < view.handSizes[p]; j++) c[pool[k++]]++;
+      const c = new Array(14).fill(0), fx = view.peek ? view.peek.hands[p] : [];
+      for (const v of fx) c[v]++;
+      for (let j = fx.length; j < view.handSizes[p]; j++) c[pool[k++]]++;
       hands.push(c);
     }
     let w = 1;
@@ -1783,6 +1783,8 @@ function evaluate(view, cands, rollouts, ctx, r) {
   known[view.field]++;
   const pool = [];
   for (let v = 1; v <= 13; v++) for (let k = 0; k < 4 - known[v]; k++) pool.push(v);
+  const pk = view.peek;
+  if (pk) { const fixed = pk.hands.flat().concat(Object.values(pk.deck)); for (const v of fixed) { const i = pool.indexOf(v); if (i >= 0) pool.splice(i, 1); } }
   const pol = [];
   for (let p = 0; p < n; p++) {
     const md = view.models && view.models[p];
@@ -1796,7 +1798,9 @@ function evaluate(view, cands, rollouts, ctx, r) {
   for (let s = 0; s < stages; s++) {
     for (let it = 0; it < perStage; it++) {
       const smp = sampleHands(view, pool, r, pol);
-      const deck = smp.rest.slice(0, view.deckSize);
+      let deck;
+      if (pk) { deck = []; let q = 0; for (let k = 0; k < view.deckSize; k++) deck.push(pk.deck[k] != null ? pk.deck[k] : smp.rest[q++]); }
+      else deck = smp.rest.slice(0, view.deckSize);
       const noise = []; for (let p = 0; p < n; p++) noise.push(ctx && ctx.gamesLeftAfter ? gauss(r) * (ctx.sd || 10) * Math.sqrt(ctx.gamesLeftAfter) : 0);
       const seed = (r() * 4294967296) >>> 0;
       for (const rr of res) {
@@ -2023,12 +2027,25 @@ function aiMoveClear(game, p, rollouts) {
       const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
       if (w === p) win++; else pp += sumCounts(hands[p]);
     }
-    const s = win / N - pp / N / 40;
+    const s = win / N * 0.5 - pp / N; // 失点の見込みを最小に（同じくらいなら上がりやすい方）
     if (s > bs) { bs = s; best = m; }
   }
   return best;
 }
 KB.aiMoveClear = aiMoveClear;
+// ゼロの隠れた力（本人も気づいていない）：ときどき、見えないはずの札が何枚か分かる。
+// 分かった札は固定し、残りは毎回ランダムに埋めて先を読む。カナタほどではないが、ほかの★5より強い
+const PEEK_RATE = 0.7;
+// 見えないはずの札（他の人の手札＋山札の上6枚）から5〜7枚だけ分かる。分かった札は、ふだんの読み（MC）の中で固定される
+function makePeek(game, p) {
+  const slots = [];
+  game.hands.forEach((h, i) => { if (i !== p) h.forEach(c => slots.push({ i, v: c.v })); });
+  const D = game.deck.length; for (let k = Math.max(0, D - 6); k < D; k++) slots.push({ i: -1, k, v: game.deck[k].v });
+  shuffle(slots);
+  const pk = { hands: game.hands.map(() => []), deck: {} };
+  for (const x of slots.slice(0, 5 + ((Math.random() * 3) | 0))) { if (x.i >= 0) pk.hands[x.i].push(x.v); else pk.deck[x.k] = x.v; }
+  return pk;
+}
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
@@ -2041,7 +2058,9 @@ KB.aiMove = function (game, p, ctx) {
     if (!all.length) return null;
     const win = all.find(m => m.n === counts.reduce((a, b) => a + b, 0)); if (win) return win;
     const cands = KB.candidates(counts, t, 6).concat([null]); // あえて引くも検討
-    const ev = evaluate(game.view(p), cands, lv.mcRollouts, ctx);
+    const view = game.view(p);
+    if (pl.peek && Math.random() < PEEK_RATE) { view.peek = makePeek(game, p); game.peeks = (game.peeks || 0) + 1; } // ゼロの隠れた力（本人は気づいていない）
+    const ev = evaluate(view, cands, lv.mcRollouts, ctx);
     const mc = st.mc;
     const sc = ev.map(e => ({ m: e.m, s: mc.goal * normGoal(e, ctx) + mc.win * e.win - mc.pp * e.pp / 40 + gauss() * st.noise * 0.01 }));
     sc.sort((a, b) => b.s - a.s);
@@ -2256,8 +2275,8 @@ const KB = G.KB;
 // tone: end 語尾 / kata カタカナ / pre 前置き
 const R = [
   // ---------- ★5（16人）：二つ名つき。局面と無関係なことしか言わない ----------
-  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' },
-    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。',
+  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' }, peek: true,
+    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。ときどき、まだめくられていない札が「なんとなく」分かるらしい。本人はただの勘だと思っている。',
     idle: ['…今日の給食、カレーだった', '…', '雲、動いてる', '…眠い', 'この机、ちょっと傾いてる', '宿題、もう終わってる', '…ふうん', '外、雨が降りそう'], win: ['…おしまい', '…帰っていい？'], lose: ['…そう', '…次'] },
   { id: 'soroban', name: 'ソロバン9000', title: '無敗の演算機', lv: 5, st: 'keisan', kind: 'robot', tag: 'ロボ', look: { color: '#adb5bd' },
     prof: '全通りを読むという噂の算盤ロボ。話す内容は、だいたい天気。', tone: { kata: true },
@@ -4879,9 +4898,9 @@ M.atkEndBest = [
 ];
 M.atkQuit = ['ここで終了か！{bp}BPは取れたで、次はフルタイム出場や！', '途中交代やな！{bp}BP、次は最後のホイッスルまで行こか！'];
 M.atkQuit0 = ['ありゃ、ウォーミングアップで終わってもうたな！次は本番いこか！'];
-R.kanataOn = ['奥義「絶対透視」。{n}さんには、全員の手札と山札の順番まで視えています。ここからは上がりより、失点を減らすことを考えましょう。大きい札から処分です。', '{n}さんの目が開きました。こうなると上がりの確率はぐっと下がります。被害を最小にする手を選びましょう。'];
+R.kanataOn = ['奥義「絶対透視」。{n}さんには、全員の手札と山札の順番まで視えています。{n}さんが上がる確率はぐっと上がりました。上がりも狙えますが、上がられたときに備えて大きい札から処分していく手が有力になります。', '{n}さんの目が開きました。こちらの上がりの目が消えたわけではありません。ただ、先に上がられる確率は大きく上がったので、失点の見込みも頭に入れて選びましょう。'];
 for (const k in R) KB.LINES_ROOT[k] = R[k];
-M.kanataOn = ['出たー！奥義・絶対透視や！全部見えとるで！こうなったらゴール前にバス止めるしかない、でかい札から逃がしとき！', 'カナタの目が開いたで…！山札の底までお見通しや。ここは失点を抑える守備固めや！'];
+M.kanataOn = ['出たー！奥義・絶対透視や！カナタには全部見えとるで！こっちのゴールもまだ狙えるけど、先に決められる確率はグンと上がった。でかい札から逃がしながら攻めや！', 'カナタの目が開いたで…！山札の底までお見通しや。カウンター狙いつつ、守備もしっかり固めとこ！'];
 for (const k in M) KB.LINES_MASA[k] = M[k];
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -5041,7 +5060,7 @@ function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; 
 // AIはごちゃまぜ倶楽部の固定キャラから選ぶ（強さ・性格・名前・見た目はキャラごとに決まっている）
 function makeAI(id, level, style, used) {
   const c = KB.pickChar(level, style || null, used);
-  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c) };
+  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c), peek: !!c.peek };
 }
 // アバター編集
 const AV_OPTS = {
@@ -7357,11 +7376,12 @@ function cutInFx(label, expr, t) {
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
 function toushiFx(g, p) {
   if (S.settings.speed === 'instant') return;
-  const pl = g.players[p], mini = c => `<span class="tx-c ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</span>`;
-  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(mini).join('')}</div>`).join('');
-  const deck = g.deck.slice(-12).reverse().map(mini).join('');
+  // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
+  const pl = g.players[p], back = (_, k) => `<span class="tx-c" style="animation-delay:${0.5 + k * 0.06}s"></span>`;
+  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(back).join('')}</div>`).join('');
+  const deck = g.deck.slice(-12).map(back).join('');
   const el = document.createElement('div'); el.className = 'toushi-fx';
-  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……全員の手札と、山札の順番まで視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
+  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……${esc(nm(pl))}にだけ、全員の手札と山札の順番が視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
   document.body.appendChild(el); KB.sfx('cutin');
   setTimeout(() => el.classList.add('hide-cards'), 1900); setTimeout(() => el.classList.add('out'), 2700); setTimeout(() => el.remove(), 3200);
 }
@@ -8683,7 +8703,7 @@ function rvGameSolo(who) {
   if (f.kanata) {
     const K = f.kanata;
     if (f.won) B(`第${K.round}巡にカナタの「絶対透視」が発動したゲームで、上がり切りました。すべてを見通す相手より先に上がるのは、確率の上では大きな番狂わせです。`, `カナタの絶対透視が出たゲームで上がったやて！？ 全部見えとる相手からゴール奪うて、ジャイアントキリングや！`);
-    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。発動したあとは上がりより失点を減らす局面です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分すると、被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ ああなったらゴール前にバス止めて守るしかないんや。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
+    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。上がりの可能性は残っていますが、カナタが先に上がる確率は大きく上がります。上がりを狙いつつ、上がられたときに備えて大きい札から処分しておくのが有力です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分しておくと、上がられたときの被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ まだゴールは狙えるけど、カナタに先に決められる確率はグンと上がるんや。守備も固めながらやで。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
   }
   sec = 'luck'; // 8. 運と実力
   if (f.missHit) { B(`第${f.missHit.round}巡で最善を外して残した${f.missHit.card}が、最後の「${f.missHit.e}」に使われました。結果には助けられましたが、その手自体は最善ではありません。`, `第${f.missHit.round}巡で残した${f.missHit.card}が、最後の「${f.missHit.e}」にハマったんや！ミスが結果オーライやな〜。`); N(rt ? 'luck' : 'luckGood'); }

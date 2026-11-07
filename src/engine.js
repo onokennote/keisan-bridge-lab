@@ -243,8 +243,9 @@ function sampleHands(view, pool, r, pol) {
     const hands = []; let k = 0;
     for (let p = 0; p < n; p++) {
       if (p === me) { hands.push(view.hands[me]); continue; }
-      const c = new Array(14).fill(0);
-      for (let j = 0; j < view.handSizes[p]; j++) c[pool[k++]]++;
+      const c = new Array(14).fill(0), fx = view.peek ? view.peek.hands[p] : [];
+      for (const v of fx) c[v]++;
+      for (let j = fx.length; j < view.handSizes[p]; j++) c[pool[k++]]++;
       hands.push(c);
     }
     let w = 1;
@@ -306,6 +307,8 @@ function evaluate(view, cands, rollouts, ctx, r) {
   known[view.field]++;
   const pool = [];
   for (let v = 1; v <= 13; v++) for (let k = 0; k < 4 - known[v]; k++) pool.push(v);
+  const pk = view.peek;
+  if (pk) { const fixed = pk.hands.flat().concat(Object.values(pk.deck)); for (const v of fixed) { const i = pool.indexOf(v); if (i >= 0) pool.splice(i, 1); } }
   const pol = [];
   for (let p = 0; p < n; p++) {
     const md = view.models && view.models[p];
@@ -319,7 +322,9 @@ function evaluate(view, cands, rollouts, ctx, r) {
   for (let s = 0; s < stages; s++) {
     for (let it = 0; it < perStage; it++) {
       const smp = sampleHands(view, pool, r, pol);
-      const deck = smp.rest.slice(0, view.deckSize);
+      let deck;
+      if (pk) { deck = []; let q = 0; for (let k = 0; k < view.deckSize; k++) deck.push(pk.deck[k] != null ? pk.deck[k] : smp.rest[q++]); }
+      else deck = smp.rest.slice(0, view.deckSize);
       const noise = []; for (let p = 0; p < n; p++) noise.push(ctx && ctx.gamesLeftAfter ? gauss(r) * (ctx.sd || 10) * Math.sqrt(ctx.gamesLeftAfter) : 0);
       const seed = (r() * 4294967296) >>> 0;
       for (const rr of res) {
@@ -546,12 +551,25 @@ function aiMoveClear(game, p, rollouts) {
       const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
       if (w === p) win++; else pp += sumCounts(hands[p]);
     }
-    const s = win / N - pp / N / 40;
+    const s = win / N * 0.5 - pp / N; // 失点の見込みを最小に（同じくらいなら上がりやすい方）
     if (s > bs) { bs = s; best = m; }
   }
   return best;
 }
 KB.aiMoveClear = aiMoveClear;
+// ゼロの隠れた力（本人も気づいていない）：ときどき、見えないはずの札が何枚か分かる。
+// 分かった札は固定し、残りは毎回ランダムに埋めて先を読む。カナタほどではないが、ほかの★5より強い
+const PEEK_RATE = 0.7;
+// 見えないはずの札（他の人の手札＋山札の上6枚）から5〜7枚だけ分かる。分かった札は、ふだんの読み（MC）の中で固定される
+function makePeek(game, p) {
+  const slots = [];
+  game.hands.forEach((h, i) => { if (i !== p) h.forEach(c => slots.push({ i, v: c.v })); });
+  const D = game.deck.length; for (let k = Math.max(0, D - 6); k < D; k++) slots.push({ i: -1, k, v: game.deck[k].v });
+  shuffle(slots);
+  const pk = { hands: game.hands.map(() => []), deck: {} };
+  for (const x of slots.slice(0, 5 + ((Math.random() * 3) | 0))) { if (x.i >= 0) pk.hands[x.i].push(x.v); else pk.deck[x.k] = x.v; }
+  return pk;
+}
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
@@ -564,7 +582,9 @@ KB.aiMove = function (game, p, ctx) {
     if (!all.length) return null;
     const win = all.find(m => m.n === counts.reduce((a, b) => a + b, 0)); if (win) return win;
     const cands = KB.candidates(counts, t, 6).concat([null]); // あえて引くも検討
-    const ev = evaluate(game.view(p), cands, lv.mcRollouts, ctx);
+    const view = game.view(p);
+    if (pl.peek && Math.random() < PEEK_RATE) { view.peek = makePeek(game, p); game.peeks = (game.peeks || 0) + 1; } // ゼロの隠れた力（本人は気づいていない）
+    const ev = evaluate(view, cands, lv.mcRollouts, ctx);
     const mc = st.mc;
     const sc = ev.map(e => ({ m: e.m, s: mc.goal * normGoal(e, ctx) + mc.win * e.win - mc.pp * e.pp / 40 + gauss() * st.noise * 0.01 }));
     sc.sort((a, b) => b.s - a.s);

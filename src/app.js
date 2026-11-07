@@ -61,7 +61,7 @@ function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; 
 // AIはごちゃまぜ倶楽部の固定キャラから選ぶ（強さ・性格・名前・見た目はキャラごとに決まっている）
 function makeAI(id, level, style, used) {
   const c = KB.pickChar(level, style || null, used);
-  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c) };
+  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c), peek: !!c.peek };
 }
 // アバター編集
 const AV_OPTS = {
@@ -2377,11 +2377,12 @@ function cutInFx(label, expr, t) {
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
 function toushiFx(g, p) {
   if (S.settings.speed === 'instant') return;
-  const pl = g.players[p], mini = c => `<span class="tx-c ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</span>`;
-  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(mini).join('')}</div>`).join('');
-  const deck = g.deck.slice(-12).reverse().map(mini).join('');
+  // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
+  const pl = g.players[p], back = (_, k) => `<span class="tx-c" style="animation-delay:${0.5 + k * 0.06}s"></span>`;
+  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(back).join('')}</div>`).join('');
+  const deck = g.deck.slice(-12).map(back).join('');
   const el = document.createElement('div'); el.className = 'toushi-fx';
-  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……全員の手札と、山札の順番まで視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
+  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……${esc(nm(pl))}にだけ、全員の手札と山札の順番が視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
   document.body.appendChild(el); KB.sfx('cutin');
   setTimeout(() => el.classList.add('hide-cards'), 1900); setTimeout(() => el.classList.add('out'), 2700); setTimeout(() => el.remove(), 3200);
 }
@@ -3703,7 +3704,7 @@ function rvGameSolo(who) {
   if (f.kanata) {
     const K = f.kanata;
     if (f.won) B(`第${K.round}巡にカナタの「絶対透視」が発動したゲームで、上がり切りました。すべてを見通す相手より先に上がるのは、確率の上では大きな番狂わせです。`, `カナタの絶対透視が出たゲームで上がったやて！？ 全部見えとる相手からゴール奪うて、ジャイアントキリングや！`);
-    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。発動したあとは上がりより失点を減らす局面です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分すると、被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ ああなったらゴール前にバス止めて守るしかないんや。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
+    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。上がりの可能性は残っていますが、カナタが先に上がる確率は大きく上がります。上がりを狙いつつ、上がられたときに備えて大きい札から処分しておくのが有力です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分しておくと、上がられたときの被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ まだゴールは狙えるけど、カナタに先に決められる確率はグンと上がるんや。守備も固めながらやで。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
   }
   sec = 'luck'; // 8. 運と実力
   if (f.missHit) { B(`第${f.missHit.round}巡で最善を外して残した${f.missHit.card}が、最後の「${f.missHit.e}」に使われました。結果には助けられましたが、その手自体は最善ではありません。`, `第${f.missHit.round}巡で残した${f.missHit.card}が、最後の「${f.missHit.e}」にハマったんや！ミスが結果オーライやな〜。`); N(rt ? 'luck' : 'luckGood'); }

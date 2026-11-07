@@ -10,8 +10,8 @@ const KB = G.KB;
 // tone: end 語尾 / kata カタカナ / pre 前置き
 const R = [
   // ---------- ★5（16人）：二つ名つき。局面と無関係なことしか言わない ----------
-  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' },
-    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。',
+  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' }, peek: true,
+    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。ときどき、まだめくられていない札が「なんとなく」分かるらしい。本人はただの勘だと思っている。',
     idle: ['…今日の給食、カレーだった', '…', '雲、動いてる', '…眠い', 'この机、ちょっと傾いてる', '宿題、もう終わってる', '…ふうん', '外、雨が降りそう'], win: ['…おしまい', '…帰っていい？'], lose: ['…そう', '…次'] },
   { id: 'soroban', name: 'ソロバン9000', title: '無敗の演算機', lv: 5, st: 'keisan', kind: 'robot', tag: 'ロボ', look: { color: '#adb5bd' },
     prof: '全通りを読むという噂の算盤ロボ。話す内容は、だいたい天気。', tone: { kata: true },
