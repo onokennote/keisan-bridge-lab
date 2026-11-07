@@ -1537,3 +1537,19 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 .w-hand .wc.red{color:var(--card-red,#d6336c)}
 .w-hand{gap:3px}
 .w-head > div{min-width:0}
+
+/* 観戦（本戦と同じ画面で） */
+.watch-home{display:block;width:100%;margin:14px 0 4px;padding:14px;font-size:17px;font-weight:900;border:2px solid #f2b632;background:linear-gradient(180deg,rgba(242,182,50,.22),rgba(242,182,50,.08))}
+body.spectate .me .controls,body.spectate .me .actions,body.spectate #hintpanel,body.spectate #prevpanel{display:none!important}
+body.spectate .me .hand .card{cursor:default}
+.played.open-hand .pg .mc{min-width:18px;height:23px;font-size:12px}
+.watch-sum .ws-pps{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.watch-sum .ws-pp{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.25);text-align:left}
+.watch-sum .ws-pp .av{width:36px;height:36px;flex:none}
+.watch-sum .ws-pp .av svg{width:100%;height:100%}
+.watch-sum .ws-pp > div{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.watch-sum .ws-pp small{color:#c9c2ad;font-size:10px}
+.watch-sum .ws-pp.win{background:rgba(105,219,124,.16);outline:2px solid #69db7c}
+.watch-sum .gs-head{display:flex;flex-direction:column;align-items:center}
+.watch-sum .gs-head b{font-family:var(--f-display);font-size:24px;color:#ffd43b}
+.watch-sum .ws-pps .ws-pp.win{flex-direction:row!important;justify-content:flex-start!important;text-align:left!important}
