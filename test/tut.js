@@ -28,7 +28,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   }
   await pg.screenshot({ path: path.join(__dirname, 'out', 'tut_end.png') });
   await pg.click('[data-act="tut-end"]'); await pg.waitForTimeout(400);
-  ok(await pg.evaluate(() => KBAPP.S.view === 'game' && KBAPP.S.T && KBAPP.S.T.players.filter(p => !p.human).every(p => p.level <= 2)), '最後は弱めの相手3人と1セット練習が始まる');
+  ok(await pg.evaluate(() => KBAPP.S.view === 'game' && KBAPP.S.T && KBAPP.S.T.players.filter(p => !p.human).every(p => p.level <= 2) && KBAPP.S.T.cfg.games === 3), '最後は弱めの相手3人・3ゲームの練習が始まる');
   await pg.evaluate(() => { clearTimeout(KBAPP.S.timer); KBAPP.go('home'); }); await pg.waitForTimeout(300);
   // 説明を聞かないときも、ひと声かけて送り出す
   await pg.evaluate(() => KBAPP.act('tut-skip')); await pg.waitForTimeout(1500);
