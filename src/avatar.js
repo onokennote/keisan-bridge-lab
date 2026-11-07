@@ -12,7 +12,7 @@ const HAIR = ['#2b2522', '#3c2b20', '#5a3a24', '#7a4b2a', '#a8763e', '#d9b46a', 
 const GRAY = ['#c9c9c9', '#e8e8e8', '#a5a5a5'];
 const SHIRT = ['#4263eb', '#e64980', '#20c997', '#fab005', '#7950f2', '#fd7e14', '#868e96', '#15aabf'];
 const HSTYLE = { m: ['short', 'spiky', 'side', 'buzz'], f: ['bob', 'long', 'pony', 'bun'] };
-const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5'];
+const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5', '#ffd43b'];
 
 let used = new Set();
 KB.resetNames = () => { used = new Set(); };
@@ -33,6 +33,7 @@ KB.genChar = function (r) {
 
 // mood: normal happy worried smug shock sleepy
 const FRAME = (id, ring, bg) => `<defs><clipPath id="${id}"><rect x="4" y="4" width="92" height="92" rx="17"/></clipPath></defs><rect x="1" y="1" width="98" height="98" rx="20" fill="${ring}"/><rect x="4" y="4" width="92" height="92" rx="17" fill="${bg}" opacity=".9"/>`;
+const LV6 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#7048e8" stroke-width="1.4"/>';
 const LV5 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#e5dbff" stroke-width="1" stroke-dasharray="3 4"/>';
 KB.avatarSVG = function (ch, opts) {
   opts = opts || {};
@@ -47,11 +48,11 @@ KB.avatarSVG = function (ch, opts) {
     const ca = ch.acc && KB.accSVG ? KB.accSVG(ch.acc, fy, rx, top) : { back: '', front: '' };
     const co = ch.outfit && KB.accSVG ? KB.accSVG(ch.outfit, fy, rx, top) : { back: '', front: '' };
     const gl = ch.gl && KB.glSVG && !['robot', 'skeleton', 'ghost', 'alien'].includes(ch.base) ? KB.glSVG(ch.gl, 50, 9) : '';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   if (ch.kind && ch.kind !== 'human' && KB.creatureSVG) {
     const id0 = 'c' + Math.random().toString(36).slice(2, 8), ring0 = lv ? LEVEL_RING[lv - 1] : 'transparent', bg0 = st ? st.color : '#8a9a93';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   const child = ch.age === 'child', senior = ch.age === 'senior';
   const fy = child ? 56 : 52, rx = child ? 24 : 23, ry = child ? 23 : 26;
@@ -94,6 +95,8 @@ KB.avatarSVG = function (ch, opts) {
   if (mood === 'happy') eyes = `<path d="M${50 - ex - 4} ${eyY + 1}Q${50 - ex} ${eyY - 4} ${50 - ex + 4} ${eyY + 1}M${50 + ex - 4} ${eyY + 1}Q${50 + ex} ${eyY - 4} ${50 + ex + 4} ${eyY + 1}" stroke="${ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
   else if (mood === 'smug' || mood === 'sleepy') eyes = `<path d="M${50 - ex - 4} ${eyY}L${50 - ex + 4} ${eyY}M${50 + ex - 4} ${eyY}L${50 + ex + 4} ${eyY}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
   else if (mood === 'shock') eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 + ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 - ex}" cy="${eyY}" r="1.5" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="1.5" fill="${ink}"/>`;
+  else if (mood === 'cool' && ch.closed && !opts.open) eyes = `<path d="M${50 - ex - 4.5} ${eyY}Q${50 - ex} ${eyY + 2.6} ${50 - ex + 4.5} ${eyY}M${50 + ex - 4.5} ${eyY}Q${50 + ex} ${eyY + 2.6} ${50 + ex + 4.5} ${eyY}" stroke="${ink}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else if (mood === 'cool' && opts.open) eyes = [50 - ex, 50 + ex].map(x => `<ellipse cx="${x}" cy="${eyY}" rx="4.6" ry="3.4" fill="#fff"/><circle cx="${x}" cy="${eyY}" r="3" fill="#f2b632"/><circle cx="${x}" cy="${eyY}" r="3" fill="none" stroke="#7048e8" stroke-width=".7"/><path d="M${x - 1.6} ${eyY}h3.2M${x} ${eyY - 1.6}v3.2" stroke="#2b1d00" stroke-width=".8"/>`).join('') + `<circle cx="50" cy="${eyY}" r="${ex + 9}" fill="none" stroke="rgba(242,182,50,.45)" stroke-width="1.2"/>`;
   else if (mood === 'cool') eyes = `<path d="M${50 - ex - 4.5} ${eyY - 1}L${50 - ex + 4.5} ${eyY - 1.6}M${50 + ex - 4.5} ${eyY - 1.6}L${50 + ex + 4.5} ${eyY - 1}" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="${50 - ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><ellipse cx="${50 + ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><circle cx="${50 - ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/><circle cx="${50 + ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/>`;
   else eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 - ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/><circle cx="${50 + ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/>`;
   const my = fy + 13;
@@ -129,7 +132,7 @@ ${FRAME(id, ring, bg)}
 <ellipse cx="${50 - rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/><ellipse cx="${50 + rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/>
 <ellipse cx="50" cy="${fy}" rx="${rx}" ry="${ry}" fill="${S}"/>
 ${co.front}${front}${brows}${eyes}${mouth}${extra}${over}${ch.face && KB.faceSVG ? KB.faceSVG(ch.face, fy, eyY, ex) : ''}${acc}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>
-${lv >= 5 ? LV5 : ''}
+${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}
 </svg>`;
 };
 

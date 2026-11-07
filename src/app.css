@@ -1444,3 +1444,25 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 
 /* 引っ越し（アーティファクト版 → 公開版）の案内 */
 .mig-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px auto 0;max-width:420px;text-align:center}
+
+/* ★6カナタ：奥義「絶対透視」の演出 */
+.toushi-fx{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;box-sizing:border-box;pointer-events:none;background:radial-gradient(circle at 50% 38%,rgba(60,30,140,.92),rgba(5,4,18,.97) 70%);animation:txIn .35s ease both;text-align:center}
+.toushi-fx .tx-eye{width:132px;height:132px;border-radius:24px;box-shadow:0 0 0 3px #f2b632,0 0 40px 10px rgba(242,182,50,.45);animation:txGlow 1.2s ease-in-out infinite alternate}
+.toushi-fx .tx-eye svg{width:100%;height:100%}
+.toushi-fx .tx-name{font-family:var(--f-display);font-size:clamp(30px,9vw,46px);color:#ffd43b;letter-spacing:.06em;text-shadow:0 0 18px rgba(255,212,59,.7),0 3px 0 #2b1d00;animation:txName .6s .15s cubic-bezier(.2,1.6,.4,1) both}
+.toushi-fx .tx-sub{color:#e5dbff;font-size:14px;font-weight:700;max-width:420px}
+.toushi-fx .tx-see{display:flex;flex-direction:column;gap:5px;max-width:440px;width:100%;transition:filter .5s,opacity .5s}
+.toushi-fx .tx-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;justify-content:center;font-size:12px;color:#d0bfff}
+.toushi-fx .tx-row b{min-width:4.5em;text-align:right;margin-right:4px;font-weight:700}
+.toushi-fx .tx-c{display:inline-block;min-width:20px;padding:2px 3px;border-radius:4px;background:rgba(251,243,220,.92);color:#1b1b1b;font-weight:900;font-size:12px;animation:txCard .4s ease both;animation-delay:.6s}
+.toushi-fx .tx-c.red{color:#d6336c}
+.toushi-fx.hide-cards .tx-see{filter:blur(6px);opacity:.15}
+.toushi-fx.out{animation:txOut .5s ease both}
+@keyframes txIn{from{opacity:0}to{opacity:1}}
+@keyframes txOut{to{opacity:0}}
+@keyframes txGlow{from{box-shadow:0 0 0 3px #f2b632,0 0 24px 4px rgba(242,182,50,.35)}to{box-shadow:0 0 0 3px #ffd43b,0 0 56px 18px rgba(170,140,255,.55)}}
+@keyframes txName{from{transform:scale(2.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes txCard{from{opacity:0;transform:rotateY(90deg)}to{opacity:1;transform:none}}
+.kanata-ent{margin:6px auto 0;max-width:520px;text-align:center;color:#e5dbff;font-weight:700;line-height:1.6}
+.kanata-ent small{color:#c9c2ad;font-weight:400}
+@media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}

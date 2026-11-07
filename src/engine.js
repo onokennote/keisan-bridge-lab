@@ -144,7 +144,7 @@ KB.validateStrategy = function (s) {
   return s;
 };
 KB.style = id => STRAT.styles.find(s => s.id === id) || STRAT.styles[0];
-KB.levelCfg = lv => STRAT.levels.find(l => l.level === lv) || STRAT.levels[2];
+KB.levelCfg = lv => STRAT.levels.find(l => l.level === Math.min(lv, 5)) || STRAT.levels[2]; // ★6（カナタ）はふだん★5と同じ読み
 
 // ヒューリスティック評価（1手）
 function heurScore(counts, m, st, unseen, flexScale) {
@@ -521,9 +521,41 @@ KB.Game = class {
   }
 };
 
+// ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
+// 発動は1ゲーム1回まで。50%の確率で、第2巡か第3巡のカナタの番に発動する（kanataAt）
+KB.kanataRoll = function (game) {
+  const k = game.players.findIndex(pl => pl.clairvoyant);
+  game.kanataIdx = k; game.kanataAt = k >= 0 && Math.random() < 0.5 ? (Math.random() < 0.5 ? 2 : 3) : 0; game.kanataOn = false;
+  if (k >= 0 && G.KB_KANATA_AT) game.kanataAt = G.KB_KANATA_AT; // テスト用：発動を固定
+};
+KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataAt && !game.kanataOn && game.round >= game.kanataAt;
+function aiMoveClear(game, p, rollouts) {
+  const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
+  const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
+  const win = all.find(m => m.n === total); if (win) return win;
+  const cands = KB.candidates(counts, t, 10).concat([null]);
+  const hands0 = game.hands.map(h => countsOf(h)), deck0 = game.deck.map(c => c.v), disc0 = game.discard.map(c => c.v);
+  const pol = game.players.map((pl, i) => i === p ? makePolicy(5, 'keisan') : makePolicy(pl.human ? 4 : Math.min(pl.level || 3, 5), pl.style || 'keisan'));
+  const N = rollouts || 48; let best = null, bs = -1e9;
+  for (const m of cands) {
+    let win = 0, pp = 0;
+    for (let it = 0; it < N; it++) {
+      const hands = hands0.map(h => h.slice());
+      const sim = { hands, deck: deck0.slice(), discard: disc0.slice(), field: t, order: game.order, pos: game.pos + 1, r: mulberry(1000 + it * 7919), pol, me: p, meTurns: 0 };
+      if (m) { for (const v of m.vals) { hands[p][v]--; sim.discard.push(v); } } else { const v = simDraw(sim); if (v) hands[p][v]++; }
+      const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
+      if (w === p) win++; else pp += sumCounts(hands[p]);
+    }
+    const s = win / N - pp / N / 40;
+    if (s > bs) { bs = s; best = m; }
+  }
+  return best;
+}
+KB.aiMoveClear = aiMoveClear;
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
+  if (pl.clairvoyant && game.kanataOn) return aiMoveClear(game, p);
   const lv = KB.levelCfg(pl.level), st = KB.style(pl.style);
   const counts = game.counts(p), t = game.field.v;
   const unseen = game.unseenCounts(p);
@@ -546,9 +578,12 @@ KB.normGoal = normGoal;
 // 全自動で1ゲーム（他テーブル用：速さ優先でMCは上級ヒューリスティックで代用）
 KB.autoGame = function (players, starter) {
   const g = new KB.Game(players, starter);
+  KB.kanataRoll(g);
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
+    if (KB.kanataReady(g, p)) g.kanataOn = true;
+    if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));
     g.apply(m);

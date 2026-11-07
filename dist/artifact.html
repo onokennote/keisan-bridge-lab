@@ -1449,10 +1449,32 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 
 /* 引っ越し（アーティファクト版 → 公開版）の案内 */
 .mig-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px auto 0;max-width:420px;text-align:center}
+
+/* ★6カナタ：奥義「絶対透視」の演出 */
+.toushi-fx{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;box-sizing:border-box;pointer-events:none;background:radial-gradient(circle at 50% 38%,rgba(60,30,140,.92),rgba(5,4,18,.97) 70%);animation:txIn .35s ease both;text-align:center}
+.toushi-fx .tx-eye{width:132px;height:132px;border-radius:24px;box-shadow:0 0 0 3px #f2b632,0 0 40px 10px rgba(242,182,50,.45);animation:txGlow 1.2s ease-in-out infinite alternate}
+.toushi-fx .tx-eye svg{width:100%;height:100%}
+.toushi-fx .tx-name{font-family:var(--f-display);font-size:clamp(30px,9vw,46px);color:#ffd43b;letter-spacing:.06em;text-shadow:0 0 18px rgba(255,212,59,.7),0 3px 0 #2b1d00;animation:txName .6s .15s cubic-bezier(.2,1.6,.4,1) both}
+.toushi-fx .tx-sub{color:#e5dbff;font-size:14px;font-weight:700;max-width:420px}
+.toushi-fx .tx-see{display:flex;flex-direction:column;gap:5px;max-width:440px;width:100%;transition:filter .5s,opacity .5s}
+.toushi-fx .tx-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;justify-content:center;font-size:12px;color:#d0bfff}
+.toushi-fx .tx-row b{min-width:4.5em;text-align:right;margin-right:4px;font-weight:700}
+.toushi-fx .tx-c{display:inline-block;min-width:20px;padding:2px 3px;border-radius:4px;background:rgba(251,243,220,.92);color:#1b1b1b;font-weight:900;font-size:12px;animation:txCard .4s ease both;animation-delay:.6s}
+.toushi-fx .tx-c.red{color:#d6336c}
+.toushi-fx.hide-cards .tx-see{filter:blur(6px);opacity:.15}
+.toushi-fx.out{animation:txOut .5s ease both}
+@keyframes txIn{from{opacity:0}to{opacity:1}}
+@keyframes txOut{to{opacity:0}}
+@keyframes txGlow{from{box-shadow:0 0 0 3px #f2b632,0 0 24px 4px rgba(242,182,50,.35)}to{box-shadow:0 0 0 3px #ffd43b,0 0 56px 18px rgba(170,140,255,.55)}}
+@keyframes txName{from{transform:scale(2.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes txCard{from{opacity:0;transform:rotateY(90deg)}to{opacity:1;transform:none}}
+.kanata-ent{margin:6px auto 0;max-width:520px;text-align:center;color:#e5dbff;font-weight:700;line-height:1.6}
+.kanata-ent small{color:#c9c2ad;font-weight:400}
+@media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='0e3702e0c5';
+window.KB_BUILD='b88b787b60';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -1599,7 +1621,7 @@ KB.validateStrategy = function (s) {
   return s;
 };
 KB.style = id => STRAT.styles.find(s => s.id === id) || STRAT.styles[0];
-KB.levelCfg = lv => STRAT.levels.find(l => l.level === lv) || STRAT.levels[2];
+KB.levelCfg = lv => STRAT.levels.find(l => l.level === Math.min(lv, 5)) || STRAT.levels[2]; // ★6（カナタ）はふだん★5と同じ読み
 
 // ヒューリスティック評価（1手）
 function heurScore(counts, m, st, unseen, flexScale) {
@@ -1976,9 +1998,41 @@ KB.Game = class {
   }
 };
 
+// ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
+// 発動は1ゲーム1回まで。50%の確率で、第2巡か第3巡のカナタの番に発動する（kanataAt）
+KB.kanataRoll = function (game) {
+  const k = game.players.findIndex(pl => pl.clairvoyant);
+  game.kanataIdx = k; game.kanataAt = k >= 0 && Math.random() < 0.5 ? (Math.random() < 0.5 ? 2 : 3) : 0; game.kanataOn = false;
+  if (k >= 0 && G.KB_KANATA_AT) game.kanataAt = G.KB_KANATA_AT; // テスト用：発動を固定
+};
+KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataAt && !game.kanataOn && game.round >= game.kanataAt;
+function aiMoveClear(game, p, rollouts) {
+  const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
+  const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
+  const win = all.find(m => m.n === total); if (win) return win;
+  const cands = KB.candidates(counts, t, 10).concat([null]);
+  const hands0 = game.hands.map(h => countsOf(h)), deck0 = game.deck.map(c => c.v), disc0 = game.discard.map(c => c.v);
+  const pol = game.players.map((pl, i) => i === p ? makePolicy(5, 'keisan') : makePolicy(pl.human ? 4 : Math.min(pl.level || 3, 5), pl.style || 'keisan'));
+  const N = rollouts || 48; let best = null, bs = -1e9;
+  for (const m of cands) {
+    let win = 0, pp = 0;
+    for (let it = 0; it < N; it++) {
+      const hands = hands0.map(h => h.slice());
+      const sim = { hands, deck: deck0.slice(), discard: disc0.slice(), field: t, order: game.order, pos: game.pos + 1, r: mulberry(1000 + it * 7919), pol, me: p, meTurns: 0 };
+      if (m) { for (const v of m.vals) { hands[p][v]--; sim.discard.push(v); } } else { const v = simDraw(sim); if (v) hands[p][v]++; }
+      const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
+      if (w === p) win++; else pp += sumCounts(hands[p]);
+    }
+    const s = win / N - pp / N / 40;
+    if (s > bs) { bs = s; best = m; }
+  }
+  return best;
+}
+KB.aiMoveClear = aiMoveClear;
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
+  if (pl.clairvoyant && game.kanataOn) return aiMoveClear(game, p);
   const lv = KB.levelCfg(pl.level), st = KB.style(pl.style);
   const counts = game.counts(p), t = game.field.v;
   const unseen = game.unseenCounts(p);
@@ -2001,9 +2055,12 @@ KB.normGoal = normGoal;
 // 全自動で1ゲーム（他テーブル用：速さ優先でMCは上級ヒューリスティックで代用）
 KB.autoGame = function (players, starter) {
   const g = new KB.Game(players, starter);
+  KB.kanataRoll(g);
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
+    if (KB.kanataReady(g, p)) g.kanataOn = true;
+    if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));
     g.apply(m);
@@ -2040,7 +2097,7 @@ const HAIR = ['#2b2522', '#3c2b20', '#5a3a24', '#7a4b2a', '#a8763e', '#d9b46a', 
 const GRAY = ['#c9c9c9', '#e8e8e8', '#a5a5a5'];
 const SHIRT = ['#4263eb', '#e64980', '#20c997', '#fab005', '#7950f2', '#fd7e14', '#868e96', '#15aabf'];
 const HSTYLE = { m: ['short', 'spiky', 'side', 'buzz'], f: ['bob', 'long', 'pony', 'bun'] };
-const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5'];
+const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5', '#ffd43b'];
 
 let used = new Set();
 KB.resetNames = () => { used = new Set(); };
@@ -2061,6 +2118,7 @@ KB.genChar = function (r) {
 
 // mood: normal happy worried smug shock sleepy
 const FRAME = (id, ring, bg) => `<defs><clipPath id="${id}"><rect x="4" y="4" width="92" height="92" rx="17"/></clipPath></defs><rect x="1" y="1" width="98" height="98" rx="20" fill="${ring}"/><rect x="4" y="4" width="92" height="92" rx="17" fill="${bg}" opacity=".9"/>`;
+const LV6 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#7048e8" stroke-width="1.4"/>';
 const LV5 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#e5dbff" stroke-width="1" stroke-dasharray="3 4"/>';
 KB.avatarSVG = function (ch, opts) {
   opts = opts || {};
@@ -2075,11 +2133,11 @@ KB.avatarSVG = function (ch, opts) {
     const ca = ch.acc && KB.accSVG ? KB.accSVG(ch.acc, fy, rx, top) : { back: '', front: '' };
     const co = ch.outfit && KB.accSVG ? KB.accSVG(ch.outfit, fy, rx, top) : { back: '', front: '' };
     const gl = ch.gl && KB.glSVG && !['robot', 'skeleton', 'ghost', 'alien'].includes(ch.base) ? KB.glSVG(ch.gl, 50, 9) : '';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   if (ch.kind && ch.kind !== 'human' && KB.creatureSVG) {
     const id0 = 'c' + Math.random().toString(36).slice(2, 8), ring0 = lv ? LEVEL_RING[lv - 1] : 'transparent', bg0 = st ? st.color : '#8a9a93';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   const child = ch.age === 'child', senior = ch.age === 'senior';
   const fy = child ? 56 : 52, rx = child ? 24 : 23, ry = child ? 23 : 26;
@@ -2122,6 +2180,8 @@ KB.avatarSVG = function (ch, opts) {
   if (mood === 'happy') eyes = `<path d="M${50 - ex - 4} ${eyY + 1}Q${50 - ex} ${eyY - 4} ${50 - ex + 4} ${eyY + 1}M${50 + ex - 4} ${eyY + 1}Q${50 + ex} ${eyY - 4} ${50 + ex + 4} ${eyY + 1}" stroke="${ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
   else if (mood === 'smug' || mood === 'sleepy') eyes = `<path d="M${50 - ex - 4} ${eyY}L${50 - ex + 4} ${eyY}M${50 + ex - 4} ${eyY}L${50 + ex + 4} ${eyY}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
   else if (mood === 'shock') eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 + ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 - ex}" cy="${eyY}" r="1.5" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="1.5" fill="${ink}"/>`;
+  else if (mood === 'cool' && ch.closed && !opts.open) eyes = `<path d="M${50 - ex - 4.5} ${eyY}Q${50 - ex} ${eyY + 2.6} ${50 - ex + 4.5} ${eyY}M${50 + ex - 4.5} ${eyY}Q${50 + ex} ${eyY + 2.6} ${50 + ex + 4.5} ${eyY}" stroke="${ink}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else if (mood === 'cool' && opts.open) eyes = [50 - ex, 50 + ex].map(x => `<ellipse cx="${x}" cy="${eyY}" rx="4.6" ry="3.4" fill="#fff"/><circle cx="${x}" cy="${eyY}" r="3" fill="#f2b632"/><circle cx="${x}" cy="${eyY}" r="3" fill="none" stroke="#7048e8" stroke-width=".7"/><path d="M${x - 1.6} ${eyY}h3.2M${x} ${eyY - 1.6}v3.2" stroke="#2b1d00" stroke-width=".8"/>`).join('') + `<circle cx="50" cy="${eyY}" r="${ex + 9}" fill="none" stroke="rgba(242,182,50,.45)" stroke-width="1.2"/>`;
   else if (mood === 'cool') eyes = `<path d="M${50 - ex - 4.5} ${eyY - 1}L${50 - ex + 4.5} ${eyY - 1.6}M${50 + ex - 4.5} ${eyY - 1.6}L${50 + ex + 4.5} ${eyY - 1}" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="${50 - ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><ellipse cx="${50 + ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><circle cx="${50 - ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/><circle cx="${50 + ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/>`;
   else eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 - ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/><circle cx="${50 + ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/>`;
   const my = fy + 13;
@@ -2157,7 +2217,7 @@ ${FRAME(id, ring, bg)}
 <ellipse cx="${50 - rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/><ellipse cx="${50 + rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/>
 <ellipse cx="50" cy="${fy}" rx="${rx}" ry="${ry}" fill="${S}"/>
 ${co.front}${front}${brows}${eyes}${mouth}${extra}${over}${ch.face && KB.faceSVG ? KB.faceSVG(ch.face, fy, eyY, ex) : ''}${acc}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>
-${lv >= 5 ? LV5 : ''}
+${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}
 </svg>`;
 };
 
@@ -2309,6 +2369,12 @@ const R = [
   { id: 'kerosuke', name: 'ケロスケ', lv: 1, st: 'gangan', kind: 'frog', tag: 'カエル', look: {}, tone: { end: 'ケロ' }, prof: '雨の日だけ元気なカエル。とにかく跳ねるように出す。' }
 ];
 KB.ROSTER = R;
+// ---------- ★6（唯一）：カナタ。ROSTER には入れない（予選・練習では当たらず、大会の決勝にだけ現れる） ----------
+// 大会に参加する確率は、ほかのキャラと同じ（参加AIの人数 ÷ キャラの総数）
+KB.KANATA = { id: 'kanata', name: 'カナタ', title: '卓の彼方を視る者', lv: 6, st: 'keisan', kind: 'human', tag: '年齢不詳', look: { g: 'm', age: 'adult', skin: 0, hair: '#eef0f6', hs: 'long', shirt: '#1b2340', cool: true, closed: true, bgpat: 'pat:void' },
+  prof: '計算ブリッジ倶楽部の初代チャンピオン。いつから倶楽部にいるのか、誰も知らない。ゼロに計算を教えた師。ふだんは目を閉じたまま打つが、奥義「絶対透視」で目を開くと、山札の底まで見通すという。',
+  idle: ['……'], win: ['最初から、そう決まっていた'], lose: ['……面白い'] };
+KB.kanataRate = nAI => Math.min(1, nAI / (R.length + 1));
 // ライバル関係（同じ卓にいると、上がったときに相手が反応する）
 KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 'hidari', hidari: 'migi', pipo: 'omega' };
 
@@ -2316,9 +2382,9 @@ KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 
 const SKIN = ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'];
 KB.charToCh = function (c) {
   const L = c.look || {};
-  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
+  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, closed: !!L.closed, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
 };
-KB.charById = id => R.find(c => c.id === id);
+KB.charById = id => id === 'kanata' ? KB.KANATA : R.find(c => c.id === id);
 // level の中から、style（指定があれば優先）で、まだ使っていないキャラを選ぶ。いなければ近い強さから
 KB.pickChar = function (level, style, used) {
   used = used || new Set();
@@ -2387,7 +2453,7 @@ KB.charLine = function (p, kind, info) {
 KB.charTalkRate = function (p) {
   const c = p && p.ch && p.ch.charId ? KB.charById(p.ch.charId) : null;
   if (!c) return KB.talkRate(p.level);
-  return [0.85, 0.7, 0.45, 0.28, 0.22][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
+  return [0.85, 0.7, 0.45, 0.28, 0.22, 0.12][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
 };
 
 // ---------- 見た目：人間以外のキャラと、人間の小物 ----------
@@ -2512,6 +2578,7 @@ KB.petSVG = function (p) {
 KB.bgPatSVG = function (pat) {
   switch (pat) {
     case 'fire': return `<rect x="0" y="0" width="100" height="100" fill="#3b0d0d"/><path d="M0 100V70q8 -14 14 0q4 -18 12 -4q6 -16 12 0q6 -20 14 -2q6 -14 12 2q6 -16 12 0q6 -12 14 4V100Z" fill="#e8590c"/><path d="M0 100V82q8 -10 14 0q6 -12 12 0q6 -10 12 0q6 -12 14 0q6 -10 12 0q6 -10 12 0q6 -8 14 2V100Z" fill="#fcc419"/>`;
+    case 'void': return `<rect x="0" y="0" width="100" height="100" fill="#0a0820"/><g fill="none" stroke="rgba(170,150,255,.22)">${[14, 26, 38, 50, 62].map(r => `<circle cx="50" cy="52" r="${r}"/>`).join('')}</g>${[[12, 14], [86, 20], [20, 84], [80, 82], [52, 6], [6, 50], [94, 54]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 2 ? .8 : 1.3}" fill="#d0bfff"/>`).join('')}`;
     case 'stars': return `<rect x="0" y="0" width="100" height="100" fill="#1b1f4a"/>${[[14, 18], [30, 10], [80, 16], [88, 40], [10, 50], [70, 8], [20, 80], [86, 76], [50, 6], [94, 60]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1 : 1.8}" fill="#fff3bf"/>`).join('')}`;
     case 'rainbow': return `<rect x="0" y="0" width="100" height="100" fill="#d0ebff"/>${['#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7', '#9775fa'].map((c, i) => `<path d="M${-10 + i * 6} 100A${60 - i * 6} ${60 - i * 6} 0 0 1 ${110 - i * 6} 100" stroke="${c}" stroke-width="6" fill="none"/>`).join('')}`;
     case 'formula': return `<rect x="0" y="0" width="100" height="100" fill="#0b3d2e"/><g fill="rgba(255,255,255,.28)" font-family="sans-serif" font-weight="900" font-size="11">${[['÷', 10, 20], ['×', 78, 18], ['+', 16, 70], ['−', 84, 66], ['=', 50, 12], ['7', 30, 40], ['13', 64, 40], ['(', 8, 44], [')', 90, 44]].map(([t, x, y]) => `<text x="${x}" y="${y}">${t}</text>`).join('')}</g>`;
@@ -4812,7 +4879,9 @@ M.atkEndBest = [
 ];
 M.atkQuit = ['ここで終了か！{bp}BPは取れたで、次はフルタイム出場や！', '途中交代やな！{bp}BP、次は最後のホイッスルまで行こか！'];
 M.atkQuit0 = ['ありゃ、ウォーミングアップで終わってもうたな！次は本番いこか！'];
+R.kanataOn = ['奥義「絶対透視」。{n}さんには、全員の手札と山札の順番まで視えています。ここからは上がりより、失点を減らすことを考えましょう。大きい札から処分です。', '{n}さんの目が開きました。こうなると上がりの確率はぐっと下がります。被害を最小にする手を選びましょう。'];
 for (const k in R) KB.LINES_ROOT[k] = R[k];
+M.kanataOn = ['出たー！奥義・絶対透視や！全部見えとるで！こうなったらゴール前にバス止めるしかない、でかい札から逃がしとき！', 'カナタの目が開いたで…！山札の底までお見通しや。ここは失点を抑える守備固めや！'];
 for (const k in M) KB.LINES_MASA[k] = M[k];
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4848,7 +4917,7 @@ KB.casterSVG = function (who, mood) {
 const R = (a, r) => a[((r || Math.random)() * a.length) | 0];
 const fill = (s, d) => s.replace(/\{(\w+)\}/g, (_, k) => (d[k] == null ? '' : d[k]));
 const ANALYTIC = { start: 1, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, good: 1, ok: 1, bad: 1, drewGood: 1, border: 1, borderIn: 1, borderClose: 1, borderFar: 1, finalSet: 1, lastGame: 1, final: 1, heavy: 1, tip: 1, leadSet: 1, trailSet: 1, philo: 1, setStart: 1, oppMissed: 1, oppBlunder: 1, oppNice: 1, myBigPP: 1, mySmallPP: 1, resultLucky: 1, resultUnlucky: 1, resultBoth: 1, resultBad: 1, reshuffle: 1, deckLow: 1, styleKeisan: 1, styleInochi: 1 };
-const PRIO = { atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
+const PRIO = { kanataOn: 9, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
 const LINES = () => ({ root: KB.LINES_ROOT || {}, masa: KB.LINES_MASA || {} });
 // 最近使ったセリフ（ブラウザに保存して、次に開いたときも続けて避ける）
 let RECENT = {};
@@ -4899,7 +4968,7 @@ KB.commentLine = function (mode, kind, d) {
   saveRecent();
   let text = fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
-  const noPrefix = { atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
+  const noPrefix = { kanataOn: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];
   if (pf && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
   // 博士はごくたまに、哲学的なひと言を添える
@@ -5085,7 +5154,7 @@ function av(p, mood, small) {
 function lvChip(p) {
   if (p.human) return '';
   let s = '';
-  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(5 - p.level)} ${esc(KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
+  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(Math.max(0, 5 - p.level))} ${esc(p.level >= 6 ? '奥義使い' : KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
   if (S.settings.showStyle) { const st = KB.style(p.style); s += `<span class="chip stchip" style="background:${esc(st.color)}"><span class="lv-full">${esc(st.label)}</span><span class="lv-short">${esc(st.label.slice(0, 4))}</span></span>`; }
   return s;
 }
@@ -5110,6 +5179,10 @@ function newSession(cfg) {
     setPP: {}, points: {}, totPP: {}, setHist: [], finalists: [], finalPP: {}, tb: {}, done: false, startedAt: Date.now()
   };
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
+  // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
+  if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : Math.random() < KB.kanataRate(cfg.nPlayers - 1))) {
+    T.kanata = true; if (cfg.finalists >= 5) T.cfg = Object.assign({}, cfg, { finalists: 4 });
+  }
   return T;
 }
 function seatSet(T) {
@@ -5425,6 +5498,7 @@ const ACH = [
   ['set_win', 'セット優勝', [1, 5, 20], n => `セット優勝（練習・大会の卓内1位）を${n}回`, ['卓のトップ', 'セット巧者', 'セットの覇者']],
   ['qualify', '決勝進出', [1, 3, 10], n => `大会で決勝に${n}回進む`, ['決勝の舞台', 'ファイナリスト', '決勝の顔']],
   ['champion', '優勝', [1, 3, 10], n => `大会で${n}回優勝`, ['チャンピオン', '王者', '絶対王者']],
+  ['toushi', '透視破り', [1], () => '決勝で奥義「絶対透視」を受けながら優勝', ['透視破り']],
   // 強豪大会：段階は「強豪ぞろい」（銀）と「全員達人」（金）。6番目の要素は段階ごとの色（0銅・1銀・2金）
   ['qualify_strong', '強豪大会 決勝進出', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で決勝に進む' : '相手が「強豪ぞろい」の大会で決勝に進む', ['猛者の切符', '達人の切符'], [1, 2]],
   ['champion_strong', '強豪大会 優勝', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で優勝' : '相手が「強豪ぞろい」の大会で優勝', ['覇王', '達人王'], [1, 2]],
@@ -5460,7 +5534,7 @@ const ACH = [
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
   ['atk_badges', 'アタック収集', [10, 20, 35], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -5610,7 +5684,7 @@ function catTalk(k) {
 }
 // バッジを押すと、マサが説明する
 // モードごとの関連バッジ（各系統の今の段階。未獲得は影で）
-const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'qualify_strong', 'champion_strong'];
+const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'toushi', 'qualify_strong', 'champion_strong'];
 const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'];
 const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS).includes(k));
 // 各系統の全段階（銅・銀・金）を並べる。未獲得は影
@@ -5645,7 +5719,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
-  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
+  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','toushi','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
   else if (['quick5', 'quick3', 'snap', 'quickdraw', 'blitz'].includes(key)) text += ' 時間は自分の番になった瞬間から数えるで。速さだけやなくて、最善手（即断即決は好手以上）やないとアカンからな！AIの読みを見た手は数えへんで。';
   else if (key.startsWith('atk_')) text += ' バッジアタックを15分やり切ったときだけ数えるで。途中で中断したら数えへんからな！';
   else if (key === 'streak5' || key === 'streak10') text += ' AIの読みを見た手は連続に数えへんで（途切れもせえへん）。';
@@ -6449,7 +6523,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
+const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
 const BP_CAT = 500;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
@@ -6919,6 +6993,7 @@ function startGame() {
   const players = ids.map(id => P(id));
   const starter = S.tiebreak ? (Math.random() * ids.length) | 0 : starterFor(ids, T.game);
   S.game = new KB.Game(players, starter);
+  KB.kanataRoll(S.game);
   S.gameHinted = false;
   if (!S.tiebreak) T.live = null;
   S.gameNo = (S.gameNo || 0) + 1;
@@ -7156,9 +7231,14 @@ function loop() {
   const lv = KB.levelCfg(pl.level);
   const nOpts = KB.findMoves(g.counts(p), g.field.v, lv.ops, lv.maxCards).length;
   const styleF = { gangan: 0.65, inochi: 1.1, iroiro: 0.55 + Math.random() * 0.9, keisan: 1.35 }[pl.style] || 1;
-  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1][(pl.level || 3) - 1];
+  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1, 1.2][(pl.level || 3) - 1];
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
+  if (KB.kanataReady(g, p)) { // 奥義・絶対透視
+    g.kanataOn = true; if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+    S.thinking = p; toushiFx(g, p); say('kanataOn', { n: nm(pl) }); renderGame();
+    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : 3300); return;
+  }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
     const r0 = g.round;
@@ -7273,6 +7353,17 @@ function cutInFx(label, expr, t) {
   el.innerHTML = `<div class="ci-band"><div class="ci-label">${esc(label)}</div><div class="ci-expr">${esc(expr)} = ${t}</div></div>`;
   document.body.appendChild(el); KB.sfx('cutin');
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
+}
+// 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
+function toushiFx(g, p) {
+  if (S.settings.speed === 'instant') return;
+  const pl = g.players[p], mini = c => `<span class="tx-c ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</span>`;
+  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(mini).join('')}</div>`).join('');
+  const deck = g.deck.slice(-12).reverse().map(mini).join('');
+  const el = document.createElement('div'); el.className = 'toushi-fx';
+  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……全員の手札と、山札の順番まで視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
+  document.body.appendChild(el); KB.sfx('cutin');
+  setTimeout(() => el.classList.add('hide-cards'), 1900); setTimeout(() => el.classList.add('out'), 2700); setTimeout(() => el.remove(), 3200);
 }
 function markCmOverflow() {
   document.querySelectorAll('.table .cm-text').forEach(t => {
@@ -8414,6 +8505,7 @@ function rvGameFacts() {
   const g = S.game, me = g.players.findIndex(p => p.human), all = S.decisions || [], ds = all.filter(d => !d.viewedHint);
   const f = { pp: g.pp[me], won: g.winner === me, n: g.n, rank: g.pp.filter(x => x < g.pp[me]).length + 1, nDec: ds.length, nBest: ds.filter(d => d.loss <= 0.015).length, nGood: ds.filter(d => d.loss <= 0.05).length, nHint: all.length - ds.length, round: g.round, kind: S.T && S.T.cfg.kind };
   let run = 0, best = 0; ds.forEach(d => { if (d.loss <= 0.015) { run++; best = Math.max(best, run); } else run = 0; }); f.run = best;
+  if (g.kanataOn) { const k = g.kanataIdx; f.kanata = { round: g.kanataAt, won: g.winner === k, beat: g.pp[me] < g.pp[k] || f.won }; }
   // 分かれ道を損の大きい順に3つまで。最善手と自分の手で、残る形も比べる
   f.misses = ds.filter(d => d.loss > 0.03).sort((a, b) => b.loss - a.loss).slice(0, 3).map(d => {
     let gf = null; try { gf = gapFact(d); } catch (e) { }
@@ -8586,6 +8678,12 @@ function rvGameSolo(who) {
     if (Math.abs(d) >= 0.15) B(`直近${rc.games}ゲームの最善率${Math.round(rc.rate * 100)}%と比べると、今回は${Math.round(now * 100)}%。${d > 0 ? 'いつもより冴えていました。' : '今回は少し崩れました。'}`, `いつもの最善率${Math.round(rc.rate * 100)}%に対して今回${Math.round(now * 100)}%や。${d > 0 ? '絶好調やな！' : '今日はちょっと調子悪かったな。'}`);
     if (rc.weak && f.missCats[rc.weak.k]) B(`「${rc.weak.label}」は、最近の苦手な場面でもあります（外す割合${Math.round(rc.weak.bad * 100)}%）。今回も同じところで外しています。`, `「${rc.weak.label}」は最近ずっと苦手やねん（外す割合${Math.round(rc.weak.bad * 100)}%）。今回もそこや！`);
     else if (rc.weak && !f.missCats[rc.weak.k] && f.nDec >= 4) B(`最近の苦手だった「${rc.weak.label}」では、今回は外していません。克服が進んでいます。`, `最近苦手やった「${rc.weak.label}」、今回はノーミスや！克服してきとるで！`);
+  }
+  sec = 'kanata'; // 奥義「絶対透視」が発動したゲーム：上がりより、被害をどこまで抑えたか
+  if (f.kanata) {
+    const K = f.kanata;
+    if (f.won) B(`第${K.round}巡にカナタの「絶対透視」が発動したゲームで、上がり切りました。すべてを見通す相手より先に上がるのは、確率の上では大きな番狂わせです。`, `カナタの絶対透視が出たゲームで上がったやて！？ 全部見えとる相手からゴール奪うて、ジャイアントキリングや！`);
+    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。発動したあとは上がりより失点を減らす局面です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分すると、被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ ああなったらゴール前にバス止めて守るしかないんや。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
   }
   sec = 'luck'; // 8. 運と実力
   if (f.missHit) { B(`第${f.missHit.round}巡で最善を外して残した${f.missHit.card}が、最後の「${f.missHit.e}」に使われました。結果には助けられましたが、その手自体は最善ではありません。`, `第${f.missHit.round}巡で残した${f.missHit.card}が、最後の「${f.missHit.e}」にハマったんや！ミスが結果オーライやな〜。`); N(rt ? 'luck' : 'luckGood'); }
@@ -8783,7 +8881,7 @@ function endSet() {
   go('set-end');
 }
 function standingsSorted(T) {
-  return T.players.slice().sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
+  return T.players.filter(p => !p.seed).sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
 }
 function myStanding() {
   const T = S.T; const s = standingsSorted(T); const i = s.findIndex(p => p.id === 0);
@@ -8861,7 +8959,7 @@ function openingHTML() {
   const step = 2.2;
   return `<div class="stage opening"><div class="spot"></div>
   <div class="stage-title">計算ブリッジ大会</div>
-  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝</div>
+  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝${S.T && S.T.kanata ? '（決勝にはシード選手が1名加わります）' : ''}</div>
   <div class="op-lines">${lines.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.4 + i * step}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
   <div class="row" style="justify-content:center;gap:10px;margin-top:16px;position:relative">
     <button class="btn ghost" data-act="opening-skip">説明をすぐ表示</button>
@@ -8872,6 +8970,11 @@ function openingHTML() {
 function enterFinal() {
   const T = S.T; const s = standingsSorted(T);
   T.finalists = s.slice(0, T.cfg.finalists).map(p => p.id);
+  if (T.kanata) {
+    let k = T.players.find(p => p.seed);
+    if (!k) { const id = T.players.length; k = { id, human: false, level: 6, style: 'keisan', ch: KB.charToCh(KB.KANATA), clairvoyant: true, seed: true }; T.players.push(k); T.points[id] = 0; T.totPP[id] = 0; T.tb[id] = 0; }
+    T.finalists.push(k.id);
+  }
   saveSession();
   go('entrance');
   if (T.finalists.includes(0)) setTimeout(confetti, T.finalists.length * 550 + 300);
@@ -8881,10 +8984,11 @@ function entranceHTML() {
   const inF = T.finalists.includes(0);
   const myPre = s.findIndex(p => p.id === 0) + 1;
   const cards = T.finalists.map((id, i) => { const p = P(id); const st = p.human ? null : KB.style(p.style);
-    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">予選${i + 1}位</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${T.points[id]}点・PP ${T.totPP[id]}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
+    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">${p.seed ? 'シード' : `予選${i + 1}位`}</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${p.seed ? '★6・予選免除' : `${T.points[id]}点・PP ${T.totPP[id]}`}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
+  ${T.kanata ? `<p class="kanata-ent">そして最後に、シード選手が入場します。倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタ。<br><small>奥義「絶対透視」：第2巡か第3巡に、山札の底まで見通すことがある</small></p>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;
@@ -8920,7 +9024,7 @@ function finalResult() {
   while (i < ids.length) { let j = i; while (j + 1 < ids.length && T.finalPP[ids[j + 1]] === T.finalPP[ids[i]]) j++; groups.push(ids.slice(i, j + 1)); i = j + 1; }
   const order = [];
   const nextGroup = k => {
-    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
+    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (T.kanataClear) bump('toushi'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
     const g = groups[k];
     if (g.length === 1) { order.push(g[0]); nextGroup(k + 1); return; }
     resolveTie(g, `決勝 ${order.length + 1}位決定戦`, 1, o => { order.push(...o); nextGroup(k + 1); });
@@ -9035,7 +9139,7 @@ function charProfile(id) {
   const inGame = S.view === 'game', showLv = !inGame || S.settings.showLevel || (S.T && S.T.revealAll), showSt = !inGame || S.settings.showStyle || (S.T && S.T.revealAll);
   const stl = KB.getStrategy().styles.find(x => x.id === c.st) || {};
   const say = c.lv >= 4 ? (c.idle || []).slice(0, 3) : c.idle ? c.idle.slice(0, 2) : [];
-  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(5 - c.lv) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
+  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(Math.max(0, 5 - c.lv)) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
     <p style="margin:0">${esc(c.prof || '')}</p>
     ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>

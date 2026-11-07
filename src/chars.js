@@ -123,6 +123,12 @@ const R = [
   { id: 'kerosuke', name: 'ケロスケ', lv: 1, st: 'gangan', kind: 'frog', tag: 'カエル', look: {}, tone: { end: 'ケロ' }, prof: '雨の日だけ元気なカエル。とにかく跳ねるように出す。' }
 ];
 KB.ROSTER = R;
+// ---------- ★6（唯一）：カナタ。ROSTER には入れない（予選・練習では当たらず、大会の決勝にだけ現れる） ----------
+// 大会に参加する確率は、ほかのキャラと同じ（参加AIの人数 ÷ キャラの総数）
+KB.KANATA = { id: 'kanata', name: 'カナタ', title: '卓の彼方を視る者', lv: 6, st: 'keisan', kind: 'human', tag: '年齢不詳', look: { g: 'm', age: 'adult', skin: 0, hair: '#eef0f6', hs: 'long', shirt: '#1b2340', cool: true, closed: true, bgpat: 'pat:void' },
+  prof: '計算ブリッジ倶楽部の初代チャンピオン。いつから倶楽部にいるのか、誰も知らない。ゼロに計算を教えた師。ふだんは目を閉じたまま打つが、奥義「絶対透視」で目を開くと、山札の底まで見通すという。',
+  idle: ['……'], win: ['最初から、そう決まっていた'], lose: ['……面白い'] };
+KB.kanataRate = nAI => Math.min(1, nAI / (R.length + 1));
 // ライバル関係（同じ卓にいると、上がったときに相手が反応する）
 KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 'hidari', hidari: 'migi', pipo: 'omega' };
 
@@ -130,9 +136,9 @@ KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 
 const SKIN = ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'];
 KB.charToCh = function (c) {
   const L = c.look || {};
-  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
+  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, closed: !!L.closed, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
 };
-KB.charById = id => R.find(c => c.id === id);
+KB.charById = id => id === 'kanata' ? KB.KANATA : R.find(c => c.id === id);
 // level の中から、style（指定があれば優先）で、まだ使っていないキャラを選ぶ。いなければ近い強さから
 KB.pickChar = function (level, style, used) {
   used = used || new Set();
@@ -201,7 +207,7 @@ KB.charLine = function (p, kind, info) {
 KB.charTalkRate = function (p) {
   const c = p && p.ch && p.ch.charId ? KB.charById(p.ch.charId) : null;
   if (!c) return KB.talkRate(p.level);
-  return [0.85, 0.7, 0.45, 0.28, 0.22][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
+  return [0.85, 0.7, 0.45, 0.28, 0.22, 0.12][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
 };
 
 // ---------- 見た目：人間以外のキャラと、人間の小物 ----------
@@ -326,6 +332,7 @@ KB.petSVG = function (p) {
 KB.bgPatSVG = function (pat) {
   switch (pat) {
     case 'fire': return `<rect x="0" y="0" width="100" height="100" fill="#3b0d0d"/><path d="M0 100V70q8 -14 14 0q4 -18 12 -4q6 -16 12 0q6 -20 14 -2q6 -14 12 2q6 -16 12 0q6 -12 14 4V100Z" fill="#e8590c"/><path d="M0 100V82q8 -10 14 0q6 -12 12 0q6 -10 12 0q6 -12 14 0q6 -10 12 0q6 -10 12 0q6 -8 14 2V100Z" fill="#fcc419"/>`;
+    case 'void': return `<rect x="0" y="0" width="100" height="100" fill="#0a0820"/><g fill="none" stroke="rgba(170,150,255,.22)">${[14, 26, 38, 50, 62].map(r => `<circle cx="50" cy="52" r="${r}"/>`).join('')}</g>${[[12, 14], [86, 20], [20, 84], [80, 82], [52, 6], [6, 50], [94, 54]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 2 ? .8 : 1.3}" fill="#d0bfff"/>`).join('')}`;
     case 'stars': return `<rect x="0" y="0" width="100" height="100" fill="#1b1f4a"/>${[[14, 18], [30, 10], [80, 16], [88, 40], [10, 50], [70, 8], [20, 80], [86, 76], [50, 6], [94, 60]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1 : 1.8}" fill="#fff3bf"/>`).join('')}`;
     case 'rainbow': return `<rect x="0" y="0" width="100" height="100" fill="#d0ebff"/>${['#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7', '#9775fa'].map((c, i) => `<path d="M${-10 + i * 6} 100A${60 - i * 6} ${60 - i * 6} 0 0 1 ${110 - i * 6} 100" stroke="${c}" stroke-width="6" fill="none"/>`).join('')}`;
     case 'formula': return `<rect x="0" y="0" width="100" height="100" fill="#0b3d2e"/><g fill="rgba(255,255,255,.28)" font-family="sans-serif" font-weight="900" font-size="11">${[['÷', 10, 20], ['×', 78, 18], ['+', 16, 70], ['−', 84, 66], ['=', 50, 12], ['7', 30, 40], ['13', 64, 40], ['(', 8, 44], [')', 90, 44]].map(([t, x, y]) => `<text x="${x}" y="${y}">${t}</text>`).join('')}</g>`;

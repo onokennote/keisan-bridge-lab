@@ -174,7 +174,7 @@ function av(p, mood, small) {
 function lvChip(p) {
   if (p.human) return '';
   let s = '';
-  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(5 - p.level)} ${esc(KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
+  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(Math.max(0, 5 - p.level))} ${esc(p.level >= 6 ? '奥義使い' : KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
   if (S.settings.showStyle) { const st = KB.style(p.style); s += `<span class="chip stchip" style="background:${esc(st.color)}"><span class="lv-full">${esc(st.label)}</span><span class="lv-short">${esc(st.label.slice(0, 4))}</span></span>`; }
   return s;
 }
@@ -199,6 +199,10 @@ function newSession(cfg) {
     setPP: {}, points: {}, totPP: {}, setHist: [], finalists: [], finalPP: {}, tb: {}, done: false, startedAt: Date.now()
   };
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
+  // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
+  if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : Math.random() < KB.kanataRate(cfg.nPlayers - 1))) {
+    T.kanata = true; if (cfg.finalists >= 5) T.cfg = Object.assign({}, cfg, { finalists: 4 });
+  }
   return T;
 }
 function seatSet(T) {
@@ -514,6 +518,7 @@ const ACH = [
   ['set_win', 'セット優勝', [1, 5, 20], n => `セット優勝（練習・大会の卓内1位）を${n}回`, ['卓のトップ', 'セット巧者', 'セットの覇者']],
   ['qualify', '決勝進出', [1, 3, 10], n => `大会で決勝に${n}回進む`, ['決勝の舞台', 'ファイナリスト', '決勝の顔']],
   ['champion', '優勝', [1, 3, 10], n => `大会で${n}回優勝`, ['チャンピオン', '王者', '絶対王者']],
+  ['toushi', '透視破り', [1], () => '決勝で奥義「絶対透視」を受けながら優勝', ['透視破り']],
   // 強豪大会：段階は「強豪ぞろい」（銀）と「全員達人」（金）。6番目の要素は段階ごとの色（0銅・1銀・2金）
   ['qualify_strong', '強豪大会 決勝進出', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で決勝に進む' : '相手が「強豪ぞろい」の大会で決勝に進む', ['猛者の切符', '達人の切符'], [1, 2]],
   ['champion_strong', '強豪大会 優勝', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で優勝' : '相手が「強豪ぞろい」の大会で優勝', ['覇王', '達人王'], [1, 2]],
@@ -549,7 +554,7 @@ const ACH = [
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
   ['atk_badges', 'アタック収集', [10, 20, 35], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -699,7 +704,7 @@ function catTalk(k) {
 }
 // バッジを押すと、マサが説明する
 // モードごとの関連バッジ（各系統の今の段階。未獲得は影で）
-const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'qualify_strong', 'champion_strong'];
+const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'toushi', 'qualify_strong', 'champion_strong'];
 const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'];
 const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS).includes(k));
 // 各系統の全段階（銅・銀・金）を並べる。未獲得は影
@@ -734,7 +739,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
-  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
+  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','toushi','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
   else if (['quick5', 'quick3', 'snap', 'quickdraw', 'blitz'].includes(key)) text += ' 時間は自分の番になった瞬間から数えるで。速さだけやなくて、最善手（即断即決は好手以上）やないとアカンからな！AIの読みを見た手は数えへんで。';
   else if (key.startsWith('atk_')) text += ' バッジアタックを15分やり切ったときだけ数えるで。途中で中断したら数えへんからな！';
   else if (key === 'streak5' || key === 'streak10') text += ' AIの読みを見た手は連続に数えへんで（途切れもせえへん）。';
@@ -1538,7 +1543,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
+const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
 const BP_CAT = 500;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
@@ -2008,6 +2013,7 @@ function startGame() {
   const players = ids.map(id => P(id));
   const starter = S.tiebreak ? (Math.random() * ids.length) | 0 : starterFor(ids, T.game);
   S.game = new KB.Game(players, starter);
+  KB.kanataRoll(S.game);
   S.gameHinted = false;
   if (!S.tiebreak) T.live = null;
   S.gameNo = (S.gameNo || 0) + 1;
@@ -2245,9 +2251,14 @@ function loop() {
   const lv = KB.levelCfg(pl.level);
   const nOpts = KB.findMoves(g.counts(p), g.field.v, lv.ops, lv.maxCards).length;
   const styleF = { gangan: 0.65, inochi: 1.1, iroiro: 0.55 + Math.random() * 0.9, keisan: 1.35 }[pl.style] || 1;
-  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1][(pl.level || 3) - 1];
+  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1, 1.2][(pl.level || 3) - 1];
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
+  if (KB.kanataReady(g, p)) { // 奥義・絶対透視
+    g.kanataOn = true; if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+    S.thinking = p; toushiFx(g, p); say('kanataOn', { n: nm(pl) }); renderGame();
+    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : 3300); return;
+  }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
     const r0 = g.round;
@@ -2362,6 +2373,17 @@ function cutInFx(label, expr, t) {
   el.innerHTML = `<div class="ci-band"><div class="ci-label">${esc(label)}</div><div class="ci-expr">${esc(expr)} = ${t}</div></div>`;
   document.body.appendChild(el); KB.sfx('cutin');
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
+}
+// 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
+function toushiFx(g, p) {
+  if (S.settings.speed === 'instant') return;
+  const pl = g.players[p], mini = c => `<span class="tx-c ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</span>`;
+  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(mini).join('')}</div>`).join('');
+  const deck = g.deck.slice(-12).reverse().map(mini).join('');
+  const el = document.createElement('div'); el.className = 'toushi-fx';
+  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……全員の手札と、山札の順番まで視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
+  document.body.appendChild(el); KB.sfx('cutin');
+  setTimeout(() => el.classList.add('hide-cards'), 1900); setTimeout(() => el.classList.add('out'), 2700); setTimeout(() => el.remove(), 3200);
 }
 function markCmOverflow() {
   document.querySelectorAll('.table .cm-text').forEach(t => {
@@ -3503,6 +3525,7 @@ function rvGameFacts() {
   const g = S.game, me = g.players.findIndex(p => p.human), all = S.decisions || [], ds = all.filter(d => !d.viewedHint);
   const f = { pp: g.pp[me], won: g.winner === me, n: g.n, rank: g.pp.filter(x => x < g.pp[me]).length + 1, nDec: ds.length, nBest: ds.filter(d => d.loss <= 0.015).length, nGood: ds.filter(d => d.loss <= 0.05).length, nHint: all.length - ds.length, round: g.round, kind: S.T && S.T.cfg.kind };
   let run = 0, best = 0; ds.forEach(d => { if (d.loss <= 0.015) { run++; best = Math.max(best, run); } else run = 0; }); f.run = best;
+  if (g.kanataOn) { const k = g.kanataIdx; f.kanata = { round: g.kanataAt, won: g.winner === k, beat: g.pp[me] < g.pp[k] || f.won }; }
   // 分かれ道を損の大きい順に3つまで。最善手と自分の手で、残る形も比べる
   f.misses = ds.filter(d => d.loss > 0.03).sort((a, b) => b.loss - a.loss).slice(0, 3).map(d => {
     let gf = null; try { gf = gapFact(d); } catch (e) { }
@@ -3675,6 +3698,12 @@ function rvGameSolo(who) {
     if (Math.abs(d) >= 0.15) B(`直近${rc.games}ゲームの最善率${Math.round(rc.rate * 100)}%と比べると、今回は${Math.round(now * 100)}%。${d > 0 ? 'いつもより冴えていました。' : '今回は少し崩れました。'}`, `いつもの最善率${Math.round(rc.rate * 100)}%に対して今回${Math.round(now * 100)}%や。${d > 0 ? '絶好調やな！' : '今日はちょっと調子悪かったな。'}`);
     if (rc.weak && f.missCats[rc.weak.k]) B(`「${rc.weak.label}」は、最近の苦手な場面でもあります（外す割合${Math.round(rc.weak.bad * 100)}%）。今回も同じところで外しています。`, `「${rc.weak.label}」は最近ずっと苦手やねん（外す割合${Math.round(rc.weak.bad * 100)}%）。今回もそこや！`);
     else if (rc.weak && !f.missCats[rc.weak.k] && f.nDec >= 4) B(`最近の苦手だった「${rc.weak.label}」では、今回は外していません。克服が進んでいます。`, `最近苦手やった「${rc.weak.label}」、今回はノーミスや！克服してきとるで！`);
+  }
+  sec = 'kanata'; // 奥義「絶対透視」が発動したゲーム：上がりより、被害をどこまで抑えたか
+  if (f.kanata) {
+    const K = f.kanata;
+    if (f.won) B(`第${K.round}巡にカナタの「絶対透視」が発動したゲームで、上がり切りました。すべてを見通す相手より先に上がるのは、確率の上では大きな番狂わせです。`, `カナタの絶対透視が出たゲームで上がったやて！？ 全部見えとる相手からゴール奪うて、ジャイアントキリングや！`);
+    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。発動したあとは上がりより失点を減らす局面です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分すると、被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ ああなったらゴール前にバス止めて守るしかないんや。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
   }
   sec = 'luck'; // 8. 運と実力
   if (f.missHit) { B(`第${f.missHit.round}巡で最善を外して残した${f.missHit.card}が、最後の「${f.missHit.e}」に使われました。結果には助けられましたが、その手自体は最善ではありません。`, `第${f.missHit.round}巡で残した${f.missHit.card}が、最後の「${f.missHit.e}」にハマったんや！ミスが結果オーライやな〜。`); N(rt ? 'luck' : 'luckGood'); }
@@ -3872,7 +3901,7 @@ function endSet() {
   go('set-end');
 }
 function standingsSorted(T) {
-  return T.players.slice().sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
+  return T.players.filter(p => !p.seed).sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
 }
 function myStanding() {
   const T = S.T; const s = standingsSorted(T); const i = s.findIndex(p => p.id === 0);
@@ -3950,7 +3979,7 @@ function openingHTML() {
   const step = 2.2;
   return `<div class="stage opening"><div class="spot"></div>
   <div class="stage-title">計算ブリッジ大会</div>
-  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝</div>
+  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝${S.T && S.T.kanata ? '（決勝にはシード選手が1名加わります）' : ''}</div>
   <div class="op-lines">${lines.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.4 + i * step}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
   <div class="row" style="justify-content:center;gap:10px;margin-top:16px;position:relative">
     <button class="btn ghost" data-act="opening-skip">説明をすぐ表示</button>
@@ -3961,6 +3990,11 @@ function openingHTML() {
 function enterFinal() {
   const T = S.T; const s = standingsSorted(T);
   T.finalists = s.slice(0, T.cfg.finalists).map(p => p.id);
+  if (T.kanata) {
+    let k = T.players.find(p => p.seed);
+    if (!k) { const id = T.players.length; k = { id, human: false, level: 6, style: 'keisan', ch: KB.charToCh(KB.KANATA), clairvoyant: true, seed: true }; T.players.push(k); T.points[id] = 0; T.totPP[id] = 0; T.tb[id] = 0; }
+    T.finalists.push(k.id);
+  }
   saveSession();
   go('entrance');
   if (T.finalists.includes(0)) setTimeout(confetti, T.finalists.length * 550 + 300);
@@ -3970,10 +4004,11 @@ function entranceHTML() {
   const inF = T.finalists.includes(0);
   const myPre = s.findIndex(p => p.id === 0) + 1;
   const cards = T.finalists.map((id, i) => { const p = P(id); const st = p.human ? null : KB.style(p.style);
-    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">予選${i + 1}位</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${T.points[id]}点・PP ${T.totPP[id]}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
+    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">${p.seed ? 'シード' : `予選${i + 1}位`}</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${p.seed ? '★6・予選免除' : `${T.points[id]}点・PP ${T.totPP[id]}`}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
+  ${T.kanata ? `<p class="kanata-ent">そして最後に、シード選手が入場します。倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタ。<br><small>奥義「絶対透視」：第2巡か第3巡に、山札の底まで見通すことがある</small></p>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;
@@ -4009,7 +4044,7 @@ function finalResult() {
   while (i < ids.length) { let j = i; while (j + 1 < ids.length && T.finalPP[ids[j + 1]] === T.finalPP[ids[i]]) j++; groups.push(ids.slice(i, j + 1)); i = j + 1; }
   const order = [];
   const nextGroup = k => {
-    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
+    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (T.kanataClear) bump('toushi'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
     const g = groups[k];
     if (g.length === 1) { order.push(g[0]); nextGroup(k + 1); return; }
     resolveTie(g, `決勝 ${order.length + 1}位決定戦`, 1, o => { order.push(...o); nextGroup(k + 1); });
@@ -4124,7 +4159,7 @@ function charProfile(id) {
   const inGame = S.view === 'game', showLv = !inGame || S.settings.showLevel || (S.T && S.T.revealAll), showSt = !inGame || S.settings.showStyle || (S.T && S.T.revealAll);
   const stl = KB.getStrategy().styles.find(x => x.id === c.st) || {};
   const say = c.lv >= 4 ? (c.idle || []).slice(0, 3) : c.idle ? c.idle.slice(0, 2) : [];
-  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(5 - c.lv) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
+  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(Math.max(0, 5 - c.lv)) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
     <p style="margin:0">${esc(c.prof || '')}</p>
     ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
