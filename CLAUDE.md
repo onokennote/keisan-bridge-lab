@@ -11,7 +11,7 @@
 - `./deploy.sh` → `dist/index.html`（単体で動く版。ロリポップ！デプロイナウ用）
 - 公開先
   - claude.ai アーティファクト：https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD （`dist/artifact.html` を、この url に publish する）
-  - デプロイナウ（本番）：https://keisan-bridge.lolipop-now.app 。公開専用ブランチ `lolipop-deploy`（`index.html`・`og.png` だけ）に push すると自動でデプロイされる。更新は作業ブランチで `./publish.sh`（さくらのAPI `https://onoken-web.sakura.ne.jp/kb/api.php` を埋め込んで作り、`lolipop-deploy` に push）。本番に出すのは作者が「出す」と言ったときだけ（例外：毎朝のAI総評改善の予約タスクは、テストが通れば自動で push と `./publish.sh` まで行う。11/27まで）
+  - デプロイナウ（本番）：https://keisan-bridge.lolipop-now.app 。公開専用ブランチ `lolipop-deploy`（`index.html`・`og.png` だけ）に push すると自動でデプロイされる。更新は作業ブランチで `./publish.sh`（さくらのAPI `https://onoken-web.sakura.ne.jp/kb/api.php` を埋め込んで作り、`lolipop-deploy` に push）。変更してテストが通ったら、push のあと `./publish.sh` で本番まで出す（作者が「出さないで」と言ったときだけ出さない。毎朝のAI総評改善の予約タスクも同じ）
 
 ## テスト（Playwright。`./build.sh` のあと `test/` で実行）
 - `node run.js practice` / `node run.js tour` … 1セット／大会を自動で最後まで（エラーが出ないこと）
