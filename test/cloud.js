@@ -23,6 +23,14 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code), '公開版は自動で匿名アカウントができ、引き継ぎコードが出る：' + (c1.c && c1.c.code));
   // バッジと記録を作って保存
   await pa.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 60); localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.attackBest', JSON.stringify({ 15: { bp: 820, badges: 21 } })); });
+  // 自己紹介を書く（プロフィールから）
+  await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast,.toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
+  await pa.click('.player-bar [data-act="profiles"]'); await pa.waitForTimeout(300); await pa.click('#modal [data-act="bio-edit"]'); await pa.waitForTimeout(200);
+  await pa.fill('#bio-text', '3枚出しの研究中。目標は全員達人の大会で優勝！' + 'あ'.repeat(200));
+  ok(await pa.evaluate(() => [...document.querySelector('#bio-text').value].length === 140), '自己紹介は140文字まで');
+  await pa.fill('#bio-text', '3枚出しの研究中。目標は全員達人の大会で優勝！'); await pa.click('#modal [data-act="bio-save"]'); await pa.waitForTimeout(300);
+  ok(await pa.evaluate(() => /3枚出しの研究中/.test(document.querySelector('#modal .pf-bio').innerText)), 'プロフィールに自己紹介が出る');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'bio_profile.png') });
   await pa.evaluate(() => KBAPP.cloudPush()); await pa.waitForTimeout(500);
   // ランキング
   await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast,.toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
@@ -43,6 +51,14 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pb.evaluate(() => KBAPP.go('ranking')); await pb.waitForTimeout(1800);
   const names = await pb.evaluate(() => [...document.querySelectorAll('.rk-nm')].map(e => e.innerText));
   ok(names.some(n => /^研究員/.test(n)) && !names.some(n => /うんこ/.test(n)), 'ふさわしくない名前は「研究員○○」と表示：' + names.join(' / '));
+  // ランキングでアイコンを押すと、その人の成績カードと自己紹介
+  await pb.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)).querySelector('[data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
+  ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'ほかの人のアイコンを押すと成績カードと自己紹介が出る');
+  await pb.screenshot({ path: path.join(__dirname, 'out', 'rank_card.png') });
+  await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
+  await pb.evaluate(() => document.querySelector('.rk-row.me [data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
+  ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img')), '自分のアイコンを押すと自分の成績カードが出る');
+  await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // 端末C：Aの引き継ぎコードで入ると、Aの記録が出る
   const C = await b.newContext(); const pc = await C.newPage(); pc.on('pageerror', e => errs.push(e.message));
   await pc.goto('http://localhost:8124/'); await pc.waitForTimeout(1500);

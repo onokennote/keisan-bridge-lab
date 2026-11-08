@@ -32,6 +32,10 @@ function db(): PDO {
   $pdo->exec('CREATE TABLE IF NOT EXISTS ranks (uid TEXT NOT NULL, pid TEXT NOT NULL, name TEXT NOT NULL, shown INTEGER NOT NULL DEFAULT 1, rating REAL, badges INTEGER DEFAULT 0, bp INTEGER DEFAULT 0, atk INTEGER DEFAULT 0, avatar TEXT, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))');
   $pdo->exec('CREATE TABLE IF NOT EXISTS tokens (token_hash TEXT PRIMARY KEY, uid TEXT NOT NULL, created INTEGER NOT NULL)'); // 端末ごとの鍵（複数の端末で同時に使える）
   $pdo->exec('CREATE TABLE IF NOT EXISTS hits (ip TEXT NOT NULL, at INTEGER NOT NULL)');
+  // あとから足した列（自己紹介・成績カード）
+  $cols = array_column($pdo->query('PRAGMA table_info(ranks)')->fetchAll(), 'name');
+  if (!in_array('bio', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN bio TEXT');
+  if (!in_array('card', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN card TEXT');
   return $pdo;
 }
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見まちがえやすい I・O・0・1 は使わない
@@ -67,6 +71,19 @@ function nameOk(string $s): bool {
   foreach (NG as $w) { $x = normName($w); if ($x !== '' && mb_strpos($n, $x) !== false) return false; }
   return true;
 }
+// 自己紹介（140文字まで）。URL・連絡先・NGワードが入っていたら載せない
+function safeBio(string $s): string {
+  $s = trim(mb_substr(preg_replace('/[\x00-\x09\x0B-\x1F\x7F<>]/u', '', $s), 0, 140));
+  return ($s !== '' && nameOk($s)) ? $s : '';
+}
+// 成績カード（ランキングでアイコンを押すと見られる）。決まった項目だけを、ありえない値ははじいて残す
+function safeCard($c): ?string {
+  if (!is_array($c)) return null;
+  $ach = array_values(array_slice(array_filter((array)($c['ach'] ?? []), fn($k) => is_string($k) && preg_match('/^[a-z0-9_]{1,40}:\d{1,3}$/i', $k)), 0, 400));
+  $n = fn($k, $max) => max(0, min($max, (int)($c[$k] ?? 0)));
+  return json_encode(['ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000)], JSON_UNESCAPED_UNICODE);
+}
+function rid(string $uid, string $pid): string { return substr(h('rid:' . $uid . ':' . $pid), 0, 16); } // ランキングで人を指す公開用の番号
 function safeName(string $s, string $uid, string $pid): string {
   $s = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', $s), 0, 10));
   return ($s !== '' && nameOk($s)) ? $s : '研究員' . strtoupper(substr(h($uid . $pid), 0, 3));
@@ -113,8 +130,8 @@ try {
         $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
         $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0)));
         $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
-        $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, updated) VALUES (?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, updated=excluded.updated')
-          ->execute([$u['uid'], $pid, safeName((string)($s['name'] ?? ''), $u['uid'], $pid), empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, time()]);
+        $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, updated=excluded.updated')
+          ->execute([$u['uid'], $pid, safeName((string)($s['name'] ?? ''), $u['uid'], $pid), empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), time()]);
       }
       // 消したプレイヤーはランキングからも消す
       if ($pids) { $q = implode(',', array_fill(0, count($pids), '?')); $d->prepare("DELETE FROM ranks WHERE uid = ? AND pid NOT IN ($q)")->execute(array_merge([$u['uid']], $pids)); }
@@ -140,7 +157,7 @@ try {
         'badges' => ['badges > 0', 'badges DESC, bp DESC', fn($r, $m) => $r['badges'] > $m['badges'] || ($r['badges'] == $m['badges'] && $r['bp'] > $m['bp'])],
         'bp' => ['bp > 0', 'bp DESC', fn($r, $m) => $r['bp'] > $m['bp']],
         'attack' => ['atk > 0', 'atk DESC', fn($r, $m) => $r['atk'] > $m['atk']]];
-      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'badges' => (int)$r['badges'], 'bp' => (int)$r['bp'], 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'me' => $uid !== '' && $r['uid'] === $uid];
+      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'badges' => (int)$r['badges'], 'bp' => (int)$r['bp'], 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid];
       foreach ($defs as $type => [$where, $order, $better]) {
         $all = db()->query("SELECT uid, pid, name, rating, badges, bp, atk, avatar FROM ranks WHERE shown = 1 AND $where ORDER BY $order, updated ASC")->fetchAll();
         $list = []; $mine = [];
@@ -152,7 +169,15 @@ try {
       }
       out(['ok' => true, 'rankings' => $res]);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 2]);
+    case 'card': { // ランキングの人の成績カード（自己紹介つき）。rid で指す
+      $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
+      foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card FROM ranks WHERE shown = 1')->fetchAll() as $r) {
+        if (rid($r['uid'], $r['pid']) !== $rid) continue;
+        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? '')])]);
+      }
+      fail('見つかりません', 404);
+    }
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 3]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();
