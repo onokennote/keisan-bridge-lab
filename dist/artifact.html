@@ -1634,7 +1634,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='9e75fea86f';
+window.KB_BUILD='3f90beaee9';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8244,10 +8244,12 @@ function recordDecision(move) {
   let loss = Math.max(0, best.score - mine.score);
   // 表示される数字（目的・上がる確率・期待PP）で最善手が上回っていなければ、端数の差は同じ扱い＝最善とする
   if (loss > 0 && visTie(best, mine)) loss = 0;
-  // 捨て身が最善の場面で上がった：損失は目的（セット期待点など）の差で数える
-  if (sutemi && isOutEv(mine)) loss = Math.max(loss, (sutemi.bestGoal - sutemi.outGoal) / goalMax);
+  // 捨て身（あえて上がらない）が最善の場面で上がった：上がりは最善として扱う（疑問手にしない）。
+  // ただし「攻めるなら捨て身もあった」ことは、あとで博士・マサがひと言そえる（sutemi.outOk）
+  if (sutemi && isOutEv(mine)) { loss = 0; sutemi.outOk = true; }
   if (sutemi) sutemi.chose = mine === best;
-  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: mlabel(best), bestStats: best, mineStats: mine, loss, ppLoss: mine.pp - best.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+  const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
+  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: mlabel(sutemi && sutemi.outOk ? mine : best0), bestStats: sutemi && sutemi.outOk ? mine : best0, mineStats: mine, loss, ppLoss: sutemi && sutemi.outOk ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -8398,7 +8400,11 @@ function sutemiIns(d) {
   const oppM = few ? '相手が小さい札しか持ってへん時は、捨て身もアリなんやで！' : '相手に札を引かせて、PPを積ませる作戦や！';
   return su.chose
     ? { id: 'sutemi', root: `見事な捨て身です。上がれる手を見送って、相手に札を抱えさせたまま続けました。上がると${gl}は${a}どまり、あえて引けば${b}。${oppR}`, masa: `上がれるのにあえて引いた！ 上がっても${gl}は${a}、引いて続けたら${b}や。逆転狙いの捨て身、しびれるで！` }
-    : { id: 'sutemi', root: `上がるのも自然な手ですが、ここは「あえて上がらない」のが最善でした。上がると${gl}は${a}どまり、あえて引いて続ければ${b}まで伸びます。${oppR}`, masa: `実はな、ここは上がらんのが正解やったんや！ 上がっても${gl}は${a}、引いて続けたら${b}。${oppM}` };
+    : (() => { // 上がったのは最善扱い。ただ「攻めるなら捨て身もあった」とひと言そえる
+      const g0 = G_(), badge = !((g0.cnt || {}).sutemi1 >= 1);
+      return { id: 'sutemi', root: `上がりは最善の判断です。ただ、攻めるなら「あえて上がらずに続ける」捨て身もありました。上がると${gl}は${a}、続ければ${b}まで伸びる見込みでした。${oppR}${badge ? '選んでいれば、バッジ「溜めと捨て身」の金も取れていました。' : ''}`,
+        masa: `上がったんは正解や、文句なし！ せやけど、今あがらんで攻めてたら${gl}は${a}から${b}まで伸びとったかもな！${badge ? '「溜めと捨て身」の金バッジももらえたのになー！' : oppM}` };
+    })();
 }
 function feedback(nd, g, me, drew) {
   if (g.over) { // 上がったあとでも、捨て身が最善だった場面はあとから解説する
