@@ -34,6 +34,14 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.evaluate(() => { KBAPP.S.hunt.end = Date.now() + 200; }); await pg.waitForTimeout(2600);
   await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_result.png'), fullPage: true });
   ok(await pg.evaluate(() => /自動照準で捕獲：\d+式/.test(document.body.innerText)), '結果に自動で捕獲した数が出る');
+  // 大会のご褒美の数：まんべんなく以下は1発・強豪ぞろい以上は2発・優勝でさらに2発。マサが手渡す
+  const c0 = await pg.evaluate(() => KBAPP.aimCount());
+  const add = await pg.evaluate(() => [KBAPP.aimReward({ cfg: { mix: 'even' } }, 'final'), KBAPP.aimReward({ cfg: { mix: 'strong' } }, 'final'), KBAPP.aimReward({ cfg: { mix: 'master' } }, 'final'), KBAPP.aimReward({ cfg: { mix: 'casual' } }, 'champion')]);
+  ok(add.join() === '1,2,2,2' && (await pg.evaluate(() => KBAPP.aimCount())) === c0 + 7, '決勝進出：まんべんなく以下1発・強豪以上2発、優勝でさらに2発（' + add.join() + '）');
+  await pg.evaluate(() => KBAPP.go('home')); await pg.evaluate(() => KBAPP.aimHandover(2, 'final', () => { window.__aimThen = 1; })); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /マサ/.test(document.querySelector('#modal .aim-hand').innerText) && /2発/.test(document.querySelector('#modal').innerText)), 'マサが自動照準を手渡す画面が出る');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'aim_hand.png') });
+  await pg.click('#aim-ok'); ok(await pg.evaluate(() => window.__aimThen === 1 && !document.querySelector('#modal')), '受け取ると次へ進む（決勝のゲームが始まる）');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();
 })();

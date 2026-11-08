@@ -879,16 +879,29 @@ function huntGo(aim) {
 // 自動で捕まえた式は図鑑に登録される（図鑑のバッジにも数える）が、得点・捕獲数・自己ベストには入れない
 
 const aimCount = () => G_().aim || 0;
-function aimReward(T) {
-  const g = G_(); if (!g.ach['zukan_cat:3']) return;
-  g.aim = (g.aim || 0) + 1; G_save(g); T.aimGot = true;
-  setTimeout(() => { const el = document.createElement('div'); el.className = 'aim-get'; el.innerHTML = `<div class="ag-in">${huntReticle('ov')}<b>ご褒美：自動照準</b><small>決勝進出のご褒美！式ハンターで、3分間ずっと自動で捕まえる（所持 ${g.aim}発）</small></div>`; document.body.appendChild(el); KB.sfx('lockon'); setTimeout(() => el.classList.add('out'), 2600); setTimeout(() => el.remove(), 3000); }, 900);
+// 大会のご褒美：決勝進出で「まんべんなく」以下は1発、「強豪ぞろい」「全員達人」は2発。優勝でさらに2発（「図鑑の場」の銀バッジを持っているとき）
+const AIM_RULE = '大会で決勝に進んだら1発（強豪ぞろい・全員達人なら2発）、優勝したらさらに2発';
+function aimReward(T, kind) {
+  const g = G_(); if (!g.ach['zukan_cat:3']) return 0;
+  const n = kind === 'champion' ? 2 : (T.cfg && ['strong', 'master'].includes(T.cfg.mix) ? 2 : 1);
+  g.aim = (g.aim || 0) + n; G_save(g); T.aimGot = (T.aimGot || 0) + n;
+  return n;
+}
+// マサが自動照準を手渡す（受け取ってから次へ進む）
+function aimHandover(n, kind, then) {
+  const t = kind === 'champion' ? `優勝おめでとう！ご褒美に自動照準を${n}発、追加で渡しとくで！式ハンターで使ってや！` : `決勝進出のご褒美や！自動照準を${n}発渡しとくで！式ハンターで${HUNT_SEC / 60}分間ずっと自動で捕まえてくれるんや。優勝したら、さらに2発やで！`;
+  modal(`<div class="stack aim-hand"><div class="ag-ret" aria-hidden="true">🎯</div><h2 style="margin:0;text-align:center">ご褒美：自動照準 ×${n}</h2>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(t)}</div></div>
+    <p class="small muted" style="margin:0;text-align:center">所持 ${aimCount()}発</p>
+    <div class="row" style="justify-content:center"><button class="btn primary" id="aim-ok">${kind === 'champion' ? '受け取る' : '受け取って決勝へ'}</button></div></div>`);
+  KB.sfx('lockon');
+  $('#aim-ok').onclick = () => { closeModal(); if (then) then(); };
 }
 // 式ハンターの最初に、マサが自動照準のことを教える（条件の「図鑑の場」銀バッジを持っているときだけ）
 function aimTalk() {
   const g = G_(); if (!g.ach['zukan_cat:3']) return '';
   const n = g.aim || 0;
-  const t = n ? `自動照準が${n}発あるで！下のボタンで使えるわ。大会で決勝に進んだら、また1発もらえるで！` : `「図鑑の場」の銀バッジ持っとるやん！大会で決勝に進んだら、ご褒美に自動照準がもらえるで！${HUNT_SEC / 60}分間ずっと、自動で捕まえてくれるんや！`;
+  const t = n ? `自動照準が${n}発あるで！下のボタンで使えるわ。${AIM_RULE}もらえるで！` : `「図鑑の場」の銀バッジ持っとるやん！${AIM_RULE}、ご褒美に自動照準がもらえるで！${HUNT_SEC / 60}分間ずっと、自動で捕まえてくれるんや！`;
   return `<div class="op-line masa aim-talk"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(t)}</div></div>`;
 }
 function huntAutoStep() {
@@ -4608,7 +4621,7 @@ function startFinal() {
   const T = S.T; T.phase = 'final'; T.set = 1; T.game = 1; T.finalPP = {}; S.T.setLog = []; T.setT0 = Date.now(); T.pbSnap = rvSnap();
   T.finalists.forEach(id => T.finalPP[id] = 0);
   seatSet(T);
-  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); aimReward(T); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; startGame(); return; }
+  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); T.aimNow = aimReward(T, 'final'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; if (T.aimNow) { const n = T.aimNow; T.aimNow = 0; aimHandover(n, 'final', startGame); } else startGame(); return; }
   // 観戦：全ゲーム自動
   const pls = T.tables[0].map(id => P(id));
   for (let gI = 0; gI < T.cfg.games; gI++) { const gm = KB.autoGame(pls, starterFor(T.tables[0], gI + 1)); pls.forEach((p, i) => { T.setPP[p.id].push(gm.pp[i]); T.finalPP[p.id] += gm.pp[i]; }); }
@@ -4623,7 +4636,7 @@ function finalResult() {
   while (i < ids.length) { let j = i; while (j + 1 < ids.length && T.finalPP[ids[j + 1]] === T.finalPP[ids[i]]) j++; groups.push(ids.slice(i, j + 1)); i = j + 1; }
   const order = [];
   const nextGroup = k => {
-    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (T.kanataClear) bump('toushi'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
+    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); { const n = aimReward(T, 'champion'); if (n) setTimeout(() => aimHandover(n, 'champion'), 1800); } if (T.kanataClear) bump('toushi'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
     const g = groups[k];
     if (g.length === 1) { order.push(g[0]); nextGroup(k + 1); return; }
     resolveTie(g, `決勝 ${order.length + 1}位決定戦`, 1, o => { order.push(...o); nextGroup(k + 1); });
@@ -5117,6 +5130,6 @@ setInterval(() => {
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
 else if (CLOUD_ON) setTimeout(cloudInit, 100);
-window.KBAPP = { S, act, cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
