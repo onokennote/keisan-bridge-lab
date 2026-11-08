@@ -2284,7 +2284,7 @@ function chartRender() {
     const r = CHART_ROWS[i], d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
     return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => chartCell(d, t, i, mk, C.hint, men)).join('')}</tr>`;
   });
-  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
+  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i)), al = chartAllowed(C), busy = !!C.lock;
   let preview = '';
   if (C.tok.length) { try { const v = chartEval(C.tok); preview = `= ${v}`; } catch (e) { preview = e.message === '…' ? '' : e.message; } }
   const done = chartDone(), total = chartTotal();
@@ -2295,8 +2295,8 @@ function chartRender() {
     <div class="ch-input">
       <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small><button class="btn sm ch-hintbtn ${C.hint ? 'on' : ''}" data-chint="1" aria-pressed="${C.hint ? 'true' : 'false'}">💡 残りの場 ${C.hint ? 'ON' : 'OFF'}</button></div>
       <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
-      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
-        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button><button class="ch-k ch-clr" data-ckclr="1" aria-label="式をクリア">C</button></div>
+      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) || !al.card || busy ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
+        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}" ${(o === '(' ? !al.open : !al.op) || busy ? 'disabled' : ''}>${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す" ${!C.tok.length || busy ? 'disabled' : ''}>⌫</button><button class="ch-k ch-clr" data-ckclr="1" aria-label="式をクリア" ${!C.tok.length || busy ? 'disabled' : ''}>C</button></div>
       <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span></div>
       ${C.hint ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
     </div>
@@ -2323,8 +2323,18 @@ function chartViewRender(men, data) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   const m = $('#modal'); if (m) chartBindCells(m);
 }
+// 式として続けられるキーだけを押せるようにする：札・「(」のあとは札か「(」、札・「)」のあとは記号だけ。
+// 「(」は中に札を2枚入れる余裕があるときだけ（入れ子はなし）。札を使い切ったら記号は押せない
+function chartAllowed(C) {
+  const row = CHART_ROWS[C.row], last = C.tok[C.tok.length - 1], left = row.length - C.tok.filter(x => x.k === 'c').length;
+  let depth = 0; C.tok.forEach(x => { if (x.k === '(') depth++; else if (x.k === ')') depth--; });
+  const operand = !last || ['+', '−', '×', '÷', '('].includes(last.k);
+  return { card: operand && left > 0, op: !operand && left > 0, open: operand && depth === 0 && left >= 2, close: !operand && depth > 0 };
+}
+const chartOk = (C, t) => { const a = chartAllowed(C); return !t || (t.k === 'c' ? a.card : t.k === '(' ? a.open : t.k === ')' ? a.close : a.op); };
 function chartKey(t) {
   const C = S.chart; if (!C || C.lock || C.view) return;
+  if (t && !chartOk(C, t)) return; // 式として続かないキーは受け付けない
   C.msg = null;
   if (!t) C.tok.pop(); else C.tok.push(t);
   // カッコの自動補助：「(」のあとに札を2枚入れたら「)」を閉じる

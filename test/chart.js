@@ -15,6 +15,14 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.click('.whistle-ov [data-x="e0"]'); await pg.waitForTimeout(500);
   ok(!!(await pg.$('#modal .ch-keys')), 'ホームから開くと入力できる');
   const tap = async sel => { await pg.click(sel); await pg.waitForTimeout(60); };
+  // 式として続かないボタンはグレーアウト
+  const st = () => pg.evaluate(() => { const d = q => [...document.querySelectorAll(q)].map(b => b.disabled ? 0 : 1).join(''); return { c: d('[data-ckc]'), o: d('[data-cko]'), b: d('[data-ckb],[data-ckclr]') }; });
+  let s0 = await st(); ok(s0.c === '111' && s0.o === '00001' && s0.b === '00', '最初は札と「(」だけ押せる（記号・⌫・Cはグレー）：' + JSON.stringify(s0));
+  await pg.keyboard.press('+'); ok(await pg.evaluate(() => KBAPP.S.chart.tok.length === 0), 'キーボードでも、式として続かない記号は入らない');
+  await tap('[data-ckc="0"]'); s0 = await st(); ok(s0.c === '000' && s0.o === '11110' && s0.b === '11', '札のあとは記号だけ（札と「(」はグレー）：' + JSON.stringify(s0));
+  await tap('[data-cko="+"]'); s0 = await st(); ok(s0.c === '011' && s0.o === '00001', '記号のあとは札と「(」（残り2枚なので「(」も可）：' + JSON.stringify(s0));
+  await tap('[data-ckc="1"]'); await tap('[data-cko="×"]'); s0 = await st(); ok(s0.c === '001' && s0.o === '00000', '残り1枚のときは「(」もグレー：' + JSON.stringify(s0));
+  await tap('[data-ckclr="1"]');
   // A・2・6 の行で (6 − 2) × A = 4。カッコは自動で閉じる
   await tap('[data-cko="("]'); await tap('[data-ckc="2"]'); await tap('[data-cko="−"]'); await tap('[data-ckc="1"]');
   ok(await pg.evaluate(() => /\(6 − 2\)/.test(document.querySelector('.ch-expr').innerText)), 'カッコが自動で閉じる');
