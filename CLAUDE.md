@@ -47,7 +47,7 @@
 - ゼロには隠れた力（本人は気づいていない）：自分の番の70%で、見えないはずの札（他の人の手札＋山札の上6枚）のうち5〜7枚が分かり、ふだんの読み（MC）の中で固定される（`makePeek`）。演出やセリフでは明かさない。強さはカナタ未満・ほかの★5より上
 
 ## クラウド保存・ランキング（ロリポップ版だけ）
-- `server/api.php`（PHP＋SQLite。さくらのレンタルサーバーに置く。手順は `server/README.md`）。公開版は `KB_CLOUD_API=（APIのURL） ./deploy.sh` で作ると有効になる（`window.KB_CLOUD_API`、`CLOUD_ON`）。アーティファクト版では動かない
+- `server/api.php`（PHP＋SQLite。さくらのレンタルサーバーに置く。手順は `server/README.md`）。変えて push すると GitHub Actions（`.github/workflows/sakura-api.yml`）が SFTP で自動で送る（Secrets：SAKURA_HOST・SAKURA_USER・SAKURA_PASSWORD）。公開版は `KB_CLOUD_API=（APIのURL） ./deploy.sh` で作ると有効になる（`window.KB_CLOUD_API`、`CLOUD_ON`）。アーティファクト版では動かない
 - ログイン：匿名アカウントを自動で作り、引き継ぎコード（12文字）で別の端末から入る。名前・メールは集めない
 - 保存：変更があったときだけ送る。ほかの端末のほうが新しければ上書きせずに読み込む（`base` と `data_at` の比較）
 - ランキング：総合・推定実力・バッジ数（同数はBP）・BP・連続最善・バッジアタックの自己ベスト。総合は推定実力35・BP30・連続最善20・バッジアタック15の配分で、各部門の順位を点数（載っている人数の中で上ほど満点に近い。載っていない部門は0点）にして合わせる（`server/api.php` の `rankings`）。NGワードの名前は「研究員○○」。ズル対策はできる範囲で（ありえない値ははじく）

@@ -1,0 +1,43 @@
+# server/api.php が変わったら、さくらのレンタルサーバー（~/www/kb/api.php）へ自動で送る
+# 必要な Secrets（GitHub → Settings → Secrets and variables → Actions）：
+#   SAKURA_HOST（例 onoken-web.sakura.ne.jp）・SAKURA_USER（例 onoken-web）・SAKURA_PASSWORD（サーバーパスワード）
+# config.php とデータベースは送らない（サーバーにあるものをそのまま使う）
+name: さくらにAPIを送る
+on:
+  push:
+    branches: [claude/lucid-curie-k2el7s]
+    paths: [server/api.php]
+  workflow_dispatch:
+concurrency: sakura-api
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 設定の確認
+        id: cfg
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+        run: |
+          if [ -z "$H" ]; then echo "Secrets（SAKURA_HOST など）が未設定なので送りません"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: 文法チェック
+        if: steps.cfg.outputs.skip != '1'
+        run: php -l server/api.php
+      - name: 送る（SFTP）
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+          U: ${{ secrets.SAKURA_USER }}
+          P: ${{ secrets.SAKURA_PASSWORD }}
+        run: |
+          sudo apt-get install -y -qq lftp >/dev/null
+          lftp -e "set sftp:auto-confirm yes; set net:max-retries 2; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "sftp://$H"
+      - name: 動いているか確かめる
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+        run: |
+          want=$(grep -o "'api' => [0-9]*" server/api.php | grep -o '[0-9]*$')
+          got=$(curl -fsS "https://$H/kb/api.php")
+          echo "$got"
+          echo "$got" | grep -q "\"api\":$want" || { echo "api のバージョンが $want になっていません"; exit 1; }

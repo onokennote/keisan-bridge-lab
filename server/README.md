@@ -40,3 +40,16 @@ KB_CLOUD_API=https://（あなたのドメイン）/kb/api.php ./deploy.sh
 ```bash
 cd test && node cloud.js
 ```
+
+## 自動で送る（GitHub Actions）
+
+`server/api.php` を変えて作業ブランチに push すると、`.github/workflows/sakura-api.yml` が SFTP で `~/www/kb/api.php` に送り、
+`api.php` を開いてバージョン（`"api":○`）が新しくなったかまで確かめます。`config.php` とデータベースは送りません。
+
+使えるようにするには、GitHub のリポジトリの Settings → Secrets and variables → Actions → New repository secret で3つを登録します。
+
+- `SAKURA_HOST`：`onoken-web.sakura.ne.jp`
+- `SAKURA_USER`：さくらのアカウント名（例：`onoken-web`）
+- `SAKURA_PASSWORD`：サーバーパスワード
+
+登録するまでは、送る手順は飛ばされます（失敗にはなりません）。結果は GitHub の Actions タブで見られます。手で動かすときは、Actions → 「さくらにAPIを送る」→ Run workflow。
