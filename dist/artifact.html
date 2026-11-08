@@ -1634,7 +1634,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='456da1b927';
+window.KB_BUILD='d753292f2c';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6284,6 +6284,7 @@ function huntCardHTML() {
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
     <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span>${aimCount() ? `<span class="aim-fact">🎯 自動照準 ×${aimCount()}</span>` : ''}</div>
     ${b ? `<p class="small" style="margin:0">自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</p>` : ''}
+    <div class="row zk-mini" style="align-items:center;gap:8px"><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
     <button class="btn primary" data-act="hunt-start">狩りに出る</button></div>`;
 }
 // ホーム：アウツチャレンジ（モードの1つ）
@@ -6478,10 +6479,6 @@ function growthHTML() {
     <div class="lbl">場面別の得意・苦手</div>
     ${catRows || '<p class="small muted" style="margin:0">もう少しプレイすると、場面ごとの傾向が見えてきます。</p>'}
     <p class="small muted" style="margin:0">直近40ゲームで、その場面での1判断あたりの平均損失（小さいほど得意）。全体の平均は${allAvg.toFixed(1)}pt。項目を押すと博士が解説します（AIの読みを見た手は除いています）。</p>
-  </div>
-  <div class="panel stack">
-    <div class="lbl">式の図鑑</div>
-    ${(() => { const z = zukanGet(), n = zukanCount(z); return `<div class="row" style="align-items:center"><div class="zk-bar" style="flex:1"><i style="width:${(n / ZUKAN.length * 100).toFixed(1)}%"></i></div><b>${n}/${ZUKAN.length}</b><button class="btn" data-go="zukan">図鑑を見る</button></div>`; })()}
   </div>
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
@@ -6739,7 +6736,7 @@ function zukanHTML() {
   const z = zukanGet(), n = zukanCount(z), T = S.zkT || 1;
   const tabs = Array.from({ length: 13 }, (_, i) => { const t = i + 1, l = ZUKAN.filter(e => e.t === t), h = l.filter(e => z[e.id]).length; return `<button class="zk-tab ${t === T ? 'on' : ''} ${h === l.length ? 'done' : ''}" data-act="zk-t" data-t="${t}"><b>${KB.vname(t)}</b><small>${h}/${l.length}</small></button>`; }).join('');
   const list = ZUKAN.filter(e => e.t === T);
-  return `<div class="topbar"><button class="btn ghost sm" data-go="growth">← 成長記録</button><div class="where">式の図鑑</div><div class="small muted">${n}/${ZUKAN.length}</div></div>
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">式の図鑑</div><div class="small muted">${n}/${ZUKAN.length}</div></div>
   <div class="panel stack"><p class="small muted" style="margin:0">割り算を使う式と、かっこを使った掛け算の式を集める図鑑です。同じ札でも式がちがえば別の項目です。対局や式ハンターで出すと1つずつオープンします（AIの読みを見た手は除く）。まだの式は形だけ見えています。</p>
   <div class="zk-bar"><i style="width:${(n / ZUKAN.length * 100).toFixed(1)}%"></i></div></div>
   <div class="panel stack"><div class="lbl">場の数</div><div class="zk-tabs">${tabs}</div></div>
