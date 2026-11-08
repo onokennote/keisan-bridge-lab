@@ -36,6 +36,7 @@ function db(): PDO {
   $cols = array_column($pdo->query('PRAGMA table_info(ranks)')->fetchAll(), 'name');
   if (!in_array('bio', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN bio TEXT');
   if (!in_array('card', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN card TEXT');
+  if (!in_array('streak', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN streak INTEGER DEFAULT 0');
   return $pdo;
 }
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見まちがえやすい I・O・0・1 は使わない
@@ -128,10 +129,10 @@ try {
         $pid = substr(preg_replace('/[^a-z0-9]/i', '', (string)($s['pid'] ?? '')), 0, 24); if ($pid === '') continue; $pids[] = $pid;
         // ズルを厳密には防がないが、ありえない値ははじく
         $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
-        $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0)));
+        $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0))); $streak = max(0, min(2000, (int)($s['streak'] ?? 0)));
         $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
-        $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, updated=excluded.updated')
-          ->execute([$u['uid'], $pid, safeName((string)($s['name'] ?? ''), $u['uid'], $pid), empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), time()]);
+        $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, streak, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, streak=excluded.streak, updated=excluded.updated')
+          ->execute([$u['uid'], $pid, safeName((string)($s['name'] ?? ''), $u['uid'], $pid), empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), $streak, time()]);
       }
       // 消したプレイヤーはランキングからも消す
       if ($pids) { $q = implode(',', array_fill(0, count($pids), '?')); $d->prepare("DELETE FROM ranks WHERE uid = ? AND pid NOT IN ($q)")->execute(array_merge([$u['uid']], $pids)); }
@@ -151,21 +152,35 @@ try {
       $total = (int)db()->query("SELECT COUNT(*) c FROM ranks WHERE shown = 1 AND $where")->fetch()['c'];
       out(['ok' => true, 'type' => $type, 'list' => $list, 'total' => $total]);
     }
-    case 'rankings': { // 4つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
+    case 'rankings': { // 6つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
       $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = 20; $res = [];
-      $defs = ['rating' => ['rating IS NOT NULL', 'rating DESC', fn($r, $m) => $r['rating'] > $m['rating']],
-        'badges' => ['badges > 0', 'badges DESC, bp DESC', fn($r, $m) => $r['badges'] > $m['badges'] || ($r['badges'] == $m['badges'] && $r['bp'] > $m['bp'])],
-        'bp' => ['bp > 0', 'bp DESC', fn($r, $m) => $r['bp'] > $m['bp']],
-        'attack' => ['atk > 0', 'atk DESC', fn($r, $m) => $r['atk'] > $m['atk']]];
-      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'badges' => (int)$r['badges'], 'bp' => (int)$r['bp'], 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid];
-      foreach ($defs as $type => [$where, $order, $better]) {
-        $all = db()->query("SELECT uid, pid, name, rating, badges, bp, atk, avatar FROM ranks WHERE shown = 1 AND $where ORDER BY $order, updated ASC")->fetchAll();
+      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, updated FROM ranks WHERE shown = 1')->fetchAll();
+      foreach ($all as &$r) { $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0; } unset($r);
+      $defs = [
+        'rating' => [fn($r) => $r['rating'] !== null, fn($a, $b) => $b['rating'] <=> $a['rating']],
+        'badges' => [fn($r) => $r['badges'] > 0, fn($a, $b) => [$b['badges'], $b['bp']] <=> [$a['badges'], $a['bp']]],
+        'bp' => [fn($r) => $r['bp'] > 0, fn($a, $b) => $b['bp'] <=> $a['bp']],
+        'streak' => [fn($r) => $r['streak'] > 0, fn($a, $b) => $b['streak'] <=> $a['streak']],
+        'attack' => [fn($r) => $r['atk'] > 0, fn($a, $b) => $b['atk'] <=> $a['atk']]];
+      // 総合：推定実力・BP・連続最善・バッジアタックの順位を点数（載っている人数の中で上にいるほど100点に近い）にして、重みをつけて合わせる
+      $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $sorted = [];
+      foreach ($defs as $type => [$in, $cmp]) {
+        $l = array_values(array_filter($all, $in)); usort($l, fn($a, $b) => $cmp($a, $b) ?: $a['updated'] <=> $b['updated']);
+        $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmp($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1; // 同じ値は同じ順位
+        $sorted[$type] = [$l, $rk];
+        if (isset($W[$type])) { $n = count($l); foreach ($l as $i => $r) foreach ($all as &$x) if ($x['uid'] === $r['uid'] && $x['pid'] === $r['pid']) { $x['total'] += $W[$type] * ($n - $rk[$i] + 1) / $n; } unset($x); }
+      }
+      foreach ($all as &$r) $r['total'] = round($r['total'], 1); unset($r);
+      $l = array_values(array_filter($all, fn($r) => $r['total'] > 0)); $cmpT = fn($a, $b) => $b['total'] <=> $a['total'];
+      usort($l, fn($a, $b) => $cmpT($a, $b) ?: $a['updated'] <=> $b['updated']);
+      $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmpT($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1;
+      $sorted = ['total' => [$l, $rk]] + $sorted;
+      $tot = []; foreach ($all as $r) $tot[$r['uid'] . ':' . $r['pid']] = $r['total'];
+      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid];
+      foreach ($sorted as $type => [$l, $rk]) {
         $list = []; $mine = [];
-        foreach ($all as $i => $r) {
-          $rank = 1; foreach ($all as $o) { if ($better($o, $r)) $rank++; else break; } // 同じ値は同じ順位
-          if ($i < $lim) $list[] = $row($r, $rank); elseif ($uid !== '' && $r['uid'] === $uid) $mine[] = $row($r, $rank);
-        }
-        $res[$type] = ['list' => $list, 'mine' => $mine, 'total' => count($all)];
+        foreach ($l as $i => $r) { if ($i < $lim) $list[] = $row($r, $rk[$i]); elseif ($uid !== '' && $r['uid'] === $uid) $mine[] = $row($r, $rk[$i]); }
+        $res[$type] = ['list' => $list, 'mine' => $mine, 'total' => count($l)];
       }
       out(['ok' => true, 'rankings' => $res]);
     }
@@ -177,7 +192,7 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 3]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 4]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

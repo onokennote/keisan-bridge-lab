@@ -22,7 +22,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   const c1 = await pa.evaluate(() => KBAPP.cloud());
   ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code), '公開版は自動で匿名アカウントができ、引き継ぎコードが出る：' + (c1.c && c1.c.code));
   // バッジと記録を作って保存
-  await pa.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 60); localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.attackBest', JSON.stringify({ 15: { bp: 820, badges: 21 } })); });
+  await pa.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 60); KBAPP.testAch('streakMax', 7); localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.attackBest', JSON.stringify({ 15: { bp: 820, badges: 21 } })); });
   // 自己紹介を書く（プロフィールから）
   await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast,.toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
   await pa.click('.player-bar [data-act="profiles"]'); await pa.waitForTimeout(300); await pa.click('#modal [data-act="bio-edit"]'); await pa.waitForTimeout(200);
@@ -38,11 +38,14 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_home.png') });
   await pa.click('[data-go="ranking"]'); await pa.waitForTimeout(1500);
   const secs = await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')].map(e => ({ h: e.querySelector('h2').innerText, t: e.querySelector('.rk-list').innerText, me: !!e.querySelector('.rk-row.me') })));
-  ok(secs.length === 4, '4つのランキングが全部展開して出る：' + secs.map(x => x.h).join(' / '));
-  ok(secs[1] && /ケン/.test(secs[1].t) && secs[1].me, 'バッジ数のランキングに自分（ケン）が出る');
-  ok(secs[2] && /BP/.test(secs[2].h) && /ケン/.test(secs[2].t) && secs[2].me, 'BPのランキングに自分（ケン）が出る');
+  const sec = h => secs.find(x => x.h.startsWith(h)) || {};
+  ok(secs.length === 6 && secs[0].h === '総合', '6つのランキングが全部展開して出る（総合が先頭）：' + secs.map(x => x.h).join(' / '));
+  ok(/ケン/.test(sec('バッジ数').t) && sec('バッジ数').me, 'バッジ数のランキングに自分（ケン）が出る');
+  ok(/ケン/.test(sec('BP').t) && sec('BP').me, 'BPのランキングに自分（ケン）が出る');
+  ok(/ケン/.test(sec('連続最善').t) && /7回/.test(sec('連続最善').t), '連続最善のランキングに自分（7回）が出る');
+  ok(/ケン/.test(sec('総合').t) && /\d+\.\d点/.test(sec('総合').t), '総合のランキングに点数つきで出る：' + sec('総合').t.replace(/\s+/g, ' '));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ranking.png') });
-  ok(secs[3] && /820BP/.test(secs[3].t), 'バッジアタックの自己ベスト（820BP）が出る');
+  ok(/820BP/.test(sec('バッジアタック').t), 'バッジアタックの自己ベスト（820BP）が出る');
   // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
   ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p'); }), 'アバターを作っていない人はタイトルに並ばない');
   await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });

@@ -1691,7 +1691,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='8a318c37d9';
+window.KB_BUILD='c24705c71d';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6406,7 +6406,7 @@ function cloudStats() {
     const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
     const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
     const avr = raw.get('kb.p.' + p.id + '.avatar', null);
-    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, bio: raw.get('kb.p.' + p.id + '.bio', '') || '', card: cardBrief(cardDataOf(p.id, p.name)) };
+    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, streak: (g.cnt && g.cnt.streakMax) || 0, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, bio: raw.get('kb.p.' + p.id + '.bio', '') || '', card: cardBrief(cardDataOf(p.id, p.name)) };
   });
 }
 // 変更があったときだけ送る（force は新規登録の直後など）
@@ -6465,10 +6465,10 @@ function cloudPanelHTML() {
 }
 // ---------- ランキング ----------
 // 4つのランキングを並べて全部見せる（各上位20人＋20位より下の自分）
-const RANK_DEFS = [['rating', '推定実力', '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。'], ['badges', 'バッジ数', '獲得したバッジの数（同じ数ならBPの多い順）。'], ['bp', 'BP（バッジポイント）', 'バッジの段階（銅・銀・金）と取りにくさで決まるポイントの合計。'], ['attack', 'バッジアタック', 'バッジアタック（15分）の自己ベスト。']];
+const RANK_DEFS = [['total', '総合', '推定実力・BP・連続最善・バッジアタックの4つの順位を点数にして合わせたもの（100点満点）。それぞれのランキングで上にいるほど点が高く、載っていない部門は0点です。配分は推定実力35・BP30・連続最善20・バッジアタック15。'], ['rating', '推定実力', '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。'], ['badges', 'バッジ数', '獲得したバッジの数（同じ数ならBPの多い順）。'], ['bp', 'BP（バッジポイント）', 'バッジの段階（銅・銀・金）と取りにくさで決まるポイントの合計。'], ['streak', '連続最善', '最善手を続けて打った最長記録。'], ['attack', 'バッジアタック', 'バッジアタック（15分）の自己ベスト。']];
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
-  const val = (k, x) => k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
+  const val = (k, x) => k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
   const rowH = (k, x) => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><button class="rk-av" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${x.me ? 1 : ''}" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.length ? '<div class="rk-gap">…</div>' + d.mine.map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
@@ -7637,7 +7637,7 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
-${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>推定実力・バッジ数・BP・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
+${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
 <div class="mode-grid">
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
