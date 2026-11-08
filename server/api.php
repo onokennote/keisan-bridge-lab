@@ -178,13 +178,13 @@ try {
         'bp' => [fn($r) => $r['bp'] > 0, fn($a, $b) => $b['bp'] <=> $a['bp']],
         'streak' => [fn($r) => $r['streak'] > 0, fn($a, $b) => $b['streak'] <=> $a['streak']],
         'attack' => [fn($r) => $r['atk'] > 0, fn($a, $b) => $b['atk'] <=> $a['atk']]];
-      // 総合：推定実力・BP・連続最善・バッジアタックの順位を点数（載っている人数の中で上にいるほど100点に近い）にして、重みをつけて合わせる
-      $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $sorted = [];
+      // 総合：推定実力・BP・連続最善・バッジアタックそれぞれ「1位の成績を1とした比率」に重み（35・30・20・15）をかけて合計。全部1位なら100点
+      $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $COL = ['rating' => 'rating', 'bp' => 'bp', 'streak' => 'streak', 'attack' => 'atk']; $sorted = [];
       foreach ($defs as $type => [$in, $cmp]) {
         $l = array_values(array_filter($all, $in)); usort($l, fn($a, $b) => $cmp($a, $b) ?: $a['updated'] <=> $b['updated']);
         $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmp($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1; // 同じ値は同じ順位
         $sorted[$type] = [$l, $rk];
-        if (isset($W[$type])) { $n = count($l); foreach ($l as $i => $r) foreach ($all as &$x) if ($x['uid'] === $r['uid'] && $x['pid'] === $r['pid']) { $x['total'] += $W[$type] * ($n - $rk[$i] + 1) / $n; } unset($x); }
+        if (isset($W[$type]) && $l) { $c = $COL[$type]; $top = (float)$l[0][$c]; if ($top > 0) foreach ($all as &$x) { $v = (float)($x[$c] ?? 0); if ($v > 0) $x['total'] += $W[$type] * min(1, $v / $top); } unset($x); }
       }
       foreach ($all as &$r) $r['total'] = round($r['total'], 1); unset($r);
       $l = array_values(array_filter($all, fn($r) => $r['total'] > 0)); $cmpT = fn($a, $b) => $b['total'] <=> $a['total'];
@@ -215,7 +215,7 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 6]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 7]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();
