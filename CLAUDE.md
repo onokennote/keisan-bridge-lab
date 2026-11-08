@@ -11,7 +11,7 @@
 - `./deploy.sh` → `dist/index.html`（単体で動く版。ロリポップ！デプロイナウ用）
 - 公開先
   - claude.ai アーティファクト：https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD （`dist/artifact.html` を、この url に publish する）
-  - デプロイナウ：作者のPCで `lolipop deploy`（`dist/` で `--framework static`）。URLは未定
+  - デプロイナウ（本番）：https://keisan-bridge.lolipop-now.app 。公開専用ブランチ `lolipop-deploy`（`index.html`・`og.png` だけ）に push すると自動でデプロイされる。更新は作業ブランチで `./publish.sh`（さくらのAPI `https://onoken-web.sakura.ne.jp/kb/api.php` を埋め込んで作り、`lolipop-deploy` に push）。本番に出すのは作者が「出す」と言ったときだけ
 
 ## テスト（Playwright。`./build.sh` のあと `test/` で実行）
 - `node run.js practice` / `node run.js tour` … 1セット／大会を自動で最後まで（エラーが出ないこと）
