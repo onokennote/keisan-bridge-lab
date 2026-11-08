@@ -1679,3 +1679,7 @@ body.spectate .me .hand .card{cursor:default}
 .pb-bio{flex-basis:100%;order:0;text-align:left;font:inherit;font-size:14px;line-height:1.65;color:var(--ink);background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.35);border-radius:12px;padding:8px 12px;cursor:pointer;overflow-wrap:anywhere}
 .pb-bio.empty{color:#c9c2ad;border-style:dashed;font-size:13px}
 .pb-bio:hover{border-color:#f2b632}
+.cast-p{position:relative;padding:0;border:0;background:none;cursor:pointer;margin-right:-8px;border-radius:20%}
+.cast-p svg{margin-right:0;box-shadow:0 0 0 2px #f2b632 !important}
+.cast-p i{position:absolute;right:-3px;bottom:-4px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:8px;background:#f2b632;color:#1a1408;font:900 10px/16px var(--f-body);font-style:normal;text-align:center}
+.cast-p:hover svg,.cast-p:focus-visible svg{transform:translateY(-2px)}

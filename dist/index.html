@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1682,10 +1682,14 @@ body.spectate .me .hand .card{cursor:default}
 .pb-bio{flex-basis:100%;order:0;text-align:left;font:inherit;font-size:14px;line-height:1.65;color:var(--ink);background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.35);border-radius:12px;padding:8px 12px;cursor:pointer;overflow-wrap:anywhere}
 .pb-bio.empty{color:#c9c2ad;border-style:dashed;font-size:13px}
 .pb-bio:hover{border-color:#f2b632}
+.cast-p{position:relative;padding:0;border:0;background:none;cursor:pointer;margin-right:-8px;border-radius:20%}
+.cast-p svg{margin-right:0;box-shadow:0 0 0 2px #f2b632 !important}
+.cast-p i{position:absolute;right:-3px;bottom:-4px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:8px;background:#f2b632;color:#1a1408;font:900 10px/16px var(--f-body);font-style:normal;text-align:center}
+.cast-p:hover svg,.cast-p:focus-visible svg{transform:translateY(-2px)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='27d8347c02';
+window.KB_BUILD='8a318c37d9';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5591,7 +5595,7 @@ function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view 
 function render() {
   const app = $('#app');
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') app.innerHTML = homeHTML();
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -6475,7 +6479,7 @@ async function rankingLoad() {
   const c = raw.get('kb.cloud', null);
   const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
   bindHide();
-  if (S.rank && Date.now() - S.rank.at < 30000) return;
+  if (S.rank && !S.rank.home && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
   try {
     await cloudPush();
     const u = encodeURIComponent((c && c.uid) || ''), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + u)).json();
@@ -7591,12 +7595,27 @@ async function migrateIn(t) {
   function done0() { const d = raw.get('kb.migDone', []); d.push(o.id); raw.set('kb.migDone', d.slice(-20)); }
 }
 
+// タイトルの6人：BPランキングの上位でアバターを作った人がいれば、その人たちを先に並べる（押すと成績カード）。残りはAIのキャラ
+function castHTML() {
+  const R = CLOUD_ON && S.rank && S.rank.rankings && S.rank.rankings.bp, top = R ? R.list.filter(x => x.avatar && x.rid).slice(0, 6) : [];
+  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-me="${x.me ? 1 : ''}" title="BP${x.rank}位　${esc(x.name)}（${x.bp}BP）" aria-label="BP${x.rank}位 ${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' })}<i>${x.rank}</i></button>`);
+  if (!S.castPool) S.castPool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6);
+  const ai = S.castPool.slice(0, 6 - ppl.length).sort((a, b) => a.lv - b.lv).map((c, i) => KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }));
+  return ppl.join('') + ai.join('');
+}
+async function homeCastLoad() {
+  if (!CLOUD_ON || (S.rank && Date.now() - S.rank.at < 300000) || S.castLoading) return;
+  S.castLoading = true;
+  try {
+    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + encodeURIComponent((c && c.uid) || ''))).json();
+    if (j.ok && j.rankings && !(S.rank && !S.rank.home && S.rank.at > Date.now() - 300000)) S.rank = { rankings: j.rankings, at: Date.now(), home: true };
+  } catch (e) { } finally { S.castLoading = false; }
+  const el = S.view === 'home' && $('.title .cast'); if (el) { el.innerHTML = castHTML(); el.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
 function homeHTML() {
   const saved = store.get('session', null);
-  const demo = [];
   KB.resetNames();
   const sts = KB.getStrategy().styles;
-  { const pool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6).sort((a, b) => a.lv - b.lv); pool.forEach((c, i) => demo.push(KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }))); }
   const fanCards = [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
   const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
   return `<section class="title">
@@ -7609,7 +7628,7 @@ function homeHTML() {
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
-  <div class="cast">${demo.join('')}</div>
+  <div class="cast">${castHTML()}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span></span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}

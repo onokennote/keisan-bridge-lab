@@ -380,7 +380,7 @@ function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view 
 function render() {
   const app = $('#app');
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') app.innerHTML = homeHTML();
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -1264,7 +1264,7 @@ async function rankingLoad() {
   const c = raw.get('kb.cloud', null);
   const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
   bindHide();
-  if (S.rank && Date.now() - S.rank.at < 30000) return;
+  if (S.rank && !S.rank.home && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
   try {
     await cloudPush();
     const u = encodeURIComponent((c && c.uid) || ''), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + u)).json();
@@ -2380,12 +2380,27 @@ async function migrateIn(t) {
   function done0() { const d = raw.get('kb.migDone', []); d.push(o.id); raw.set('kb.migDone', d.slice(-20)); }
 }
 
+// タイトルの6人：BPランキングの上位でアバターを作った人がいれば、その人たちを先に並べる（押すと成績カード）。残りはAIのキャラ
+function castHTML() {
+  const R = CLOUD_ON && S.rank && S.rank.rankings && S.rank.rankings.bp, top = R ? R.list.filter(x => x.avatar && x.rid).slice(0, 6) : [];
+  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-me="${x.me ? 1 : ''}" title="BP${x.rank}位　${esc(x.name)}（${x.bp}BP）" aria-label="BP${x.rank}位 ${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' })}<i>${x.rank}</i></button>`);
+  if (!S.castPool) S.castPool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6);
+  const ai = S.castPool.slice(0, 6 - ppl.length).sort((a, b) => a.lv - b.lv).map((c, i) => KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }));
+  return ppl.join('') + ai.join('');
+}
+async function homeCastLoad() {
+  if (!CLOUD_ON || (S.rank && Date.now() - S.rank.at < 300000) || S.castLoading) return;
+  S.castLoading = true;
+  try {
+    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + encodeURIComponent((c && c.uid) || ''))).json();
+    if (j.ok && j.rankings && !(S.rank && !S.rank.home && S.rank.at > Date.now() - 300000)) S.rank = { rankings: j.rankings, at: Date.now(), home: true };
+  } catch (e) { } finally { S.castLoading = false; }
+  const el = S.view === 'home' && $('.title .cast'); if (el) { el.innerHTML = castHTML(); el.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
 function homeHTML() {
   const saved = store.get('session', null);
-  const demo = [];
   KB.resetNames();
   const sts = KB.getStrategy().styles;
-  { const pool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6).sort((a, b) => a.lv - b.lv); pool.forEach((c, i) => demo.push(KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }))); }
   const fanCards = [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
   const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
   return `<section class="title">
@@ -2398,7 +2413,7 @@ function homeHTML() {
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
-  <div class="cast">${demo.join('')}</div>
+  <div class="cast">${castHTML()}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span></span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}

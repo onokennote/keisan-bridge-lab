@@ -43,6 +43,15 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(secs[2] && /BP/.test(secs[2].h) && /ケン/.test(secs[2].t) && secs[2].me, 'BPのランキングに自分（ケン）が出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ranking.png') });
   ok(secs[3] && /820BP/.test(secs[3].t), 'バッジアタックの自己ベスト（820BP）が出る');
+  // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
+  ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p'); }), 'アバターを作っていない人はタイトルに並ばない');
+  await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });
+  await pa.evaluate(() => { KBAPP.S.rank = null; KBAPP.go('ranking'); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
+  ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && !!document.querySelector('.title .cast .cast-p')), 'BP上位でアバターを作った人がタイトルの6人に入る（全部で6人）');
+  await (await pa.$('.title')).screenshot({ path: path.join(__dirname, 'out', 'cast_top.png') });
+  await pa.click('.title .cast .cast-p'); await pa.waitForTimeout(2500);
+  ok(await pa.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'タイトルのアイコンを押すと成績カードと自己紹介');
+  await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // 端末B：NGワードの名前のプレイヤー
   const B = await b.newContext(); const pb = await B.newPage(); pb.on('pageerror', e => errs.push(e.message));
   await pb.goto('http://localhost:8124/'); await pb.waitForTimeout(700);
