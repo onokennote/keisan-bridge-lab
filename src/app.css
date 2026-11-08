@@ -1567,7 +1567,8 @@ body.spectate .me .hand .card{cursor:default}
 .tut-prog i{display:block;height:100%;background:#f2b632;transition:width .35s}
 .tut-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:60px}
 .tut-hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.tut-hand .card{animation:pop .3s ease-out both}
+.tut-hand .card{animation:pop .3s ease-out backwards}
+.tut.tut-static .tut-hand .card{animation:none}
 .tut-hand.pick .card{cursor:pointer}
 .tut-field{display:flex;justify-content:center}
 .tut-field .fieldcard{position:relative;transform:none}

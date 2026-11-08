@@ -2102,7 +2102,10 @@ function tutRender() {
     <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<span class="row" style="gap:8px"><button class="btn ghost" data-act="tut-later">あとで</button><button class="btn primary" data-act="tut-end">打ってみる！</button></span>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
   const cur = $('#modal .tut'); if (cur) { cur.parentElement.innerHTML = html; bindModal($('#modal')); } else modal(html);
   const md = $('#modal'); if (!md) return;
-  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select'); tutRender(); });
+  // 札のタップは本番と同じ動き：その札だけが持ち上がる（手札を作り直さないので、点滅しない）
+  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select');
+    const old = b.closest('.tut-hand'); tutRender(); const nu = $('#modal .tut-hand.pick');
+    if (old && nu && old !== nu) { old.querySelectorAll('[data-tutc]').forEach(x => x.classList.toggle('sel', T.sel.includes(+x.dataset.tutc))); nu.replaceWith(old); } });
   md.querySelectorAll('[data-tutplay]').forEach(b => b.onclick = () => { const vals = T.sel.map(k => tk.hand[k]), m = KB.evalSelection(vals, tk.t); if (!m) return; T.done[T.i] = true; T.msg = { cls: 'good', t: `${m.expr} ＝ ${tk.t}　ナイス！ ほかにも 9 − 2、J − 4 × A など、作り方はいろいろあります。` }; KB.sfx('play3'); tutRender(); });
   md.querySelectorAll('[data-tuto]').forEach(b => b.onclick = () => { const k = +b.dataset.tuto, ok = k === tk.ok; T.done[T.i] = true; T.msg = { cls: ok ? 'good' : 'bad', t: (ok ? '⭕ ' : '❌ ') + (ok ? tk.good : tk.bad) }; KB.sfx(ok ? 'capture' : 'foul'); tutRender(); });
 }
