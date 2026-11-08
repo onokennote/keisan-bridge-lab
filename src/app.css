@@ -1622,3 +1622,7 @@ body.spectate .me .hand .card{cursor:default}
 .nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}
 .hunt-ready .aim-talk{animation:none;opacity:1}
 .hunt-rules summary{cursor:pointer;color:#f2b632;font-weight:700}
+.ch-keys{grid-template-columns:repeat(3,1fr)}
+.ch-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ch-hintline{font-size:14px;padding:4px 8px;border-radius:8px;background:rgba(116,192,252,.12);color:#a5d8ff}
+.ch-table td.hint{color:#74c0fc;font-weight:900;background:rgba(116,192,252,.10)}

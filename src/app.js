@@ -2066,7 +2066,7 @@ function chartRender() {
   const head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
   const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + CHART_ROWS.slice(from, to).map((r, k) => {
     const i = from + k, d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
-    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : '<td></td>').join('')}</tr>`;
+    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : C.hint === i && men[i].includes(t) ? '<td class="hint">？</td>' : '<td></td>').join('')}</tr>`;
   }).join('');
   const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
   let preview = '';
@@ -2080,7 +2080,9 @@ function chartRender() {
       <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small></div>
       <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
       <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
-        ${['+', '−', '×', '÷', '(', ')'].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button></div>
+        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button></div>
+      <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span><button class="btn sm ghost" data-chint="1">💡 残りの場</button></div>
+      ${C.hint === C.row ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
     </div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   if (cur) { const keep = cur.querySelector('.ch-wrap'), st = keep ? keep.scrollTop : 0; cur.parentElement.innerHTML = html; bindModal($('#modal')); const w = $('#modal .ch-wrap'); if (w) w.scrollTop = st; } else modal(html); // 打つたびに作り直しても、対局は止めたまま
@@ -2090,6 +2092,7 @@ function chartRender() {
   m.querySelectorAll('[data-ckc]').forEach(b => b.onclick = () => chartKey({ k: 'c', i: +b.dataset.ckc, v: row[+b.dataset.ckc] }));
   m.querySelectorAll('[data-cko]').forEach(b => b.onclick = () => chartKey({ k: b.dataset.cko }));
   m.querySelectorAll('[data-ckb]').forEach(b => b.onclick = () => chartKey(null));
+  m.querySelectorAll('[data-chint]').forEach(b => b.onclick = () => { C.hint = C.hint === C.row ? null : C.row; chartRender(); });
   const on = m.querySelector('tr.on'); if (on && C.scroll !== C.row) { C.scroll = C.row; on.scrollIntoView({ block: 'nearest' }); }
 }
 // 対局中：完成した行だけを見る（入力はできない。作るのはホームから）

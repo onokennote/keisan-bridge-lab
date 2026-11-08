@@ -31,6 +31,10 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   for (const k of ['6', '+', '2', '-', 'a']) { await pg.keyboard.press(k); await pg.waitForTimeout(60); }
   ok(await pg.evaluate(() => /もう埋まって/.test(document.querySelector('.ch-expr').innerText)), '同じ答えは「もう埋まっています」');
   await pg.waitForTimeout(1000);
+  // ヒント：残りの場（A・2・6 の行で2つ埋めたあと）
+  await pg.click('[data-chint]'); await pg.waitForTimeout(200);
+  ok(await pg.evaluate(() => /まだの場：/.test(document.querySelector('.ch-hintline').innerText) && document.querySelectorAll('tr.on td.hint').length === 10), '「残りの場」でまだ埋まっていない場（10個）を表示');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_hint.png') });
   // 2・6 の行（3・4・8・Q）を全部埋めて完成させる
   await pg.click('tr[data-crow="26"]'); await pg.waitForTimeout(200);
   for (const ks of [['6', '/', '2'], ['6', '-', '2'], ['6', '+', '2'], ['6', '*', '2']]) { for (const k of ks) { await pg.keyboard.press(k); await pg.waitForTimeout(50); } await pg.waitForTimeout(900); }
