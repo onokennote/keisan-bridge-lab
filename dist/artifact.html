@@ -1727,10 +1727,14 @@ body.spectate .me .hand .card{cursor:default}
 .ch-hintbtn.on{background:rgba(116,192,252,.25);border-color:#74c0fc;color:#d0ebff}
 .ch-keys{grid-template-columns:repeat(5,1fr)}
 .ch-k.ch-clr{background:#5c2b2b;border-color:rgba(255,135,135,.5);color:#ffc9c9}
+/* モードのカード：自分の成績をまとめる */
+.mode-rec{display:grid;gap:6px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.18);font-size:13px}
+.mode-rec b{color:#ffd43b}
+.mode-rec .aim-fact{justify-self:start}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='9a0fac3986';
+window.KB_BUILD='0785434de3';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6400,9 +6404,9 @@ function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
   return `<div class="mode hunt-card"><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2>${modeBadgeRows(MB_HUNT, true)}
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
-    <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span>${aimCount() ? `<span class="aim-fact">🎯 自動照準 ×${aimCount()}</span>` : ''}</div>
-    ${b ? `<p class="small" style="margin:0">自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</p>` : ''}
-    <div class="row zk-mini" style="align-items:center;gap:8px"><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
+    <div class="mode-rec">${b ? `<div>自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</div>` : ''}
+      <div class="row zk-mini" style="align-items:center;gap:8px"><span>図鑑 <b>${zukanCount(z)}</b>/${ZUKAN.length}</span><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
+      ${aimCount() ? `<div class="aim-fact">🎯 自動照準 ×${aimCount()}</div>` : ''}</div>
     <button class="btn primary" data-act="hunt-start">狩りに出る</button></div>`;
 }
 // ホーム：アウツチャレンジ（モードの1つ）
@@ -6410,16 +6414,15 @@ function huntCardHTML() {
 function chartCardHTML() {
   const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
   return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>${modeBadgeRows(MB_CHART, true)}
-    <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。ヒントなし。完成した行は、対局中に見返せます。</p>
-    <div class="facts"><span>3枚26組・2枚11組</span><span>${done}/${total}面</span><span>完成 ${full}行</span></div>
+    <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。完成した行は、対局中に見返せます。</p>
+    <div class="mode-rec"><div>進み具合：<b>${done}</b>/${total}面・完成 <b>${full}</b>/${CHART_ROWS.length}行</div></div>
     <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
 }
 function outsCardHTML() {
   const g = G_(), d = g.drill || null, c = g.cnt || {};
   return `<div class="mode outs-card"><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2>${modeBadgeRows(MB_OUTS, true)}
     <p class="small muted" style="margin:0">見えている札から、次の番で上がれる札（アウツ）がいちばん多くなる出し方を選ぶ問題。5問連続で正解するとクリア、1問でも間違えると最初からやり直し。問題はだんだん難しくなります。</p>
-    <div class="facts"><span>5問</span><span>だんだん難しく</span><span>ヒントなし</span></div>
-    ${d && d.n ? `<p class="small" style="margin:0">これまで ${d.ok}/${d.n}問正解・クリア ${c.outs5 || 0}回</p>` : ''}
+    ${d && d.n ? `<div class="mode-rec"><div>これまで <b>${d.ok}</b>/${d.n}問正解・クリア <b>${c.outs5 || 0}</b>回</div></div>` : ''}
     <button class="btn primary" data-act="drill">アウツチャレンジに挑戦</button></div>`;
 }
 function growthCardHTML() {
@@ -7166,8 +7169,7 @@ function attackCardHTML() {
   const best = attackBests()[ATTACK_MIN];
   return `<div class="mode atk-card"><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2>${modeBadgeRows(MB_ATK, true)}
     <p class="small muted" style="margin:0">15分間で、どれだけバッジ（BP）を取れるかの勝負。4人卓・相手まんべんなく・1セット3ゲームを、時間いっぱいくり返します。セット1位は+30BP・2位は+10BPの順位ボーナス。速さ・判定・解説（掛け合い）は固定。AIの読みとゲームごとの総括はありません。</p>
-    <div class="facts"><span>15分</span><span>4人卓</span><span>1セット3ゲーム</span><span>速さ：はやい</span><span>記録は別集計</span></div>
-    ${best ? `<div class="row" style="align-items:center;gap:8px"><p class="small" style="margin:0;flex:1">自己ベスト：<b class="atk-bp">${best.bp} BP</b>（バッジ${best.badges}個・${new Date(best.at).toLocaleDateString('ja-JP')}）</p><button class="btn sm" data-act="attack-best">ベスト記録を見る</button></div>` : ''}
+    ${best ? `<div class="mode-rec row" style="align-items:center;gap:8px"><p style="margin:0;flex:1">自己ベスト：<b class="atk-bp">${best.bp} BP</b>（バッジ${best.badges}個・${new Date(best.at).toLocaleDateString('ja-JP')}）</p><button class="btn sm" data-act="attack-best">ベスト記録を見る</button></div>` : ''}
     <button class="btn primary" data-act="attack-start">バッジアタック開始</button></div>`;
 }
 // ホーム：バッジアタックの最高記録をそのまま表示
@@ -7732,6 +7734,17 @@ async function homeCastLoad() {
   } catch (e) { } finally { S.castLoading = false; }
   const el = S.view === 'home' && $('.title .cast'); if (el) { el.innerHTML = castHTML(); el.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }
+// モードのカードのタグ：自分で決めた設定があるときだけ、その設定を出す（決まっている設定は出さない）
+function pracFacts() {
+  const c = store.get('cfgPractice', null); if (!c) return '';
+  const opps = (c.opps || []).slice(0, Math.max(1, (c.n || 4) - 1)), lv = opps.map(o => o.level === 'r' ? null : +o.level);
+  const lvTxt = lv.every(x => x == null) ? `相手：${(MIX[c.mix] || MIX.random).label}` : `相手：${lv.map(x => x == null ? 'おまかせ' : '★' + x).join('・')}`;
+  return `<div class="facts my-facts"><span>${c.n || 4}人卓</span><span>${c.games || 5}ゲーム</span><span>${esc(lvTxt)}</span></div>`;
+}
+function tourFacts() {
+  const c = store.get('cfgTour', null); if (!c) return '';
+  return `<div class="facts my-facts"><span>${c.nPlayers}人・${KB.splitTables(c.nPlayers, 5).length}卓</span><span>${c.games}ゲーム×${c.sets}セット</span><span>上位${c.finalists}名が決勝</span><span>相手：${esc((MIX[c.mix] || MIX.random).label)}</span></div>`;
+}
 function homeHTML() {
   const saved = store.get('session', null);
   KB.resetNames();
@@ -7759,12 +7772,12 @@ ${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">
 <div class="mode-grid">
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
-    <div class="facts"><span>2〜5人卓</span><span>レベル・性格を指定</span><span>セット得点つき</span></div>
+    ${pracFacts()}
     <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
   <div class="mode"><div class="lbl">TOURNAMENT</div><h2>大会モード</h2>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
-    <div class="facts"><span>17人・4卓</span><span>5ゲーム×4セット</span><span>上位5名が決勝</span></div>
+    ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
   ${attackCardHTML()}
   ${huntCardHTML()}

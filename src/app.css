@@ -1722,3 +1722,7 @@ body.spectate .me .hand .card{cursor:default}
 .ch-hintbtn.on{background:rgba(116,192,252,.25);border-color:#74c0fc;color:#d0ebff}
 .ch-keys{grid-template-columns:repeat(5,1fr)}
 .ch-k.ch-clr{background:#5c2b2b;border-color:rgba(255,135,135,.5);color:#ffc9c9}
+/* モードのカード：自分の成績をまとめる */
+.mode-rec{display:grid;gap:6px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.18);font-size:13px}
+.mode-rec b{color:#ffd43b}
+.mode-rec .aim-fact{justify-self:start}
