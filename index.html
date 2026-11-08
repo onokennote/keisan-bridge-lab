@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="5a6cf0a 2026-11-08 21:46"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="ec901e8 2026-11-08 22:25"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1570,7 +1570,8 @@ body.spectate .me .hand .card{cursor:default}
 .tut-prog i{display:block;height:100%;background:#f2b632;transition:width .35s}
 .tut-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:60px}
 .tut-hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
-.tut-hand .card{animation:pop .3s ease-out both}
+.tut-hand .card{animation:pop .3s ease-out backwards}
+.tut.tut-static .tut-hand .card{animation:none}
 .tut-hand.pick .card{cursor:pointer}
 .tut-field{display:flex;justify-content:center}
 .tut-field .fieldcard{position:relative;transform:none}
@@ -1711,7 +1712,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='ef904bc056';
+window.KB_BUILD='22a2c6280b';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7340,7 +7341,10 @@ function tutRender() {
     <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<span class="row" style="gap:8px"><button class="btn ghost" data-act="tut-later">あとで</button><button class="btn primary" data-act="tut-end">打ってみる！</button></span>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
   const cur = $('#modal .tut'); if (cur) { cur.parentElement.innerHTML = html; bindModal($('#modal')); } else modal(html);
   const md = $('#modal'); if (!md) return;
-  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select'); tutRender(); });
+  // 札のタップは本番と同じ動き：その札だけが持ち上がる（手札を作り直さないので、点滅しない）
+  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select');
+    const old = b.closest('.tut-hand'); tutRender(); const nu = $('#modal .tut-hand.pick');
+    if (old && nu && old !== nu) { old.querySelectorAll('[data-tutc]').forEach(x => x.classList.toggle('sel', T.sel.includes(+x.dataset.tutc))); nu.replaceWith(old); } });
   md.querySelectorAll('[data-tutplay]').forEach(b => b.onclick = () => { const vals = T.sel.map(k => tk.hand[k]), m = KB.evalSelection(vals, tk.t); if (!m) return; T.done[T.i] = true; T.msg = { cls: 'good', t: `${m.expr} ＝ ${tk.t}　ナイス！ ほかにも 9 − 2、J − 4 × A など、作り方はいろいろあります。` }; KB.sfx('play3'); tutRender(); });
   md.querySelectorAll('[data-tuto]').forEach(b => b.onclick = () => { const k = +b.dataset.tuto, ok = k === tk.ok; T.done[T.i] = true; T.msg = { cls: ok ? 'good' : 'bad', t: (ok ? '⭕ ' : '❌ ') + (ok ? tk.good : tk.bad) }; KB.sfx(ok ? 'capture' : 'foul'); tutRender(); });
 }
