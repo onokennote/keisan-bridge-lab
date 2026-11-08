@@ -3155,7 +3155,7 @@ function renderPrev() {
   const [v, c] = verdict(d);
   el.hidden = false;
   el.innerHTML = `<details class="prev-dec" ${S.prevOpen ? 'open' : ''}><summary><span class="lbl" style="margin:0">前回の判断</span> <span class="dr-r">第${d.round}巡・場${d.t}</span> <span class="verdict ${c}">${v}</span> <span class="dr-loss">損失 ${(d.loss * 100).toFixed(1)}pt</span></summary>
-    <div class="dr-moves" style="margin-top:6px">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
+    <div class="dr-moves" style="margin-top:6px">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>${d.near ? `<span class="lab">ほぼ互角</span><span class="mono">${esc(d.near)}</span>` : ''}` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
     <div style="margin-top:6px">${whyHTML(d)}</div></details>`;
   const det = el.querySelector('details'); det.addEventListener('toggle', () => { S.prevOpen = det.open; });
 }
@@ -3285,6 +3285,7 @@ function rerenderAsk(where) { if (where === 'hint') renderHint(); else { const e
 // ---------- 自分の手 ----------
 const mlabel = e => e && e.m ? e.m.expr : 'あえて引く';
 const sameMove = (e, move) => move ? (e.m && e.m.key === move.key) : e.m === null;
+const BEST_LOOSE = { 1: { loss: 0.04, pp: 1.0, cap: 0.08 }, 2: { loss: 0.025 } };
 function recordDecision(move) {
   const g = S.game; const me = g.current();
   const counts = g.counts(me), t = g.field.v;
@@ -3314,12 +3315,16 @@ function recordDecision(move) {
   let loss = Math.max(0, best.score - mine.score);
   // 表示される数字（目的・上がる確率・期待PP）で最善手が上回っていなければ、端数の差は同じ扱い＝最善とする
   if (loss > 0 && visTie(best, mine)) loss = 0;
+  // 序盤は読みのばらつきが手の差と同じくらい大きい（1巡目は2回読むと最善手が3割入れ替わる）ので、最善の幅を広げる。
+  // 1巡目：差4%以内、または期待PPの差1.0以内（差8%まで）／2巡目：差2.5%以内。最善と同じ扱いにして、その手は「ほぼ互角」として残す
+  let near = null;
+  if (loss > 0 && !(sutemi && isOutEv(mine))) { const L = BEST_LOOSE[g.round]; if (L && (loss <= L.loss || (L.pp && mine.pp - best.pp <= L.pp && loss <= L.cap))) { near = mlabel(best); loss = 0; } }
   // 捨て身（あえて上がらない）が最善の場面で上がった：上がりは最善として扱う（疑問手にしない）。
   // ただし「攻めるなら捨て身もあった」ことは、あとで博士・マサがひと言そえる（sutemi.outOk）
   if (sutemi && isOutEv(mine)) { loss = 0; sutemi.outOk = true; }
   if (sutemi) sutemi.chose = mine === best;
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
-  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: mlabel(sutemi && sutemi.outOk ? mine : best0), bestStats: sutemi && sutemi.outOk ? mine : best0, mineStats: mine, loss, ppLoss: sutemi && sutemi.outOk ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: sutemi && sutemi.outOk ? mine : best0, mineStats: mine, loss, ppLoss: sutemi && sutemi.outOk ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -3790,7 +3795,7 @@ function showGameSummary(keep) {
     const k = di++; const d = dsAll[k]; if (!d) return '';
     const [v, c] = d.viewedHint ? ['評価外', 'v-none'] : verdict(d);
     return `<div class="dec-row"><div class="dr-head"><span class="dr-r">第${d.round}巡・場${d.t}</span><span class="verdict ${c}">${v}</span>${d.viewedHint ? '<span class="hint-tag">読みあり</span>' : ''}<span class="dr-loss">損失 ${(d.loss * 100).toFixed(1)}pt</span><button class="btn sm why" data-why="${k}" aria-expanded="false">${d.loss > 0.015 ? '理由と候補' : '候補を見る'}</button></div>
-    <div class="dr-moves">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
+    <div class="dr-moves">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>${d.near ? `<span class="lab">ほぼ互角</span><span class="mono">${esc(d.near)}</span>` : ''}` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
     <div class="why-row" id="why-${k}" hidden>${whyHTML(d)}</div></div>`;
   }).join('');
   const sorted = g.players.map((p, i) => ({ p, i, pp: g.pp[i] })).sort((a, b) => a.pp - b.pp);
