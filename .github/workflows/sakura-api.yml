@@ -28,14 +28,18 @@ jobs:
         env:
           H: ${{ secrets.SAKURA_HOST }}
           U: ${{ secrets.SAKURA_USER }}
-          P: ${{ secrets.SAKURA_PASSWORD }}
+          LFTP_PASSWORD: ${{ secrets.SAKURA_PASSWORD }}
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
+          # パスワードは環境変数で渡す（記号が入っていても崩れない）。中身は出さず、長さと前後の空白だけ確かめる
+          echo "ユーザー名の長さ: ${#U}  パスワードの長さ: ${#LFTP_PASSWORD}"
+          case "$LFTP_PASSWORD" in " "*|*" ") echo "パスワードの前後に空白が入っています";; esac
+          case "$U" in *@*|*" "*) echo "ユーザー名に @ や空白が入っています（アカウント名だけにしてください）";; esac
           # まず SFTP、だめなら FTPS（暗号化したFTP。証明書は確かめる）で送る
-          if lftp -e "set sftp:auto-confirm yes; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "sftp://$H"; then echo "SFTPで送りました"
+          if lftp -e "set sftp:auto-confirm yes; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" --env-password -u "$U" "sftp://$H"; then echo "SFTPで送りました"
           else
             echo "SFTPで入れませんでした。FTPSで試します"
-            lftp -e "set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "ftp://$H" && echo "FTPSで送りました"
+            lftp -e "set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" --env-password -u "$U" "ftp://$H" && echo "FTPSで送りました"
           fi
       - name: 動いているか確かめる
         if: steps.cfg.outputs.skip != '1'
