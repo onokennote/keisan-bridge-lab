@@ -10,10 +10,13 @@ SRC=$(git rev-parse --short HEAD)
 WT=$(mktemp -d)
 git fetch -q origin lolipop-deploy 2>/dev/null && git worktree add -q "$WT" origin/lolipop-deploy -B lolipop-deploy || git worktree add -q --orphan -b lolipop-deploy "$WT"
 cp dist/index.html dist/og.png "$WT/"
+# どの版か分かるように、ページに版の印を入れる（ページのソースの <meta name="kb-version"> で確かめられる）
+STAMP="$SRC $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
+sed -i "s|<head>|<head><meta name=\"kb-version\" content=\"$STAMP\">|" "$WT/index.html"
 printf '# 公開専用ブランチ\n\n計算ブリッジ作戦研究所（非公式ファン制作）の本番（https://keisan-bridge.lolipop-now.app）に出すファイルだけを置くブランチです。\n手で編集せず、作業ブランチの `./publish.sh` で更新します。\n' > "$WT/README.md"
 cd "$WT"
 git add -A
-if git diff --cached --quiet; then echo "変更なし"; else git commit -q -m "公開：作業ブランチ $SRC の版"; fi
+git commit -q -m "公開：作業ブランチ $SRC の版（$STAMP）"
 git push -q -u origin lolipop-deploy
 cd - >/dev/null
 git worktree remove --force "$WT"
