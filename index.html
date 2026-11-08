@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="bc59f31 2026-11-08 12:17"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="a38985c 2026-11-08 17:34"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1686,10 +1686,16 @@ body.spectate .me .hand .card{cursor:default}
 .cast-p svg{margin-right:0;box-shadow:0 0 0 2px #f2b632 !important}
 .cast-p i{position:absolute;right:-3px;bottom:-4px;min-width:16px;height:16px;padding:0 3px;box-sizing:border-box;border-radius:8px;background:#f2b632;color:#1a1408;font:900 10px/16px var(--f-body);font-style:normal;text-align:center}
 .cast-p:hover svg,.cast-p:focus-visible svg{transform:translateY(-2px)}
+/* 絶対透視（2回目から）：軽い演出 */
+.toushi-lite{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:120;display:flex;align-items:center;gap:10px;padding:8px 16px 8px 8px;border-radius:999px;background:rgba(40,20,100,.88);border:2px solid #b197fc;box-shadow:0 0 24px rgba(177,151,252,.6);pointer-events:none;animation:tlIn 1.3s ease both}
+.toushi-lite .tl-eye{width:40px;height:40px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px #f2b632}
+.toushi-lite .tl-eye svg{width:100%;height:100%;display:block}
+.toushi-lite b{font-family:var(--f-display);font-weight:400;font-size:20px;color:#ffd43b;text-shadow:0 0 10px rgba(255,212,59,.6)}
+@keyframes tlIn{0%{opacity:0;transform:translate(-50%,-40%) scale(.9)}15%{opacity:1;transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-56%)}}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='c24705c71d';
+window.KB_BUILD='364f2b7c90';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -2219,13 +2225,12 @@ KB.Game = class {
 };
 
 // ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
-// 発動は1ゲーム1回まで。50%の確率で、第2巡か第3巡のカナタの番に発動する（kanataAt）
+// 第1巡から、カナタの番が来るたびに50%の確率で発動する。発動したら、そのゲームの最後まで見通したまま（1ゲーム1回）。kanataAt は発動した巡
 KB.kanataRoll = function (game) {
-  const k = game.players.findIndex(pl => pl.clairvoyant);
-  game.kanataIdx = k; game.kanataAt = k >= 0 && Math.random() < 0.5 ? (Math.random() < 0.5 ? 2 : 3) : 0; game.kanataOn = false;
-  if (k >= 0 && G.KB_KANATA_AT) game.kanataAt = G.KB_KANATA_AT; // テスト用：発動を固定
+  game.kanataIdx = game.players.findIndex(pl => pl.clairvoyant); game.kanataAt = 0; game.kanataOn = false;
 };
-KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataAt && !game.kanataOn && game.round >= game.kanataAt;
+KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataIdx >= 0 && !game.kanataOn && (G.KB_KANATA_AT ? game.round >= G.KB_KANATA_AT : Math.random() < 0.5); // KB_KANATA_AT はテスト用（その巡で必ず発動）
+KB.kanataStart = (game) => { game.kanataOn = true; game.kanataAt = game.round; };
 function aiMoveClear(game, p, rollouts) {
   const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
   const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
@@ -2294,7 +2299,7 @@ KB.autoGame = function (players, starter) {
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
-    if (KB.kanataReady(g, p)) g.kanataOn = true;
+    if (KB.kanataReady(g, p)) KB.kanataStart(g);
     if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));
@@ -5115,8 +5120,10 @@ M.atkEndBest = [
 M.atkQuit = ['ここで終了か！{bp}BPは取れたで、次はフルタイム出場や！', '途中交代やな！{bp}BP、次は最後のホイッスルまで行こか！'];
 M.atkQuit0 = ['ありゃ、ウォーミングアップで終わってもうたな！次は本番いこか！'];
 R.kanataOn = ['奥義「絶対透視」。{n}さんには、全員の手札と山札の順番まで視えています。{n}さんが上がる確率はぐっと上がりました。上がりも狙えますが、上がられたときに備えて大きい札から処分していく手が有力になります。', '{n}さんの目が開きました。こちらの上がりの目が消えたわけではありません。ただ、先に上がられる確率は大きく上がったので、失点の見込みも頭に入れて選びましょう。'];
+R.kanataAgain = ['{n}さんの目が、また開きました。このゲームも見通されています。大きい札から減らしておきましょう。', '絶対透視、ふたたび。上がりは狙えますが、失点の見込みにも備えておきましょう。'];
 for (const k in R) KB.LINES_ROOT[k] = R[k];
 M.kanataOn = ['出たー！奥義・絶対透視や！カナタには全部見えとるで！こっちのゴールもまだ狙えるけど、先に決められる確率はグンと上がった。でかい札から逃がしながら攻めや！', 'カナタの目が開いたで…！山札の底までお見通しや。カウンター狙いつつ、守備もしっかり固めとこ！'];
+M.kanataAgain = ['また来たで、絶対透視！このゲームも全部見えとる。でかい札から逃がしとこ！', 'カナタの目がまた開いたで！ポーカーで手札を全部見られとるようなもんや、守りも忘れんとこ！'];
 for (const k in M) KB.LINES_MASA[k] = M[k];
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -5152,7 +5159,7 @@ KB.casterSVG = function (who, mood) {
 const R = (a, r) => a[((r || Math.random)() * a.length) | 0];
 const fill = (s, d) => s.replace(/\{(\w+)\}/g, (_, k) => (d[k] == null ? '' : d[k]));
 const ANALYTIC = { start: 1, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, good: 1, ok: 1, bad: 1, drewGood: 1, border: 1, borderIn: 1, borderClose: 1, borderFar: 1, finalSet: 1, lastGame: 1, final: 1, heavy: 1, tip: 1, leadSet: 1, trailSet: 1, philo: 1, setStart: 1, oppMissed: 1, oppBlunder: 1, oppNice: 1, myBigPP: 1, mySmallPP: 1, resultLucky: 1, resultUnlucky: 1, resultBoth: 1, resultBad: 1, reshuffle: 1, deckLow: 1, styleKeisan: 1, styleInochi: 1 };
-const PRIO = { kanataOn: 9, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
+const PRIO = { kanataOn: 9, kanataAgain: 8, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
 const LINES = () => ({ root: KB.LINES_ROOT || {}, masa: KB.LINES_MASA || {} });
 // 最近使ったセリフ（ブラウザに保存して、次に開いたときも続けて避ける）
 let RECENT = {};
@@ -5203,7 +5210,7 @@ KB.commentLine = function (mode, kind, d) {
   saveRecent();
   let text = fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
-  const noPrefix = { kanataOn: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
+  const noPrefix = { kanataOn: 1, kanataAgain: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];
   if (pf && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
   // 博士はごくたまに、哲学的なひと言を添える
@@ -8023,9 +8030,12 @@ function loop() {
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
   if (KB.kanataReady(g, p)) { // 奥義・絶対透視
-    g.kanataOn = true; if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
-    S.thinking = p; toushiFx(g, p); say('kanataOn', { n: nm(pl) }); renderGame();
-    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : 3300); return;
+    KB.kanataStart(g); if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+    // 大きな演出はそのセットの最初の1回だけ。2回目からは軽く光るだけ
+    const setKey = S.T ? (S.T.phase || '') + ':' + (S.T.set || 0) : 'p', first = S.toushiSet !== setKey; S.toushiSet = setKey;
+    S.thinking = p; if (first) { toushiFx(g, p); say('kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say('kanataAgain', { n: nm(pl) }); }
+    renderGame();
+    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : first ? 3300 : 1100); return;
   }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
@@ -8145,6 +8155,12 @@ function cutInFx(label, expr, t) {
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
 }
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
+function toushiLite(g, p) {
+  if (S.settings.speed === 'instant') return;
+  const el = document.createElement('div'); el.className = 'toushi-lite';
+  el.innerHTML = `<span class="tl-eye">${KB.avatarSVG(g.players[p].ch, { open: true, level: 6 })}</span><b>絶対透視</b>`;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
+}
 function toushiFx(g, p) {
   if (S.settings.speed === 'instant') return;
   // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
@@ -9794,7 +9810,7 @@ function entranceHTML() {
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
-  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、第2巡か第3巡に、全員の手札も山札の底まで見通すんや。ほんで、ゲームごとに出るか出えへんかは五分五分。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
+  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、カナタの番が来るたびに五分五分で出るんや。出たらそのゲームはずっと、全員の手札も山札の底まで見通しとる。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;
