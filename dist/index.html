@@ -1658,7 +1658,7 @@ body.spectate .me .hand .card{cursor:default}
 .rk-bio small{display:block;color:#f2b632;font-weight:900;margin-bottom:2px}
 .pf-bio{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.2);overflow-wrap:anywhere}
 .pf-bio .btn{justify-self:start}
-#bio-text{width:100%;box-sizing:border-box;font:inherit;padding:10px;border-radius:10px}
+#modal #bio-text{width:100%;box-sizing:border-box;font-family:var(--f-body,"Zen Kaku Gothic New",sans-serif);font-size:17px;line-height:1.7;padding:12px;border-radius:10px;margin:0}
 /* アーティファクト版を閉じた画面（新しいサイトへの案内） */
 .closed{max-width:640px;margin:0 auto;padding:24px 16px 40px;display:grid;gap:16px}
 .cl-hero{text-align:center;display:grid;gap:4px;padding:8px 0}
@@ -1679,10 +1679,13 @@ body.spectate .me .hand .card{cursor:default}
 .cl-go{font-size:18px;padding:16px;text-align:center;justify-content:center}
 .cl-go[aria-disabled="true"]{opacity:.6;pointer-events:none}
 .cl-go2{justify-self:center}
+.pb-bio{flex-basis:100%;order:0;text-align:left;font:inherit;font-size:14px;line-height:1.65;color:var(--ink);background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.35);border-radius:12px;padding:8px 12px;cursor:pointer;overflow-wrap:anywhere}
+.pb-bio.empty{color:#c9c2ad;border-style:dashed;font-size:13px}
+.pb-bio:hover{border-color:#f2b632}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='7bbb75f95a';
+window.KB_BUILD='27d8347c02';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6501,11 +6504,12 @@ async function rankCardOpen(rid, me) {
     put(`<img src="${cv.toDataURL('image/png')}" alt="成績カード" style="width:100%;border-radius:10px;display:block">`, d ? d.bio : store.get('bio', ''), d ? d.name : S.settings.name);
   } catch (e) { put('<span class="small">成績カードを読み込めませんでした。</span>', '', ''); }
 }
-function bioEdit() {
+function bioEdit(from) {
+  S.bioFrom = from || 'profiles';
   const v = store.get('bio', '') || '';
   modal(`<div class="stack"><h2 style="margin:0">自己紹介</h2><p class="small muted" style="margin:0">${CLOUD_ON ? 'ランキングでアイコンを押すと、成績カードといっしょに表示されます。' : ''}140文字まで。URL・連絡先・ふさわしくない言葉が入っていると、ほかの人には表示されません。</p>
     <textarea id="bio-text" rows="4" maxlength="140" placeholder="例）3枚出しの研究中。目標は全員達人の大会で優勝！">${esc(v)}</textarea><div class="small muted" id="bio-n" style="text-align:right">${[...v].length}/140</div>
-    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="profiles">戻る</button><button class="btn primary" data-act="bio-save">保存する</button></div></div>`);
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="${S.bioFrom === 'home' ? 'close' : 'profiles'}">戻る</button><button class="btn primary" data-act="bio-save">保存する</button></div></div>`);
   const t = $('#bio-text'); if (t) { t.oninput = () => { const n = $('#bio-n'); if (n) n.textContent = [...t.value].length + '/140'; }; setTimeout(() => t.focus(), 50); }
 }
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
@@ -7608,6 +7612,7 @@ function homeHTML() {
   <div class="cast">${demo.join('')}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span></span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
+    ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
@@ -10232,8 +10237,8 @@ function act(a, el) {
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me); break;
-    case 'bio-edit': bioEdit(); break;
-    case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); profileModal(); break; }
+    case 'bio-edit': bioEdit(el.dataset.from); break;
+    case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;
     case 'attack-best': attackBestModal(); break;
     case 'attack-next': attackNextSetGo(); break;

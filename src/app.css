@@ -1676,3 +1676,6 @@ body.spectate .me .hand .card{cursor:default}
 .cl-go{font-size:18px;padding:16px;text-align:center;justify-content:center}
 .cl-go[aria-disabled="true"]{opacity:.6;pointer-events:none}
 .cl-go2{justify-self:center}
+.pb-bio{flex-basis:100%;order:0;text-align:left;font:inherit;font-size:14px;line-height:1.65;color:var(--ink);background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.35);border-radius:12px;padding:8px 12px;cursor:pointer;overflow-wrap:anywhere}
+.pb-bio.empty{color:#c9c2ad;border-style:dashed;font-size:13px}
+.pb-bio:hover{border-color:#f2b632}
