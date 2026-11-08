@@ -627,9 +627,12 @@ function G_() {
 function G_save(g) { if (S.attack) return; if (g.games.length > 300) g.games = g.games.slice(-300); store.set('growth', g); }
 // 直近 n ゲームの判断から推定実力を出す（お手つきは損失10ptの判断として数える）
 // 判断の質（最善率・平均損失）から出した実力から、お手つきの割合に応じて差し引く（お手つき1割で−0.5）
+// 実力の計算に使う1手の損失：序盤（1・2巡）で差2.5%以内は最善と同じ（最善の幅を広げる前の記録にも当てる）。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
+const RATE_CAP = 0.10;
+const rateLoss = d => Math.min(RATE_CAP, (d.l <= 0.025 && (d.c || []).includes('opening')) ? 0 : d.l);
 function ratingOf(games, n) {
   const gs = games.slice(-(n || 20)); const ls = []; let fouls = 0;
-  gs.forEach(x => { x.ds.forEach(d => { if (!d.h) ls.push(d.l); }); fouls += x.f || 0; }); // AIの読みを見た手は実力の計算から外す
+  gs.forEach(x => { x.ds.forEach(d => { if (!d.h) ls.push(rateLoss(d)); }); fouls += x.f || 0; }); // AIの読みを見た手は実力の計算から外す
   if (ls.length < 8) return { ok: false, need: 8 - ls.length, n: ls.length };
   const avg = ls.reduce((a, b) => a + b, 0) / ls.length * 100, best = ls.filter(l => l <= 0.015).length / ls.length;
   const base = Math.max(0.3, Math.min(5.5, (interp(RATE_LOSS, avg, true) + interp(RATE_BEST, best, false)) / 2));
