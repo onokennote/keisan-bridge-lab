@@ -387,7 +387,7 @@ function render() {
   else if (S.view === 'game') app.innerHTML = gameHTML();
   else if (S.view === 'set-end') app.innerHTML = setEndHTML();
   else if (S.view === 'result') app.innerHTML = resultHTML();
-  else if (S.view === 'entrance') app.innerHTML = entranceHTML();
+  else if (S.view === 'entrance') { app.innerHTML = entranceHTML(); entranceScroll(); }
   else if (S.view === 'opening') app.innerHTML = openingHTML();
   else if (S.view === 'strategy') app.innerHTML = strategyHTML();
   else if (S.view === 'growth') app.innerHTML = growthHTML();
@@ -4605,17 +4605,27 @@ function enterFinal() {
   go('entrance');
   if (T.finalists.includes(0)) setTimeout(confetti, T.finalists.length * 550 + 300);
 }
+// シードの入場に合わせて、画面をそこまで動かす（スマホで見切れないように）。話し終わるころに開始ボタンまで
+function entranceScroll() {
+  const el = $('.seed-ent'); if (!el) return; const d = parseFloat(el.style.animationDelay) || 0, key = S.gameNo + ':' + (S.T && S.T.set);
+  if (S.entScrolled === key) return; S.entScrolled = key;
+  setTimeout(() => { const e = $('.seed-ent'); if (e && S.view === 'entrance') e.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, (d - 0.1) * 1000);
+  setTimeout(() => { const b = $('[data-act="start-final"]'); if (b && S.view === 'entrance') b.scrollIntoView({ behavior: 'smooth', block: 'end' }); }, (d + 1.2 + 3 * 1.6 + 1) * 1000);
+}
 function entranceHTML() {
   const T = S.T; const s = standingsSorted(T);
   const inF = T.finalists.includes(0);
   const myPre = s.findIndex(p => p.id === 0) + 1;
-  const cards = T.finalists.map((id, i) => { const p = P(id); const st = p.human ? null : KB.style(p.style);
-    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">${p.seed ? 'シード' : `予選${i + 1}位`}</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${p.seed ? '★6・予選免除' : `${T.points[id]}点・PP ${T.totPP[id]}`}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
+  const card = (id, delay) => { const p = P(id); const st = p.human ? null : KB.style(p.style);
+    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${delay}s"><div class="ent-rank">${p.seed ? 'シード' : `予選${T.finalists.filter(x => !P(x).seed).indexOf(id) + 1}位`}</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${p.seed ? '★6・予選免除' : `${T.points[id]}点・PP ${T.totPP[id]}`}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; };
+  // 予選からの進出者が先に入場し、そのあとシード（カナタ）が別の舞台で入場する。スマホでは入場に合わせてそこまで動かす
+  const reg = T.finalists.filter(id => !P(id).seed), seed = T.finalists.find(id => P(id).seed), sd = 0.8 + reg.length * 0.55;
+  const cards = reg.map((id, i) => card(id, 0.4 + i * 0.55)).join('');
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
-  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、カナタの番が来るたびに五分五分で出るんや。出たらそのゲームはずっと、全員の手札も山札の底まで見通しとる。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
   <div class="ent-row">${cards}</div>
+  ${T.kanata && seed != null ? `<div class="seed-ent" style="animation-delay:${sd}s"><div class="seed-head">シード選手、入場！</div><div class="ent-row">${card(seed, sd + 0.3)}</div><div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、カナタの番が来るたびに五分五分で出るんや。出たらそのゲームはずっと、全員の手札も山札の底まで見通しとる。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${sd + 1.2 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div></div>` : ''}
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;
 }
