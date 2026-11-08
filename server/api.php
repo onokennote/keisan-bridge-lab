@@ -134,7 +134,25 @@ try {
       $total = (int)db()->query("SELECT COUNT(*) c FROM ranks WHERE shown = 1 AND $where")->fetch()['c'];
       out(['ok' => true, 'type' => $type, 'list' => $list, 'total' => $total]);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 1]);
+    case 'rankings': { // 4つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
+      $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = 20; $res = [];
+      $defs = ['rating' => ['rating IS NOT NULL', 'rating DESC', fn($r, $m) => $r['rating'] > $m['rating']],
+        'badges' => ['badges > 0', 'badges DESC, bp DESC', fn($r, $m) => $r['badges'] > $m['badges'] || ($r['badges'] == $m['badges'] && $r['bp'] > $m['bp'])],
+        'bp' => ['bp > 0', 'bp DESC', fn($r, $m) => $r['bp'] > $m['bp']],
+        'attack' => ['atk > 0', 'atk DESC', fn($r, $m) => $r['atk'] > $m['atk']]];
+      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'badges' => (int)$r['badges'], 'bp' => (int)$r['bp'], 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'me' => $uid !== '' && $r['uid'] === $uid];
+      foreach ($defs as $type => [$where, $order, $better]) {
+        $all = db()->query("SELECT uid, pid, name, rating, badges, bp, atk, avatar FROM ranks WHERE shown = 1 AND $where ORDER BY $order, updated ASC")->fetchAll();
+        $list = []; $mine = [];
+        foreach ($all as $i => $r) {
+          $rank = 1; foreach ($all as $o) { if ($better($o, $r)) $rank++; else break; } // 同じ値は同じ順位
+          if ($i < $lim) $list[] = $row($r, $rank); elseif ($uid !== '' && $r['uid'] === $uid) $mine[] = $row($r, $rank);
+        }
+        $res[$type] = ['list' => $list, 'mine' => $mine, 'total' => count($all)];
+      }
+      out(['ok' => true, 'rankings' => $res]);
+    }
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 2]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

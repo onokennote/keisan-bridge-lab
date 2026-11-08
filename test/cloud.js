@@ -27,18 +27,20 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   // ランキング
   await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast,.toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
   ok(!!(await pa.$('[data-go="ranking"]')), 'ホームにランキングのボタン');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_home.png') });
   await pa.click('[data-go="ranking"]'); await pa.waitForTimeout(1500);
-  await pa.click('[data-act="rank-tab"][data-k="badges"]'); await pa.waitForTimeout(1500);
-  ok(await pa.evaluate(() => /ケン/.test(document.querySelector('.rk-list').innerText) && !!document.querySelector('.rk-row.me')), 'バッジ数のランキングに自分（ケン）が出る');
+  const secs = await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')].map(e => ({ h: e.querySelector('h2').innerText, t: e.querySelector('.rk-list').innerText, me: !!e.querySelector('.rk-row.me') })));
+  ok(secs.length === 4, '4つのランキングが全部展開して出る：' + secs.map(x => x.h).join(' / '));
+  ok(secs[1] && /ケン/.test(secs[1].t) && secs[1].me, 'バッジ数のランキングに自分（ケン）が出る');
+  ok(secs[2] && /BP/.test(secs[2].h) && /ケン/.test(secs[2].t) && secs[2].me, 'BPのランキングに自分（ケン）が出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ranking.png') });
-  await pa.click('[data-act="rank-tab"][data-k="attack"]'); await pa.waitForTimeout(1500);
-  ok(await pa.evaluate(() => /820BP/.test(document.querySelector('.rk-list').innerText)), 'バッジアタックの自己ベスト（820BP）が出る');
+  ok(secs[3] && /820BP/.test(secs[3].t), 'バッジアタックの自己ベスト（820BP）が出る');
   // 端末B：NGワードの名前のプレイヤー
   const B = await b.newContext(); const pb = await B.newPage(); pb.on('pageerror', e => errs.push(e.message));
   await pb.goto('http://localhost:8124/'); await pb.waitForTimeout(700);
   await pb.fill('#new-name', 'うんこマン'); await pb.click('[data-act="create-profile"]'); await pb.waitForTimeout(1500);
   await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.testAch('win', 30); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(); }); await pb.waitForTimeout(500);
-  await pb.evaluate(() => KBAPP.go('ranking')); await pb.waitForTimeout(300); await pb.click('[data-act="rank-tab"][data-k="badges"]'); await pb.waitForTimeout(1500);
+  await pb.evaluate(() => KBAPP.go('ranking')); await pb.waitForTimeout(1800);
   const names = await pb.evaluate(() => [...document.querySelectorAll('.rk-nm')].map(e => e.innerText));
   ok(names.some(n => /^研究員/.test(n)) && !names.some(n => /うんこ/.test(n)), 'ふさわしくない名前は「研究員○○」と表示：' + names.join(' / '));
   // 端末C：Aの引き継ぎコードで入ると、Aの記録が出る

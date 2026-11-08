@@ -1639,3 +1639,13 @@ body.spectate .me .hand .card{cursor:default}
 .rk-v{font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
 .rk-v small{display:block;font-size:10px;font-weight:400;color:#c9c2ad}
 .cl-code{font-size:18px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;background:#0b1a14;border:1px solid rgba(242,182,50,.4)}
+.rank-banner{display:flex;align-items:center;gap:12px;width:100%;margin:12px 0 4px;padding:14px 16px;border-radius:16px;border:2px solid #f2b632;background:linear-gradient(135deg,rgba(242,182,50,.28),rgba(242,182,50,.08));color:inherit;text-align:left;cursor:pointer;font:inherit}
+.rank-banner .rb-ic{font-size:30px}
+.rank-banner b{display:block;font-family:var(--f-display);font-size:22px;color:#ffd43b;font-weight:400}
+.rank-banner small{color:#e9e3cf}
+.rank-banner .rb-go{margin-left:auto;font-weight:900;color:#ffd43b;white-space:nowrap}
+.rk-all{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.rk-all{grid-template-columns:1fr 1fr}}
+.rk-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.rk-h h2{margin:0;font-size:18px}
+.rk-gap{text-align:center;color:#c9c2ad;line-height:1}

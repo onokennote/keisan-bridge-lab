@@ -1642,10 +1642,20 @@ body.spectate .me .hand .card{cursor:default}
 .rk-v{font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
 .rk-v small{display:block;font-size:10px;font-weight:400;color:#c9c2ad}
 .cl-code{font-size:18px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;background:#0b1a14;border:1px solid rgba(242,182,50,.4)}
+.rank-banner{display:flex;align-items:center;gap:12px;width:100%;margin:12px 0 4px;padding:14px 16px;border-radius:16px;border:2px solid #f2b632;background:linear-gradient(135deg,rgba(242,182,50,.28),rgba(242,182,50,.08));color:inherit;text-align:left;cursor:pointer;font:inherit}
+.rank-banner .rb-ic{font-size:30px}
+.rank-banner b{display:block;font-family:var(--f-display);font-size:22px;color:#ffd43b;font-weight:400}
+.rank-banner small{color:#e9e3cf}
+.rank-banner .rb-go{margin-left:auto;font-weight:900;color:#ffd43b;white-space:nowrap}
+.rk-all{display:grid;grid-template-columns:1fr;gap:12px}
+@media (min-width:760px){.rk-all{grid-template-columns:1fr 1fr}}
+.rk-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.rk-h h2{margin:0;font-size:18px}
+.rk-gap{text-align:center;color:#c9c2ad;line-height:1}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='fac8efacaf';
+window.KB_BUILD='70bf23fa5f';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6417,25 +6427,34 @@ function cloudPanelHTML() {
     <details class="small"><summary>別の端末の記録を引き継ぐ</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">引き継ぐ</button></div><p class="small muted" style="margin:4px 0 0">いまこの端末にある記録は、引き継いだ記録に置きかわります。</p></details>`;
 }
 // ---------- ランキング ----------
-const RANK_TABS = [['rating', '推定実力'], ['badges', 'バッジ数'], ['attack', 'バッジアタック']];
+// 4つのランキングを並べて全部見せる（各上位20人＋20位より下の自分）
+const RANK_DEFS = [['rating', '推定実力', '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。'], ['badges', 'バッジ数', '獲得したバッジの数（同じ数ならBPの多い順）。'], ['bp', 'BP（バッジポイント）', 'バッジの段階（銅・銀・金）と取りにくさで決まるポイントの合計。'], ['attack', 'バッジアタック', 'バッジアタック（15分）の自己ベスト。']];
 function rankingHTML() {
-  const tab = S.rankTab || 'rating', R = S.rank && S.rank.type === tab ? S.rank : null, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
-  const val = x => tab === 'rating' ? `★${x.rating.toFixed(1)}` : tab === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : `${x.atk}BP`;
-  const rows = R ? R.list.map(x => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><span class="rk-av">${x.avatar ? KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' }) : ''}</span><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(x)}</span></div>`).join('') || '<p class="small muted">まだだれも載っていません。</p>' : '<p class="small muted">読み込み中…</p>';
+  const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
+  const val = (k, x) => k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
+  const rowH = (k, x) => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><span class="rk-av">${x.avatar ? KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' }) : ''}</span><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
+  const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
+    <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.length ? '<div class="rk-gap">…</div>' + d.mine.map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
-  <div class="panel stack"><div class="rk-tabs">${RANK_TABS.map(([k, l]) => `<button class="btn sm ${k === tab ? 'primary' : ''}" data-act="rank-tab" data-k="${k}">${l}</button>`).join('')}</div>
-    <p class="small muted" style="margin:0">${tab === 'rating' ? '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。' : tab === 'badges' ? '獲得したバッジの数（同じ数ならBPの多い順）。' : 'バッジアタック（15分）の自己ベスト。'}${R ? `　全${R.total}人` : ''}</p>
-    <div class="rk-list">${rows}</div>
-    <label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
-    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。</p></div>`;
+  <div class="rk-all">${RANK_DEFS.map(sec).join('')}</div>
+  <div class="panel stack"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは上位20人まで。20位より下のときは、自分の順位を下に出します。</p></div>`;
 }
 async function rankingLoad() {
-  const tab = S.rankTab || 'rating'; const c = raw.get('kb.cloud', null);
-  const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); };
-  if (S.rank && S.rank.type === tab && Date.now() - S.rank.at < 30000) return;
-  try { await cloudPush(); const r = await fetch(CLOUD_API + '?a=ranking&type=' + tab + '&uid=' + encodeURIComponent((c && c.uid) || '')); const j = await r.json(); if (!j.ok) throw new Error(j.error); S.rank = Object.assign(j, { at: Date.now() }); }
-  catch (e) { S.rank = { type: tab, list: [], total: 0, at: Date.now() }; toast('ランキングを読み込めませんでした'); }
-  if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); const h2 = $('#rk-hide'); if (h2) h2.onchange = h.onchange || (() => { raw.set('kb.p.' + PID + '.rankHide', h2.checked); cloudPush().then(() => { S.rank = null; render(); }); }); }
+  const c = raw.get('kb.cloud', null);
+  const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
+  bindHide();
+  if (S.rank && Date.now() - S.rank.at < 30000) return;
+  try {
+    await cloudPush();
+    const u = encodeURIComponent((c && c.uid) || ''), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + u)).json();
+    let R = j.rankings;
+    if (!R) { // サーバーが古いとき：これまでのランキングを1つずつ読む（BPは出せない）
+      R = {}; for (const k of ['rating', 'badges', 'attack']) { const x = await (await fetch(CLOUD_API + '?a=ranking&type=' + k + '&uid=' + u)).json(); if (x.ok) R[k] = { list: x.list.slice(0, 20), mine: x.list.slice(20).filter(y => y.me), total: x.total }; }
+    }
+    S.rank = { rankings: R, at: Date.now() };
+  } catch (e) { S.rank = { rankings: {}, at: Date.now() }; toast('ランキングを読み込めませんでした'); }
+  if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); bindHide(); }
 }
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
@@ -7495,6 +7514,7 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
+${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>推定実力・バッジ数・BP・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
 <div class="mode-grid">
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
@@ -7512,7 +7532,6 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
 </div>
 ${growthCardHTML()}
 <div class="row" style="margin-top:14px">
-  ${CLOUD_ON ? '<button class="btn" data-go="ranking">🏆 ランキング</button>' : ''}
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
@@ -10081,7 +10100,6 @@ function act(a, el) {
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartOpen(); break;
-    case 'rank-tab': S.rankTab = el.dataset.k; render(); break;
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
     case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
     case 'cloud-restore': { const v = (($('#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } cloudRestore(v); break; }
