@@ -192,7 +192,7 @@ try {
       $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmpT($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1;
       $sorted = ['total' => [$l, $rk]] + $sorted;
       $tot = []; foreach ($all as $r) $tot[$r['uid'] . ':' . $r['pid']] = $r['total'];
-      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid];
+      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid, 'pid' => ($uid !== '' && $r['uid'] === $uid) ? $r['pid'] : null]; // pid は自分の行だけ（今のプレイヤーを見分けるため）
       foreach ($sorted as $type => [$l, $rk]) {
         $list = []; $mine = [];
         foreach ($l as $i => $r) { if ($i < $lim) $list[] = $row($r, $rk[$i]); elseif ($uid !== '' && $r['uid'] === $uid) $mine[] = $row($r, $rk[$i]); }
@@ -215,7 +215,7 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 5]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 6]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

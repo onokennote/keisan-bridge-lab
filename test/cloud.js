@@ -98,6 +98,14 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(await settle(pa, () => JSON.parse(localStorage.getItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth')).cnt.win === 50), '別の端末で進めた記録が、開き直すと反映される（端末に依存しない）');
   // 端末Aは鍵が切れずに使い続けられる
   await settle(pa, () => { KBAPP.testAch('three', 70); return KBAPP.cloudPush(); }); ok(await settle(pa, () => KBAPP.cloud().CLOUD.status === 'saved'), '引き継いだあとも、もとの端末で保存を続けられる');
+  // 同じ端末の2人目：ランキングの「あなた」は今プレイしているプレイヤーだけ
+  await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); KBAPP.act('new-profile'); });
+  await pa.fill('#new-name', 'ジロウ'); await pa.click('[data-act="create-profile"]'); await pa.waitForTimeout(1500);
+  await settle(pa, () => { document.querySelectorAll('#modal,.whistle-ov,.ach-toast').forEach(e => e.remove()); KBAPP.testAch('win', 5); return KBAPP.cloudPush(); });
+  await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
+  const meRows = await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')].find(e => /バッジ数/.test(e.querySelector('h2').innerText)).querySelectorAll('.rk-row').length ? [...[...document.querySelectorAll('.rk-sec')].find(e => /バッジ数/.test(e.querySelector('h2').innerText)).querySelectorAll('.rk-row')].map(r => r.querySelector('.rk-nm').innerText.replace(/\s+/g, '')) : []);
+  ok(meRows.some(n => n === 'ジロウあなた') && meRows.some(n => n === 'ケン'), '「あなた」は今のプレイヤー（ジロウ）だけ、同じ端末のケンは名前だけ：' + meRows.join(' / '));
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_me.png') });
   // アーティファクト版（file://）ではクラウドは動かない
   const D = await b.newContext(); const pd = await D.newPage(); await pd.goto('file://' + path.join(__dirname, 'page.html')); await pd.waitForTimeout(500);
   ok(await pd.evaluate(() => !KBAPP.cloud().CLOUD_ON && !document.querySelector('[data-go="ranking"]')), 'アーティファクト版ではクラウド・ランキングは出ない');
