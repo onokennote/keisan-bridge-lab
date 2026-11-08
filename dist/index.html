@@ -1696,7 +1696,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d3866bc72f';
+window.KB_BUILD='f23e8523c0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7071,7 +7071,7 @@ function modeIntro(o) {
   const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
   const el = document.createElement('div'); el.className = 'whistle-ov';
   el.innerHTML = `<div class="wh-box"><div class="wh-title" ${o.title.length >= 7 ? 'style="font-size:clamp(26px,8.5vw,40px)"' : ''}>${esc(o.title)}</div><div class="wh-sub">${esc(o.sub)}</div>
-    <div class="wh-cast">${bub('masa', o.masa, 0.3)}${bub('root', o.root, 1.1)}</div>
+    <div class="wh-cast">${bub('masa', o.masa, 0.3)}${o.masa2 ? bub('masa', o.masa2, 1.1) : ''}${o.root ? bub('root', o.root, 1.1) : ''}</div>
     <div class="row" style="justify-content:center;margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn" data-x="cancel">やめる</button>${(o.extra || []).map((x, i) => `<button class="btn ${x.primary ? 'primary' : ''}" data-x="e${i}">${esc(x.label)}</button>`).join('')}${o.noGo ? '' : `<button class="btn primary" data-x="go">${esc(o.goLabel || 'スタート')}</button>`}</div></div>`;
   document.body.appendChild(el);
   const close = then => { el.classList.add('out'); setTimeout(() => { el.remove(); if (then) then(); }, 300); };
@@ -7443,6 +7443,15 @@ function chartEval(tok) {
   const v = expr(); if (i < tok.length) err('式の形がちがいます'); return v;
 }
 const chartStr = tok => tok.map(t => t.k === 'c' ? KB.vname(t.v) : t.k).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
+// 早見表の導入（ホームから開くとき）：マサが、作り方とゲーム中に見られることを話す。完成していれば完成と言う
+function chartIntro() {
+  const full = chartFullRows().length, all = CHART_ROWS.length, done = full >= all;
+  modeIntro({ title: '早見表', sub: done ? `${all}行すべて完成！` : `完成 ${full}/${all}行`,
+    masa: done ? `早見表、完成しとるやん！${all}行ぜんぶ埋まったで、見事なもんや！ゲーム中は「まだ見えていないカードを見る」の横のボタンから、いつでもこの表が見られるで！`
+      : `早見表は、3枚・2枚の札でどの場の数が作れるかの一覧や。行を選んで、札と記号で式を作ったら○が付く。${full ? `いま${full}行完成、あと${all - full}行や！` : 'まずは1行、ぜんぶ埋めてみよか！'}`,
+    masa2: done ? null : `完成した行は、ゲーム中に「まだ見えていないカードを見る」の横のボタンから見られるで。サッカーの作戦ボードみたいなもんや、試合中に見られたら心強いやろ！`,
+    noGo: true, extra: [{ label: done ? '早見表を見る' : '早見表を作る', primary: true, on: () => chartOpen() }] });
+}
 function chartOpen(view) { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.view = !!view; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
 function chartRender() {
   const C = S.chart, men = chartMen(), data = chartGet(), row = CHART_ROWS[C.row], key = row.join(','), mine = data[key] || {};
@@ -10249,7 +10258,7 @@ function act(a, el) {
     case 'quit': if (S.attack) { modal(`<div class="stack"><h3 style="margin:0">アタックを中止しますか？</h3><p class="small muted" style="margin:0">中止すると、ここまでのBPで終了します。完走のバッジ（バッジアタックの系統）は数えません。</p><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="attack-abort">中止する</button></div></div>`); break; } clearTimeout(S.timer); S.game = null; S.tiebreak = null; go('home'); break;
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
-    case 'chart-open': chartOpen(); break;
+    case 'chart-open': chartIntro(); break;
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
     case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
     case 'cloud-restore': { const v = (($('#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } cloudRestore(v); break; }
