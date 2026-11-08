@@ -1661,10 +1661,30 @@ body.spectate .me .hand .card{cursor:default}
 .pf-bio{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.2);overflow-wrap:anywhere}
 .pf-bio .btn{justify-self:start}
 #bio-text{width:100%;box-sizing:border-box;font:inherit;padding:10px;border-radius:10px}
+/* アーティファクト版を閉じた画面（新しいサイトへの案内） */
+.closed{max-width:640px;margin:0 auto;padding:24px 16px 40px;display:grid;gap:16px}
+.cl-hero{text-align:center;display:grid;gap:4px;padding:8px 0}
+.cl-title{font-family:var(--f-display);font-size:clamp(30px,8vw,46px);color:#fbf3dc;line-height:1.1}
+.cl-title small{display:block;font-size:.45em;color:#f2b632;letter-spacing:.3em;margin-top:4px}
+.cl-move{font-family:var(--f-display);font-size:clamp(22px,6vw,30px);color:#ffd43b;margin-top:10px}
+.cl-url{font-weight:900;color:#e9e3cf;overflow-wrap:anywhere}
+.cl-talk{display:grid;gap:10px}
+.cl-say{display:flex;gap:10px;align-items:flex-start}
+.cl-say.masa{flex-direction:row-reverse}
+.cl-cast{flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid #f2b632;background:#0b1a14}
+.cl-cast svg{width:100%;height:100%;display:block}
+.cl-say p{margin:0;background:rgba(0,0,0,.32);border:1px solid rgba(242,182,50,.4);border-radius:14px;padding:10px 12px;line-height:1.7;flex:1}
+.cl-say p small{display:block;color:#f2b632;font-weight:900}
+.cl-q{display:grid;gap:4px;text-align:center}
+.cl-q b{font-size:18px}
+.cl-go,.cl-go2{text-decoration:none}
+.cl-go{font-size:18px;padding:16px;text-align:center;justify-content:center}
+.cl-go[aria-disabled="true"]{opacity:.6;pointer-events:none}
+.cl-go2{justify-self:center}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='3548ef9faa';
+window.KB_BUILD='a83b5fdede';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5569,6 +5589,7 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 function render() {
   const app = $('#app');
+  if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') app.innerHTML = homeHTML();
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
@@ -7490,6 +7511,38 @@ function migCollect() {
   const data = {};
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !MIG_SKIP[k]) data[k] = localStorage.getItem(k); } } catch (e) { }
   return data;
+}
+// アーティファクト版は閉じる：遊べなくして、新しいサイトへ案内する（はじめての人は説明のあと、記録のある人は引っ越すかを確認して）
+const ARTIFACT_CLOSED = IS_ARTIFACT && !(typeof window !== 'undefined' && window.KB_TEST && !localStorage.getItem('kb.testClosed'));
+const closedHas = () => profiles().length > 0 || Object.keys(migCollect()).some(k => /^kb\.p\./.test(k));
+function closedHTML() {
+  const has = closedHas(), nm = has ? san(S.settings.name || 'プレイヤー') : '', host = esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''));
+  const say = (who, t) => `<div class="cl-say ${who}"><span class="cl-cast">${KB.casterSVG(who, 'happy')}</span><p><small>${who === 'root' ? 'ルート博士' : 'ナニワのマサ'}</small>${t}</p></div>`;
+  const talk = has
+    ? say('root', `${esc(nm)}、いつも研究所に来てくれてありがとうございます。研究所は<b>新しいサイト</b>に引っ越しました。こちらの研究所は、これからは更新しません。`) + say('masa', `記録はまるごと持っていけるで！成長記録もバッジも図鑑もアバターも、ぜーんぶや。向こうでは記録がクラウドに残るし、<b>ランキング</b>もあるで！`)
+    : say('root', 'ようこそ、計算ブリッジ作戦研究所へ。カードゲーム「計算ブリッジ」を、AIと対局しながら練習・研究する場所です。') + say('masa', '練習・大会・特訓・早見表・バッジ・観戦……楽しみ方はいろいろや。ルールも、ワイと博士で3分でサクッと教えたるで！') + say('root', `研究所は<b>新しいサイト</b>に引っ越しました。こちらでは遊べないので、新しいサイトでお待ちしています。`);
+  const go = has
+    ? `<div class="cl-q"><b>記録を持って、新しいサイトへ移りますか？</b><span class="small muted">こちらの記録は消えません。新しいサイトにすでに記録があるときは、上書きするか確認が出ます。</span></div>
+      <a class="btn primary cl-go" id="cl-go" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener" aria-disabled="true">記録を持って新しいサイトへ移る</a>
+      <a class="btn ghost sm cl-go2" id="cl-go2" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener">記録を持たずに移る</a>`
+    : `<a class="btn primary cl-go" id="cl-go" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener">新しいサイトを開く</a>`;
+  return `<div class="closed"><div class="cl-hero"><div class="cl-title">計算ブリッジ<small>作戦研究所</small></div><div class="cl-move">引っ越しました</div><div class="cl-url">${host}</div></div>
+    <div class="cl-talk">${talk}</div>
+    <div class="panel stack cl-act">${go}<p class="small muted cl-after" id="cl-after" hidden>新しいサイトを開きました。開かないときは、もう一度ボタンを押してください。</p></div>
+    <div class="panel about-box"><h3>このアプリについて</h3><p class="small">「計算ブリッジ作戦研究所」は、カードゲーム「計算ブリッジ」を練習・研究するための、<b>非公式のファン制作アプリ</b>です。考案者・公式とは関係なく、個人が作成しています。「計算ブリッジ」は、<b>上野晋太郎さん（すうがっくま）</b>が2016年に考案したゲームです。</p>
+      <div class="about-links"><a class="btn sm" href="https://keisan-bridge.amebaownd.com/" target="_blank" rel="noopener">計算ブリッジ 公式サイト ↗</a><a class="btn sm" href="https://soogackuma.com/18/" target="_blank" rel="noopener">公式ルール ↗</a><a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a></div></div></div>`;
+}
+async function closedBind() {
+  const after = () => { const a = $('#cl-after'); if (a) a.hidden = false; };
+  ['#cl-go', '#cl-go2'].forEach(q => { const a = $(q); if (a) a.addEventListener('click', e => { if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); return; } after(); }); });
+  if (!closedHas()) return;
+  const a = $('#cl-go'); if (!a) return;
+  try {
+    const payload = JSON.stringify({ app: 'keisan-bridge', mv: 1, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), at: new Date().toISOString(), data: migCollect() });
+    a.href = PUBLIC_URL + '#kbmove=' + b64u.enc(await zipText(payload));
+    a.addEventListener('click', () => raw.set('kb.migSent', Date.now()));
+  } catch (e) { a.textContent = '新しいサイトを開く'; const b = $('#cl-go2'); if (b) b.remove(); const q = $('.cl-q .small'); if (q) q.textContent = 'この端末では記録をまとめられませんでした。新しいサイトで最初から始めてください。'; }
+  a.removeAttribute('aria-disabled');
 }
 async function migrateOut() {
   const data = migCollect(), n = profiles().length;

@@ -1656,3 +1656,23 @@ body.spectate .me .hand .card{cursor:default}
 .pf-bio{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.2);overflow-wrap:anywhere}
 .pf-bio .btn{justify-self:start}
 #bio-text{width:100%;box-sizing:border-box;font:inherit;padding:10px;border-radius:10px}
+/* アーティファクト版を閉じた画面（新しいサイトへの案内） */
+.closed{max-width:640px;margin:0 auto;padding:24px 16px 40px;display:grid;gap:16px}
+.cl-hero{text-align:center;display:grid;gap:4px;padding:8px 0}
+.cl-title{font-family:var(--f-display);font-size:clamp(30px,8vw,46px);color:#fbf3dc;line-height:1.1}
+.cl-title small{display:block;font-size:.45em;color:#f2b632;letter-spacing:.3em;margin-top:4px}
+.cl-move{font-family:var(--f-display);font-size:clamp(22px,6vw,30px);color:#ffd43b;margin-top:10px}
+.cl-url{font-weight:900;color:#e9e3cf;overflow-wrap:anywhere}
+.cl-talk{display:grid;gap:10px}
+.cl-say{display:flex;gap:10px;align-items:flex-start}
+.cl-say.masa{flex-direction:row-reverse}
+.cl-cast{flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid #f2b632;background:#0b1a14}
+.cl-cast svg{width:100%;height:100%;display:block}
+.cl-say p{margin:0;background:rgba(0,0,0,.32);border:1px solid rgba(242,182,50,.4);border-radius:14px;padding:10px 12px;line-height:1.7;flex:1}
+.cl-say p small{display:block;color:#f2b632;font-weight:900}
+.cl-q{display:grid;gap:4px;text-align:center}
+.cl-q b{font-size:18px}
+.cl-go,.cl-go2{text-decoration:none}
+.cl-go{font-size:18px;padding:16px;text-align:center;justify-content:center}
+.cl-go[aria-disabled="true"]{opacity:.6;pointer-events:none}
+.cl-go2{justify-self:center}
