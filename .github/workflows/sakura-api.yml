@@ -31,7 +31,12 @@ jobs:
           P: ${{ secrets.SAKURA_PASSWORD }}
         run: |
           sudo apt-get install -y -qq lftp >/dev/null
-          lftp -e "set sftp:auto-confirm yes; set net:max-retries 2; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "sftp://$H"
+          # まず SFTP、だめなら FTPS（暗号化したFTP。証明書は確かめる）で送る
+          if lftp -e "set sftp:auto-confirm yes; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "sftp://$H"; then echo "SFTPで送りました"
+          else
+            echo "SFTPで入れませんでした。FTPSで試します"
+            lftp -e "set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" -u "$U,$P" "ftp://$H" && echo "FTPSで送りました"
+          fi
       - name: 動いているか確かめる
         if: steps.cfg.outputs.skip != '1'
         env:
