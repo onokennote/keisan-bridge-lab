@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="8ce92b6 2026-11-08 11:38"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="de23032 2026-11-08 11:47"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1652,10 +1652,37 @@ body.spectate .me .hand .card{cursor:default}
 .rk-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .rk-h h2{margin:0;font-size:18px}
 .rk-gap{text-align:center;color:#c9c2ad;line-height:1}
+.rk-av{padding:0;border:0;background:none;cursor:pointer;border-radius:10px}
+.rk-av:focus-visible{outline:2px solid #f2b632}
+.rk-bio{background:rgba(0,0,0,.3);border:1px solid rgba(242,182,50,.45);border-radius:12px;padding:10px 12px;line-height:1.7;overflow-wrap:anywhere}
+.rk-bio small{display:block;color:#f2b632;font-weight:900;margin-bottom:2px}
+.pf-bio{display:grid;gap:6px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.2);overflow-wrap:anywhere}
+.pf-bio .btn{justify-self:start}
+#bio-text{width:100%;box-sizing:border-box;font:inherit;padding:10px;border-radius:10px}
+/* アーティファクト版を閉じた画面（新しいサイトへの案内） */
+.closed{max-width:640px;margin:0 auto;padding:24px 16px 40px;display:grid;gap:16px}
+.cl-hero{text-align:center;display:grid;gap:4px;padding:8px 0}
+.cl-title{font-family:var(--f-display);font-size:clamp(30px,8vw,46px);color:#fbf3dc;line-height:1.1}
+.cl-title small{display:block;font-size:.45em;color:#f2b632;letter-spacing:.3em;margin-top:4px}
+.cl-move{font-family:var(--f-display);font-size:clamp(22px,6vw,30px);color:#ffd43b;margin-top:10px}
+.cl-url{font-weight:900;color:#e9e3cf;overflow-wrap:anywhere}
+.cl-talk{display:grid;gap:10px}
+.cl-say{display:flex;gap:10px;align-items:flex-start}
+.cl-say.masa{flex-direction:row-reverse}
+.cl-cast{flex:0 0 56px;width:56px;height:56px;border-radius:50%;overflow:hidden;border:2px solid #f2b632;background:#0b1a14}
+.cl-cast svg{width:100%;height:100%;display:block}
+.cl-say p{margin:0;background:rgba(0,0,0,.32);border:1px solid rgba(242,182,50,.4);border-radius:14px;padding:10px 12px;line-height:1.7;flex:1}
+.cl-say p small{display:block;color:#f2b632;font-weight:900}
+.cl-q{display:grid;gap:4px;text-align:center}
+.cl-q b{font-size:18px}
+.cl-go,.cl-go2{text-decoration:none}
+.cl-go{font-size:18px;padding:16px;text-align:center;justify-content:center}
+.cl-go[aria-disabled="true"]{opacity:.6;pointer-events:none}
+.cl-go2{justify-self:center}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='70bf23fa5f';
+window.KB_BUILD='a83b5fdede';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5189,7 +5216,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
+const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -5560,6 +5587,7 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 function render() {
   const app = $('#app');
+  if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') app.innerHTML = homeHTML();
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
@@ -6369,7 +6397,7 @@ function cloudStats() {
     const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
     const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
     const avr = raw.get('kb.p.' + p.id + '.avatar', null);
-    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null };
+    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, bio: raw.get('kb.p.' + p.id + '.bio', '') || '', card: cardBrief(cardDataOf(p.id, p.name)) };
   });
 }
 // 変更があったときだけ送る（force は新規登録の直後など）
@@ -6432,7 +6460,7 @@ const RANK_DEFS = [['rating', '推定実力', '直近の判断の質から出し
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
   const val = (k, x) => k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
-  const rowH = (k, x) => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><span class="rk-av">${x.avatar ? KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' }) : ''}</span><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
+  const rowH = (k, x) => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><button class="rk-av" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${x.me ? 1 : ''}" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.length ? '<div class="rk-gap">…</div>' + d.mine.map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
@@ -6455,6 +6483,30 @@ async function rankingLoad() {
     S.rank = { rankings: R, at: Date.now() };
   } catch (e) { S.rank = { rankings: {}, at: Date.now() }; toast('ランキングを読み込めませんでした'); }
   if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); bindHide(); }
+}
+// ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
+async function rankCardOpen(rid, me) {
+  modal(`<div class="stack share-modal rk-card"><div class="share-prev"><span class="small muted">成績カードを読み込んでいます…</span></div><div class="rk-bio-box"></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  const put = (html, bio, name) => { const b = $('#modal .share-prev'); if (b) b.innerHTML = html; const q = $('#modal .rk-bio-box'); if (q) q.innerHTML = bio ? `<div class="rk-bio"><small>${esc(name)}の自己紹介</small>${esc(bio).replace(/\n/g, '<br>')}</div>` : `<p class="small muted" style="margin:0">${esc(name)}の自己紹介はまだありません。</p>`; };
+  try {
+    let d;
+    if (me) d = null;
+    else {
+      if (!rid) throw new Error('old');
+      const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error);
+      d = Object.assign({}, j.card, { ach: Object.fromEntries((j.card.ach || []).map(k => [k, 1])) });
+    }
+    const cv = await shareCard(d);
+    put(`<img src="${cv.toDataURL('image/png')}" alt="成績カード" style="width:100%;border-radius:10px;display:block">`, d ? d.bio : store.get('bio', ''), d ? d.name : S.settings.name);
+  } catch (e) { put('<span class="small">成績カードを読み込めませんでした。</span>', '', ''); }
+}
+function bioEdit() {
+  const v = store.get('bio', '') || '';
+  modal(`<div class="stack"><h2 style="margin:0">自己紹介</h2><p class="small muted" style="margin:0">${CLOUD_ON ? 'ランキングでアイコンを押すと、成績カードといっしょに表示されます。' : ''}140文字まで。URL・連絡先・ふさわしくない言葉が入っていると、ほかの人には表示されません。</p>
+    <textarea id="bio-text" rows="4" maxlength="140" placeholder="例）3枚出しの研究中。目標は全員達人の大会で優勝！">${esc(v)}</textarea><div class="small muted" id="bio-n" style="text-align:right">${[...v].length}/140</div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="profiles">戻る</button><button class="btn primary" data-act="bio-save">保存する</button></div></div>`);
+  const t = $('#bio-text'); if (t) { t.oninput = () => { const n = $('#bio-n'); if (n) n.textContent = [...t.value].length + '/140'; }; setTimeout(() => t.focus(), 50); }
 }
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
@@ -6492,12 +6544,24 @@ const svgToImg = svg => new Promise(res => {
   const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null);
   im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 });
-async function shareCard() {
+// 成績カードの中身（自分のカードと、ランキングで見るほかの人のカードで共通）
+function cardDataOf(pid, name) {
+  const P = k => raw.get('kb.p.' + pid + '.' + k, null);
+  const g = P('growth') || { games: [], ach: {} }, c = g.cnt || {}, r = g.games ? ratingOf(g.games) : { ok: false };
+  const ab0 = P('attackBest') || {}, ab = ab0.bp != null ? ab0 : (ab0[15] || null), hb = P('huntBest'), avr = P('avatar');
+  return { name, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, rating: r.ok ? Math.round(r.r * 100) / 100 : null, ach: Object.assign({}, g.ach || {}),
+    champion: c.champion || 0, qualify: c.qualify || 0, atk: ab ? ab.bp : 0, atkBadges: ab ? ab.badges || 0 : 0, hunt: hb && hb.regs || 0,
+    zukan: zukanCount(P('zukan') || {}), streak: c.streakMax || 0, outs5: c.outs5 || 0, bio: P('bio') || '' };
+}
+// サーバーに送るカード：バッジは取ったものの名前だけ
+function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5 }; }
+async function shareCard(data) {
   const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
   try { await Promise.all(['400 60px "Dela Gothic One"', '900 30px "Zen Kaku Gothic New"', '700 30px "Zen Kaku Gothic New"'].map(f => document.fonts.load(f))); } catch (e) { }
   const DISP = '"Dela Gothic One","Hiragino Sans",sans-serif', BODY = '"Zen Kaku Gothic New","Hiragino Sans",sans-serif';
-  const g = G_(), c = g.cnt || {}, r = ratingOf(g.games);
+  const D = data || Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()) });
+  const NAME = D.name || 'プレイヤー', g = { ach: D.ach || {} }, c = { champion: D.champion, qualify: D.qualify, streakMax: D.streak, outs5: D.outs5 }, r = D.rating != null ? { ok: true, r: D.rating } : { ok: false };
   const rr = (X, Y, w, h, rad) => { x.beginPath(); x.moveTo(X + rad, Y); x.arcTo(X + w, Y, X + w, Y + h, rad); x.arcTo(X + w, Y + h, X, Y + h, rad); x.arcTo(X, Y + h, X, Y, rad); x.arcTo(X, Y, X + w, Y, rad); x.closePath(); };
   // 背景
   let gr = x.createRadialGradient(W * 0.3, H * 0.25, 60, W * 0.5, H * 0.5, W * 0.8); gr.addColorStop(0, '#1d4a37'); gr.addColorStop(1, '#07140e');
@@ -6506,10 +6570,10 @@ async function shareCard() {
   x.strokeStyle = 'rgba(242,182,50,.35)'; x.lineWidth = 2; rr(26, 26, W - 52, H - 52, 20); x.stroke();
   // 上段：ロゴ・名前・推定実力・カテゴリーの紋章
   const AVS = 112, NX = 56 + AVS + 22;
-  try { const av = await svgToImg(KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name || 'プレイヤー' }), { mood: 'happy' }).replace('<svg', `<svg width="${AVS * 2}" height="${AVS * 2}"`)); if (av) { x.save(); x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = 14; x.drawImage(av, 54, 40, AVS, AVS); x.restore(); x.strokeStyle = '#f2b632'; x.lineWidth = 3; rr(54, 40, AVS, AVS, AVS * 0.2); x.stroke(); } } catch (e) { }
+  try { const av = await svgToImg(KB.avatarSVG(Object.assign({}, D.avatar || AVATAR_DEF, { name: NAME }), { mood: 'happy' }).replace('<svg', `<svg width="${AVS * 2}" height="${AVS * 2}"`)); if (av) { x.save(); x.shadowColor = 'rgba(0,0,0,.45)'; x.shadowBlur = 14; x.drawImage(av, 54, 40, AVS, AVS); x.restore(); x.strokeStyle = '#f2b632'; x.lineWidth = 3; rr(54, 40, AVS, AVS, AVS * 0.2); x.stroke(); } } catch (e) { }
   x.fillStyle = '#f2b632'; x.font = `22px ${DISP}`; x.fillText('計算ブリッジ 作戦研究所', NX, 70);
-  x.fillStyle = '#fbf3dc'; x.font = `54px ${DISP}`; x.fillText(S.settings.name || 'プレイヤー', NX, 138, 270);
-  const nameW = Math.min(270, x.measureText(S.settings.name || 'プレイヤー').width);
+  x.fillStyle = '#fbf3dc'; x.font = `54px ${DISP}`; x.fillText(NAME, NX, 138, 270);
+  const nameW = Math.min(270, x.measureText(NAME).width);
   if (r.ok) {
     const full = Math.floor(r.r + 1e-9), half = r.r % 1 >= 0.5 && r.r < 5; let sx = NX + nameW + 26;
     x.font = `30px ${DISP}`;
@@ -6533,7 +6597,7 @@ async function shareCard() {
     if (im) { x.globalAlpha = b.got ? 1 : 0.28; x.drawImage(im, X, Y, 44, 44); x.globalAlpha = 1; }
   }
   // 右：各モードの成績をバーンと
-  const ab = attackBests()[15], hb = store.get('huntBest', null), zn = zukanCount(zukanGet());
+  const ab = D.atk ? { bp: D.atk, badges: D.atkBadges } : null, hb = D.hunt ? { regs: D.hunt } : null, zn = D.zukan || 0;
   const tiles = [
     ['大会', c.champion ? `優勝${c.champion}回` : c.qualify ? `決勝${c.qualify}回` : '—', g.ach['champion_strong:2'] ? '全員達人で優勝' : g.ach['champion_strong:1'] ? '強豪ぞろいで優勝' : g.ach['qualify_strong:2'] ? '全員達人で決勝' : ''],
     ['バッジアタック', ab ? `${ab.bp}BP` : '—', ab ? `バッジ${ab.badges}個` : ''],
@@ -7104,6 +7168,7 @@ function profileModal() {
   const L = profiles();
   modal(`<h2>プレイヤー</h2>
     <div class="pf-list">${L.map(p => `<div class="pf-row ${p.id === PID ? 'cur' : ''}"><b>${esc(p.name)}</b><span class="small muted">${(() => { const g = raw.get('kb.p.' + p.id + '.growth', null); const r = g ? ratingOf(g.games) : null; return r && r.ok ? `★${r.r.toFixed(1)}・${g.games.length}ゲーム` : g ? `${g.games.length}ゲーム` : '記録なし'; })()}</span>${p.id === PID ? '<span class="pf-cur">プレイ中</span>' : ''}<span class="pf-btns">${p.id === PID ? '<button class="btn sm ghost" data-act="rename-profile">名前を変更</button>' : `<button class="btn sm" data-pf="${p.id}">この人で遊ぶ</button>`}${L.length > 1 ? `<button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button>` : ''}</span></div>`).join('')}</div>
+    ${PID ? (() => { const b = store.get('bio', ''); return `<div class="pf-bio"><div class="lbl">${esc(S.settings.name)}の自己紹介</div><p class="small" style="margin:0;${b ? '' : 'color:var(--muted,#9a9)'}">${b ? esc(b).replace(/\n/g, '<br>') : 'まだ書いていません（140文字まで）'}</p><button class="btn sm" data-act="bio-edit">${b ? '自己紹介を編集' : '自己紹介を書く'}</button></div>`; })() : ''}
     <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="new-profile">新しい名前で始める</button></div>
     ${CLOUD_ON ? `<details class="save-note"><summary>記録の保存について</summary><ul><li>記録（成長記録・バッジ・図鑑・アバターなど）は<b>クラウド</b>に保存されます。ブラウザの履歴を消しても、引き継ぎコードがあれば戻せます。</li><li>端末には、すぐ遊べるように控えと、ログインの鍵だけを置いています。</li><li>同じ端末を使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li></ul></details>` : `
     <details class="save-note" open><summary>記録の保存について</summary><ul>
@@ -7444,6 +7509,38 @@ function migCollect() {
   const data = {};
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !MIG_SKIP[k]) data[k] = localStorage.getItem(k); } } catch (e) { }
   return data;
+}
+// アーティファクト版は閉じる：遊べなくして、新しいサイトへ案内する（はじめての人は説明のあと、記録のある人は引っ越すかを確認して）
+const ARTIFACT_CLOSED = IS_ARTIFACT && !(typeof window !== 'undefined' && window.KB_TEST && !localStorage.getItem('kb.testClosed'));
+const closedHas = () => profiles().length > 0 || Object.keys(migCollect()).some(k => /^kb\.p\./.test(k));
+function closedHTML() {
+  const has = closedHas(), nm = has ? san(S.settings.name || 'プレイヤー') : '', host = esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''));
+  const say = (who, t) => `<div class="cl-say ${who}"><span class="cl-cast">${KB.casterSVG(who, 'happy')}</span><p><small>${who === 'root' ? 'ルート博士' : 'ナニワのマサ'}</small>${t}</p></div>`;
+  const talk = has
+    ? say('root', `${esc(nm)}、いつも研究所に来てくれてありがとうございます。研究所は<b>新しいサイト</b>に引っ越しました。こちらの研究所は、これからは更新しません。`) + say('masa', `記録はまるごと持っていけるで！成長記録もバッジも図鑑もアバターも、ぜーんぶや。向こうでは記録がクラウドに残るし、<b>ランキング</b>もあるで！`)
+    : say('root', 'ようこそ、計算ブリッジ作戦研究所へ。カードゲーム「計算ブリッジ」を、AIと対局しながら練習・研究する場所です。') + say('masa', '練習・大会・特訓・早見表・バッジ・観戦……楽しみ方はいろいろや。ルールも、ワイと博士で3分でサクッと教えたるで！') + say('root', `研究所は<b>新しいサイト</b>に引っ越しました。こちらでは遊べないので、新しいサイトでお待ちしています。`);
+  const go = has
+    ? `<div class="cl-q"><b>記録を持って、新しいサイトへ移りますか？</b><span class="small muted">こちらの記録は消えません。新しいサイトにすでに記録があるときは、上書きするか確認が出ます。</span></div>
+      <a class="btn primary cl-go" id="cl-go" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener" aria-disabled="true">記録を持って新しいサイトへ移る</a>
+      <a class="btn ghost sm cl-go2" id="cl-go2" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener">記録を持たずに移る</a>`
+    : `<a class="btn primary cl-go" id="cl-go" href="${esc(PUBLIC_URL)}" target="_blank" rel="noopener">新しいサイトを開く</a>`;
+  return `<div class="closed"><div class="cl-hero"><div class="cl-title">計算ブリッジ<small>作戦研究所</small></div><div class="cl-move">引っ越しました</div><div class="cl-url">${host}</div></div>
+    <div class="cl-talk">${talk}</div>
+    <div class="panel stack cl-act">${go}<p class="small muted cl-after" id="cl-after" hidden>新しいサイトを開きました。開かないときは、もう一度ボタンを押してください。</p></div>
+    <div class="panel about-box"><h3>このアプリについて</h3><p class="small">「計算ブリッジ作戦研究所」は、カードゲーム「計算ブリッジ」を練習・研究するための、<b>非公式のファン制作アプリ</b>です。考案者・公式とは関係なく、個人が作成しています。「計算ブリッジ」は、<b>上野晋太郎さん（すうがっくま）</b>が2016年に考案したゲームです。</p>
+      <div class="about-links"><a class="btn sm" href="https://keisan-bridge.amebaownd.com/" target="_blank" rel="noopener">計算ブリッジ 公式サイト ↗</a><a class="btn sm" href="https://soogackuma.com/18/" target="_blank" rel="noopener">公式ルール ↗</a><a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a></div></div></div>`;
+}
+async function closedBind() {
+  const after = () => { const a = $('#cl-after'); if (a) a.hidden = false; };
+  ['#cl-go', '#cl-go2'].forEach(q => { const a = $(q); if (a) a.addEventListener('click', e => { if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); return; } after(); }); });
+  if (!closedHas()) return;
+  const a = $('#cl-go'); if (!a) return;
+  try {
+    const payload = JSON.stringify({ app: 'keisan-bridge', mv: 1, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), at: new Date().toISOString(), data: migCollect() });
+    a.href = PUBLIC_URL + '#kbmove=' + b64u.enc(await zipText(payload));
+    a.addEventListener('click', () => raw.set('kb.migSent', Date.now()));
+  } catch (e) { a.textContent = '新しいサイトを開く'; const b = $('#cl-go2'); if (b) b.remove(); const q = $('.cl-q .small'); if (q) q.textContent = 'この端末では記録をまとめられませんでした。新しいサイトで最初から始めてください。'; }
+  a.removeAttribute('aria-disabled');
 }
 async function migrateOut() {
   const data = migCollect(), n = profiles().length;
@@ -10134,6 +10231,9 @@ function act(a, el) {
     case 'av-save': { store.set('avatar', S.avDraft); if (S.T) { const h = S.T.players.find(p => p.human); if (h) Object.assign(h.ch, S.avDraft); } S.avDraft = null; closeModal(); toast('アバターを保存しました'); render(); break; }
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
+    case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me); break;
+    case 'bio-edit': bioEdit(); break;
+    case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); profileModal(); break; }
     case 'share-save': shareSave(); break;
     case 'attack-best': attackBestModal(); break;
     case 'attack-next': attackNextSetGo(); break;
