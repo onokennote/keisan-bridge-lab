@@ -10,6 +10,9 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(men.length === 37 && men.slice(0, 26).every(x => +x.split(':')[1] >= 9) && men.slice(26).every(x => +x.split(':')[1] >= 3), '37行（3枚は9面以上・2枚は3面以上）合計 ' + men.reduce((a, x) => a + +x.split(':')[1], 0) + '面');
   // 作るのはホームから
   await pg.click('[data-act="chart-open"]'); await pg.waitForTimeout(300);
+  ok(await pg.evaluate(() => /早見表/.test(document.querySelector('.whistle-ov .wh-title').innerText) && /ゲーム中/.test(document.querySelector('.whistle-ov').innerText) && /マサ/.test(document.querySelector('.whistle-ov').innerText)), 'ホームから開くと、マサの導入（ゲーム中に見られること）が出る');
+  await pg.waitForTimeout(1500); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'chart_intro.png') });
+  await pg.click('.whistle-ov [data-x="e0"]'); await pg.waitForTimeout(500);
   ok(!!(await pg.$('#modal .ch-keys')), 'ホームから開くと入力できる');
   const tap = async sel => { await pg.click(sel); await pg.waitForTimeout(60); };
   // A・2・6 の行で (6 − 2) × A = 4。カッコは自動で閉じる
@@ -52,6 +55,11 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_view.png') });
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(200);
   ok(await pg.evaluate(() => !KBAPP.S.paused), '閉じると対局が再開する');
+  // ぜんぶ完成していると、マサが「完成しとる」と言う
+  await pg.evaluate(() => { const c = {}; KBAPP.CHART_ROWS.forEach((r, i) => { const d = {}; KBAPP.chartMen()[i].forEach(t => d[t] = 'x'); c[r.join(',')] = d; }); const pid = JSON.parse(localStorage.getItem('kb.profile') || 'null'); localStorage.setItem(pid ? 'kb.p.' + pid + '.chart' : 'kb.chart', JSON.stringify(c)); document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); });
+  await pg.click('[data-act="chart-open"]'); await pg.waitForTimeout(1600);
+  ok(await pg.evaluate(() => /完成しとる/.test(document.querySelector('.whistle-ov').innerText) && /すべて完成/.test(document.querySelector('.whistle-ov .wh-sub').innerText)), '完成していれば、マサが完成していると言う');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_intro_done.png') });
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close();
 })();
