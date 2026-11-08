@@ -30,7 +30,7 @@ KB.casterSVG = function (who, mood) {
 const R = (a, r) => a[((r || Math.random)() * a.length) | 0];
 const fill = (s, d) => s.replace(/\{(\w+)\}/g, (_, k) => (d[k] == null ? '' : d[k]));
 const ANALYTIC = { start: 1, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, good: 1, ok: 1, bad: 1, drewGood: 1, border: 1, borderIn: 1, borderClose: 1, borderFar: 1, finalSet: 1, lastGame: 1, final: 1, heavy: 1, tip: 1, leadSet: 1, trailSet: 1, philo: 1, setStart: 1, oppMissed: 1, oppBlunder: 1, oppNice: 1, myBigPP: 1, mySmallPP: 1, resultLucky: 1, resultUnlucky: 1, resultBoth: 1, resultBad: 1, reshuffle: 1, deckLow: 1, styleKeisan: 1, styleInochi: 1 };
-const PRIO = { kanataOn: 9, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
+const PRIO = { kanataOn: 9, kanataAgain: 8, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
 const LINES = () => ({ root: KB.LINES_ROOT || {}, masa: KB.LINES_MASA || {} });
 // 最近使ったセリフ（ブラウザに保存して、次に開いたときも続けて避ける）
 let RECENT = {};
@@ -81,7 +81,7 @@ KB.commentLine = function (mode, kind, d) {
   saveRecent();
   let text = fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
-  const noPrefix = { kanataOn: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
+  const noPrefix = { kanataOn: 1, kanataAgain: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];
   if (pf && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
   // 博士はごくたまに、哲学的なひと言を添える

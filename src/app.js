@@ -2808,9 +2808,12 @@ function loop() {
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
   if (KB.kanataReady(g, p)) { // 奥義・絶対透視
-    g.kanataOn = true; if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
-    S.thinking = p; toushiFx(g, p); say('kanataOn', { n: nm(pl) }); renderGame();
-    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : 3300); return;
+    KB.kanataStart(g); if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+    // 大きな演出はそのセットの最初の1回だけ。2回目からは軽く光るだけ
+    const setKey = S.T ? (S.T.phase || '') + ':' + (S.T.set || 0) : 'p', first = S.toushiSet !== setKey; S.toushiSet = setKey;
+    S.thinking = p; if (first) { toushiFx(g, p); say('kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say('kanataAgain', { n: nm(pl) }); }
+    renderGame();
+    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : first ? 3300 : 1100); return;
   }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
@@ -2930,6 +2933,12 @@ function cutInFx(label, expr, t) {
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
 }
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
+function toushiLite(g, p) {
+  if (S.settings.speed === 'instant') return;
+  const el = document.createElement('div'); el.className = 'toushi-lite';
+  el.innerHTML = `<span class="tl-eye">${KB.avatarSVG(g.players[p].ch, { open: true, level: 6 })}</span><b>絶対透視</b>`;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
+}
 function toushiFx(g, p) {
   if (S.settings.speed === 'instant') return;
   // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
@@ -4579,7 +4588,7 @@ function entranceHTML() {
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
-  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、第2巡か第3巡に、全員の手札も山札の底まで見通すんや。ほんで、ゲームごとに出るか出えへんかは五分五分。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
+  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、カナタの番が来るたびに五分五分で出るんや。出たらそのゲームはずっと、全員の手札も山札の底まで見通しとる。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;

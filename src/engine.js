@@ -527,13 +527,12 @@ KB.Game = class {
 };
 
 // ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
-// 発動は1ゲーム1回まで。50%の確率で、第2巡か第3巡のカナタの番に発動する（kanataAt）
+// 第1巡から、カナタの番が来るたびに50%の確率で発動する。発動したら、そのゲームの最後まで見通したまま（1ゲーム1回）。kanataAt は発動した巡
 KB.kanataRoll = function (game) {
-  const k = game.players.findIndex(pl => pl.clairvoyant);
-  game.kanataIdx = k; game.kanataAt = k >= 0 && Math.random() < 0.5 ? (Math.random() < 0.5 ? 2 : 3) : 0; game.kanataOn = false;
-  if (k >= 0 && G.KB_KANATA_AT) game.kanataAt = G.KB_KANATA_AT; // テスト用：発動を固定
+  game.kanataIdx = game.players.findIndex(pl => pl.clairvoyant); game.kanataAt = 0; game.kanataOn = false;
 };
-KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataAt && !game.kanataOn && game.round >= game.kanataAt;
+KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataIdx >= 0 && !game.kanataOn && (G.KB_KANATA_AT ? game.round >= G.KB_KANATA_AT : Math.random() < 0.5); // KB_KANATA_AT はテスト用（その巡で必ず発動）
+KB.kanataStart = (game) => { game.kanataOn = true; game.kanataAt = game.round; };
 function aiMoveClear(game, p, rollouts) {
   const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
   const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
@@ -602,7 +601,7 @@ KB.autoGame = function (players, starter) {
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
-    if (KB.kanataReady(g, p)) g.kanataOn = true;
+    if (KB.kanataReady(g, p)) KB.kanataStart(g);
     if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));

@@ -1,4 +1,4 @@
-// ★6カナタの通しテスト（大会5人・決勝にカナタ・第2巡で必ず発動）：node kanata.js
+// ★6カナタの通しテスト（大会5人・決勝にカナタ・第2巡で必ず発動。決勝2ゲーム）：node kanata.js
 const { chromium } = require('playwright');
 const fs = require('fs');
 (async () => {
@@ -16,6 +16,8 @@ const fs = require('fs');
   if (mode === 'practice') { await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); }
   else { await pg.click('[data-go="setup-tour"]'); await pg.fill('#t-n', '5'); await pg.fill('#t-sets', '1'); await pg.fill('#t-games', '2'); await pg.selectOption('#t-fin', '4').catch(() => {}); await pg.click('[data-act="start-tour"]'); await pg.waitForTimeout(7000); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'kanata_opening.png'), fullPage: true }); await pg.waitForTimeout(100); await pg.evaluate(() => { if (KBAPP.S.view === 'opening') KBAPP.act('opening-start'); }); }
   await pg.waitForTimeout(400);
+  // 絶対透視の演出を数える（大きな演出はセットの最初の1回だけ、あとは軽い演出）
+  await pg.evaluate(() => { window.__fx = { big: 0, lite: 0 }; new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(n => { if (n.classList && n.classList.contains('toushi-fx')) window.__fx.big++; if (n.classList && n.classList.contains('toushi-lite')) window.__fx.lite++; }))).observe(document.body, { childList: true }); });
   let shots = 0;
   for (let step = 0; step < 4000; step++) {
     const st = await pg.evaluate(() => {
@@ -55,6 +57,9 @@ const fs = require('fs');
   }
   await pg.screenshot({ path: require('path').join(__dirname, 'out', 'end.png'), fullPage: true });
   console.log('kanataClear', await pg.evaluate(() => KBAPP.S.T && KBAPP.S.T.kanataClear), 'finalOrder', await pg.evaluate(() => KBAPP.S.T && JSON.stringify(KBAPP.S.T.finalOrder)));
+  const fx = await pg.evaluate(() => window.__fx); console.log('fx', JSON.stringify(fx));
+  const okc = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.exitCode = 1; };
+  okc(fx.big === 1, '大きな演出はセットの最初の1回だけ（' + fx.big + '回）'); okc(fx.lite >= 1, '2ゲーム目からは軽い演出（' + fx.lite + '回）');
   console.log('errors', errs, await pg.evaluate(() => JSON.stringify(window.__stats)));
   await b.close();
 })();
