@@ -1166,7 +1166,7 @@ const ARTIFACT_URL = 'https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD';
 const IS_ARTIFACT = typeof location === 'undefined' || !/^https?:$/.test(location.protocol) || /claude\.(ai|site)|claudeusercontent/.test(location.hostname);
 const APP_URL = IS_ARTIFACT ? ARTIFACT_URL : PUBLIC_URL;
 // 引っ越しボタン（アーティファクト版 → 公開版）を出すか。考案者の了承が取れて公開版を出したら true にする
-const MIGRATE_ON = false;
+const MIGRATE_ON = true;
 // ---------- クラウド保存とランキング（公開版だけ。window.KB_CLOUD_API にAPIのURLが入っているとき） ----------
 // 記録の正本はクラウド。端末には控え（すぐ遊べるように）と、ログインの鍵だけを置く。引き継ぎコードで別の端末からも同じ記録に入れる
 const CLOUD_API = (typeof window !== 'undefined' && window.KB_CLOUD_API) || '';

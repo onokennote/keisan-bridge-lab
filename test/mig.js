@@ -52,9 +52,10 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await p2.goto('about:blank'); await p2.goto(href3); await p2.waitForSelector('#mig-yes'); await p2.click('#mig-yes'); await p2.waitForTimeout(1500);
   ok(JSON.parse(await p2.evaluate(() => localStorage.getItem('kb.p.pB.zukan'))).mk === 20, '「上書きして引き継ぐ」で前のサイトの記録になる');
   ok(await p2.evaluate(() => location.hash === ''), '上書き後もURLに#は残らない');
-  // フラグOFFの本番ビルドではボタンが出ない
+  // いまのビルド（アーティファクト版）ではボタンが出る
   const p3 = await ctx.newPage(); await p3.goto('file://' + path.join(__dirname, 'page.html')); await p3.waitForTimeout(400);
-  ok(!(await p3.$('[data-act="migrate-out"]')), 'フラグOFF（いまの設定）ではボタンは出ない');
+  await p3.evaluate(() => { localStorage.setItem('kb.profiles', JSON.stringify([{ id: 'pA', name: 'ケン', at: 1 }])); localStorage.setItem('kb.profile', '"pA"'); }); await p3.reload(); await p3.waitForTimeout(400);
+  ok(!!(await p3.$('[data-act="migrate-out"]')), '引っ越しボタンが有効（アーティファクト版のホームに出る）');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close();
 })();
