@@ -13,7 +13,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.evaluate(() => KBAPP.go('home')); await pg.waitForTimeout(3500);
   ok(await pg.evaluate(() => /自動照準 ×1/.test(document.body.innerText)), 'ホームの式ハンターに所持数が出る');
   await pg.click('[data-act="hunt-start"]'); await pg.waitForTimeout(600);
-  ok(await pg.evaluate(() => /式ハンター/.test(document.querySelector('.whistle-ov .wh-title').innerText) && /自動照準/.test(document.querySelector('.whistle-ov').innerText)), '最初にバッジアタックと同じ形の導入が出る（自動照準のボタンつき）');
+  ok(await pg.evaluate(() => /式ハンター/.test(document.querySelector('.whistle-ov .wh-title').innerText) && !document.querySelector('.whistle-ov [data-x="go"]') && /次へ/.test(document.querySelector('.whistle-ov [data-x="e0"]').innerText)), '最初の導入からはすぐ始めず、「次へ（標的を選ぶ・ルール）」だけ');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'hunt_intro.png') });
   await pg.click('.whistle-ov [data-x="e0"]'); await pg.waitForTimeout(500);
   ok(!!(await pg.$('[data-act="hunt-go-aim"]')), '開始前に「自動照準を使って始める」が出る');
