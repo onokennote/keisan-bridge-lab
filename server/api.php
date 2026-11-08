@@ -84,6 +84,13 @@ function safeCard($c): ?string {
   $n = fn($k, $max) => max(0, min($max, (int)($c[$k] ?? 0)));
   return json_encode(['ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000)], JSON_UNESCAPED_UNICODE);
 }
+// 名前の重複：ほかのプレイヤー（別の端末・別の人）がもう使っている名前か（全角半角・大文字小文字・記号の違いは同じとみなす）
+function nameTaken(string $name, string $uid, string $pid): bool {
+  $n = normName($name); if ($n === '') return false;
+  $st = db()->prepare('SELECT uid, pid, name FROM ranks'); $st->execute();
+  foreach ($st->fetchAll() as $r) { if ($r['uid'] === $uid && $r['pid'] === $pid) continue; if (normName((string)$r['name']) === $n) return true; }
+  return false;
+}
 function rid(string $uid, string $pid): string { return substr(h('rid:' . $uid . ':' . $pid), 0, 16); } // ランキングで人を指す公開用の番号
 function safeName(string $s, string $uid, string $pid): string {
   $s = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', $s), 0, 10));
@@ -131,8 +138,12 @@ try {
         $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
         $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0))); $streak = max(0, min(2000, (int)($s['streak'] ?? 0)));
         $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
+        // 名前を新しく付ける・変えるときに、ほかの人がもう使っていれば「研究員○○」にする（前から同じ名前なら、そのまま）
+        $want = safeName((string)($s['name'] ?? ''), $u['uid'], $pid);
+        $cs = $d->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $cs->execute([$u['uid'], $pid]); $cur = $cs->fetch();
+        if ((!$cur || $cur['name'] !== $want) && strpos($want, '研究員') !== 0 && nameTaken($want, $u['uid'], $pid)) $want = '研究員' . strtoupper(substr(h($u['uid'] . $pid), 0, 3));
         $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, streak, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, streak=excluded.streak, updated=excluded.updated')
-          ->execute([$u['uid'], $pid, safeName((string)($s['name'] ?? ''), $u['uid'], $pid), empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), $streak, time()]);
+          ->execute([$u['uid'], $pid, $want, empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), $streak, time()]);
       }
       // 消したプレイヤーはランキングからも消す
       if ($pids) { $q = implode(',', array_fill(0, count($pids), '?')); $d->prepare("DELETE FROM ranks WHERE uid = ? AND pid NOT IN ($q)")->execute(array_merge([$u['uid']], $pids)); }
@@ -189,6 +200,13 @@ try {
       }
       out(['ok' => true, 'rankings' => $res]);
     }
+    case 'name': { // 名前が使えるか（登録・名前の変更の前に確かめる）
+      $n = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($_GET['n'] ?? '')), 0, 10));
+      $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $pid = substr(preg_replace('/[^a-z0-9]/i', '', (string)($_GET['pid'] ?? '')), 0, 24);
+      if ($n === '') out(['ok' => true, 'free' => false, 'why' => 'empty']);
+      if (!nameOk($n)) out(['ok' => true, 'free' => false, 'why' => 'ng']);
+      out(['ok' => true, 'free' => !nameTaken($n, $uid, $pid), 'why' => 'taken']);
+    }
     case 'card': { // ランキングの人の成績カード（自己紹介つき）。rid で指す
       $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
       foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card FROM ranks WHERE shown = 1')->fetchAll() as $r) {
@@ -197,7 +215,7 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 4]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 5]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

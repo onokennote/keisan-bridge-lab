@@ -1704,3 +1704,4 @@ body.spectate .me .hand .card{cursor:default}
   .stage > .ent-row .ent-meta{font-size:10px}
   .stage > .ent-row .chip{font-size:9px;padding:1px 5px}
 }
+.name-err{color:#ff8787;font-weight:700;margin:4px 0 0}

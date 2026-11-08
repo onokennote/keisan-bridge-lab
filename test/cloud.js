@@ -58,11 +58,19 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   // 端末B：NGワードの名前のプレイヤー
   const B = await b.newContext(); const pb = await B.newPage(); pb.on('pageerror', e => errs.push(e.message));
   await pb.goto('http://localhost:8124/'); await pb.waitForTimeout(700);
-  await pb.fill('#new-name', 'うんこマン'); await pb.click('[data-act="create-profile"]'); await pb.waitForTimeout(1500);
+  await pb.fill('#new-name', 'うんこマン'); await pb.click('[data-act="create-profile"]'); await pb.waitForTimeout(1000);
+  ok(await pb.evaluate(() => !document.querySelector('#name-err').hidden && /使えません/.test(document.querySelector('#name-err').innerText) && !JSON.parse(localStorage.getItem('kb.profiles') || '[]').length), 'ふさわしくない名前では登録できない');
+  await pb.fill('#new-name', 'ｹﾝ'); await pb.click('[data-act="create-profile"]'); await pb.waitForTimeout(1000);
+  ok(await pb.evaluate(() => /もう使っています/.test(document.querySelector('#name-err').innerText) && !JSON.parse(localStorage.getItem('kb.profiles') || '[]').length), 'ほかの人が使っている名前（全角半角の違いも同じ）では登録できない');
+  await pb.screenshot({ path: path.join(__dirname, 'out', 'name_taken.png') });
+  await pb.fill('#new-name', 'ハナ'); await pb.click('[data-act="create-profile"]'); await pb.waitForTimeout(1500);
+  ok(await pb.evaluate(() => JSON.parse(localStorage.getItem('kb.profiles') || '[]').some(p => p.name === 'ハナ')), 'まだ使われていない名前なら登録できる');
+  // 画面を通さずに使われている名前に変えても、サーバーが「研究員○○」にする
+  await pb.evaluate(() => { const L = JSON.parse(localStorage.getItem('kb.profiles')); L[0].name = 'ケン'; localStorage.setItem('kb.profiles', JSON.stringify(L)); });
   await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.testAch('win', 30); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(); }); await pb.waitForTimeout(500);
   await pb.evaluate(() => KBAPP.go('ranking')); await pb.waitForTimeout(1800);
   const names = await pb.evaluate(() => [...document.querySelectorAll('.rk-nm')].map(e => e.innerText));
-  ok(names.some(n => /^研究員/.test(n)) && !names.some(n => /うんこ/.test(n)), 'ふさわしくない名前は「研究員○○」と表示：' + names.join(' / '));
+  ok(names.some(n => /^研究員/.test(n)) && !names.some(n => /うんこ/.test(n)), '使われている名前に勝手に変えると「研究員○○」と表示：' + names.join(' / '));
   // ランキングでアイコンを押すと、その人の成績カードと自己紹介
   await pb.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)).querySelector('[data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
   ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'ほかの人のアイコンを押すと成績カードと自己紹介が出る');

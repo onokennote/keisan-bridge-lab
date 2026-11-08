@@ -1947,10 +1947,24 @@ function attackResultHTML() {
 }
 
 // ---------- プレイヤー（名前ごとに記録を分ける）・書き出しと読み込み ----------
+// 名前が使えるか：この端末のほかのプレイヤーと同じ名前、（公開版では）ほかの人がもう使っている名前は使えない
+async function nameCheck(name, exceptPid) {
+  if (!name) return '名前を入れてください';
+  const norm = x => x.normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}ー〜・]+/gu, '');
+  if (profiles().some(p => p.id !== exceptPid && norm(p.name) === norm(name))) return 'この端末に、同じ名前のプレイヤーがもういます';
+  if (!CLOUD_ON) return null;
+  try {
+    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''))).json();
+    if (j.ok && !j.free) return j.why === 'ng' ? 'その名前は使えません。ほかの名前にしてください' : 'その名前は、ほかのプレイヤーがもう使っています';
+  } catch (e) { } // つながらないときは止めない（サーバー側でも重複は「研究員○○」になる）
+  return null;
+}
+function nameErr(msg) { const e = $('#name-err'); if (e) { e.textContent = msg || ''; e.hidden = !msg; } }
 function askName(again) {
   modal(`<div class="upd-modal"><h2>${again ? '新しい名前で始める' : 'ようこそ！'}</h2>
     <p>${again ? '新しいプレイヤーの名前を入れてください。成長記録や続きからのデータは、名前ごとに分けて保存されます。' : 'あなたの名前を教えてください。成長記録や続きからのデータは、名前ごとに保存されます。'}</p>
     <input id="new-name" class="name-input" maxlength="10" placeholder="名前" value="${again ? '' : esc(S.settings.name !== 'あなた' ? S.settings.name : '')}">
+    <p class="small name-err" id="name-err" hidden></p>
     <button class="btn primary upd-go" data-act="create-profile">はじめる</button>
     ${again ? '<button class="btn ghost sm" data-act="close">やめる</button>' : ''}</div>`);
   setTimeout(() => { const i = $('#new-name'); if (i) { i.focus(); i.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) act('create-profile'); }; } }, 50);
@@ -5019,9 +5033,11 @@ function act(a, el) {
     case 'drill-submit': drillSubmit(); break;
     case 'drill-hint': S.drill.hint = true; render(); break;
     case 'new-profile': askName(true); break;
-    case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
-    case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
+    case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><p class="small name-err" id="name-err" hidden></p><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
+    case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name === S.settings.name) { profileModal(); break; } if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, PID).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('rename-ok'); }); break; }
+    case 'rename-ok': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, null).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('create-ok'); }); break; }
+    case 'create-ok': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }

@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1707,10 +1707,11 @@ body.spectate .me .hand .card{cursor:default}
   .stage > .ent-row .ent-meta{font-size:10px}
   .stage > .ent-row .chip{font-size:9px;padding:1px 5px}
 }
+.name-err{color:#ff8787;font-weight:700;margin:4px 0 0}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='55b62cbd17';
+window.KB_BUILD='103283deb8';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7184,10 +7185,24 @@ function attackResultHTML() {
 }
 
 // ---------- プレイヤー（名前ごとに記録を分ける）・書き出しと読み込み ----------
+// 名前が使えるか：この端末のほかのプレイヤーと同じ名前、（公開版では）ほかの人がもう使っている名前は使えない
+async function nameCheck(name, exceptPid) {
+  if (!name) return '名前を入れてください';
+  const norm = x => x.normalize('NFKC').toLowerCase().replace(/[\s\p{P}\p{S}ー〜・]+/gu, '');
+  if (profiles().some(p => p.id !== exceptPid && norm(p.name) === norm(name))) return 'この端末に、同じ名前のプレイヤーがもういます';
+  if (!CLOUD_ON) return null;
+  try {
+    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''))).json();
+    if (j.ok && !j.free) return j.why === 'ng' ? 'その名前は使えません。ほかの名前にしてください' : 'その名前は、ほかのプレイヤーがもう使っています';
+  } catch (e) { } // つながらないときは止めない（サーバー側でも重複は「研究員○○」になる）
+  return null;
+}
+function nameErr(msg) { const e = $('#name-err'); if (e) { e.textContent = msg || ''; e.hidden = !msg; } }
 function askName(again) {
   modal(`<div class="upd-modal"><h2>${again ? '新しい名前で始める' : 'ようこそ！'}</h2>
     <p>${again ? '新しいプレイヤーの名前を入れてください。成長記録や続きからのデータは、名前ごとに分けて保存されます。' : 'あなたの名前を教えてください。成長記録や続きからのデータは、名前ごとに保存されます。'}</p>
     <input id="new-name" class="name-input" maxlength="10" placeholder="名前" value="${again ? '' : esc(S.settings.name !== 'あなた' ? S.settings.name : '')}">
+    <p class="small name-err" id="name-err" hidden></p>
     <button class="btn primary upd-go" data-act="create-profile">はじめる</button>
     ${again ? '<button class="btn ghost sm" data-act="close">やめる</button>' : ''}</div>`);
   setTimeout(() => { const i = $('#new-name'); if (i) { i.focus(); i.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) act('create-profile'); }; } }, 50);
@@ -10256,9 +10271,11 @@ function act(a, el) {
     case 'drill-submit': drillSubmit(); break;
     case 'drill-hint': S.drill.hint = true; render(); break;
     case 'new-profile': askName(true); break;
-    case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
-    case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
+    case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><p class="small name-err" id="name-err" hidden></p><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
+    case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name === S.settings.name) { profileModal(); break; } if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, PID).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('rename-ok'); }); break; }
+    case 'rename-ok': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, null).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('create-ok'); }); break; }
+    case 'create-ok': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }
