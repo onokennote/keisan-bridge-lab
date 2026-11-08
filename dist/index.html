@@ -1695,7 +1695,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='364f2b7c90';
+window.KB_BUILD='a872f939ca';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5277,6 +5277,7 @@ const MIX = {
   strong: { label: '強豪ぞろい', w: [0.2, 0.5, 1.5, 3, 3] },
   master: { label: '全員達人', w: [0, 0, 0, 0, 1] }
 };
+const KANATA_MIX = { strong: 1, master: 1 };
 function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; for (let i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) return i; } return w.length - 1; }
 
 // ---------- 参加者 ----------
@@ -5422,7 +5423,7 @@ function newSession(cfg) {
   };
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
   // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
-  if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : Math.random() < KB.kanataRate(cfg.nPlayers - 1))) {
+  if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : KANATA_MIX[cfg.mix] && Math.random() < KB.kanataRate(cfg.nPlayers - 1))) { // シードが出るのは「強豪ぞろい」「全員達人」のときだけ
     T.kanata = true; if (cfg.finalists >= 5) { T.cfg = Object.assign({}, cfg, { finalists: 4 }); T.kanataCut = true; }
   }
   return T;
@@ -7057,21 +7058,19 @@ function modeIntro(o) {
   const el = document.createElement('div'); el.className = 'whistle-ov';
   el.innerHTML = `<div class="wh-box"><div class="wh-title" ${o.title.length >= 7 ? 'style="font-size:clamp(26px,8.5vw,40px)"' : ''}>${esc(o.title)}</div><div class="wh-sub">${esc(o.sub)}</div>
     <div class="wh-cast">${bub('masa', o.masa, 0.3)}${bub('root', o.root, 1.1)}</div>
-    <div class="row" style="justify-content:center;margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn" data-x="cancel">やめる</button>${(o.extra || []).map((x, i) => `<button class="btn" data-x="e${i}">${esc(x.label)}</button>`).join('')}<button class="btn primary" data-x="go">${esc(o.goLabel || 'スタート')}</button></div></div>`;
+    <div class="row" style="justify-content:center;margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn" data-x="cancel">やめる</button>${(o.extra || []).map((x, i) => `<button class="btn ${x.primary ? 'primary' : ''}" data-x="e${i}">${esc(x.label)}</button>`).join('')}${o.noGo ? '' : `<button class="btn primary" data-x="go">${esc(o.goLabel || 'スタート')}</button>`}</div></div>`;
   document.body.appendChild(el);
   const close = then => { el.classList.add('out'); setTimeout(() => { el.remove(); if (then) then(); }, 300); };
   el.querySelector('[data-x="cancel"]').onclick = () => { KB.sfx('back'); close(o.onCancel); };
   (o.extra || []).forEach((x, i) => el.querySelector(`[data-x="e${i}"]`).onclick = () => close(x.on));
-  el.querySelector('[data-x="go"]').onclick = () => { KB.sfx('whistle', 1); el.querySelector('.wh-box').innerHTML = `<div class="wh-title">${esc(o.goTitle || 'スタート！')}</div><div class="wh-cast">${bub('masa', o.goLine || 'ほな、いこか！', 0)}</div>`; setTimeout(() => close(o.onGo), 1100); };
+  if (!o.noGo) el.querySelector('[data-x="go"]').onclick = () => { KB.sfx('whistle', 1); el.querySelector('.wh-box').innerHTML = `<div class="wh-title">${esc(o.goTitle || 'スタート！')}</div><div class="wh-cast">${bub('masa', o.goLine || 'ほな、いこか！', 0)}</div>`; setTimeout(() => close(o.onGo), 1100); };
 }
 function huntIntro() {
-  const n = aimCount(), t = store.get('huntT', null);
   modeIntro({ title: '式ハンター', sub: `${HUNT_SEC / 60}分間、手札の3枚で場の数を作って、未登録の式を捕まえろ`,
     masa: '狩りの時間や！3枚で場の数を作ったら捕獲や。図鑑にまだない式ほど獲物やで！作れんときは「見送る」でええ！',
     root: '得点や速さで取れるバッジはありません。図鑑に登録した式の数がバッジにつながるので、じっくり考えて大丈夫ですよ。',
-    goLabel: '狩りに出る', goTitle: '狩り開始！', goLine: t ? `標的は${KB.vname(t)}や、いくで！` : 'ほな、狩りに出よか！',
-    extra: [{ label: '標的を選ぶ・ルール', on: () => { } }].concat(n ? [{ label: `🎯 自動照準（${n}発）`, on: () => huntGo(true) }] : []),
-    onGo: () => huntGo(), onCancel: () => go('home') });
+    noGo: true, // ここからすぐには始めない：次の画面（標的・ルール）で確かめてから始める（自動照準もそこで選ぶ）
+    extra: [{ label: '次へ（標的を選ぶ・ルール）', primary: true, on: () => { } }], onCancel: () => go('home') });
 }
 function outsIntro() {
   modeIntro({ title: 'アウツチャレンジ', sub: '5問連続で正解したらクリア',
@@ -7754,7 +7753,7 @@ function setupTourHTML() {
   <div class="field"><label for="t-points">セット順位の得点（1位,2位,…）</label><input id="t-points" value="${c.points.join(',')}"><div class="hint">表にない順位は0点</div></div>
   <div class="field"><label for="t-fin">決勝進出人数</label><select id="t-fin">${[2, 3, 4, 5].map(n => `<option ${c.finalists === n ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="hint">決勝は1セットだけで順位を決めます</div></div>
   <div class="field"><label for="t-tie">同点（得点・PPとも同じ）のとき</label><select id="t-tie"><option value="janken" ${c.tie === 'janken' ? 'selected' : ''}>ジャンケン</option><option value="sudden" ${c.tie === 'sudden' ? 'selected' : ''}>サドンデス（1ゲーム勝負）</option></select></div>
-  <div class="field"><label for="t-mix">相手の強さの混ざり方</label><select id="t-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select><div class="hint">性格はランダム。席順は毎セット抽選</div></div>
+  <div class="field"><label for="t-mix">相手の強さの混ざり方</label><select id="t-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select><div class="hint">性格はランダム。席順は毎セット抽選。「強豪ぞろい」「全員達人」では、決勝に謎のシード選手が現れることがあります</div></div>
   <div class="field"><label for="t-cm">実況・解説</label><select id="t-cm" class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>${cmOthersHTML()}
 </div>
 ${judgeHTML()}
