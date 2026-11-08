@@ -1734,7 +1734,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='e6552a46c6';
+window.KB_BUILD='54adec686f';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -10098,7 +10098,6 @@ function strategyHTML() {
   <div class="lbl">ごちゃまぜ倶楽部の注目メンバー</div>
   <p class="small muted" style="margin:0">倶楽部には子どもから伝説の達人まで、${KB.ROSTER.length}人のメンバーがいます。ほかのメンバーには卓で出会えます（卓で顔を押すとプロフィール）。強い人ほど何を考えているか読ませず、★1〜2のメンバーは本音がセリフに出ます。</p>
   <div class="club-grid">${['zero', 'soroban', 'roshi', 'kon', 'kakeru', 'shota'].map(id => KB.charById(id)).filter(Boolean).map(c => { const stl = s.styles.find(x => x.id === c.st) || {}; return `<button class="club-card" data-char="${c.id}"><span class="club-av">${KB.avatarSVG(KB.charToCh(c), { mood: 'normal', level: c.lv, style: c.st })}</span><span class="club-tx">${c.title ? `<small class="club-title">${esc(c.title)}</small>` : ''}<b>${esc(c.name)}</b><small>${'★'.repeat(c.lv)}・<span style="color:${esc(stl.color || '#aaa')}">${esc(stl.label || '')}</span></small></span></button>`; }).join('')}</div>
-  <div class="panel small muted">「こんな打ち手がいたら練習になる」という戦略のアイデアがあれば、Claudeとの会話で伝えてください。性格として図鑑に追加できます。</div>
   </div>`;
 }
 // キャラのプロフィール
