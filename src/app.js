@@ -3390,7 +3390,8 @@ function recordDecision(move) {
   if (sutemi && isOutEv(mine)) { loss = 0; sutemi.outOk = true; }
   if (sutemi) sutemi.chose = mine === best;
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
-  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: sutemi && sutemi.outOk ? mine : best0, mineStats: mine, loss, ppLoss: sutemi && sutemi.outOk ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: near || (sutemi && sutemi.outOk) ? mine : best0, // 「ほぼ互角」で最善扱いにした手も、統計（3枚・引いた回数など）では自分の手を最善として数える
+     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -4270,7 +4271,7 @@ const MASA_NETA = {
   luckBad: ['バッドビートや！ポーカーやったら卓叩いてもええレベルや！', 'ポストに3回当たる日もあるんや、気にせんとこ！', 'リバーで逆転されるのもポーカーや。内容は勝っとったで！', '審判が見とらんかっただけや、内容は勝ちや！'],
   luckGood: ['ラッキーゴールもゴールはゴールや！でも次も入るとは限らんで！', 'ガットショットが刺さったな！せやけど毎回は来えへんで！', 'オウンゴールでもらった1点みたいなもんやな！', 'ランナーランナーで完成したみたいなもんや、反省会は必要やで！'],
   tend: ['ポーカーでもリーク（弱点）は同じとこに出るんや。そこ塞いだら一気に勝てるで！', '同じサイドばっかり破られとる。守備の穴はそこや！', 'テルが出とるで！相手に読まれる前に直しとこ！', 'セットプレーの守備みたいに、型を決めといたら崩れへん！'],
-  practice: ['居残り練習や！メッシも最初はリフティングからやで！', 'プロのポーカーは家でハンド検討しとるんや。練習あるのみや！', '練習は裏切らん！次の試合で結果出そ！', 'シュート練習100本や！…まあ1セットでええけど！'],
+  practice: ['居残り練習や！どんな名ストライカーも最初はリフティングからやで！', 'プロのポーカーは家でハンド検討しとるんや。練習あるのみや！', '練習は裏切らん！次の試合で結果出そ！', 'シュート練習100本や！…まあ1セットでええけど！'],
   flow: ['前半と後半で別のチームみたいやな！', 'ハーフタイムで修正できるかが勝負の分かれ目や！', 'スタックが減ってから慌てるのが一番あかんのや。'],
   style: ['監督目線で言うたら、戦術の傾向がはっきり出とるで！', 'プレースタイルってのはクセでもあり武器でもあるんや！'],
   defend: ['ゴール前を固める判断、ディフェンスの基本や！', 'チップを守る降り方も、立派な技術や！']
@@ -4342,7 +4343,11 @@ function rvGameSolo(who) {
     const gf = w.gf, why = rvWhy(w, who);
     const rHead = i === 0 ? RVP([`一番差がついたのは第${w.round}巡、場${w.t}で「${w.mine}」を選んだ場面です。`, `最大の分かれ道は第${w.round}巡、場${w.t}です。選んだのは「${w.mine}」でした。`]) : RVP([`次に差がついたのは第${w.round}巡、場${w.t}の「${w.mine}」です。`, `第${w.round}巡、場${w.t}の「${w.mine}」も惜しい判断でした。`]);
     const mHead = i === 0 ? RVP([`せやけど第${w.round}巡、場${w.t}で「${w.mine}」はなんでやねん！`, `一番言いたいのはここや。第${w.round}巡の場${w.t}、「${w.mine}」はちゃうやろ〜！`]) : RVP([`ほんで第${w.round}巡の「${w.mine}」もな！`, `第${w.round}巡、場${w.t}の「${w.mine}」もツッコませて！`]);
-    B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
+    // 3つ目からは短く：同じ型の説明をくり返さず、最善手だけを添える（前と同じ選び方なら「また」とまとめる）
+    if (i >= 2) { const same = f.misses.slice(0, i).some(x => x.mine === w.mine);
+      B(`第${w.round}巡（場${w.t}）の「${w.mine}」も、最善は「${w.best}」でした。`, same ? `第${w.round}巡でもまた「${w.mine}」や。同じ形の取りこぼしやで、そこは「${w.best}」！` : `第${w.round}巡の「${w.mine}」も、ほんまは「${w.best}」やったで！`); return; }
+    const mHead2 = i === 1 && f.misses[0].mine === w.mine ? `しかも第${w.round}巡でもまた「${w.mine}」や！` : mHead;
+    B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead2 + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
     if (i === 0) N(rvBadNeta(w));
   });
   if (!f.misses.length && f.nDec >= 2) B('大きく外した手はなく、判断は安定していました。', '大きなミスはなしや。ええディフェンスやったで！');
