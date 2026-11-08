@@ -1449,10 +1449,205 @@ body.atk-on .topbar .btn.sm{padding-left:8px;padding-right:8px}
 
 /* 引っ越し（アーティファクト版 → 公開版）の案内 */
 .mig-panel{display:flex;flex-direction:column;align-items:center;gap:6px;margin:10px auto 0;max-width:420px;text-align:center}
+
+/* ★6カナタ：奥義「絶対透視」の演出 */
+.toushi-fx{position:fixed;inset:0;z-index:120;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;box-sizing:border-box;pointer-events:none;background:radial-gradient(circle at 50% 38%,rgba(60,30,140,.92),rgba(5,4,18,.97) 70%);animation:txIn .35s ease both;text-align:center}
+.toushi-fx .tx-eye{width:132px;height:132px;border-radius:24px;box-shadow:0 0 0 3px #f2b632,0 0 40px 10px rgba(242,182,50,.45);animation:txGlow 1.2s ease-in-out infinite alternate}
+.toushi-fx .tx-eye svg{width:100%;height:100%}
+.toushi-fx .tx-name{font-family:var(--f-display);font-size:clamp(30px,9vw,46px);color:#ffd43b;letter-spacing:.06em;text-shadow:0 0 18px rgba(255,212,59,.7),0 3px 0 #2b1d00;animation:txName .6s .15s cubic-bezier(.2,1.6,.4,1) both}
+.toushi-fx .tx-sub{color:#e5dbff;font-size:14px;font-weight:700;max-width:420px}
+.toushi-fx .tx-see{display:flex;flex-direction:column;gap:5px;max-width:440px;width:100%;transition:filter .5s,opacity .5s}
+.toushi-fx .tx-row{display:flex;flex-wrap:wrap;align-items:center;gap:3px;justify-content:center;font-size:12px;color:#d0bfff}
+.toushi-fx .tx-row b{min-width:4.5em;text-align:right;margin-right:4px;font-weight:700}
+.toushi-fx .tx-c{display:inline-block;width:16px;height:22px;border-radius:3px;background:repeating-linear-gradient(45deg,#c92a2a 0 3px,#a61e1e 3px 6px);border:1px solid rgba(255,255,255,.6);animation:txCard 1.2s ease both}
+.toushi-fx.hide-cards .tx-see{filter:blur(6px);opacity:.15}
+.toushi-fx.out{animation:txOut .5s ease both}
+@keyframes txIn{from{opacity:0}to{opacity:1}}
+@keyframes txOut{to{opacity:0}}
+@keyframes txGlow{from{box-shadow:0 0 0 3px #f2b632,0 0 24px 4px rgba(242,182,50,.35)}to{box-shadow:0 0 0 3px #ffd43b,0 0 56px 18px rgba(170,140,255,.55)}}
+@keyframes txName{from{transform:scale(2.2);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes txCard{0%{opacity:0;transform:translateY(4px)}40%{opacity:1;transform:none}100%{opacity:.55;background:rgba(208,191,255,.35);border-color:#d0bfff;box-shadow:0 0 8px #b197fc}}
+.kanata-ent{margin:10px auto 0;max-width:560px;text-align:left}
+@media (prefers-reduced-motion:reduce){.toushi-fx,.toushi-fx *{animation:none!important}}
+
+/* ご褒美アイテム「自動照準」 */
+.aim-btn{display:flex;flex-direction:column;align-items:center;gap:2px;border:2px solid #f2b632;background:rgba(242,182,50,.12)}
+.aim-btn small{font-size:11px;font-weight:400;color:var(--muted,#c9c2ad)}
+.aim-bar{margin:0 0 8px;padding:6px 10px;border-radius:10px;background:rgba(242,182,50,.16);border:1px solid #f2b632;color:#ffe8a3;font-size:13px;text-align:center;animation:aimPulse 1s ease-in-out infinite alternate}
+.aim-bar b{font-size:16px;color:#ffd43b}
+.aim-fact{border-color:#f2b632!important;color:#ffd43b}
+@keyframes aimPulse{from{box-shadow:0 0 0 rgba(242,182,50,0)}to{box-shadow:0 0 14px rgba(242,182,50,.45)}}
+.aim-get{position:fixed;inset:0;z-index:115;display:flex;align-items:center;justify-content:center;background:rgba(5,10,8,.72);pointer-events:none;animation:txIn .3s ease both}
+.aim-get .ag-in{display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 22px;max-width:340px;text-align:center;border:2px solid #f2b632;border-radius:18px;background:#0e2a20;color:#fbf7ee}
+.aim-get .ag-in svg{width:90px;height:90px}
+.aim-get b{font-family:var(--f-display);font-size:26px;color:#ffd43b}
+.aim-get small{color:#e9e3cf;line-height:1.5}
+.aim-get.out{animation:txOut .4s ease both}
+
+/* 早見表を作成 */
+.chart-modal{display:flex;flex-direction:column;gap:8px}
+.ch-rule{padding:6px 8px;border-radius:8px;background:rgba(242,182,50,.1);border:1px solid rgba(242,182,50,.4)}
+.ch-wrap{max-height:34vh;overflow:auto;border:1px solid var(--line,#2a4a3c);border-radius:10px}
+.ch-table{border-collapse:collapse;width:100%;font-size:12px;font-variant-numeric:tabular-nums}
+.ch-table th{position:sticky;top:0;background:#123326;color:#f2b632;padding:4px 0;font-weight:700;z-index:1}
+.ch-table th:first-child{text-align:left;padding-left:6px}
+.ch-table td{text-align:center;padding:3px 0;border-top:1px solid rgba(255,255,255,.06);min-width:18px}
+.ch-table tr[data-crow]{cursor:pointer}
+.ch-table tr.on{background:rgba(242,182,50,.16)}
+.ch-table tr.full .ch-cards small{color:#ffd43b}
+.ch-table td.ok{color:#ffd43b;font-weight:900;cursor:pointer}
+.ch-table .ch-sec td{text-align:left;padding:5px 6px;color:#c9c2ad;font-weight:700;background:rgba(0,0,0,.25)}
+.ch-cards{text-align:left!important;padding-left:6px!important;white-space:nowrap}
+.ch-cards span,.ch-row-now span{display:inline-block;min-width:16px;margin-right:2px;padding:1px 2px;border-radius:3px;background:#fbf3dc;color:#1b1b1b;font-weight:900;text-align:center}
+.ch-cards small{display:block;font-size:10px;line-height:1.1;color:#c9c2ad}
+.ch-input{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:12px;background:rgba(0,0,0,.25)}
+.ch-row-now{display:flex;align-items:center;gap:4px}
+.ch-row-now span{font-size:16px;padding:2px 6px}
+.ch-row-now small{margin-left:auto;color:#c9c2ad}
+.ch-expr{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:36px;padding:6px 10px;border-radius:8px;background:#0b1a14;font-size:18px}
+.ch-expr b{font-size:15px;white-space:nowrap}
+.ch-expr.good b{color:#69db7c}
+.ch-expr.bad b{color:#ff8787}
+.ch-keys{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.ch-k{min-height:42px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:#173d2f;color:#fbf7ee;font-size:18px;font-weight:900;cursor:pointer}
+.ch-k.card-k{background:#fbf3dc;color:#1b1b1b}
+.ch-k:disabled{opacity:.3;cursor:default}
+
+/* 観戦：達人の1セット */
+.watch-entry{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+.w-table{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:16px;background:var(--felt,#0e3a2b);border:2px solid rgba(242,182,50,.35)}
+.w-field{display:flex;align-items:center;justify-content:center;gap:10px}
+.w-field .mc{min-width:44px;height:60px;font-size:26px;border-radius:7px}
+.w-seats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.w-seat{padding:8px;border-radius:12px;background:rgba(0,0,0,.25);border:2px solid transparent;display:flex;flex-direction:column;gap:5px;min-width:0}
+.w-seat.now{border-color:#f2b632}
+.w-seat.win{border-color:#69db7c;background:rgba(105,219,124,.12)}
+.w-head{display:flex;align-items:center;gap:6px}
+.w-head svg{width:34px;height:34px;flex:none}
+.w-head .av,.w-head > :first-child{flex:none}
+.w-head b{display:block;font-size:13px}
+.w-head small{display:block;font-size:10px;color:#c9c2ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.w-hand{display:flex;flex-wrap:wrap;gap:2px;min-height:20px}
+.w-last{font-size:12px;min-height:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.w-cm{display:flex;gap:8px;align-items:flex-start;padding:8px;border-radius:12px;background:rgba(0,0,0,.28)}
+.w-cm .cm-av{width:40px;height:40px;flex:none}
+.w-cm .cm-av svg{width:100%;height:100%}
+.w-cm .cm-name{display:block;font-size:11px;color:#f2b632;font-weight:700}
+.w-sum{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.watch-invite{display:flex;flex-direction:column;gap:10px}
+.watch-invite .wi-title{font-family:var(--f-display);font-size:24px;color:#ffd43b;text-align:center;animation:txName .6s cubic-bezier(.2,1.6,.4,1) both}
+.watch-invite .wi-btns{justify-content:center;gap:10px;flex-wrap:wrap;opacity:0;animation:txIn .4s 2.4s ease both}
+.w-hand .wc{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:26px;height:36px;border-radius:5px;background:var(--card,#fbf3dc);color:var(--card-ink,#1b1b1b);font-weight:900;font-size:14px;line-height:1;box-shadow:0 1px 2px rgba(0,0,0,.4)}
+.w-hand .wc small{font-size:10px;line-height:1}
+.w-hand .wc.red{color:var(--card-red,#d6336c)}
+.w-hand{gap:3px}
+.w-head > div{min-width:0}
+
+/* 観戦（本戦と同じ画面で） */
+.watch-home{display:block;width:100%;margin:14px 0 4px;padding:14px;font-size:17px;font-weight:900;border:2px solid #f2b632;background:linear-gradient(180deg,rgba(242,182,50,.22),rgba(242,182,50,.08))}
+body.spectate .me .controls,body.spectate .me .actions,body.spectate #hintpanel,body.spectate #prevpanel{display:none!important}
+body.spectate .me .hand .card{cursor:default}
+.open-hand{display:flex;flex-wrap:wrap;gap:3px;margin:4px 0 2px}
+.open-hand .oh{font-style:normal;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:24px;height:32px;padding:0 1px;border-radius:5px;background:var(--card);color:var(--card-ink);font-weight:900;font-size:14px;line-height:1;box-sizing:border-box;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.open-hand .oh small{font-size:9px;line-height:1}
+.open-hand .oh.red{color:var(--card-red)}
+.watch-sum .ws-pps{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.watch-sum .ws-pp{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.25);text-align:left}
+.watch-sum .ws-pp .av{width:36px;height:36px;flex:none}
+.watch-sum .ws-pp .av svg{width:100%;height:100%}
+.watch-sum .ws-pp > div{display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.watch-sum .ws-pp small{color:#c9c2ad;font-size:10px}
+.watch-sum .ws-pp.win{background:rgba(105,219,124,.16);outline:2px solid #69db7c}
+.watch-sum .gs-head{display:flex;flex-direction:column;align-items:center}
+.watch-sum .gs-head b{font-family:var(--f-display);font-size:24px;color:#ffd43b}
+.watch-sum .ws-pps .ws-pp.win{flex-direction:row!important;justify-content:flex-start!important;text-align:left!important}
+.seat .open-hand{grid-column:1/-1;display:flex!important;flex-direction:row!important;flex-wrap:wrap!important;align-items:center;gap:3px}
+.seat .open-hand .oh{display:inline-flex!important;flex:none;width:auto}
+
+/* チュートリアル */
+.watch-sm{display:block;margin:2px 0 6px;font-size:13px}
+.tut{display:flex;flex-direction:column;gap:10px}
+.tut-top{display:flex;justify-content:space-between;align-items:center}
+.tut-prog{height:6px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden}
+.tut-prog i{display:block;height:100%;background:#f2b632;transition:width .35s}
+.tut-stage{display:flex;flex-direction:column;align-items:center;gap:8px;min-height:60px}
+.tut-hand{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tut-hand .card{animation:pop .3s ease-out both}
+.tut-hand.pick .card{cursor:pointer}
+.tut-field{display:flex;justify-content:center}
+.tut-field .fieldcard{position:relative;transform:none}
+.tut-cap{margin:0;font-size:13px;color:#c9c2ad}
+.tut-msg{min-height:22px;text-align:center;font-weight:700}
+.tut-msg.good{color:#69db7c}
+.tut-msg.bad{color:#ff8787}
+.tut-opts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.tut-opts .btn{min-width:90px;font-size:17px}
+.tut-exprs{display:grid;grid-template-columns:auto auto;gap:6px 12px;align-items:center}
+.tut-exprs .mono{font-size:18px;font-weight:900;color:#ffd43b}
+.tut-exprs small{color:#c9c2ad}
+.tut-flow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;justify-content:center}
+.tut-flow span{padding:6px 10px;border-radius:10px;background:rgba(0,0,0,.3);font-weight:700}
+.tut-menu{margin:0;padding-left:1.1em;line-height:1.7;font-size:14px;text-align:left}
+.tut-nav{justify-content:space-between;gap:8px}
+.tut .op-lines{min-height:0!important;margin:0}
+.tut.tut-static .op-line{animation:none!important;opacity:1!important;transform:none!important}
+.about-tut{display:flex;flex-direction:column;align-items:flex-start;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)}
+
+/* このアプリができるまで */
+.story{display:flex;flex-direction:column;gap:14px;max-width:640px;margin:0 auto}
+.story-hero{text-align:center;padding:18px 12px;border-radius:18px;background:radial-gradient(ellipse at 50% 30%,#17533c,#0b1a14 80%);border:2px solid rgba(242,182,50,.45)}
+.story-hero .sh-t{font-family:var(--f-display);font-size:clamp(24px,7vw,34px);line-height:1.3;color:#ffd43b}
+.story-hero p{margin:6px 0 0;color:#c9c2ad}
+.story-tl{list-style:none;margin:0;padding:0 0 0 6px;position:relative;display:flex;flex-direction:column;gap:12px}
+.story-tl::before{content:'';position:absolute;left:24px;top:8px;bottom:8px;width:2px;background:rgba(242,182,50,.35)}
+.story-tl li{display:flex;gap:12px;align-items:flex-start;position:relative;animation:txIn .5s ease both}
+.story-tl .st-ic{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#123326;border:2px solid #f2b632;font-size:18px;z-index:1}
+.story-tl b{display:block;color:#ffe8a3;font-size:16px}
+.story-tl p{margin:2px 0 0;line-height:1.7;font-size:14px}
+.story-cast .op-line{animation:none;opacity:1}
+
+/* 数字で見る研究所 */
+.num-grid{display:grid;grid-template-columns:1fr;gap:10px}
+@media (min-width:640px){.num-grid{grid-template-columns:1fr 1fr}}
+.num-card{padding:14px;border-radius:16px;background:rgba(0,0,0,.28);border:1px solid rgba(242,182,50,.3);animation:txIn .5s ease both}
+.num-card .nc-n{display:flex;align-items:baseline;gap:4px}
+.num-card .nc-n b{font-family:var(--f-display);font-size:clamp(34px,10vw,44px);line-height:1.1;color:#ffd43b;text-shadow:0 2px 0 #2b1d00}
+.num-card .nc-n small{font-weight:700;color:#ffe8a3}
+.num-card .nc-t{font-weight:900;font-size:15px;margin-top:2px}
+.num-card p{margin:6px 0 0;line-height:1.7;font-size:13.5px}
+.num-bars{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.nb-row{display:grid;grid-template-columns:40px 1fr 34px;align-items:center;gap:6px;font-size:12px}
+.nb-row i{display:block;height:10px;border-radius:5px;background:linear-gradient(90deg,#f2b632,#ffd43b)}
+.nb-row b{text-align:right;font-variant-numeric:tabular-nums}
+.story-text{display:flex;flex-direction:column;gap:12px;padding:4px 6px}
+.story-text p{margin:0;font-size:16px;line-height:1.9;animation:txIn .6s ease both}
+.story-note{margin:0;padding:0 6px}
+.nb-row.wide{grid-template-columns:96px 1fr auto}
+.nb-row.wide b{white-space:nowrap}
+.nb-row.hi i{background:linear-gradient(90deg,#69db7c,#b2f2bb)}
+.hunt-ready .aim-talk{animation:none;opacity:1}
+.hunt-rules summary{cursor:pointer;color:#f2b632;font-weight:700}
+.ch-keys{grid-template-columns:repeat(3,1fr)}
+.ch-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.ch-hintline{font-size:14px;padding:4px 8px;border-radius:8px;background:rgba(116,192,252,.12);color:#a5d8ff}
+.ch-table td.hint{color:#74c0fc;font-weight:900;background:rgba(116,192,252,.10)}
+
+/* ランキング・クラウド */
+.rk-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.rk-list{display:flex;flex-direction:column;gap:4px}
+.rk-row{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22)}
+.rk-row.me{outline:2px solid #f2b632;background:rgba(242,182,50,.12)}
+.rk-n{font-family:var(--f-display);color:#ffd43b;text-align:center}
+.rk-av svg{width:34px;height:34px;display:block}
+.rk-nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-nm small{margin-left:6px;font-size:10px;color:#f2b632}
+.rk-v{font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
+.rk-v small{display:block;font-size:10px;font-weight:400;color:#c9c2ad}
+.cl-code{font-size:18px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;background:#0b1a14;border:1px solid rgba(242,182,50,.4)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='0e3702e0c5';
+window.KB_BUILD='6746a1d34c';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -1599,7 +1794,7 @@ KB.validateStrategy = function (s) {
   return s;
 };
 KB.style = id => STRAT.styles.find(s => s.id === id) || STRAT.styles[0];
-KB.levelCfg = lv => STRAT.levels.find(l => l.level === lv) || STRAT.levels[2];
+KB.levelCfg = lv => STRAT.levels.find(l => l.level === Math.min(lv, 5)) || STRAT.levels[2]; // ★6（カナタ）はふだん★5と同じ読み
 
 // ヒューリスティック評価（1手）
 function heurScore(counts, m, st, unseen, flexScale) {
@@ -1698,8 +1893,9 @@ function sampleHands(view, pool, r, pol) {
     const hands = []; let k = 0;
     for (let p = 0; p < n; p++) {
       if (p === me) { hands.push(view.hands[me]); continue; }
-      const c = new Array(14).fill(0);
-      for (let j = 0; j < view.handSizes[p]; j++) c[pool[k++]]++;
+      const c = new Array(14).fill(0), fx = view.peek ? view.peek.hands[p] : [];
+      for (const v of fx) c[v]++;
+      for (let j = fx.length; j < view.handSizes[p]; j++) c[pool[k++]]++;
       hands.push(c);
     }
     let w = 1;
@@ -1761,6 +1957,8 @@ function evaluate(view, cands, rollouts, ctx, r) {
   known[view.field]++;
   const pool = [];
   for (let v = 1; v <= 13; v++) for (let k = 0; k < 4 - known[v]; k++) pool.push(v);
+  const pk = view.peek;
+  if (pk) { const fixed = pk.hands.flat().concat(Object.values(pk.deck)); for (const v of fixed) { const i = pool.indexOf(v); if (i >= 0) pool.splice(i, 1); } }
   const pol = [];
   for (let p = 0; p < n; p++) {
     const md = view.models && view.models[p];
@@ -1774,7 +1972,9 @@ function evaluate(view, cands, rollouts, ctx, r) {
   for (let s = 0; s < stages; s++) {
     for (let it = 0; it < perStage; it++) {
       const smp = sampleHands(view, pool, r, pol);
-      const deck = smp.rest.slice(0, view.deckSize);
+      let deck;
+      if (pk) { deck = []; let q = 0; for (let k = 0; k < view.deckSize; k++) deck.push(pk.deck[k] != null ? pk.deck[k] : smp.rest[q++]); }
+      else deck = smp.rest.slice(0, view.deckSize);
       const noise = []; for (let p = 0; p < n; p++) noise.push(ctx && ctx.gamesLeftAfter ? gauss(r) * (ctx.sd || 10) * Math.sqrt(ctx.gamesLeftAfter) : 0);
       const seed = (r() * 4294967296) >>> 0;
       for (const rr of res) {
@@ -1976,9 +2176,54 @@ KB.Game = class {
   }
 };
 
+// ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
+// 発動は1ゲーム1回まで。50%の確率で、第2巡か第3巡のカナタの番に発動する（kanataAt）
+KB.kanataRoll = function (game) {
+  const k = game.players.findIndex(pl => pl.clairvoyant);
+  game.kanataIdx = k; game.kanataAt = k >= 0 && Math.random() < 0.5 ? (Math.random() < 0.5 ? 2 : 3) : 0; game.kanataOn = false;
+  if (k >= 0 && G.KB_KANATA_AT) game.kanataAt = G.KB_KANATA_AT; // テスト用：発動を固定
+};
+KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataAt && !game.kanataOn && game.round >= game.kanataAt;
+function aiMoveClear(game, p, rollouts) {
+  const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
+  const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
+  const win = all.find(m => m.n === total); if (win) return win;
+  const cands = KB.candidates(counts, t, 10).concat([null]);
+  const hands0 = game.hands.map(h => countsOf(h)), deck0 = game.deck.map(c => c.v), disc0 = game.discard.map(c => c.v);
+  const pol = game.players.map((pl, i) => i === p ? makePolicy(5, 'keisan') : makePolicy(pl.human ? 4 : Math.min(pl.level || 3, 5), pl.style || 'keisan'));
+  const N = rollouts || 48; let best = null, bs = -1e9;
+  for (const m of cands) {
+    let win = 0, pp = 0;
+    for (let it = 0; it < N; it++) {
+      const hands = hands0.map(h => h.slice());
+      const sim = { hands, deck: deck0.slice(), discard: disc0.slice(), field: t, order: game.order, pos: game.pos + 1, r: mulberry(1000 + it * 7919), pol, me: p, meTurns: 0 };
+      if (m) { for (const v of m.vals) { hands[p][v]--; sim.discard.push(v); } } else { const v = simDraw(sim); if (v) hands[p][v]++; }
+      const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
+      if (w === p) win++; else pp += sumCounts(hands[p]);
+    }
+    const s = win / N * 0.5 - pp / N; // 失点の見込みを最小に（同じくらいなら上がりやすい方）
+    if (s > bs) { bs = s; best = m; }
+  }
+  return best;
+}
+KB.aiMoveClear = aiMoveClear;
+// ゼロの隠れた力（本人も気づいていない）：ときどき、見えないはずの札が何枚か分かる。
+// 分かった札は固定し、残りは毎回ランダムに埋めて先を読む。カナタほどではないが、ほかの★5より強い
+const PEEK_RATE = 0.7;
+// 見えないはずの札（他の人の手札＋山札の上6枚）から5〜7枚だけ分かる。分かった札は、ふだんの読み（MC）の中で固定される
+function makePeek(game, p) {
+  const slots = [];
+  game.hands.forEach((h, i) => { if (i !== p) h.forEach(c => slots.push({ i, v: c.v })); });
+  const D = game.deck.length; for (let k = Math.max(0, D - 6); k < D; k++) slots.push({ i: -1, k, v: game.deck[k].v });
+  shuffle(slots);
+  const pk = { hands: game.hands.map(() => []), deck: {} };
+  for (const x of slots.slice(0, 5 + ((Math.random() * 3) | 0))) { if (x.i >= 0) pk.hands[x.i].push(x.v); else pk.deck[x.k] = x.v; }
+  return pk;
+}
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
+  if (pl.clairvoyant && game.kanataOn) return aiMoveClear(game, p);
   const lv = KB.levelCfg(pl.level), st = KB.style(pl.style);
   const counts = game.counts(p), t = game.field.v;
   const unseen = game.unseenCounts(p);
@@ -1987,7 +2232,9 @@ KB.aiMove = function (game, p, ctx) {
     if (!all.length) return null;
     const win = all.find(m => m.n === counts.reduce((a, b) => a + b, 0)); if (win) return win;
     const cands = KB.candidates(counts, t, 6).concat([null]); // あえて引くも検討
-    const ev = evaluate(game.view(p), cands, lv.mcRollouts, ctx);
+    const view = game.view(p);
+    if (pl.peek && Math.random() < PEEK_RATE) { view.peek = makePeek(game, p); game.peeks = (game.peeks || 0) + 1; } // ゼロの隠れた力（本人は気づいていない）
+    const ev = evaluate(view, cands, lv.mcRollouts, ctx);
     const mc = st.mc;
     const sc = ev.map(e => ({ m: e.m, s: mc.goal * normGoal(e, ctx) + mc.win * e.win - mc.pp * e.pp / 40 + gauss() * st.noise * 0.01 }));
     sc.sort((a, b) => b.s - a.s);
@@ -2001,9 +2248,12 @@ KB.normGoal = normGoal;
 // 全自動で1ゲーム（他テーブル用：速さ優先でMCは上級ヒューリスティックで代用）
 KB.autoGame = function (players, starter) {
   const g = new KB.Game(players, starter);
+  KB.kanataRoll(g);
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
+    if (KB.kanataReady(g, p)) g.kanataOn = true;
+    if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));
     g.apply(m);
@@ -2040,7 +2290,7 @@ const HAIR = ['#2b2522', '#3c2b20', '#5a3a24', '#7a4b2a', '#a8763e', '#d9b46a', 
 const GRAY = ['#c9c9c9', '#e8e8e8', '#a5a5a5'];
 const SHIRT = ['#4263eb', '#e64980', '#20c997', '#fab005', '#7950f2', '#fd7e14', '#868e96', '#15aabf'];
 const HSTYLE = { m: ['short', 'spiky', 'side', 'buzz'], f: ['bob', 'long', 'pony', 'bun'] };
-const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5'];
+const LEVEL_RING = ['#adb5bd', '#b5763a', '#b8c2cc', '#e0b43a', '#9b5de5', '#ffd43b'];
 
 let used = new Set();
 KB.resetNames = () => { used = new Set(); };
@@ -2061,6 +2311,7 @@ KB.genChar = function (r) {
 
 // mood: normal happy worried smug shock sleepy
 const FRAME = (id, ring, bg) => `<defs><clipPath id="${id}"><rect x="4" y="4" width="92" height="92" rx="17"/></clipPath></defs><rect x="1" y="1" width="98" height="98" rx="20" fill="${ring}"/><rect x="4" y="4" width="92" height="92" rx="17" fill="${bg}" opacity=".9"/>`;
+const LV6 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#7048e8" stroke-width="1.4"/>';
 const LV5 = '<rect x="1.5" y="1.5" width="97" height="97" rx="19.5" fill="none" stroke="#e5dbff" stroke-width="1" stroke-dasharray="3 4"/>';
 KB.avatarSVG = function (ch, opts) {
   opts = opts || {};
@@ -2075,11 +2326,11 @@ KB.avatarSVG = function (ch, opts) {
     const ca = ch.acc && KB.accSVG ? KB.accSVG(ch.acc, fy, rx, top) : { back: '', front: '' };
     const co = ch.outfit && KB.accSVG ? KB.accSVG(ch.outfit, fy, rx, top) : { back: '', front: '' };
     const gl = ch.gl && KB.glSVG && !['robot', 'skeleton', 'ghost', 'alien'].includes(ch.base) ? KB.glSVG(ch.gl, 50, 9) : '';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(idb, ringb, bgb)}<g clip-path="url(#${idb})">${ch.bgpat && KB.bgPatSVG ? KB.bgPatSVG(String(ch.bgpat).replace('pat:', '')) : ''}${co.back}${ca.back}${KB.creatureSVG({ kind: ch.base }, mood)}${co.front}${gl}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   if (ch.kind && ch.kind !== 'human' && KB.creatureSVG) {
     const id0 = 'c' + Math.random().toString(36).slice(2, 8), ring0 = lv ? LEVEL_RING[lv - 1] : 'transparent', bg0 = st ? st.color : '#8a9a93';
-    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 5 ? LV5 : ''}</svg>`;
+    return `<svg viewBox="0 0 100 100" role="img" aria-label="${ch.name}" xmlns="http://www.w3.org/2000/svg">${FRAME(id0, ring0, bg0)}<g clip-path="url(#${id0})">${KB.creatureSVG(ch, mood)}</g>${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}</svg>`;
   }
   const child = ch.age === 'child', senior = ch.age === 'senior';
   const fy = child ? 56 : 52, rx = child ? 24 : 23, ry = child ? 23 : 26;
@@ -2122,6 +2373,8 @@ KB.avatarSVG = function (ch, opts) {
   if (mood === 'happy') eyes = `<path d="M${50 - ex - 4} ${eyY + 1}Q${50 - ex} ${eyY - 4} ${50 - ex + 4} ${eyY + 1}M${50 + ex - 4} ${eyY + 1}Q${50 + ex} ${eyY - 4} ${50 + ex + 4} ${eyY + 1}" stroke="${ink}" stroke-width="2.2" fill="none" stroke-linecap="round"/>`;
   else if (mood === 'smug' || mood === 'sleepy') eyes = `<path d="M${50 - ex - 4} ${eyY}L${50 - ex + 4} ${eyY}M${50 + ex - 4} ${eyY}L${50 + ex + 4} ${eyY}" stroke="${ink}" stroke-width="2.4" stroke-linecap="round"/>`;
   else if (mood === 'shock') eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 + ex}" cy="${eyY}" r="${er + 1.4}" fill="#fff" stroke="${ink}" stroke-width="1.5"/><circle cx="${50 - ex}" cy="${eyY}" r="1.5" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="1.5" fill="${ink}"/>`;
+  else if (mood === 'cool' && ch.closed && !opts.open) eyes = `<path d="M${50 - ex - 4.5} ${eyY}Q${50 - ex} ${eyY + 2.6} ${50 - ex + 4.5} ${eyY}M${50 + ex - 4.5} ${eyY}Q${50 + ex} ${eyY + 2.6} ${50 + ex + 4.5} ${eyY}" stroke="${ink}" stroke-width="1.8" fill="none" stroke-linecap="round"/>`;
+  else if (mood === 'cool' && opts.open) eyes = [50 - ex, 50 + ex].map(x => `<ellipse cx="${x}" cy="${eyY}" rx="4.6" ry="3.4" fill="#fff"/><circle cx="${x}" cy="${eyY}" r="3" fill="#f2b632"/><circle cx="${x}" cy="${eyY}" r="3" fill="none" stroke="#7048e8" stroke-width=".7"/><path d="M${x - 1.6} ${eyY}h3.2M${x} ${eyY - 1.6}v3.2" stroke="#2b1d00" stroke-width=".8"/>`).join('') + `<circle cx="50" cy="${eyY}" r="${ex + 9}" fill="none" stroke="rgba(242,182,50,.45)" stroke-width="1.2"/>`;
   else if (mood === 'cool') eyes = `<path d="M${50 - ex - 4.5} ${eyY - 1}L${50 - ex + 4.5} ${eyY - 1.6}M${50 + ex - 4.5} ${eyY - 1.6}L${50 + ex + 4.5} ${eyY - 1}" stroke="${ink}" stroke-width="2.2" stroke-linecap="round"/><ellipse cx="${50 - ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><ellipse cx="${50 + ex + 0.6}" cy="${eyY + 0.8}" rx="2.2" ry="1.8" fill="#3b3f8c"/><circle cx="${50 - ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/><circle cx="${50 + ex + 1.4}" cy="${eyY + 0.2}" r="0.6" fill="#cfd8ff"/>`;
   else eyes = `<circle cx="${50 - ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 + ex}" cy="${eyY}" r="${er}" fill="${ink}"/><circle cx="${50 - ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/><circle cx="${50 + ex + 1}" cy="${eyY - 1}" r="0.9" fill="#fff"/>`;
   const my = fy + 13;
@@ -2157,7 +2410,7 @@ ${FRAME(id, ring, bg)}
 <ellipse cx="${50 - rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/><ellipse cx="${50 + rx}" cy="${fy + 2}" rx="3.5" ry="5" fill="${S}"/>
 <ellipse cx="50" cy="${fy}" rx="${rx}" ry="${ry}" fill="${S}"/>
 ${co.front}${front}${brows}${eyes}${mouth}${extra}${over}${ch.face && KB.faceSVG ? KB.faceSVG(ch.face, fy, eyY, ex) : ''}${acc}${ca.front}${ch.hold && KB.holdSVG ? KB.holdSVG(ch.hold) : ''}${ch.pet && KB.petSVG ? KB.petSVG(ch.pet) : ''}</g>
-${lv >= 5 ? LV5 : ''}
+${lv >= 6 ? LV6 : lv >= 5 ? LV5 : ''}
 </svg>`;
 };
 
@@ -2196,8 +2449,8 @@ const KB = G.KB;
 // tone: end 語尾 / kata カタカナ / pre 前置き
 const R = [
   // ---------- ★5（16人）：二つ名つき。局面と無関係なことしか言わない ----------
-  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' },
-    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。',
+  { id: 'zero', name: 'ゼロ', title: '静かなる天才', lv: 5, st: 'keisan', kind: 'human', tag: '小4', look: { g: 'm', age: 'child', skin: 0, hair: '#14141c', hs: 'veil', shirt: '#3a3f7a', cool: true, bgpat: 'pat:stars' }, peek: true,
+    prof: '無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。ときどき、まだめくられていない札が「なんとなく」分かるらしい。本人はただの勘だと思っている。',
     idle: ['…今日の給食、カレーだった', '…', '雲、動いてる', '…眠い', 'この机、ちょっと傾いてる', '宿題、もう終わってる', '…ふうん', '外、雨が降りそう'], win: ['…おしまい', '…帰っていい？'], lose: ['…そう', '…次'] },
   { id: 'soroban', name: 'ソロバン9000', title: '無敗の演算機', lv: 5, st: 'keisan', kind: 'robot', tag: 'ロボ', look: { color: '#adb5bd' },
     prof: '全通りを読むという噂の算盤ロボ。話す内容は、だいたい天気。', tone: { kata: true },
@@ -2309,6 +2562,12 @@ const R = [
   { id: 'kerosuke', name: 'ケロスケ', lv: 1, st: 'gangan', kind: 'frog', tag: 'カエル', look: {}, tone: { end: 'ケロ' }, prof: '雨の日だけ元気なカエル。とにかく跳ねるように出す。' }
 ];
 KB.ROSTER = R;
+// ---------- ★6（唯一）：カナタ。ROSTER には入れない（予選・練習では当たらず、大会の決勝にだけ現れる） ----------
+// 大会に参加する確率は、ほかのキャラの1.5倍（参加AIの人数 ÷ キャラの総数 × 1.5）
+KB.KANATA = { id: 'kanata', name: 'カナタ', title: '卓の彼方を視る者', lv: 6, st: 'keisan', kind: 'human', tag: '年齢不詳', look: { g: 'm', age: 'adult', skin: 0, hair: '#eef0f6', hs: 'long', shirt: '#1b2340', cool: true, closed: true, bgpat: 'pat:void' },
+  prof: '計算ブリッジ倶楽部の初代チャンピオン。いつから倶楽部にいるのか、誰も知らない。ゼロに計算を教えた師。ふだんは目を閉じたまま打つが、奥義「絶対透視」で目を開くと、山札の底まで見通すという。',
+  idle: ['……'], win: ['最初から、そう決まっていた'], lose: ['……面白い'] };
+KB.kanataRate = nAI => Math.min(1, nAI / (R.length + 1) * 1.5); // ほかのキャラが選ばれる割合の1.5倍（出会いやすく）
 // ライバル関係（同じ卓にいると、上がったときに相手が反応する）
 KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 'hidari', hidari: 'migi', pipo: 'omega' };
 
@@ -2316,9 +2575,9 @@ KB.RIVALS = { zero: 'shota', shota: 'zero', kakeru: 'rin', rin: 'kakeru', migi: 
 const SKIN = ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'];
 KB.charToCh = function (c) {
   const L = c.look || {};
-  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
+  return { charId: c.id, kind: c.kind, name: c.name, title: c.title || '', ageJa: c.tag || '', gender: L.g || 'm', age: L.age || 'adult', skin: SKIN[L.skin || 0], hair: L.hair || '#2b2522', hs: L.hs || 'short', shirt: L.shirt || '#868e96', glasses: !!L.gl, acc: L.acc || null, cool: !!L.cool, closed: !!L.closed, bgpat: L.bgpat || null, color: L.color, earC: L.earC, mane: L.mane };
 };
-KB.charById = id => R.find(c => c.id === id);
+KB.charById = id => id === 'kanata' ? KB.KANATA : R.find(c => c.id === id);
 // level の中から、style（指定があれば優先）で、まだ使っていないキャラを選ぶ。いなければ近い強さから
 KB.pickChar = function (level, style, used) {
   used = used || new Set();
@@ -2387,7 +2646,7 @@ KB.charLine = function (p, kind, info) {
 KB.charTalkRate = function (p) {
   const c = p && p.ch && p.ch.charId ? KB.charById(p.ch.charId) : null;
   if (!c) return KB.talkRate(p.level);
-  return [0.85, 0.7, 0.45, 0.28, 0.22][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
+  return [0.85, 0.7, 0.45, 0.28, 0.22, 0.12][c.lv - 1]; // ★5も少しは話す（ただし中身は無関係）
 };
 
 // ---------- 見た目：人間以外のキャラと、人間の小物 ----------
@@ -2512,6 +2771,7 @@ KB.petSVG = function (p) {
 KB.bgPatSVG = function (pat) {
   switch (pat) {
     case 'fire': return `<rect x="0" y="0" width="100" height="100" fill="#3b0d0d"/><path d="M0 100V70q8 -14 14 0q4 -18 12 -4q6 -16 12 0q6 -20 14 -2q6 -14 12 2q6 -16 12 0q6 -12 14 4V100Z" fill="#e8590c"/><path d="M0 100V82q8 -10 14 0q6 -12 12 0q6 -10 12 0q6 -12 14 0q6 -10 12 0q6 -10 12 0q6 -8 14 2V100Z" fill="#fcc419"/>`;
+    case 'void': return `<rect x="0" y="0" width="100" height="100" fill="#0a0820"/><g fill="none" stroke="rgba(170,150,255,.22)">${[14, 26, 38, 50, 62].map(r => `<circle cx="50" cy="52" r="${r}"/>`).join('')}</g>${[[12, 14], [86, 20], [20, 84], [80, 82], [52, 6], [6, 50], [94, 54]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 2 ? .8 : 1.3}" fill="#d0bfff"/>`).join('')}`;
     case 'stars': return `<rect x="0" y="0" width="100" height="100" fill="#1b1f4a"/>${[[14, 18], [30, 10], [80, 16], [88, 40], [10, 50], [70, 8], [20, 80], [86, 76], [50, 6], [94, 60]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1 : 1.8}" fill="#fff3bf"/>`).join('')}`;
     case 'rainbow': return `<rect x="0" y="0" width="100" height="100" fill="#d0ebff"/>${['#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c', '#4dabf7', '#9775fa'].map((c, i) => `<path d="M${-10 + i * 6} 100A${60 - i * 6} ${60 - i * 6} 0 0 1 ${110 - i * 6} 100" stroke="${c}" stroke-width="6" fill="none"/>`).join('')}`;
     case 'formula': return `<rect x="0" y="0" width="100" height="100" fill="#0b3d2e"/><g fill="rgba(255,255,255,.28)" font-family="sans-serif" font-weight="900" font-size="11">${[['÷', 10, 20], ['×', 78, 18], ['+', 16, 70], ['−', 84, 66], ['=', 50, 12], ['7', 30, 40], ['13', 64, 40], ['(', 8, 44], [')', 90, 44]].map(([t, x, y]) => `<text x="${x}" y="${y}">${t}</text>`).join('')}</g>`;
@@ -4812,7 +5072,9 @@ M.atkEndBest = [
 ];
 M.atkQuit = ['ここで終了か！{bp}BPは取れたで、次はフルタイム出場や！', '途中交代やな！{bp}BP、次は最後のホイッスルまで行こか！'];
 M.atkQuit0 = ['ありゃ、ウォーミングアップで終わってもうたな！次は本番いこか！'];
+R.kanataOn = ['奥義「絶対透視」。{n}さんには、全員の手札と山札の順番まで視えています。{n}さんが上がる確率はぐっと上がりました。上がりも狙えますが、上がられたときに備えて大きい札から処分していく手が有力になります。', '{n}さんの目が開きました。こちらの上がりの目が消えたわけではありません。ただ、先に上がられる確率は大きく上がったので、失点の見込みも頭に入れて選びましょう。'];
 for (const k in R) KB.LINES_ROOT[k] = R[k];
+M.kanataOn = ['出たー！奥義・絶対透視や！カナタには全部見えとるで！こっちのゴールもまだ狙えるけど、先に決められる確率はグンと上がった。でかい札から逃がしながら攻めや！', 'カナタの目が開いたで…！山札の底までお見通しや。カウンター狙いつつ、守備もしっかり固めとこ！'];
 for (const k in M) KB.LINES_MASA[k] = M[k];
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -4848,7 +5110,7 @@ KB.casterSVG = function (who, mood) {
 const R = (a, r) => a[((r || Math.random)() * a.length) | 0];
 const fill = (s, d) => s.replace(/\{(\w+)\}/g, (_, k) => (d[k] == null ? '' : d[k]));
 const ANALYTIC = { start: 1, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, good: 1, ok: 1, bad: 1, drewGood: 1, border: 1, borderIn: 1, borderClose: 1, borderFar: 1, finalSet: 1, lastGame: 1, final: 1, heavy: 1, tip: 1, leadSet: 1, trailSet: 1, philo: 1, setStart: 1, oppMissed: 1, oppBlunder: 1, oppNice: 1, myBigPP: 1, mySmallPP: 1, resultLucky: 1, resultUnlucky: 1, resultBoth: 1, resultBad: 1, reshuffle: 1, deckLow: 1, styleKeisan: 1, styleInochi: 1 };
-const PRIO = { atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
+const PRIO = { kanataOn: 9, atkStart: 7, atkHalf: 7, atk5: 7, atk1: 7, atkSet: 7, namedWin: 6, missLucky: 6, bigWait: 6, almostWinBig: 5, almostWin: 4, foul: 6, setStart: 5, divMild: 2, vague: 1, oppNice: 2, oppMissed: 3, oppBlunder: 3, tip: 0, roundSmall: 1, roundMid: 1, roundBig: 1, field1: 1, field13: 1, field7: 1, deckLow: 1, start: 2, draw: 2, play1: 2, play2: 2, heavy: 2, reshuffle: 2, styleGangan: 2, styleInochi: 2, styleIroiro: 2, styleKeisan: 2, master: 2, mul: 2, drawStreak: 3, play3: 3, div: 3, leadSet: 3, trailSet: 3, myHeavy: 3, reach: 4, myReach: 4, good: 4, ok: 3, bad: 4, drewGood: 4, streak: 5, border: 4, borderIn: 4, borderClose: 4, borderFar: 4, philo: 1, tableDefensive: 2, tableAggressive: 2, tableStuck: 2, tableClose: 2, tableRunaway: 3, tableHeavy: 2, myBigPP: 4, mySmallPP: 4, resultLucky: 4, resultUnlucky: 4, resultBoth: 4, resultBad: 4, finalSet: 5, lastGame: 5, final: 5, win: 6 };
 const LINES = () => ({ root: KB.LINES_ROOT || {}, masa: KB.LINES_MASA || {} });
 // 最近使ったセリフ（ブラウザに保存して、次に開いたときも続けて避ける）
 let RECENT = {};
@@ -4899,7 +5161,7 @@ KB.commentLine = function (mode, kind, d) {
   saveRecent();
   let text = fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
-  const noPrefix = { atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
+  const noPrefix = { kanataOn: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];
   if (pf && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
   // 博士はごくたまに、哲学的なひと言を添える
@@ -4919,11 +5181,11 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
+const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
-  del(k) { try { localStorage.removeItem(k); } catch (e) { } }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); }
 };
 let PID = raw.get('kb.profile', null);
 const keyOf = k => PROFILE_KEYS[k] && PID ? 'kb.p.' + PID + '.' + k : 'kb.' + k;
@@ -4972,7 +5234,7 @@ function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; 
 // AIはごちゃまぜ倶楽部の固定キャラから選ぶ（強さ・性格・名前・見た目はキャラごとに決まっている）
 function makeAI(id, level, style, used) {
   const c = KB.pickChar(level, style || null, used);
-  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c) };
+  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c), peek: !!c.peek };
 }
 // アバター編集
 const AV_OPTS = {
@@ -5074,18 +5336,18 @@ function makeHuman(id) {
   return { id, human: true, level: 0, style: null, ch: Object.assign({ gender: 'm', age: 'adult', name: S.settings.name || 'あなた', skin: '#efc4a2', hair: '#2b2522', hs: 'side', shirt: '#f0a020', glasses: false, ageJa: '' }, myAvatar(), { name: S.settings.name || 'あなた', kind: 'human' }) };
 }
 const P = id => S.T.players.find(p => p.id === id);
-function nm(p) { return p.human ? (S.settings.name || 'あなた') : p.ch.name; }
+function nm(p) { return p.human && !p.spectator ? (S.settings.name || 'あなた') : p.ch.name; }
 // 呼び名に「さん」を付ける（すでに敬称・肩書きで終わる名前には付けない）
 const san = s => /(さん|くん|君|ちゃん|様|先生|博士|大将|師匠|親方|課長|部長|社長|会長|名人|先輩)$/.test(s) ? s : s + 'さん';
 function av(p, mood, small) {
   const lvShow = S.settings.showLevel || S.T && S.T.revealAll;
   const stShow = S.settings.showStyle || S.T && S.T.revealAll;
-  return KB.avatarSVG(p.ch, { mood: mood || 'normal', level: p.human ? 0 : (lvShow ? p.level : 0), style: p.human ? null : (stShow ? p.style : null) });
+  const me = p.human && !p.spectator; return KB.avatarSVG(p.ch, { mood: mood || 'normal', level: me ? 0 : (lvShow ? p.level : 0), style: me ? null : (stShow ? p.style : null) });
 }
 function lvChip(p) {
-  if (p.human) return '';
+  if (p.human && !p.spectator) return '';
   let s = '';
-  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(5 - p.level)} ${esc(KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
+  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(Math.max(0, 5 - p.level))} ${esc(p.level >= 6 ? '奥義使い' : KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
   if (S.settings.showStyle) { const st = KB.style(p.style); s += `<span class="chip stchip" style="background:${esc(st.color)}"><span class="lv-full">${esc(st.label)}</span><span class="lv-short">${esc(st.label.slice(0, 4))}</span></span>`; }
   return s;
 }
@@ -5110,6 +5372,10 @@ function newSession(cfg) {
     setPP: {}, points: {}, totPP: {}, setHist: [], finalists: [], finalPP: {}, tb: {}, done: false, startedAt: Date.now()
   };
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
+  // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
+  if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : Math.random() < KB.kanataRate(cfg.nPlayers - 1))) {
+    T.kanata = true; if (cfg.finalists >= 5) { T.cfg = Object.assign({}, cfg, { finalists: 4 }); T.kanataCut = true; }
+  }
   return T;
 }
 function seatSet(T) {
@@ -5282,8 +5548,8 @@ function ctxFor(pIdx) {
 // ---------- 画面切替 ----------
 // アプリ更新の検知：プレイ中の画面にいたことを、ビルド番号と一緒に記録しておく
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
-function markActive(view) { try { if (PLAY_VIEWS[view] && S.T) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
-function go(view) { S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
+function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 function render() {
   const app = $('#app');
   if (S.view === 'home') app.innerHTML = homeHTML();
@@ -5302,6 +5568,9 @@ function render() {
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
+  else if (S.view === 'story') app.innerHTML = storyHTML();
+  else if (S.view === 'numbers') app.innerHTML = numbersHTML();
+  else if (S.view === 'ranking') { app.innerHTML = rankingHTML(); rankingLoad(); }
   bind();
 }
 
@@ -5373,8 +5642,8 @@ const CATS = {
   opening: '序盤（第1・2巡）', midgame: '中盤（第3巡以降・手札5枚以上）', endgame: '終盤（手札4枚以下）', heavy: '手札が重い（8枚以上）',
   oppNear: '相手が残り2枚以下', oppThree: '相手が残り3枚',
   smallField: '小さい場（4以下）', midField: '中くらいの場（5〜9）', bigField: '大きい場（10以上）',
-  three: '3枚出しもできる場面', bestThree: '3枚出しが最善', bestOne: 'あえて1枚出しが最善', leaveOne: '1枚残しが最善',
-  drawChoice: '引くかどうかの判断', hardExpr: '割り算・かっこが最善の場面'
+  three: '3枚出しもできる', bestThree: '3枚出しが最善', bestOne: 'あえて1枚出しが最善', leaveOne: '1枚残しが最善',
+  drawChoice: '引くかどうかの判断', hardExpr: '割り算・かっこが最善'
 };
 // 博士の解説：その場面の意味と考え方
 const CAT_INFO = {
@@ -5425,6 +5694,7 @@ const ACH = [
   ['set_win', 'セット優勝', [1, 5, 20], n => `セット優勝（練習・大会の卓内1位）を${n}回`, ['卓のトップ', 'セット巧者', 'セットの覇者']],
   ['qualify', '決勝進出', [1, 3, 10], n => `大会で決勝に${n}回進む`, ['決勝の舞台', 'ファイナリスト', '決勝の顔']],
   ['champion', '優勝', [1, 3, 10], n => `大会で${n}回優勝`, ['チャンピオン', '王者', '絶対王者']],
+  ['toushi', '透視破り', [1], () => '決勝で奥義「絶対透視」を受けながら優勝', ['透視破り']],
   // 強豪大会：段階は「強豪ぞろい」（銀）と「全員達人」（金）。6番目の要素は段階ごとの色（0銅・1銀・2金）
   ['qualify_strong', '強豪大会 決勝進出', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で決勝に進む' : '相手が「強豪ぞろい」の大会で決勝に進む', ['猛者の切符', '達人の切符'], [1, 2]],
   ['champion_strong', '強豪大会 優勝', [1, 2], n => n >= 2 ? '相手が「全員達人」の大会で優勝' : '相手が「強豪ぞろい」の大会で優勝', ['覇王', '達人王'], [1, 2]],
@@ -5454,13 +5724,14 @@ const ACH = [
   ['outs5', 'アウツチャレンジ', [1, 3, 10], n => `アウツチャレンジ（5問連続正解）をヒントなしで${n}回成功`, ['アウツ見習い', 'アウツ名人', '確率の鬼']],
   // バッジアタック（15分を最後までやり切ったときだけ数える）
   ['atk_done', 'アタック完走', [1, 5, 20], n => `バッジアタックを${n}回、時間いっぱいやり切る`, ['キックオフ', '常連アタッカー', 'アタックの鬼']],
-  ['atk_bp', 'アタック得点', [300, 800, 1400], n => `1回のバッジアタックで${n}BP以上`, ['得点王候補', 'ゴールゲッター', '得点王']],
+  ['atk_bp', 'アタック得点', [300, 700, 1000], n => `1回のバッジアタックで${n}BP以上`, ['得点王候補', 'ゴールゲッター', '得点王']],
   // 式の図鑑
   ['zukan', '図鑑登録', [10, 50, 200], n => `式の図鑑に${n}式を登録`, ['式の見習い', '式の収集家', '式の博士']],
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
-  ['atk_badges', 'アタック収集', [10, 20, 35], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
+  ['chart', '早見表', [1, 10, 37], n => n >= 37 ? '早見表をすべて完成（37行）' : `早見表の行を${n}行完成（すべての待ちを自分の式で埋める）`, ['早見表の一行目', '早見表の職人', '早見表マスター']],
+  ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -5610,8 +5881,8 @@ function catTalk(k) {
 }
 // バッジを押すと、マサが説明する
 // モードごとの関連バッジ（各系統の今の段階。未獲得は影で）
-const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'qualify_strong', 'champion_strong'];
-const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'];
+const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'toushi', 'qualify_strong', 'champion_strong'];
+const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'], MB_CHART = ['chart'];
 const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS).includes(k));
 // 各系統の全段階（銅・銀・金）を並べる。未獲得は影
 function tierBadges(keys) {
@@ -5645,7 +5916,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
-  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
+  if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','toushi','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
   else if (['quick5', 'quick3', 'snap', 'quickdraw', 'blitz'].includes(key)) text += ' 時間は自分の番になった瞬間から数えるで。速さだけやなくて、最善手（即断即決は好手以上）やないとアカンからな！AIの読みを見た手は数えへんで。';
   else if (key.startsWith('atk_')) text += ' バッジアタックを15分やり切ったときだけ数えるで。途中で中断したら数えへんからな！';
   else if (key === 'streak5' || key === 'streak10') text += ' AIの読みを見た手は連続に数えへんで（途切れもせえへん）。';
@@ -5757,12 +6028,14 @@ function huntDeal(H) {
   if (H.started) { KB.sfx('deal'); if (best.n) setTimeout(() => KB.sfx('lockon'), 650); }
 }
 function huntStart() {
-  const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], made: [], missed: [], sel: [], msg: null, started: false, over: false };
-  huntDeal(H); go('hunt');
+  const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], autoRegs: [], auto: false, autoLeft: 0, made: [], missed: [], sel: [], msg: null, started: false, over: false };
+  const again = S.view === 'hunt-result'; huntDeal(H); go('hunt'); if (!again) huntIntro(); // もう一度のときは導入を省く
 }
-function huntGo() {
+function huntGo(aim) {
   const H = S.hunt; if (!H || H.started) return;
-  huntOverlay('狩り開始', `${HUNT_SEC / 60}分間、未登録の式を捕まえろ`, 1);
+  if (aim) { const g = G_(); if ((g.aim || 0) > 0) { g.aim--; G_save(g); H.auto = true; H.usedAim = true; } }
+  huntOverlay(H.auto ? '自動照準 起動' : '狩り開始', H.auto ? `${HUNT_SEC / 60}分間ずっと自動で捕獲（得点には入りません）` : `${HUNT_SEC / 60}分間、未登録の式を捕まえろ`, 1);
+  if (H.auto) { clearTimeout(S.huntAutoT); S.huntAutoT = setTimeout(huntAutoStep, 1800); }
   H.started = true; H.end = Date.now() + HUNT_SEC * 1000 + 1600; H.fieldAt = Date.now() + 1600; render();
   clearInterval(S.huntTimer);
   S.huntTimer = setInterval(() => {
@@ -5771,6 +6044,34 @@ function huntGo() {
     document.querySelectorAll('.hunt-clock').forEach(el => { el.textContent = fmtClock(left); el.classList.toggle('hurry', left < 20000); });
     if (left <= 0) huntFinish();
   }, 250);
+}
+// ---------- ご褒美アイテム「自動照準」：「図鑑の場」銀バッジを持って大会の決勝に進むと1発もらえる（何発でもためられる） ----------
+// 使うと、3分間ずっと（すべて制覇したら終わり）カードを自動で選んで撃つ。札の選び方以外は手で打つときと同じ。
+// 自動で捕まえた式は図鑑に登録される（図鑑のバッジにも数える）が、得点・捕獲数・自己ベストには入れない
+
+const aimCount = () => G_().aim || 0;
+function aimReward(T) {
+  const g = G_(); if (!g.ach['zukan_cat:3']) return;
+  g.aim = (g.aim || 0) + 1; G_save(g); T.aimGot = true;
+  setTimeout(() => { const el = document.createElement('div'); el.className = 'aim-get'; el.innerHTML = `<div class="ag-in">${huntReticle('ov')}<b>ご褒美：自動照準</b><small>決勝進出のご褒美！式ハンターで、3分間ずっと自動で捕まえる（所持 ${g.aim}発）</small></div>`; document.body.appendChild(el); KB.sfx('lockon'); setTimeout(() => el.classList.add('out'), 2600); setTimeout(() => el.remove(), 3000); }, 900);
+}
+// 式ハンターの最初に、マサが自動照準のことを教える（条件の「図鑑の場」銀バッジを持っているときだけ）
+function aimTalk() {
+  const g = G_(); if (!g.ach['zukan_cat:3']) return '';
+  const n = g.aim || 0;
+  const t = n ? `自動照準が${n}発あるで！下のボタンで使えるわ。大会で決勝に進んだら、また1発もらえるで！` : `「図鑑の場」の銀バッジ持っとるやん！大会で決勝に進んだら、ご褒美に自動照準がもらえるで！${HUNT_SEC / 60}分間ずっと、自動で捕まえてくれるんや！`;
+  return `<div class="op-line masa aim-talk"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(t)}</div></div>`;
+}
+function huntAutoStep() {
+  const H = S.hunt; if (!H || H.over || !H.auto) return;
+  const again = ms => { clearTimeout(S.huntAutoT); S.huntAutoT = setTimeout(huntAutoStep, ms); };
+  if (H.blocked || !H.field || H.pausedAt || Date.now() < H.fieldAt || S.view !== 'hunt') return again(250);
+  const pats = huntPatterns(H.hand, H.field.v, H.used, zukanGet());
+  if (!pats.length) { huntPass(); return again(600); }
+  const pick = pats[(Math.random() * pats.length) | 0];
+  H.sel = []; H.blocked = true; render();
+  pick.forEach((id, i) => setTimeout(() => { if (S.hunt !== H || H.over) return; H.sel.push(id); KB.sfx('select'); render(); }, 300 + i * 260)); // タン、タン、タン
+  setTimeout(() => { if (S.hunt !== H || H.over) return; H.blocked = false; huntPlay(); again(1300); }, 300 + 3 * 260 + 200); // バン
 }
 function huntPlay() {
   const H = S.hunt; if (!H || !H.started || H.over || H.blocked) return;
@@ -5785,13 +6086,14 @@ function huntPlay() {
   H.used.add(f.use);
   const secs = (Date.now() - H.fieldAt) / 1000;
   let pts = 10 + (f.s.includes('−') ? 2 : 0) + (f.s.includes('×') ? 4 : 0) + (f.s.includes('÷') ? 6 : 0) + (f.s.includes('(') ? 4 : 0);
-  if (secs <= HUNT_QUICK) { H.streak++; pts += Math.min(10, 2 * H.streak); } else H.streak = 0;
-  H.score += pts;
+  const auto = H.auto;
+  if (auto) pts = 0; // 自動照準の間は得点に入れない
+  else { if (secs <= HUNT_QUICK) { H.streak++; pts += Math.min(10, 2 * H.streak); } else H.streak = 0; H.score += pts; }
   const isNew = f.id && !z[f.id];
-  if (isNew) { z[f.id] = { at: Date.now() }; store.set('zukan', z); H.regs.push({ s: f.s, t }); huntCapture(f.s, t, zukanCount(z)); zukanBadges(z); const lf = ZUKAN.filter(e => e.n === 3 && e.t === t && !z[e.id]).length; if (lf > 0 && (lf <= 10 || lf % 10 === 0)) huntLeftCall(t, lf); }
+  if (isNew) { z[f.id] = { at: Date.now() }; store.set('zukan', z); (auto ? H.autoRegs : H.regs).push({ s: f.s, t });  huntCapture(f.s, t, zukanCount(z)); zukanBadges(z); const lf = ZUKAN.filter(e => e.n === 3 && e.t === t && !z[e.id]).length; if (lf > 0 && (lf <= 10 || lf % 10 === 0)) huntLeftCall(t, lf); }
   else huntCapture(f.s, t, 0, f.id ? 'reg' : 'out');
-  H.made.push({ s: f.s, t, pts, isNew: !!isNew, zk: !!f.id });
-  H.msg = { ok: true, text: `${f.s} = ${t}　+${pts}点${isNew ? '　捕獲！' : ''}`, isNew };
+  H.made.push({ s: f.s, t, pts, isNew: !!isNew, zk: !!f.id, auto });
+  H.msg = { ok: true, text: `${f.s} = ${t}　${auto ? '自動照準' : `+${pts}点`}${isNew ? '　捕獲！' : ''}`, isNew };
   if (!isNew) KB.sfx('play3');
   // 撃った演出を見せてから、次の標的と手札を配る（その間は操作できない）
   H.sel = []; H.blocked = true; H.hand = H.hand.map(c => Object.assign({}, c, { gone: cards.includes(c) })); render();
@@ -5813,7 +6115,7 @@ function huntLeftCall(t, n) {
 function huntConquer(t) {
   const H = S.hunt; if (!H || H.over) return;
   const z = zukanGet(), list = ZUKAN.filter(e => e.n === 3 && e.t === t), nPar = list.filter(e => e.expr.includes('(')).length, nDiv = list.filter(e => e.expr.includes('÷')).length;
-  const mine = H.regs.filter(r => r.t === t).length, doneT = [];
+  const mine = H.regs.concat(H.autoRegs || []).filter(r => r.t === t).length, doneT = [];
   for (let v = 1; v <= 13; v++) if (!ZUKAN.some(e => e.n === 3 && e.t === v && !z[e.id])) doneT.push(v);
   const allDone = doneT.length === 13, fixed = H.target === t;
   H.pausedAt = Date.now(); clearInterval(S.huntTimer);
@@ -5835,6 +6137,7 @@ function huntConquer(t) {
       <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap">${fixed || allDone ? `<button class="btn primary" data-hq="end">結果を見る</button>${allDone ? '' : '<button class="btn" data-hq="random">ランダムで続ける</button>'}` : '<button class="btn primary" data-hq="go">狩りを続ける</button>'}</div>
     </div>`;
   document.body.appendChild(el);
+  if (H.auto && !allDone) setTimeout(() => { const b = el.querySelector('[data-hq="go"],[data-hq="random"]'); if (b && el.isConnected) b.click(); }, 2600); // 自動照準の間は、制覇の演出を見せてから自動で続ける
   el.querySelectorAll('[data-hq]').forEach(b => b.onclick = () => {
     const k = b.dataset.hq; el.classList.add('out'); setTimeout(() => el.remove(), 350);
     if (S.hunt !== H || H.over) return;
@@ -5861,7 +6164,7 @@ function huntPass(fail) {
 }
 function huntFinish(quit) {
   const H = S.hunt; if (!H || H.over) return;
-  H.over = true; clearInterval(S.huntTimer); document.querySelectorAll('.hunt-esc').forEach(e => e.remove());
+  H.over = true; H.auto = false; clearTimeout(S.huntAutoT); clearInterval(S.huntTimer); document.querySelectorAll('.hunt-esc').forEach(e => e.remove());
   // 最後の場で作れた未登録の式も「見逃し」に入れる
   if (H.started && H.field) { const z = zukanGet(); huntNew(H.hand.map(c => c.v), H.field.v, H.used, z).slice(0, 3).forEach(f => { if (!H.missed.some(m => m.id === f.id)) H.missed.push({ id: f.id, s: f.s, t: f.t }); }); }
   const best = store.get('huntBest', null), rec = { regs: H.regs.length, score: H.score, made: H.made.length, at: Date.now() };
@@ -5939,9 +6242,10 @@ function huntHTML() {
   const z = zukanGet(), t = H.field.v, preys = huntNew(H.hand.map(c => c.v), t, H.used, z), nNew = preys.length, nPar = preys.filter(f => f.s.includes('(')).length, nAll = zukanCount(z);
   const top = `<div class="topbar"><button class="btn ghost sm" data-act="hunt-quit">${H.started ? 'やめる' : '← ホーム'}</button><div class="where">式ハンター</div>${H.started ? `<span class="atk-clock hunt-clock">${fmtClock(H.end - Date.now())}</span>` : '<span></span>'}</div>`;
   if (!H.started) return top + `<div class="panel stack hunt-ready">
-    <h2 style="margin:0">式ハンター</h2>
+    <h2 style="margin:0">式ハンター</h2>${aimTalk()}
     <p class="small" style="margin:0">${HUNT_SEC / 60}分間、標的（場）の数を<b>手札の3枚</b>で作って、未登録の式＝獲物を捕獲しましょう。</p>
-    <p class="small hunt-calm" style="margin:0">🍵 得点や速さで取れるバッジはありません。バッジにつながるのは図鑑に登録した式の数（と場のコンプリート）だけなので、時間を気にせず<b>じっくり考えてOK</b>です。得点は自己ベストの記録用です。</p>
+    <details class="small hunt-rules"><summary>くわしいルール</summary>
+    <p class="small hunt-calm" style="margin:6px 0">🍵 得点や速さで取れるバッジはありません。バッジにつながるのは図鑑に登録した式の数（と場のコンプリート）だけなので、時間を気にせず<b>じっくり考えてOK</b>です。得点は自己ベストの記録用です。</p>
     <ul class="small" style="margin:0;padding-left:1.2em;line-height:1.7">
       <li>3枚を選んで「出す」。未登録の式（獲物）を作ると捕獲＝図鑑に登録。同じ札で作れる式が複数あるときは、未登録→この狩りで未使用の順に選ばれます。</li>
       <li>同じ式は1回の狩りで1度だけ。作れないときは「見送る」。そのとき手札に隠れていた式が少しのあいだ姿を見せます（その間は操作できません）。手札と標的（場）は毎回配り直し。</li>
@@ -5950,16 +6254,19 @@ function huntHTML() {
       <li>札を選ぶと、獲物（未登録の式）の筋があるか色でわかります。<b>金色</b>＝その札を含む獲物がいる、<b>青灰色</b>＝いない。1枚目から筋を探せます。</li>
       <li>図鑑に入る（獲物になる）のは、<b>÷ か「かっこ ×」を使う式</b>だけ。＋−だけの式などは「図鑑外」で、出しても登録されません。</li>
       <li>「獲物の気配」は、その手札で作れる未登録の式の数。配られる札は、獲物がいるものが少し出やすくなっています。</li>
+      <li>🎯 ご褒美「自動照準」：バッジ「図鑑の場」の銀（場を3つ制覇）を持って大会の決勝に進むと1発もらえます。使うと${HUNT_SEC / 60}分間ずっと自動で捕獲（得点には入りません）。</li>
     </ul>
+    </details>
     <p class="small muted" style="margin:0">図鑑 ${nAll}/${ZUKAN.length}</p>
     <div class="stack" style="gap:6px"><b class="small">標的（場の数）</b>
       <div class="hunt-tsel">${(() => { const left = {}; ZUKAN.forEach(e => { if (e.n === 3 && !z[e.id]) left[e.t] = (left[e.t] || 0) + 1; }); const all = Object.values(left).reduce((a, b) => a + b, 0);
         return [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<button class="hts ${H.target === v ? 'on' : ''} ${v && !left[v] ? 'done' : ''}" data-act="hunt-target" data-v="${v || ''}"><b>${v ? KB.vname(v) : 'ランダム'}</b><small>${v ? (left[v] ? `残り${left[v]}` : '👑制覇') : `残り${all}`}</small></button>`).join(''); })()}</div>
       <p class="small muted" style="margin:0">数字を選ぶと、標的がずっとその数になります（「図鑑の場」バッジを狙うときに）。残りは、手札3枚で作れる未登録の式の数。</p></div>
-    <button class="btn primary" data-act="hunt-go">狩りを始める</button></div>`;
+    <button class="btn primary" data-act="hunt-go">狩りを始める</button>
+    ${aimCount() > 0 ? `<button class="btn aim-btn" data-act="hunt-go-aim">🎯 自動照準を使って始める<small>${HUNT_SEC / 60}分間ずっと自動で捕獲（得点には入りません）・残り${aimCount()}発</small></button>` : ''}</div>`;
   const pats = huntPatterns(H.hand, t, H.used, z), selOn = H.sel.length > 0 && pats.some(p => H.sel.every(id => p.includes(id)));
   const selHint = !H.sel.length ? '' : selOn ? (H.sel.length === 3 ? '◎ この3枚は獲物（未登録）を作れます' : `◎ 筋あり（この${H.sel.length}枚を含む獲物がいます）`) : (H.sel.length === 3 ? (() => { const fs = (ZK.byCombo[H.sel.map(i => H.hand.find(c => c.id === i).v).sort((x, y) => x - y).join(',')] || {})[t] || []; return !fs.length ? 'この3枚では作れません' : fs.some(f => f.id) ? 'この3枚の図鑑の式は登録ずみです' : '図鑑外の式です（図鑑に入るのは ÷ か「かっこ×」を使う式）'; })() : `この${H.sel.length}枚を含む獲物はいません`);
-  return top + `<div class="hunt-stats"><span>捕獲<b>${H.regs.length}</b></span><span>得点<b>${H.score}</b></span><span>連続<b>${H.streak}</b></span></div>
+  return top + `${H.auto ? `<div class="aim-bar">🎯 自動照準 作動中　自動捕獲 <b>${H.autoRegs.length}</b>匹（得点には入りません）</div>` : ''}<div class="hunt-stats"><span>捕獲<b>${H.regs.length}</b></span><span>得点<b>${H.score}</b></span><span>連続<b>${H.streak}</b></span></div>
   <div class="panel hunt-board">
     <div class="hunt-field"><div class="hunt-scope ${nNew ? 'lock' : ''} ${S.huntShownField !== H.fieldNo ? 'fresh' : ''}">${huntReticle()}${S.huntShownField !== H.fieldNo && H.started && H.fieldNo > 1 ? '<span class="tgt-new">新しい標的！</span>' : ''}<div class="fieldcard top ${H.field.s === 1 || H.field.s === 2 ? 'red' : ''}" data-k="${H.fieldNo}"><span class="tag">標的</span><span class="big">${KB.vname(t)}</span><span class="val">${KB.SUITS[H.field.s]} ${t}</span></div></div>
       <div class="hunt-hint ${nNew ? 'on' : huntLeft(H, z).length ? '' : 'done'}">${nNew ? `<small>獲物の気配</small><b>${nNew}<small>匹</small></b><span class="hunt-par ${nPar ? '' : 'zero'}">うちカッコ付き <b>${nPar}</b></span><small>（未登録の式）</small>` : (huntLeft(H, z).length ? '<small>この手札に</small>獲物なし<small>見送りも手</small>' : `<small>${H.target ? `標的${KB.vname(H.target)}` : '図鑑'}は</small><span class="hd-crown">👑</span><b>制覇済み</b><small>${H.target ? '別の標的で狩ろう' : 'おめでとう！'}</small>`)}</div></div>
@@ -5976,7 +6283,8 @@ function huntResultHTML() {
   <div class="panel stack" style="align-items:center;text-align:center">
     <div class="hunt-trophy">${huntReticle('res')}</div><div class="dq-title ok">${H.quit ? '狩りを中断' : '狩りの成果'}</div>
     <div class="atk-score"><b>${H.regs.length}</b><span>式を捕獲</span></div>
-    <p style="margin:0">得点 ${H.score}・作った式 ${H.made.length}</p>
+    <p style="margin:0">得点 ${H.score}・作った式 ${H.made.filter(m => !m.auto).length}</p>
+    ${H.usedAim ? `<p class="small" style="margin:0">🎯 自動照準で捕獲：<b>${H.autoRegs.length}式</b>（図鑑には登録。得点・自己ベストには入りません）</p>` : ''}
     <p style="margin:0">${H.isBest ? '<b class="ok">自己ベスト更新！</b>' : H.prevBest ? `自己ベストは ${H.prevBest.regs}式・${H.prevBest.score}点` : ''}</p>
     <p class="small muted" style="margin:0">図鑑 ${zukanCount(z)}/${ZUKAN.length}</p>
   </div>
@@ -5989,11 +6297,20 @@ function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
   return `<div class="mode hunt-card"><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2>${modeBadgeRows(MB_HUNT, true)}
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
-    <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span></div>
+    <div class="facts"><span>${HUNT_SEC / 60}分</span><span>3枚で作る</span><span>図鑑 ${zukanCount(z)}/${ZUKAN.length}</span>${aimCount() ? `<span class="aim-fact">🎯 自動照準 ×${aimCount()}</span>` : ''}</div>
     ${b ? `<p class="small" style="margin:0">自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</p>` : ''}
+    <div class="row zk-mini" style="align-items:center;gap:8px"><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
     <button class="btn primary" data-act="hunt-start">狩りに出る</button></div>`;
 }
 // ホーム：アウツチャレンジ（モードの1つ）
+// ホーム：早見表を作成（ここで式を入れて作る。対局中は、完成した行を見るだけ）
+function chartCardHTML() {
+  const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
+  return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>${modeBadgeRows(MB_CHART, true)}
+    <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。ヒントなし。完成した行は、対局中に見返せます。</p>
+    <div class="facts"><span>3枚26組・2枚11組</span><span>${done}/${total}面</span><span>完成 ${full}行</span></div>
+    <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
+}
 function outsCardHTML() {
   const g = G_(), d = g.drill || null, c = g.cnt || {};
   return `<div class="mode outs-card"><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2>${modeBadgeRows(MB_OUTS, true)}
@@ -6023,6 +6340,105 @@ const IS_ARTIFACT = typeof location === 'undefined' || !/^https?:$/.test(locatio
 const APP_URL = IS_ARTIFACT ? ARTIFACT_URL : PUBLIC_URL;
 // 引っ越しボタン（アーティファクト版 → 公開版）を出すか。考案者の了承が取れて公開版を出したら true にする
 const MIGRATE_ON = true;
+// ---------- クラウド保存とランキング（公開版だけ。window.KB_CLOUD_API にAPIのURLが入っているとき） ----------
+// 記録の正本はクラウド。端末には控え（すぐ遊べるように）と、ログインの鍵だけを置く。引き継ぎコードで別の端末からも同じ記録に入れる
+const CLOUD_API = (typeof window !== 'undefined' && window.KB_CLOUD_API) || '';
+const CLOUD_ON = !IS_ARTIFACT && !!CLOUD_API;
+const CLOUD_KEEP = { 'kb.cloud': 1, 'kb.cloudAt': 1, 'kb.migDone': 1 }; // 同期しない・消さないもの
+const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false };
+function cloudDirty(k) { if (!CLOUD_ON || !k || CLOUD_KEEP[k] || k === 'kb.recentLines' || !k.startsWith('kb.')) return; CLOUD.dirty = true; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudPush, 4000); }
+async function cloudReq(a, body, keep) {
+  const r = await fetch(CLOUD_API + '?a=' + a, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), keepalive: !!keep });
+  const j = await r.json().catch(() => ({ ok: false, error: '通信エラー' }));
+  if (!j.ok) { const e = new Error(j.error || '通信エラー'); e.status = r.status; e.conflict = !!j.conflict; throw e; }
+  return j;
+}
+function cloudData() { const d = migCollect(); for (const k in CLOUD_KEEP) delete d[k]; return d; }
+// ランキング用の数字（プレイヤーごと）：推定実力・バッジ数とBP・バッジアタックの自己ベスト
+function cloudStats() {
+  return profiles().map(p => {
+    const g = raw.get('kb.p.' + p.id + '.growth', null) || { games: [], ach: {} }, r = g.games ? ratingOf(g.games) : { ok: false };
+    const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
+    const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
+    const avr = raw.get('kb.p.' + p.id + '.avatar', null);
+    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null };
+  });
+}
+// 変更があったときだけ送る（force は新規登録の直後など）
+async function cloudPush(keep, force) {
+  const c = raw.get('kb.cloud', null); if (!CLOUD_ON || !c || !c.token || CLOUD.busy || (!CLOUD.dirty && !force)) return;
+  CLOUD.dirty = false;
+  CLOUD.busy = true;
+  try { const at = Date.now(), base = raw.get('kb.cloudAt', 0) || 0; await cloudReq('save', { token: c.token, data: cloudData(), at, base, stats: cloudStats() }, keep); try { localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { } CLOUD.status = 'saved'; CLOUD.err = ''; }
+  catch (e) {
+    if (!e.conflict) CLOUD.dirty = true; // 送れなかった変更は次に送る
+    if (e.conflict) { CLOUD.busy = false; return keep ? null : cloudPull(); } // ほかの端末のほうが新しい：そちらを読み込む（閉じるときは何もしない）
+    CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } }
+  }
+  CLOUD.busy = false;
+}
+// クラウドの新しい記録を読み込む。対局中なら、ホームに戻ったときに読み込む
+async function cloudPull() {
+  const c = raw.get('kb.cloud', null); if (!c) return;
+  if (S.view === 'game' || S.view === 'hunt' || S.view === 'drill') { CLOUD.pendingPull = true; return; }
+  try { const j = await cloudReq('load', { token: c.token }); if (j.data && cloudApply(j.data, j.at)) { toast('ほかの端末の新しい記録を読み込みました'); setTimeout(() => location.reload(), 800); } } catch (e) { }
+}
+function cloudApply(data, at) {
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !CLOUD_KEEP[k]) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); for (const k in data) if (k.startsWith('kb.') && !CLOUD_KEEP[k]) localStorage.setItem(k, data[k]); localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { return false; }
+  return true;
+}
+async function cloudInit() {
+  if (!CLOUD_ON) return;
+  try {
+    let c = raw.get('kb.cloud', null);
+    if (!c || !c.token) { const j = await cloudReq('register'); c = { uid: j.uid, token: j.token, code: j.code }; try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { } await cloudPush(false, true); return; }
+    const j = await cloudReq('load', { token: c.token }), localAt = raw.get('kb.cloudAt', 0) || 0;
+    if (j.data && j.at > localAt) { // クラウドのほうが新しい：クラウドの記録で開き直す（1回だけ）
+      let once = false; try { once = sessionStorage.getItem('kb.cloudReload') === String(j.at); sessionStorage.setItem('kb.cloudReload', String(j.at)); } catch (e) { }
+      if (!once && cloudApply(j.data, j.at)) { location.reload(); return; }
+    } else if (localAt > j.at || !j.data) await cloudPush(false, true); // 端末のほうが新しい（引っ越し直後など）ときだけ送る
+    CLOUD.status = 'saved';
+  } catch (e) { CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } } }
+}
+async function cloudRestore(code) {
+  try {
+    const j = await cloudReq('restore', { code }); const c = { uid: j.uid, token: j.token, code: j.code };
+    const d = await cloudReq('load', { token: j.token });
+    try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { }
+    if (d.data) cloudApply(d.data, d.at || Date.now());
+    toast('引き継ぎました'); setTimeout(() => location.reload(), 600);
+  } catch (e) { toast(e.message || '引き継げませんでした'); }
+}
+if (CLOUD_ON && typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(CLOUD.timer); cloudPush(true); } });
+function cloudPanelHTML() {
+  if (!CLOUD_ON) return '';
+  const c = raw.get('kb.cloud', null);
+  return `<div class="lbl">クラウド保存（引き継ぎコード）</div>
+    <p class="small" style="margin:0">記録はクラウドに保存されます。別の端末で続けるときは、この<b>引き継ぎコード</b>を入れてください。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
+    ${c && c.code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(c.code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、あなたの記録に入れます。</p>` : '<p class="small muted" style="margin:0">準備中…（通信できるようになると、コードが発行されます）</p>'}
+    <details class="small"><summary>別の端末の記録を引き継ぐ</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">引き継ぐ</button></div><p class="small muted" style="margin:4px 0 0">いまこの端末にある記録は、引き継いだ記録に置きかわります。</p></details>`;
+}
+// ---------- ランキング ----------
+const RANK_TABS = [['rating', '推定実力'], ['badges', 'バッジ数'], ['attack', 'バッジアタック']];
+function rankingHTML() {
+  const tab = S.rankTab || 'rating', R = S.rank && S.rank.type === tab ? S.rank : null, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
+  const val = x => tab === 'rating' ? `★${x.rating.toFixed(1)}` : tab === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : `${x.atk}BP`;
+  const rows = R ? R.list.map(x => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><span class="rk-av">${x.avatar ? KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' }) : ''}</span><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(x)}</span></div>`).join('') || '<p class="small muted">まだだれも載っていません。</p>' : '<p class="small muted">読み込み中…</p>';
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
+  <div class="panel stack"><div class="rk-tabs">${RANK_TABS.map(([k, l]) => `<button class="btn sm ${k === tab ? 'primary' : ''}" data-act="rank-tab" data-k="${k}">${l}</button>`).join('')}</div>
+    <p class="small muted" style="margin:0">${tab === 'rating' ? '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。' : tab === 'badges' ? '獲得したバッジの数（同じ数ならBPの多い順）。' : 'バッジアタック（15分）の自己ベスト。'}${R ? `　全${R.total}人` : ''}</p>
+    <div class="rk-list">${rows}</div>
+    <label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。</p></div>`;
+}
+async function rankingLoad() {
+  const tab = S.rankTab || 'rating'; const c = raw.get('kb.cloud', null);
+  const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); };
+  if (S.rank && S.rank.type === tab && Date.now() - S.rank.at < 30000) return;
+  try { await cloudPush(); const r = await fetch(CLOUD_API + '?a=ranking&type=' + tab + '&uid=' + encodeURIComponent((c && c.uid) || '')); const j = await r.json(); if (!j.ok) throw new Error(j.error); S.rank = Object.assign(j, { at: Date.now() }); }
+  catch (e) { S.rank = { type: tab, list: [], total: 0, at: Date.now() }; toast('ランキングを読み込めませんでした'); }
+  if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); const h2 = $('#rk-hide'); if (h2) h2.onchange = h.onchange || (() => { raw.set('kb.p.' + PID + '.rankHide', h2.checked); cloudPush().then(() => { S.rank = null; render(); }); }); }
+}
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
 function shareBoasts() {
@@ -6177,10 +6593,6 @@ function growthHTML() {
     <div class="lbl">場面別の得意・苦手</div>
     ${catRows || '<p class="small muted" style="margin:0">もう少しプレイすると、場面ごとの傾向が見えてきます。</p>'}
     <p class="small muted" style="margin:0">直近40ゲームで、その場面での1判断あたりの平均損失（小さいほど得意）。全体の平均は${allAvg.toFixed(1)}pt。項目を押すと博士が解説します（AIの読みを見た手は除いています）。</p>
-  </div>
-  <div class="panel stack">
-    <div class="lbl">式の図鑑</div>
-    ${(() => { const z = zukanGet(), n = zukanCount(z); return `<div class="row" style="align-items:center"><div class="zk-bar" style="flex:1"><i style="width:${(n / ZUKAN.length * 100).toFixed(1)}%"></i></div><b>${n}/${ZUKAN.length}</b><button class="btn" data-go="zukan">図鑑を見る</button></div>`; })()}
   </div>
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
@@ -6438,7 +6850,7 @@ function zukanHTML() {
   const z = zukanGet(), n = zukanCount(z), T = S.zkT || 1;
   const tabs = Array.from({ length: 13 }, (_, i) => { const t = i + 1, l = ZUKAN.filter(e => e.t === t), h = l.filter(e => z[e.id]).length; return `<button class="zk-tab ${t === T ? 'on' : ''} ${h === l.length ? 'done' : ''}" data-act="zk-t" data-t="${t}"><b>${KB.vname(t)}</b><small>${h}/${l.length}</small></button>`; }).join('');
   const list = ZUKAN.filter(e => e.t === T);
-  return `<div class="topbar"><button class="btn ghost sm" data-go="growth">← 成長記録</button><div class="where">式の図鑑</div><div class="small muted">${n}/${ZUKAN.length}</div></div>
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">式の図鑑</div><div class="small muted">${n}/${ZUKAN.length}</div></div>
   <div class="panel stack"><p class="small muted" style="margin:0">割り算を使う式と、かっこを使った掛け算の式を集める図鑑です。同じ札でも式がちがえば別の項目です。対局や式ハンターで出すと1つずつオープンします（AIの読みを見た手は除く）。まだの式は形だけ見えています。</p>
   <div class="zk-bar"><i style="width:${(n / ZUKAN.length * 100).toFixed(1)}%"></i></div></div>
   <div class="panel stack"><div class="lbl">場の数</div><div class="zk-tabs">${tabs}</div></div>
@@ -6449,7 +6861,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2 };
+const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
 const BP_CAT = 500;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
@@ -6543,6 +6955,34 @@ function attackFinish(quit) {
   whistle(quit ? 'アタック中止' : 'タイムアップ！', `${quit ? 'ここまでで' : ATTACK_MIN + '分で'} 獲得 ${bp} BP`, () => { document.body.classList.remove('atk-on'); go('attack-result'); }, { end: true, kind: quit ? (bp ? 'atkQuit' : 'atkQuit0') : !bp ? 'atkQuit0' : isBest ? 'atkEndBest' : 'atkEnd', d: { bp, m: ATTACK_MIN } });
 }
 // 開始の演出：博士とマサの前振り → スタートボタン → マサ「ほなキックオフや！」＋ホイッスルで試合開始
+// 特訓モードの導入（バッジアタックと同じ形）：タイトル・ひと言・博士とマサ・やめる／スタート
+function modeIntro(o) {
+  const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
+  const el = document.createElement('div'); el.className = 'whistle-ov';
+  el.innerHTML = `<div class="wh-box"><div class="wh-title" ${o.title.length >= 7 ? 'style="font-size:clamp(26px,8.5vw,40px)"' : ''}>${esc(o.title)}</div><div class="wh-sub">${esc(o.sub)}</div>
+    <div class="wh-cast">${bub('masa', o.masa, 0.3)}${bub('root', o.root, 1.1)}</div>
+    <div class="row" style="justify-content:center;margin-top:14px;gap:8px;flex-wrap:wrap"><button class="btn" data-x="cancel">やめる</button>${(o.extra || []).map((x, i) => `<button class="btn" data-x="e${i}">${esc(x.label)}</button>`).join('')}<button class="btn primary" data-x="go">${esc(o.goLabel || 'スタート')}</button></div></div>`;
+  document.body.appendChild(el);
+  const close = then => { el.classList.add('out'); setTimeout(() => { el.remove(); if (then) then(); }, 300); };
+  el.querySelector('[data-x="cancel"]').onclick = () => { KB.sfx('back'); close(o.onCancel); };
+  (o.extra || []).forEach((x, i) => el.querySelector(`[data-x="e${i}"]`).onclick = () => close(x.on));
+  el.querySelector('[data-x="go"]').onclick = () => { KB.sfx('whistle', 1); el.querySelector('.wh-box').innerHTML = `<div class="wh-title">${esc(o.goTitle || 'スタート！')}</div><div class="wh-cast">${bub('masa', o.goLine || 'ほな、いこか！', 0)}</div>`; setTimeout(() => close(o.onGo), 1100); };
+}
+function huntIntro() {
+  const n = aimCount(), t = store.get('huntT', null);
+  modeIntro({ title: '式ハンター', sub: `${HUNT_SEC / 60}分間、手札の3枚で場の数を作って、未登録の式を捕まえろ`,
+    masa: '狩りの時間や！3枚で場の数を作ったら捕獲や。図鑑にまだない式ほど獲物やで！作れんときは「見送る」でええ！',
+    root: '得点や速さで取れるバッジはありません。図鑑に登録した式の数がバッジにつながるので、じっくり考えて大丈夫ですよ。',
+    goLabel: '狩りに出る', goTitle: '狩り開始！', goLine: t ? `標的は${KB.vname(t)}や、いくで！` : 'ほな、狩りに出よか！',
+    extra: [{ label: '標的を選ぶ・ルール', on: () => { } }].concat(n ? [{ label: `🎯 自動照準（${n}発）`, on: () => huntGo(true) }] : []),
+    onGo: () => huntGo(), onCancel: () => go('home') });
+}
+function outsIntro() {
+  modeIntro({ title: 'アウツチャレンジ', sub: '5問連続で正解したらクリア',
+    masa: '次の番で上がれる札、いちばん多くなる出し方はどれや？5問連続で当てたらクリア！1問でも外したら最初からやで！',
+    root: '「アウツ」とは、次にめくれたら上がれる札のこと。何を残すかで、その数が変わります。問題はだんだん難しくなり、ヒントはありません。',
+    goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { }, onCancel: () => go('home') });
+}
 function attackIntro(then) {
   const pick = arr => (arr[(Math.random() * arr.length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN);
   const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
@@ -6648,6 +7088,7 @@ function profileModal() {
   modal(`<h2>プレイヤー</h2>
     <div class="pf-list">${L.map(p => `<div class="pf-row ${p.id === PID ? 'cur' : ''}"><b>${esc(p.name)}</b><span class="small muted">${(() => { const g = raw.get('kb.p.' + p.id + '.growth', null); const r = g ? ratingOf(g.games) : null; return r && r.ok ? `★${r.r.toFixed(1)}・${g.games.length}ゲーム` : g ? `${g.games.length}ゲーム` : '記録なし'; })()}</span>${p.id === PID ? '<span class="pf-cur">プレイ中</span>' : ''}<span class="pf-btns">${p.id === PID ? '<button class="btn sm ghost" data-act="rename-profile">名前を変更</button>' : `<button class="btn sm" data-pf="${p.id}">この人で遊ぶ</button>`}${L.length > 1 ? `<button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button>` : ''}</span></div>`).join('')}</div>
     <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="new-profile">新しい名前で始める</button></div>
+    ${CLOUD_ON ? `<details class="save-note"><summary>記録の保存について</summary><ul><li>記録（成長記録・バッジ・図鑑・アバターなど）は<b>クラウド</b>に保存されます。ブラウザの履歴を消しても、引き継ぎコードがあれば戻せます。</li><li>端末には、すぐ遊べるように控えと、ログインの鍵だけを置いています。</li><li>同じ端末を使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li></ul></details>` : `
     <details class="save-note" open><summary>記録の保存について</summary><ul>
       <li>記録（成長記録・バッジ・続きから）は、<b>いま使っている端末のこのブラウザの中</b>に保存されます。成長記録やバッジはサーバーには送っていません（アプリの利用回数の集計だけは、名前や対局内容を含めずに記録しています）。</li>
       <li><b>別の端末や別のブラウザ</b>（スマホとパソコン、ChromeとSafariなど）では共有されません。</li>
@@ -6656,6 +7097,8 @@ function profileModal() {
       <li>同じ端末・同じブラウザを使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li>
       <li>大事な記録は、ときどき下の「書き出す」で保存しておくと安心です。</li>
     </ul></details>
+    `}
+    ${cloudPanelHTML()}
     <div class="lbl">記録の書き出し・読み込み</div>
     <p class="small muted" style="margin:0">書き出したファイル（JSON）を別の端末で読み込むと、成長記録と続きからのデータを引き継げます。読み込んだ記録は新しいプレイヤーとして追加されます。</p>
     <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="export-data">いまのプレイヤーの記録を書き出す</button><label class="btn file-btn">記録を読み込む<input type="file" id="imp-file" accept=".json,application/json" hidden></label></div>
@@ -6690,6 +7133,283 @@ function importData(text) {
   if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
   toast(`「${name}」として読み込みました`); switchProfile(id);
 }
+// ---------- チュートリアル：博士とマサが会話でルールとコツを説明（例を触りながら・簡単な選択つき） ----------
+function tutInvite(name) {
+  const nmS = san(name || S.settings.name || 'あなた');
+  const L = [['root', `ようこそ、${nmS}。私は解説のルート博士です。計算ブリッジのルールは、もうご存じですか？`], ['masa', 'ワイは実況のマサや！知らんかったら、3分でサクッと教えたるで！']];
+  modal(`<div class="watch-invite"><div class="wi-title">はじめまして！</div>
+    <div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.2 + i * 1.1}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns"><button class="btn" data-act="tut-skip">知ってるので大丈夫</button><button class="btn primary" data-act="tut-start">ルールを教えて！</button></div>
+    <p class="small muted" style="margin:0;text-align:center">あとからでも「ルール」の画面から見られます。</p></div>`);
+  KB.sfx('banner');
+}
+const TC = (v, s) => ({ v, s: s == null ? (v * 7) % 4 : s, id: 900 + v * 4 + (s || 0) });
+// 各ステップ：casters（会話）、show（例の表示）、task（操作：pick=札を選んで場を作る / choice=選択）
+const TUT = [
+  { cast: [['root', 'ゴールはかんたん。手札の7枚を、だれよりも先に出し切ることです。'], ['masa', '出し切った人が「上がり」や！サッカーで言うたら先制ゴールやな！']], show: () => tutHand([1, 4, 6, 9, 11, 12, 13].map(v => TC(v))) + '<p class="tut-cap">はじめの手札は7枚</p>' },
+  { cast: [['root', '毎巡、山札から1枚めくった札が「場」になります。この数を、手札で作るのです。A＝1、J＝11、Q＝12、K＝13 として数えます。'], ['masa', '場がJなら11を作る、ってことやな！']], show: () => tutField(TC(11, 1)) },
+  { cast: [['root', '手札の1〜3枚を、＋ − × ÷ とかっこで組み合わせて、場の数を作れば出せます。やってみましょう。場は7。手札から札を選んでください。'], ['masa', 'タップで選ぶんや！選んだら「出す」！']], show: () => tutField(TC(7, 2)), task: { kind: 'pick', t: 7, hand: [11, 4, 1, 9, 2] } },
+  { cast: [['root', '作れないときは、山札から1枚引きます。手札が増えるので、できれば出したいところ。では問題です。場はK（13）、手札は A・2・3。どうしますか？'], ['masa', 'よう考えてや〜']], show: () => tutField(TC(13, 0)) + tutHand([1, 2, 3].map(v => TC(v))), task: { kind: 'choice', opts: ['出す', '引く'], ok: 1, good: 'そのとおり。A・2・3 では、どう組み合わせても13は作れません。こういうときは引くしかありません。', bad: '実は、A・2・3 では13は作れないのです。3 ×（2 ＋ A）でも9まで。こういうときは引きます。' } },
+  { cast: [['root', 'だれかが上がると、そのゲームは終わり。残った人は、手札の数字の合計が「PP（ペナルティポイント）」、つまり失点になります。PPは少ないほど良い点です。問題。残りが K と 2 なら、PPはいくつ？'], ['masa', 'Kは13やで！']], show: () => tutHand([13, 2].map(v => TC(v))), task: { kind: 'choice', opts: ['2', '13', '15'], ok: 2, good: '正解です。13 ＋ 2 で15。大きい札が残るほど、失点は大きくなります。', bad: 'K（13）＋2 で15です。大きい札が残るほど、失点は大きくなります。' } },
+  { cast: [['root', '順番は「親」から時計回りに1人1回ずつ。全員が打ったら、次の場をめくります（これを「巡」と数えます）。親は、最初のゲームは抽選、2ゲーム目からは前のゲームでいちばんPPが多かった人。負けた人へのささやかな救済です。'], ['masa', 'ほんで大事なんは、だれかが上がったら、その場で試合終了ってことや！自分の番が回ってくる前に上がられることもある。せやから順番はけっこう大事なんやで！']], show: () => `<div class="tut-flow"><span>親</span><b>→</b><span>2番手</span><b>→</b><span>3番手</span><b>→</b><span>4番手</span><b>↻</b><span>次の場へ</span></div><p class="tut-cap">だれかが上がった瞬間にゲーム終了</p>` },
+  { cast: [['root', 'ここでコツその1。出せる手が複数あるなら、大きい札から処分するのが基本です。場は9、手札は Q・3・7・2。どちらを出しますか？'], ['masa', 'ここが分かれ道や！どっちの札が手に残るかも考えてな！']], show: () => tutField(TC(9, 3)) + tutHand([12, 3, 7, 2].map(v => TC(v))), task: { kind: 'choice', opts: ['Q − 3', '7 + 2'], ok: 0, good: 'お見事。Q − 3 なら手札の合計が15減り、上がられたときの失点もぐっと小さくなります。しかも残るのは 7・2。小さい札は組み合わせやすく、次の場で出せる＝上がれることが多いのです。', bad: '7 + 2 でも出せますが、Q − 3 なら合計が15減ります。それに、残る札にも差が出ます。Q・3 よりも 7・2 のような小さい札のほうが組み合わせやすく、上がりやすいことが多いのです。' } },
+  { cast: [['root', 'コツその2。式の作り方は自由です。3枚出しは一気に減らせますが、小さい札まで使い切ると、次の場で困ることもあります。出す枚数より、何を残すかで選びましょう。大きい札は、割り算で小さな数にすると処分しやすくなります。'], ['masa', 'でかい札を割って逃がす、ここが計算ブリッジの気持ちええとこや！']], show: () => `<div class="tut-exprs"><span class="mono">K − 8 ＋ 4 ＝ 9</span><small>3枚出し：一気に減るが、残る札しだい</small><span class="mono">Q ÷ 4 ＝ 3</span><small>割り算で大きい札を処分</small><span class="mono">J − 4 × A ＝ 7</span><small>かっこや×÷も自由に</small></div>` },
+  { cast: [['root', 'コツその3。手札が2〜3枚になったら「待ち」を意識します。たとえば A・2・6 の3枚は、13個の数のうち12個で上がれる、すごい形です。'], ['masa', 'ポーカーで言うたら、どのカードが来てもええ最強の待ちや！']], show: () => tutHand([1, 2, 6].map(v => TC(v))) + '<p class="tut-cap">A・2・6 ＝ 12面待ち（2〜Kで上がれる）</p>' },
+  { cast: [['root', '5ゲームで1セット。セットのPPの合計で順位が決まります。大会では、予選を何セットか戦って、上位が決勝に進みます。'], ['masa', '1ゲームの負けは取り返せる、長丁場の勝負や！']], show: () => `<div class="tut-flow"><span>1ゲーム</span><b>→</b><span>5ゲームで1セット</span><b>→</b><span>大会：予選 → 決勝</span></div>` },
+  { cast: [['root', 'この研究所でできることを紹介しましょう。'], ['masa', 'ぜんぶ遊びながら強くなれるで！']], show: () => `<ul class="tut-menu"><li><b>1セット練習</b>：相手の強さを選んで打つ。手ごとにAIの読みと比べられます</li><li><b>大会</b>：予選から決勝まで。思わぬ強敵も…</li><li><b>特訓</b>：式ハンター（3分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（15分の腕試し）</li><li><b>早見表</b>：多面待ちの札を、自分の式で埋めていく</li><li><b>バッジ・図鑑・アバター</b>：がんばりが形になって残ります</li><li><b>観戦</b>：達人の打ち方を見る</li></ul>` },
+  { cast: [['root', '説明は以上です。とはいえ、こればかりは打ってみるのがいちばん。'], ['masa', 'せや、いっぺんやってみんと分からんかもな！設定はワイらにまかせとき。まずは弱めの相手3人と、短めの3ゲームや。横で実況したるで！']], show: () => `<div class="tut-flow"><span>相手3人（★1〜2）</span><span>3ゲーム</span><span>博士とマサの実況つき</span></div>`, end: true }
+];
+// おすすめ設定（弱め・短め3ゲーム）でそのまま1セット練習を始める
+function tutPlay() {
+  S.T = newSession({ kind: 'practice', games: 3, mix: 'random', opps: [{ level: '1', style: 'r' }, { level: '2', style: 'r' }, { level: '2', style: 'r' }], points: [10, 8, 5, 2, 0], tie: 'janken' });
+  stat('pStart'); startSet();
+}
+// 説明を聞かないとき・練習をあとにするときも、ひと声かけて送り出す
+function tutBye(kind) {
+  const L = kind === 'skip' ? [['masa', 'ほな、楽しんでな！ 分からんことがあったら、ルールの画面からいつでも呼んでや！'], ['root', '良い一局を。達人の打ち方は、練習カードの「観戦」で見られますよ。']]
+    : [['masa', '了解や！ ほな、気が向いたらいつでもキックオフしてな！'], ['root', 'ホームの「1セット練習」から、いつでも始められます。']];
+  modal(`<div class="watch-invite tut-bye"><div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.1 + i * 0.6}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns" style="animation-delay:1.1s"><button class="btn primary" data-act="close">はじめる</button></div></div>`);
+  KB.sfx('select');
+}
+function tutStart() { S.tut = { i: 0, sel: [], done: {} }; tutRender(); }
+function tutGo(d) { const T = S.tut; if (!T) return; T.i = Math.max(0, Math.min(TUT.length - 1, T.i + d)); T.sel = []; T.msg = null; tutRender(); }
+const tutHand = cs => `<div class="tut-hand">${cs.map(c => `<span class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></span>`).join('')}</div>`;
+const tutField = c => `<div class="tut-field"><div class="fieldcard top ${c.s === 1 || c.s === 2 ? 'red' : ''} deal"><span class="tag">場</span><span class="big">${KB.vname(c.v)}</span><span class="val">${KB.SUITS[c.s]} ${c.v}</span></div></div>`;
+function tutRender() {
+  const T = S.tut; if (!T) return;
+  const st = TUT[T.i], tk = st.task, done = !tk || T.done[T.i];
+  let task = '';
+  if (tk && tk.kind === 'pick') {
+    const cards = tk.hand.map((v, k) => ({ v, s: k % 4, id: k }));
+    const vals = T.sel.map(k => tk.hand[k]), m = vals.length ? KB.evalSelection(vals, tk.t) : null;
+    task = `<div class="tut-hand pick">${cards.map(c => `<button class="card ${c.s === 1 || c.s === 2 ? 'red' : ''} ${T.sel.includes(c.id) ? 'sel' : ''}" data-tutc="${c.id}" ${T.done[T.i] ? 'disabled' : ''}><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></button>`).join('')}</div>
+      <div class="tut-msg ${T.msg ? T.msg.cls : ''}">${T.msg ? esc(T.msg.t) : vals.length ? (m ? `${esc(m.expr)} ＝ ${tk.t}　出せます！` : `${vals.map(KB.vname).join('・')} では ${tk.t} を作れません`) : '札を1〜3枚タップ'}</div>
+      ${T.done[T.i] ? '' : `<button class="btn primary" data-tutplay="1" ${m ? '' : 'disabled'}>出す</button>`}`;
+  } else if (tk && tk.kind === 'choice') {
+    task = `<div class="tut-opts">${tk.opts.map((o, k) => `<button class="btn ${T.done[T.i] ? (k === tk.ok ? 'primary' : '') : ''}" data-tuto="${k}" ${T.done[T.i] ? 'disabled' : ''}>${esc(o)}</button>`).join('')}</div>${T.msg ? `<div class="tut-msg ${T.msg.cls}">${esc(T.msg.t)}</div>` : ''}`;
+  }
+  const cast = st.cast.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.1 + i * 0.7}s"><div class="cm-av">${KB.casterSVG(who, T.msg && T.msg.cls === 'bad' && who === 'masa' ? 'worried' : 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('');
+  const again = T.shown === T.i; T.shown = T.i; // 同じステップの描き直しでは、会話の登場アニメーションをくり返さない
+  const html = `<div class="tut ${again ? 'tut-static' : ''}"><div class="tut-top"><span class="small">ルールの説明　${T.i + 1}/${TUT.length}</span><button class="btn ghost sm" data-act="tut-close">とじる</button></div>
+    <div class="tut-prog"><i style="width:${Math.round((T.i + 1) / TUT.length * 100)}%"></i></div>
+    <div class="op-lines">${cast}</div><div class="tut-stage">${st.show()}${task}</div>
+    <div class="row tut-nav">${T.i ? '<button class="btn ghost" data-act="tut-back">← もどる</button>' : '<span></span>'}${st.end ? '<span class="row" style="gap:8px"><button class="btn ghost" data-act="tut-later">あとで</button><button class="btn primary" data-act="tut-end">打ってみる！</button></span>' : `<button class="btn primary" data-act="tut-next" ${done ? '' : 'disabled'}>${done ? 'つぎへ →' : 'やってみよう'}</button>`}</div></div>`;
+  const cur = $('#modal .tut'); if (cur) { cur.parentElement.innerHTML = html; bindModal($('#modal')); } else modal(html);
+  const md = $('#modal'); if (!md) return;
+  md.querySelectorAll('[data-tutc]').forEach(b => b.onclick = () => { const k = +b.dataset.tutc; T.msg = null; T.sel = T.sel.includes(k) ? T.sel.filter(x => x !== k) : T.sel.length < 3 ? T.sel.concat(k) : T.sel; KB.sfx('select'); tutRender(); });
+  md.querySelectorAll('[data-tutplay]').forEach(b => b.onclick = () => { const vals = T.sel.map(k => tk.hand[k]), m = KB.evalSelection(vals, tk.t); if (!m) return; T.done[T.i] = true; T.msg = { cls: 'good', t: `${m.expr} ＝ ${tk.t}　ナイス！ ほかにも 9 − 2、J − 4 × A など、作り方はいろいろあります。` }; KB.sfx('play3'); tutRender(); });
+  md.querySelectorAll('[data-tuto]').forEach(b => b.onclick = () => { const k = +b.dataset.tuto, ok = k === tk.ok; T.done[T.i] = true; T.msg = { cls: ok ? 'good' : 'bad', t: (ok ? '⭕ ' : '❌ ') + (ok ? tk.good : tk.bad) }; KB.sfx(ok ? 'capture' : 'foul'); tutRender(); });
+}
+
+// ---------- 観戦：★5の達人4人の1セットを、博士とマサの実況・ゲームごとの感想つきで見る（速さはいつも「ふつう」・いつでもやめられる） ----------
+function watchInvite(name) {
+  const nmS = san(name || S.settings.name || 'あなた');
+  const L = [['root', `ようこそ、${nmS}。とりあえず、達人のゲームを見てみましょう。★5の天才ゼロさんと、★3・★2・★1の3人の卓です。強さによって打ち方がどう違うか、比べながら見ると面白いですよ。`], ['masa', `まずは観戦からや！達人ゼロの打ち筋と、ほかの3人の違い、しっかり見とこ！見飽きたら、いつでも抜けてええで！`]];
+  modal(`<div class="watch-invite"><div class="wi-title">まずは、達人の一局を</div>
+    <div class="op-lines">${L.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.2 + i * 1.1}s"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+    <div class="row wi-btns"><button class="btn" data-act="close">自分で打ってみる</button><button class="btn primary" data-act="watch-first">観戦する</button></div>
+    <p class="small muted" style="margin:0;text-align:center">観戦は「1セット練習」の画面からも、いつでも見られます。</p></div>`);
+  KB.sfx('banner');
+}
+// 卓の顔ぶれ：達人（★5）は必ず1人。ほかは★1〜4からばらばらに（強さの違いが見えるように）。
+// 初めての案内のときは、強さ（★5・3・2・1）も性格（4種）もそろった決まった顔ぶれにする
+const WATCH_FIRST = ['zero', 'shota', 'tome', 'tama'];
+function watchStart(first) {
+  watchEnd(true);
+  KB.resetNames(); const used = new Set();
+  const fromChar = (id, i) => { const c = KB.charById(id); used.add(id); return { id: i, human: false, level: c.lv, style: c.st, ch: KB.charToCh(c), peek: !!c.peek }; };
+  const lv = KB.shuffle([1, 2, 3, 4]).slice(0, 3).sort((a, b) => b - a);
+  const ais = first ? WATCH_FIRST.map(fromChar) : [makeAI(0, 5, null, used)].concat(lv.map((l, k) => makeAI(k + 1, l, null, used)));
+  // 本戦と同じ画面で見せる：手元（画面の下）は達人。達人の席は「人の席」を借りて、AIが打つ（spectator）
+  const master = ais.find(p => p.level >= 5), others = ais.filter(p => p !== master);
+  const T = newSession({ kind: 'practice', games: 5, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: [10, 8, 5, 2, 0], tie: 'janken' });
+  T.players = [Object.assign({}, master, { id: 0, human: true, spectator: true })].concat(others.map((p, k) => Object.assign({}, p, { id: k + 1 })));
+  T.points = {}; T.totPP = {}; T.tb = {}; T.players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
+  T.watch = true;
+  S.spectate = { first: !!first, saved: { speed: S.settings.speed, commentary: S.settings.commentary, spoiler: S.settings.spoiler }, diffs: [], from: S.view };
+  S.settings.speed = 'normal'; S.settings.commentary = 'both'; S.settings.spoiler = false; // 速さはいつも「ふつう」
+  document.body.classList.add('spectate');
+  S.T = T; startSet();
+}
+// 観戦を終える（設定を元に戻す）。keepView のときは画面は動かさない
+function watchEnd(keepView) {
+  if (!S.spectate) return;
+  const sv = S.spectate.saved; Object.assign(S.settings, sv); S.spectate = null;
+  clearTimeout(S.timer); S.paused = 0; S.game = null; S.T = null; S.winShow = null;
+  document.body.classList.remove('spectate');
+}
+function watchBanner(T) {
+  const m = T.players[0];
+  return T.game === 1 ? { title: '達人の観戦', sub: `手元は★5「${m.ch.title || '達人'}」${m.ch.name}。4人の打ち方の違いに注目`, say: 'start', sayData: { g: 1 } } : { title: `第${T.game}ゲーム`, sub: T.game === T.cfg.games ? '観戦もいよいよ最終ゲーム' : '達人の観戦', say: 'start', sayData: { g: T.game } };
+}
+// ★4以下の人が、達人の読みと違う手を選んだら、その差を解説する（最善手を言い続けるのではなく「違い」に注目）
+function watchDiff(g, p, m) {
+  const pl = g.players[p]; if (pl.level > 4) return null;
+  try {
+    const counts = g.counts(p), t = g.field.v, key = x => x ? x.vals.slice().sort((a, b) => a - b).join(',') : 'draw';
+    const cands = KB.candidates(counts, t, 6).concat([null]); if (m && !cands.some(c => c && key(c) === key(m))) cands.push(m);
+    if (cands.length < 2) return null;
+    const ev = KB.evaluate(g.view(p), cands, 360), best = ev.slice().sort((a, b) => a.pp - b.pp)[0], mine = ev.find(e => key(e.m) === key(m));
+    if (!best || !mine || key(best.m) === key(m) || mine.pp - best.pp < 1.5) return null;
+    const n = san(nm(pl)), stars = '★'.repeat(pl.level), bs = best.m ? `「${best.m.expr}」` : '「あえて引く」', ms = m ? `「${m.expr}」` : '「引く」', d = mine.pp - best.pp;
+    const big = best.m && best.m.vals.some(v => v >= 10), keep = !best.m;
+    S.spectate.diffs.push({ p, round: g.round, best: bs, mine: ms, d });
+    return { root: `${stars}の${n}は${ms}。達人の読みなら${bs}です。${keep ? '出せる札を使わずに手札の形を残す方が、次の場に強くなります。' : big ? '大きい札を処分できる場面でした。' : '残る手札の形に差が出ます。'}失点の見込みで${d.toFixed(1)}点ほどの差です。`,
+      masa: `${n}、${ms}かぁ！達人やったら${bs}やで！${big ? 'でかい札を逃がすチャンスやったのに、パス回しで終わってもうたな！' : keep ? 'ここは攻めずにボールキープ、我慢の場面やったんや！' : 'ちょっとの差でも、積み重なったら試合が決まるで！'}` };
+  } catch (e) { return null; }
+}
+// 1ゲームごとの感想（博士とマサ）→ 次のゲームへ
+function watchGameSummary() {
+  const g = S.game, T = S.T; if (!g || !S.spectate) return;
+  const rv = watchReview(g, S.spectate.diffs.splice(0)), last = T.game >= T.cfg.games;
+  const ppRow = g.players.map((p, i) => ({ p, i })).sort((a, b) => g.pp[a.i] - g.pp[b.i]).map(({ p, i }) => `<div class="ws-pp ${g.winner === i ? 'win' : ''}"><span class="av">${av(p, g.winner === i ? 'happy' : moodOf(g, i), true)}</span><div><b>${esc(nm(p))}</b><small>${'★'.repeat(p.level)}</small><span>${g.winner === i ? '上がり' : `PP <b class="tnum">${g.pp[i]}</b>`}</span></div></div>`).join('');
+  const cm = who => `<div class="w-cm ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(rv[who])}</div></div>`;
+  modal(`<div class="stack watch-sum"><div class="gs-head"><span class="small">達人の観戦</span><b>第${T.game}ゲームの感想</b></div><div class="ws-pps">${ppRow}</div>${cm('root')}${cm('masa')}
+    <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-act="watch-quit">観戦をやめる</button><button class="btn primary" data-act="watch-next">${last ? 'セットの結果へ' : `第${T.game + 1}ゲームへ`}</button></div></div>`);
+}
+function watchNext() {
+  const T = S.T; if (!T || !S.spectate) return;
+  closeModal();
+  if (T.game < T.cfg.games) { T.game++; startGame(); return; }
+  const tot = T.players.map(p => ({ p, t: T.setPP[p.id].reduce((a, b) => a + b, 0), w: T.setPP[p.id].filter(x => x === 0).length })).sort((a, b) => a.t - b.t), top = tot[0];
+  const r = `セットの結果は、${tot.map((o, k) => `${k + 1}位 ${o.p.ch.name}（★${o.p.level}・PP${o.t}）`).join('、')}。${san(top.p.ch.name)}は上がり${top.w}回。${top.p.level < 5 ? '達人を抑えての首位です。1セットでは運も大きく働きます。' : '強さの差は、1ゲームより1セットの合計にはっきり出ます。'}`;
+  const m = `1セット終了や！MVPは${san(top.p.ch.name)}、セットPP${top.t}！上がるだけやなくて、失点を抑えるディフェンスもワールドクラスやったで！ほな、次は自分の番や！`;
+  confetti(); KB.sfx('win');
+  modal(`<div class="stack watch-sum"><div class="gs-head"><span class="small">達人の観戦</span><b>セットの結果</b></div>
+    <div class="ws-pps">${tot.map((o, k) => `<div class="ws-pp ${k === 0 ? 'win' : ''}"><span class="av">${av(o.p, k === 0 ? 'happy' : 'normal', true)}</span><div><b>${k + 1}位 ${esc(o.p.ch.name)}</b><small>${'★'.repeat(o.p.level)}</small><span>PP <b class="tnum">${o.t}</b></span></div></div>`).join('')}</div>
+    <div class="w-cm root"><div class="cm-av">${KB.casterSVG('root', 'happy')}</div><div><span class="cm-name">解説・ルート博士</span>${esc(r)}</div></div><div class="w-cm masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div><span class="cm-name">実況・ナニワのマサ</span>${esc(m)}</div></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ghost" data-act="watch-quit">ホームへ</button><button class="btn" data-act="watch-again">もう1セット観戦</button><button class="btn primary" data-act="watch-play">自分で打つ（1セット練習）</button></div></div>`);
+}
+function watchReview(g, ds) {
+  const nm2 = i => san(g.players[i].ch.name), w = g.winner, plays = g.log.filter(x => x.type === 'play');
+  const lastW = plays.filter(x => x.p === w).pop(), sumOf = v => v.reduce((a, b) => a + b, 0);
+  const big = plays.filter(x => x.vals.length === 3 && x !== lastW).sort((a, b) => sumOf(b.vals) - sumOf(a.vals))[0]; // 決め手と同じ手は重ねて言わない
+  const lvOf = i => g.players[i].level, trivDiv = e => /(\d+|[AJQK]) ÷ \1(?!\d)/.test(e);
+  const divs = plays.filter(x => /÷/.test(x.expr) && !trivDiv(x.expr) && lvOf(x.p) >= 4 && x !== big && x !== lastW), div = divs.find(x => /\(/.test(x.expr)) || divs[0];
+  const dwp = g.drawsWhilePlayable.map((k, i) => ({ k, i })).filter(x => x.k > 0).sort((a, b) => b.k - a.k)[0];
+  const loser = g.pp.map((pp, i) => ({ pp, i })).sort((a, b) => b.pp - a.pp)[0];
+  const rest = loser ? g.hands[loser.i].map(c => KB.vname(c.v)).join('・') : '';
+  const R = [], M = [];
+  if (w >= 0) { R.push(`第${g.round}巡、${nm2(w)}の上がりです。決め手は「${lastW ? lastW.expr : ''} = ${lastW ? lastW.t : ''}」。`); M.push(RVP([`第${g.round}巡、${nm2(w)}が上がりや！「${lastW ? lastW.expr : ''}」でフィニッシュ、ゴラッソやな！`, `${nm2(w)}、第${g.round}巡で上がり！最後の「${lastW ? lastW.expr : ''}」、ナッツで勝負決めたって感じや！`])); }
+  else { R.push('山札が尽きて、上がりなしで終わりました。'); M.push('上がりなしのスコアレスドローや！守り合いの一戦やったな！'); }
+  if (big) { R.push(`光ったのは第${big.round}巡、${nm2(big.p)}の「${big.expr} = ${big.t}」。3枚で手札の合計を${sumOf(big.vals)}減らしました。`); M.push(`第${big.round}巡の${nm2(big.p)}「${big.expr}」、3枚で${sumOf(big.vals)}点分ごっそりや！ハットトリック級やで！`); }
+  if (div) { R.push(`${nm2(div.p)}の「${div.expr}」のように、割り算で大きい札を小さな数に変えるのは達人の定番です。`); M.push(`「${div.expr}」の割り算、うまいこと大きい札を逃がしとる！`); }
+  if (dwp && lvOf(dwp.i) >= 4) { R.push(`出せるのにあえて引いた場面が${dwp.k}回（${nm2(dwp.i)}）。目先の1枚より、次の場で使える形を残す判断です。`); M.push(`${nm2(dwp.i)}は出せるのにあえて引いとったで。ポーカーで言うたら、ええ手を見送って次を待つ判断や！`); }
+  else if (dwp) { R.push(`${nm2(dwp.i)}（★${lvOf(dwp.i)}）は、出せるのに引いた場面が${dwp.k}回ありました。★の低い人は、出せる組み合わせを見落としやすいのです。`); M.push(`${nm2(dwp.i)}、出せるのに引いてもうたのが${dwp.k}回や。シュートチャンスに気づかへんかったんやな！`); }
+  if (loser && loser.pp > 0) { R.push(`いちばん失点したのは${nm2(loser.i)}（PP${loser.pp}）。最後に${rest}が残りました。大きい札を抱えたまま上がられると、失点が大きくなります。`); M.push(`${nm2(loser.i)}はPP${loser.pp}、${rest}が残ってもうた。でかい札は早めにベンチに下げとかんとな！`); }
+  ds = ds || [];
+  if (ds.length) {
+    const top = ds.sort((a, b) => b.d - a.d)[0], byP = {}; ds.forEach(x => byP[x.p] = (byP[x.p] || 0) + 1);
+    const most = Object.keys(byP).sort((a, b) => byP[b] - byP[a])[0];
+    R.push(`達人の読みと違う手は${ds.length}回。いちばん差が大きかったのは第${top.round}巡、${nm2(top.p)}の${top.mine}（達人なら${top.best}）。${byP[most] >= 2 ? `${nm2(+most)}（★${g.players[+most].level}）は${byP[most]}回で、強さの差が手の選び方に出ています。` : ''}`);
+    M.push(`達人と違う手が${ds.length}回あったで！一番もったいなかったんは${nm2(top.p)}の${top.mine}や。達人なら${top.best}、ここが★の差やな！`);
+  } else R.push('このゲームは、全員が達人の読みと大きくは違わない手を選びました。');
+  R.push(RVP(['1ゲームの結果には運が入ります。見るべきは、毎回の選び方です。', '自分ならこの場で何を出すか、一手ずつ考えながら見ると上達が早いですよ。', '上がった人より、失点を小さく抑えた人の打ち方にも学びがあります。']));
+  if (!M.some(t => /ゴール|サッカー|ハットトリック|ゴラッソ|ポーカー|ナッツ|ベンチ|ドロー|オールイン/.test(t))) M.push('サッカーでも、上手い人の試合を見るのがいちばんの練習や！');
+  return { root: R.join(''), masa: M.join('') };
+}
+// ---------- 早見表を作成：多面待ちの2枚・3枚を、自分で式を入れて埋めていく（ヒントなし） ----------
+// 行：2枚は3面以上（A・○は法則の一行にまとめる）、3枚は9面以上。面数の多い順
+const CHART_ROWS = [[1, 2, 6], [1, 2, 4], [1, 2, 5], [1, 2, 7], [1, 2, 9], [1, 2, 10], [2, 3, 7], [1, 2, 3], [1, 2, 8], [1, 2, 12], [1, 3, 3], [1, 3, 4], [1, 3, 9], [2, 2, 8], [2, 3, 3], [2, 3, 4], [2, 3, 5], [2, 3, 8], [2, 3, 9], [2, 3, 12], [2, 4, 5], [2, 4, 10], [3, 3, 12], [3, 4, 5], [3, 5, 6], [3, 6, 9],
+  [2, 6], [2, 3], [2, 4], [2, 5], [2, 8], [2, 10], [3, 3], [3, 4], [3, 6], [3, 9], [4, 8]];
+let CHART_MEN = null; // 行ごとの待ち（全部の札を使って作れる場）
+function chartMen() {
+  if (CHART_MEN) return CHART_MEN;
+  CHART_MEN = CHART_ROWS.map(vals => { const c = KB.countsOf(vals), out = []; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) out.push(t); return out; });
+  return CHART_MEN;
+}
+const chartGet = () => store.get('chart', null) || {};
+const chartTotal = () => chartMen().reduce((a, m) => a + m.length, 0);
+const chartFullRows = () => { const c = chartGet(), men = chartMen(); return CHART_ROWS.map((r, i) => i).filter(i => men[i].every(t => (c[CHART_ROWS[i].join(',')] || {})[t])); };
+const chartDone = () => { const c = chartGet(); return CHART_ROWS.reduce((a, r) => a + Object.keys(c[r.join(',')] || {}).length, 0); };
+// 式の計算：整数だけ。割り算は割り切れるときだけ（ゲームのルールと同じ）
+function chartEval(tok) {
+  let i = 0;
+  const peek = () => tok[i], err = m => { throw new Error(m); };
+  function atom() { const t = tok[i++]; if (!t) err('…'); if (t.k === 'c') return t.v; if (t.k === '(') { const v = expr(); if (!tok[i] || tok[i].k !== ')') err('…'); i++; return v; } err('式の形がちがいます'); }
+  function term() { let v = atom(); while (peek() && (peek().k === '×' || peek().k === '÷')) { const o = tok[i++].k, w = atom(); if (o === '×') v *= w; else { if (w === 0 || v % w !== 0) err('割り切れない割り算は使えません'); v /= w; } } return v; }
+  function expr() { let v = term(); while (peek() && (peek().k === '+' || peek().k === '−')) { const o = tok[i++].k, w = term(); v = o === '+' ? v + w : v - w; } return v; }
+  const v = expr(); if (i < tok.length) err('式の形がちがいます'); return v;
+}
+const chartStr = tok => tok.map(t => t.k === 'c' ? KB.vname(t.v) : t.k).join(' ').replace(/\( /g, '(').replace(/ \)/g, ')');
+function chartOpen(view) { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.view = !!view; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
+function chartRender() {
+  const C = S.chart, men = chartMen(), data = chartGet(), row = CHART_ROWS[C.row], key = row.join(','), mine = data[key] || {};
+  if (C.view) return chartViewRender(men, data);
+  const head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
+  const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + CHART_ROWS.slice(from, to).map((r, k) => {
+    const i = from + k, d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
+    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : C.hint === i && men[i].includes(t) ? '<td class="hint">？</td>' : '<td></td>').join('')}</tr>`;
+  }).join('');
+  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
+  let preview = '';
+  if (C.tok.length) { try { const v = chartEval(C.tok); preview = `= ${v}`; } catch (e) { preview = e.message === '…' ? '' : e.message; } }
+  const done = chartDone(), total = chartTotal();
+  const cur = $('#modal .chart-modal'), html = (`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表を作成</h2><span class="small">${done}/${total}</span></div>
+    <p class="small" style="margin:0">行を選び、札と記号で式を作ると答えの列に○。○をタップすると自分の式が見られます。</p>
+    <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
+    <div class="ch-wrap"><table class="ch-table">${head}${sec('3枚（9面以上）', 0, 26)}${sec('2枚（3面以上）', 26, CHART_ROWS.length)}</table></div>
+    <div class="ch-input">
+      <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small></div>
+      <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
+      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
+        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button></div>
+      <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span><button class="btn sm ghost" data-chint="1">💡 残りの場</button></div>
+      ${C.hint === C.row ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
+    </div>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  if (cur) { const keep = cur.querySelector('.ch-wrap'), st = keep ? keep.scrollTop : 0; cur.parentElement.innerHTML = html; bindModal($('#modal')); const w = $('#modal .ch-wrap'); if (w) w.scrollTop = st; } else modal(html); // 打つたびに作り直しても、対局は止めたまま
+  const m = $('#modal'); if (!m) return;
+  m.querySelectorAll('[data-crow]').forEach(tr => tr.onclick = () => { C.row = +tr.dataset.crow; C.tok = []; C.msg = null; chartRender(); });
+  m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = e => { e.stopPropagation(); toast(td.dataset.cexp); });
+  m.querySelectorAll('[data-ckc]').forEach(b => b.onclick = () => chartKey({ k: 'c', i: +b.dataset.ckc, v: row[+b.dataset.ckc] }));
+  m.querySelectorAll('[data-cko]').forEach(b => b.onclick = () => chartKey({ k: b.dataset.cko }));
+  m.querySelectorAll('[data-ckb]').forEach(b => b.onclick = () => chartKey(null));
+  m.querySelectorAll('[data-chint]').forEach(b => b.onclick = () => { C.hint = C.hint === C.row ? null : C.row; chartRender(); });
+  const on = m.querySelector('tr.on'); if (on && C.scroll !== C.row) { C.scroll = C.row; on.scrollIntoView({ block: 'nearest' }); }
+}
+// 対局中：完成した行だけを見る（入力はできない。作るのはホームから）
+function chartViewRender(men, data) {
+  const full = chartFullRows(), head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
+  const rows = full.map(i => { const r = CHART_ROWS[i], d = data[r.join(',')] || {}; return `<tr class="full"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[i].length}面</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : '<td></td>').join('')}</tr>`; }).join('');
+  modal(`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表</h2><span class="small">完成 ${full.length}/${CHART_ROWS.length}行</span></div>
+    <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
+    ${full.length ? `<div class="ch-wrap" style="max-height:52vh"><table class="ch-table">${head}${rows}</table></div><p class="small muted" style="margin:0">○をタップすると、自分で作った式が見られます。</p>` : '<p class="small" style="margin:0">まだ完成した行がありません。ホームの「早見表を作成」で、行のすべての待ちを自分の式で埋めると、ここに表示されます。</p>'}
+    <p class="small muted" style="margin:0">対局中は見るだけです。表を作るのはホームから。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  const m = $('#modal'); if (m) m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = () => toast(td.dataset.cexp));
+}
+function chartKey(t) {
+  const C = S.chart; if (!C || C.lock || C.view) return;
+  C.msg = null;
+  if (!t) C.tok.pop(); else C.tok.push(t);
+  // カッコの自動補助：「(」のあとに札を2枚入れたら「)」を閉じる
+  if (t && t.k === 'c') { let depth = 0, open = -1; C.tok.forEach((x, k) => { if (x.k === '(') { depth++; open = k; } else if (x.k === ')') depth--; }); if (depth > 0 && C.tok.slice(open).filter(x => x.k === 'c').length >= 2) C.tok.push({ k: ')' }); }
+  const row = CHART_ROWS[C.row], nC = C.tok.filter(x => x.k === 'c').length;
+  if (nC === row.length) {
+    let v = null, e = null; try { v = chartEval(C.tok); } catch (x) { e = x.message; }
+    if (e && e !== '…') C.msg = { t: e };
+    else if (v != null) {
+      const key = row.join(','), data = chartGet(), mine = data[key] = data[key] || {};
+      if (v < 1 || v > 13 || v !== Math.floor(v)) C.msg = { t: `= ${v}（待ちになりません）` };
+      else if (mine[v]) { C.msg = { t: `${KB.vname(v)} はもう埋まっています` }; C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 900); }
+      else { mine[v] = chartStr(C.tok); store.set('chart', data); setMax('chart', chartFullRows().length); C.msg = { ok: true, t: `= ${KB.vname(v)}　○` }; KB.sfx('capture'); C.lock = true; setTimeout(() => { C.lock = false; C.tok = []; C.msg = null; if ($('#modal .chart-modal')) chartRender(); }, 700); }
+    }
+  }
+  chartRender();
+}
+// パソコンではキーボードでも入力できる
+document.addEventListener('keydown', e => {
+  if (!S.chart || S.chart.view || !$('#modal .chart-modal') || e.isComposing) return;
+  const row = CHART_ROWS[S.chart.row], used = new Set(S.chart.tok.filter(t => t.k === 'c').map(t => t.i));
+  const kv = { a: 1, j: 11, q: 12, k: 13, t: 10, '0': 10 }[e.key.toLowerCase()] || (/^[1-9]$/.test(e.key) ? +e.key : null);
+  const op = { '+': '+', '-': '−', '*': '×', '/': '÷', '(': '(', ')': ')' }[e.key];
+  if (kv) { const i = row.findIndex((v, k) => v === kv && !used.has(k)); if (i >= 0) { e.preventDefault(); chartKey({ k: 'c', i, v: kv }); } }
+  else if (op) { e.preventDefault(); chartKey({ k: op }); }
+  else if (e.key === 'Backspace') { e.preventDefault(); chartKey(null); }
+});
+
 // ---------- 引っ越し（アーティファクト版 → 公開版） ----------
 // 全プレイヤーの記録（localStorage の kb.*）を圧縮して、公開版URLの「#kbmove=」以降に入れて開く
 const MIG_SKIP = { 'kb.recentLines': 1, 'kb.migDone': 1, 'kb.testAskName': 1 };
@@ -6732,9 +7452,9 @@ const MIG_IN = (() => {
 })();
 function migApply(o) {
   const done = raw.get('kb.migDone', []);
-  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && k !== 'kb.migDone') ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && k !== 'kb.migDone' && !CLOUD_KEEP[k]) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
   try { for (const k in o.data) if (k.startsWith('kb.') && !MIG_SKIP[k]) localStorage.setItem(k, o.data[k]); } catch (e) { toast('保存できませんでした（容量の上限かもしれません）'); return; }
-  done.push(o.id); raw.set('kb.migDone', done.slice(-20)); raw.set('kb.migAt', Date.now());
+  done.push(o.id); raw.set('kb.migDone', done.slice(-20)); raw.set('kb.migAt', Date.now()); raw.set('kb.cloudAt', Date.now()); // 引っ越した記録をクラウドの正本にする
   location.reload();
 }
 async function migrateIn(t) {
@@ -6781,6 +7501,7 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
   <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     <div class="facts"><span>2〜5人卓</span><span>レベル・性格を指定</span><span>セット得点つき</span></div>
+    <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
   <div class="mode"><div class="lbl">TOURNAMENT</div><h2>大会モード</h2>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
@@ -6789,9 +7510,11 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
   ${attackCardHTML()}
   ${huntCardHTML()}
   ${outsCardHTML()}
+  ${chartCardHTML()}
 </div>
 ${growthCardHTML()}
 <div class="row" style="margin-top:14px">
+  ${CLOUD_ON ? '<button class="btn" data-go="ranking">🏆 ランキング</button>' : ''}
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
@@ -6813,6 +7536,7 @@ ${growthCardHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
+  <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
@@ -6919,13 +7643,14 @@ function startGame() {
   const players = ids.map(id => P(id));
   const starter = S.tiebreak ? (Math.random() * ids.length) | 0 : starterFor(ids, T.game);
   S.game = new KB.Game(players, starter);
+  KB.kanataRoll(S.game);
   S.gameHinted = false;
   if (!S.tiebreak) T.live = null;
   S.gameNo = (S.gameNo || 0) + 1;
   S.sel = []; S.hint = null; S.decisions = []; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = null; S.fouls = [];
   S.qual = (!S.tiebreak && T.cfg.kind === 'tournament' && T.phase === 'prelim') ? qualifyTable(T) : null;
   S.cm = null; S.cmHoldUntil = 0; S.flowHoldUntil = 0;
-  const bn = bannerFor(T);
+  const bn = T.watch ? watchBanner(T) : bannerFor(T);
   S.bigBanner = bn ? Object.assign(bn, { shown: false }) : null;
   S.introUntil = bn && S.settings.speed !== 'instant' ? Date.now() + 2900 : 0;
   S.reshuffleSeen = 0; S.deckLowSaid = false;
@@ -7018,7 +7743,7 @@ const selfOnlyCm = () => S.settings.speed === 'fast' || S.settings.speed === 'in
 const holdEnd = () => selfOnlyCm() ? (S.flowHoldUntil || 0) : Math.max(S.cmHoldUntil || 0, S.flowHoldUntil || 0);
 function holdMs(c) {
   if (!c || S.settings.speed === 'instant') return 0;
-  const f = S.settings.speed === 'fast' ? 0.7 : S.settings.speed === 'slow' ? 1.3 : 1;
+  const f = (S.settings.speed === 'fast' ? 0.7 : S.settings.speed === 'slow' ? 1.3 : 1) * (S.spectate && c.kind !== 'insight' ? 0.8 : 1); // 観戦：ふつうの実況は少し短く、違いの解説はじっくり
   return Math.min(3800, Math.max(1200, 700 + c.text.length * 70)) * f;
 }
 // 速さが「はやい」「一瞬」のときは、自分に関する実況だけにする（他の人の実況は流れが速すぎて読めないため）
@@ -7103,7 +7828,7 @@ function restoreLive() {
   go('game');
   loop();
 }
-function saveSession() { if (S.attack) return; if (S.T && !S.T.done) store.set('session', S.T); }
+function saveSession() { if (S.attack || S.spectate) return; if (S.T && !S.T.done) store.set('session', S.T); }
 
 // 巡の最後の人のアクションが落ち着いてから、ほんの少し間をおいて次の場札と「第N巡」を出す
 // 一時停止できるタイマー：順位表を見ている間などは、時間が来ても進めずに保留する
@@ -7146,7 +7871,7 @@ function loop() {
   // 実況を読む時間を確保してから、ターン終了（黄色枠を次の人へ）
   { const he = holdEnd(); if (he && Date.now() < he) { S.timer = pt(loop, he - Date.now()); return; } }
   if (S.holdTurn != null) { S.holdTurn = null; S.roundHeld = false; renderGame(); }
-  if (pl.human) {
+  if (pl.human && !S.spectate) {
     const tk = S.gameNo + ':' + g.round + ':' + g.pos; if (S.chimeKey !== tk) { S.chimeKey = tk; S.turnStart = Date.now(); KB.sfx('myturn'); }
     if (Math.random() < 0.08 && (!S.cm || Date.now() - S.cm.at > 5000)) { say('tip', {}); renderGame(); }
     if (S.settings.autoHint && !S.hint) S.timer = setTimeout(() => computeHint(), 50);
@@ -7156,19 +7881,26 @@ function loop() {
   const lv = KB.levelCfg(pl.level);
   const nOpts = KB.findMoves(g.counts(p), g.field.v, lv.ops, lv.maxCards).length;
   const styleF = { gangan: 0.65, inochi: 1.1, iroiro: 0.55 + Math.random() * 0.9, keisan: 1.35 }[pl.style] || 1;
-  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1][(pl.level || 3) - 1];
+  const levelF = [1.35, 1.2, 1.0, 0.95, 1.1, 1.2][(pl.level || 3) - 1];
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
+  if (KB.kanataReady(g, p)) { // 奥義・絶対透視
+    g.kanataOn = true; if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+    S.thinking = p; toushiFx(g, p); say('kanataOn', { n: nm(pl) }); renderGame();
+    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : 3300); return;
+  }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
     const r0 = g.round;
     const m = KB.aiMove(g, p, ctxFor(p));
+    const wd = S.spectate ? watchDiff(g, p, m) : null; // 観戦：★4以下の人と達人の読みの違い
     const before = g.hands[p].length;
     const kind = m ? (before - m.vals.length === 0 ? 'win' : before - m.vals.length <= 2 ? 'reach' : m.n === 3 ? 'play3' : 'play') : 'draw';
     if (kind === 'win' || Math.random() < KB.charTalkRate(pl) * (kind === 'play' ? 0.6 : 1.2)) { const hl = g.hands[p].filter(c => !(m && m.vals.includes(c.v))); S.bubbles[pl.id] = { text: KB.charLine(pl, kind, { h: before - (m ? m.vals.length : -1), big: hl.filter(c => c.v >= 10).length }), at: Date.now() }; }
     const tAct = Date.now();
     const spoil = S.settings.spoiler ? spoilerCheck(g, p, m) : null;
     g.apply(m);
+    if (wd && !g.over) { sayInsight(wd, 'worried'); if (S.cm) S.cm.prio = 8; } // 観戦：違いの解説を、ほかの実況より優先
     if (!g.over) {
       const nmS = san(nm(pl)), h = g.hands[p].length;
       const meI = g.players.findIndex(x => x.human);
@@ -7242,7 +7974,7 @@ function whereText() {
 }
 function gameHTML() {
   return `<div class="topbar"><div class="where">${S.tiebreak ? whereText() : progTopHTML(S.T)}</div>${S.attack ? `<span class="atk-box"><span class="atk-clock" title="残り時間">${fmtClock(S.attack.end - Date.now())}</span><small class="atk-now">${atkBP()} BP</small></span>` : ''}
-  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm" data-act="standings">順位表</button><button class="btn sm ghost" data-act="quit">中断</button></div></div>
+  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
   <div id="tablewrap"></div>
   <div class="under"><div class="panel" id="unseenpanel"></div><div class="stack under-main"><div class="panel" id="hintpanel"></div><div class="panel" id="prevpanel" hidden></div></div><div class="panel stack" id="sidepanel"></div></div>`;
 }
@@ -7273,6 +8005,18 @@ function cutInFx(label, expr, t) {
   el.innerHTML = `<div class="ci-band"><div class="ci-label">${esc(label)}</div><div class="ci-expr">${esc(expr)} = ${t}</div></div>`;
   document.body.appendChild(el); KB.sfx('cutin');
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
+}
+// 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
+function toushiFx(g, p) {
+  if (S.settings.speed === 'instant') return;
+  // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
+  const pl = g.players[p], back = (_, k) => `<span class="tx-c" style="animation-delay:${0.5 + k * 0.06}s"></span>`;
+  const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(back).join('')}</div>`).join('');
+  const deck = g.deck.slice(-12).map(back).join('');
+  const el = document.createElement('div'); el.className = 'toushi-fx';
+  el.innerHTML = `<div class="tx-eye">${KB.avatarSVG(pl.ch, { open: true, level: 6 })}</div><div class="tx-name">奥義・絶対透視</div><div class="tx-sub">${esc(nm(pl))}の目が開いた……${esc(nm(pl))}にだけ、全員の手札と山札の順番が視えている</div><div class="tx-see">${rows}<div class="tx-row"><b>山札</b>${deck}<i>…</i></div></div>`;
+  document.body.appendChild(el); KB.sfx('cutin');
+  setTimeout(() => el.classList.add('hide-cards'), 1900); setTimeout(() => el.classList.add('out'), 2700); setTimeout(() => el.remove(), 3200);
 }
 function markCmOverflow() {
   document.querySelectorAll('.table .cm-text').forEach(t => {
@@ -7313,9 +8057,9 @@ function renderGame0() {
       <div class="av" ${p.ch && p.ch.charId ? `data-char="${p.ch.charId}" role="button" aria-label="${esc(nm(p))}のプロフィール"` : ''}>${av(p, S.thinking === i ? 'normal' : moodOf(g, i))}${bubble}</div>
       <div class="nm"><span>${esc(nm(p))}</span><span class="ord">${ordInRound}番手</span>${pvr ? `<span class="prov"><span class="lv-full">暫定</span>${pvr.rank[p.id]}位</span>` : ''}</div>
       <div class="meta">${lvChip(p) || `<span class="chip lvchip">${esc(p.ch.ageJa)}</span>`}</div>
-      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over ? '' : handBacks(n)}</span>
+      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over || S.spectate ? '' : handBacks(n)}</span>
         <span>${g.over ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${setpp}</b>`}</span></div>
-      ${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
+      ${S.spectate && !g.over && n ? `<div class="open-hand">${g.hands[i].map(c => `<i class="oh ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>`).join('')}</div>` : ''}${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
   }
   const fieldsAll = g.log.filter(e => e.type === 'field');
   const dispRound = S.showRound ? g.round - 1 : g.round;
@@ -7323,7 +8067,7 @@ function renderGame0() {
   const flipped = !S.showRound && S.lastField !== g.round; if (!S.showRound) S.lastField = g.round;
   if (flipped) S.roundStart = Date.now() + (banner ? 2600 : 0);
   const fields = S.showRound ? fieldsAll.slice(0, -1) : fieldsAll; const prevF = fields.length >= 2 ? fields[fields.length - 2] : null;
-  const myTurn = cur === me && S.holdTurn == null && !g.over;
+  const myTurn = !S.spectate && cur === me && S.holdTurn == null && !g.over;
   const hand = g.hands[me];
   const selVals = S.sel.map(id => hand.find(c => c.id === id)).filter(Boolean).map(c => c.v);
   let prev = '';
@@ -7347,7 +8091,7 @@ function renderGame0() {
     <div class="center">
       <div class="side deckside"><div class="deck" aria-label="山札 ${g.deck.length}枚">${'<i></i>'.repeat(Math.min(5, Math.ceil(g.deck.length / 6)))}<b class="tnum">${g.deck.length}</b></div><span>山札</span><span>捨て札 ${g.discard.length}</span></div>
       <div class="pilecol"><div class="pile"><div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${dispRound}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>${flipped ? `<div class="round-pop" style="--rp-delay:${S.settings.speed === 'instant' ? 0 : (S.settings.speed === 'fast' ? 0.85 : S.settings.speed === 'slow' ? 1.5 : 1.15) + (banner ? 2.6 : 0)}s">第${dispRound}巡</div>` : ''}</div>${fieldMiniHTML(g, flipped)}</div>
-      ${cmHTML() || `<div class="side r"><span>手番</span><b>${g.over ? '終了' : esc(nm(g.players[cur]))}</b><span>${g.over ? '' : S.thinking === cur ? '考え中…' : cur === me ? 'あなたの番です' : ''}</span></div>`}
+      ${cmHTML() || `<div class="side r"><span>手番</span><b>${g.over ? '終了' : esc(nm(g.players[cur]))}</b><span>${g.over ? '' : S.thinking === cur ? '考え中…' : cur === me && !S.spectate ? 'あなたの番です' : ''}</span></div>`}
     </div>
     ${orderStripHTML(g, me)}
     ${S.winShow ? winStripHTML(g, me) : ''}
@@ -7425,7 +8169,7 @@ function orderStripHTML(g, me) {
     const done = g.over || held || k < g.pos;
     const st = cur === i ? (S.thinking === i ? 'now thinking' : 'now') : done ? 'done' : '';
     const res = '';
-    return `${k ? '<span class="arr">→</span>' : ''}<span class="os ${st} ${i === me ? 'meos' : ''}">${k === 0 ? dealerChip('dbtn inline') : ''}${esc(i === me ? 'あなた' : nm(p))}${res}</span>`;
+    return `${k ? '<span class="arr">→</span>' : ''}<span class="os ${st} ${i === me ? 'meos' : ''}">${k === 0 ? dealerChip('dbtn inline') : ''}${esc(i === me && !S.spectate ? 'あなた' : nm(p))}${res}</span>`;
   }).join('')}</div>`;
 }
 function renderSide() {
@@ -7440,7 +8184,7 @@ function renderSide() {
     else if (e.type === 'draw') lines.push(`<div class="muted">${esc(nm(g.players[e.p]))}：引いた（残${e.left}）</div>`);
     else if (e.type === 'reshuffle') lines.push(`<div class="muted">捨て札を切り直して山札に</div>`);
   }
-  $('#unseenpanel').innerHTML = `<div><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button>
+  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button></div>
     ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>`;
   renderPrev();
   $('#sidepanel').innerHTML = `<div><div class="lbl" style="margin-bottom:4px">記録</div><div class="log" id="log">${lines.join('')}</div></div>`;
@@ -7617,10 +8361,12 @@ function recordDecision(move) {
   let loss = Math.max(0, best.score - mine.score);
   // 表示される数字（目的・上がる確率・期待PP）で最善手が上回っていなければ、端数の差は同じ扱い＝最善とする
   if (loss > 0 && visTie(best, mine)) loss = 0;
-  // 捨て身が最善の場面で上がった：損失は目的（セット期待点など）の差で数える
-  if (sutemi && isOutEv(mine)) loss = Math.max(loss, (sutemi.bestGoal - sutemi.outGoal) / goalMax);
+  // 捨て身（あえて上がらない）が最善の場面で上がった：上がりは最善として扱う（疑問手にしない）。
+  // ただし「攻めるなら捨て身もあった」ことは、あとで博士・マサがひと言そえる（sutemi.outOk）
+  if (sutemi && isOutEv(mine)) { loss = 0; sutemi.outOk = true; }
   if (sutemi) sutemi.chose = mine === best;
-  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: mlabel(best), bestStats: best, mineStats: mine, loss, ppLoss: mine.pp - best.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+  const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
+  S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: mlabel(sutemi && sutemi.outOk ? mine : best0), bestStats: sutemi && sutemi.outOk ? mine : best0, mineStats: mine, loss, ppLoss: sutemi && sutemi.outOk ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -7771,7 +8517,11 @@ function sutemiIns(d) {
   const oppM = few ? '相手が小さい札しか持ってへん時は、捨て身もアリなんやで！' : '相手に札を引かせて、PPを積ませる作戦や！';
   return su.chose
     ? { id: 'sutemi', root: `見事な捨て身です。上がれる手を見送って、相手に札を抱えさせたまま続けました。上がると${gl}は${a}どまり、あえて引けば${b}。${oppR}`, masa: `上がれるのにあえて引いた！ 上がっても${gl}は${a}、引いて続けたら${b}や。逆転狙いの捨て身、しびれるで！` }
-    : { id: 'sutemi', root: `上がるのも自然な手ですが、ここは「あえて上がらない」のが最善でした。上がると${gl}は${a}どまり、あえて引いて続ければ${b}まで伸びます。${oppR}`, masa: `実はな、ここは上がらんのが正解やったんや！ 上がっても${gl}は${a}、引いて続けたら${b}。${oppM}` };
+    : (() => { // 上がったのは最善扱い。ただ「攻めるなら捨て身もあった」とひと言そえる
+      const g0 = G_(), badge = !((g0.cnt || {}).sutemi1 >= 1);
+      return { id: 'sutemi', root: `上がりは最善の判断です。ただ、攻めるなら「あえて上がらずに続ける」捨て身もありました。上がると${gl}は${a}、続ければ${b}まで伸びる見込みでした。${oppR}${badge ? '選んでいれば、バッジ「溜めと捨て身」の金も取れていました。' : ''}`,
+        masa: `上がったんは正解や、文句なし！ せやけど、今あがらんで攻めてたら${gl}は${a}から${b}まで伸びとったかもな！${badge ? '「溜めと捨て身」の金バッジももらえたのになー！' : oppM}` };
+    })();
 }
 function feedback(nd, g, me, drew) {
   if (g.over) { // 上がったあとでも、捨て身が最善だった場面はあとから解説する
@@ -7938,6 +8688,7 @@ function onGameOver() {
     const gm = KB.autoGame(pls, starterFor(t, T.game));
     pls.forEach((p, i) => { T.setPP[p.id].push(gm.pp[i]); T.totPP[p.id] += gm.pp[i]; });
   });
+  if (S.spectate) { winOverlay(watchGameSummary); if (S.settings.speed !== 'instant') { const gn = S.gameNo; setTimeout(() => { if (S.spectate && S.winShow && S.gameNo === gn) act('win-ok'); }, 4200); } return; } // 観戦：記録は残さず、感想へ
   // セットの総括用に、このゲームの要点を残す
   {
     const ds = S.decisions, lk = luckInfo(g, me0());
@@ -8414,6 +9165,7 @@ function rvGameFacts() {
   const g = S.game, me = g.players.findIndex(p => p.human), all = S.decisions || [], ds = all.filter(d => !d.viewedHint);
   const f = { pp: g.pp[me], won: g.winner === me, n: g.n, rank: g.pp.filter(x => x < g.pp[me]).length + 1, nDec: ds.length, nBest: ds.filter(d => d.loss <= 0.015).length, nGood: ds.filter(d => d.loss <= 0.05).length, nHint: all.length - ds.length, round: g.round, kind: S.T && S.T.cfg.kind };
   let run = 0, best = 0; ds.forEach(d => { if (d.loss <= 0.015) { run++; best = Math.max(best, run); } else run = 0; }); f.run = best;
+  if (g.kanataOn) { const k = g.kanataIdx; f.kanata = { round: g.kanataAt, won: g.winner === k, beat: g.pp[me] < g.pp[k] || f.won }; }
   // 分かれ道を損の大きい順に3つまで。最善手と自分の手で、残る形も比べる
   f.misses = ds.filter(d => d.loss > 0.03).sort((a, b) => b.loss - a.loss).slice(0, 3).map(d => {
     let gf = null; try { gf = gapFact(d); } catch (e) { }
@@ -8483,7 +9235,13 @@ const MASA_NETA = {
   // 待つ・こらえる場面（あえて引く・あえて1枚・捨て身）
   goodWait: ['ナッツ持ってじっくり待った、ええスロープレイや！', 'ポットオッズ計算して正しくコールしたプロの判断や！', 'ボール回して相手を動かしてから仕掛ける、大人のサッカーや！', 'あわてて打たんと、ええタイミングまで溜めたな！'],
   bad: ['キーパーと1対1で外したようなもんや！', 'ポケットエース持ってフォールドしたようなもんやで！', 'オフサイドトラップに見事にかかったな〜！', 'リバーで余計なコールしてもうたパターンや！', '自陣でのバックパス、危なっかしいで〜！', 'ティルトしとらんか？深呼吸や！'],
+  // 外し方の種類に合うたとえ：出せたのに引いた（＝降りた）／引くべきところで出した（＝余計に勝負した）／出す手の選び違い
+  badDraw: ['ポケットエース持ってフォールドしたようなもんやで！', 'シュートチャンスでバックパスや、もったいない！', 'ええ手で降りてもうたな、ポーカーやったら泣くとこや！'],
+  badPlay: ['リバーで余計なコールしてもうたパターンや！', '慌ててシュート打って、カウンター食らうパターンや！', '待つとこで勝負に行ってもうたな、ここは我慢やったで！'],
+  badPick: ['キーパーと1対1で外したようなもんや！', 'オフサイドトラップに見事にかかったな〜！', 'パスの出し先、ちょっとズレとったな！', 'ティルトしとらんか？深呼吸や！'],
   // 判断は良かったのに結果が出なかったとき（結果より判断をたたえ、気持ちを前に向ける）
+  // 判断にも課題が残った負け（「内容で負けたとは限らん」は使わない）
+  losePoor: ['ポーカーでも負けたハンドから学ぶのが本物のプロや。', 'アウェーの洗礼やな。次はホームで取り返そ！', 'チップは減っても、席に座っとる限りチャンスはあるで！'],
   goodLose: ['確率どおりに打てとるなら、結果は気にせんでええで！ポーカーのプロはそこしか見とらん！', '気を取り直して前に進むのみや！ええシュート打ち続けとったら、ゴールは必ず来る！', '正しいコールで負けるのもポーカーや。判断は胸張ってええで！', '内容で押しとった試合や。スコアは気にせんと、次のキックオフや！'],
   luckBad: ['バッドビートや！ポーカーやったら卓叩いてもええレベルや！', 'ポストに3回当たる日もあるんや、気にせんとこ！', 'リバーで逆転されるのもポーカーや。内容は勝っとったで！', '審判が見とらんかっただけや、内容は勝ちや！'],
   luckGood: ['ラッキーゴールもゴールはゴールや！でも次も入るとは限らんで！', 'ガットショットが刺さったな！せやけど毎回は来えへんで！', 'オウンゴールでもらった1点みたいなもんやな！', 'ランナーランナーで完成したみたいなもんや、反省会は必要やで！'],
@@ -8501,8 +9259,9 @@ const ROOT_NETA = {
   tend: ['誤りにも規則性があります。規則性が見えれば、直し方も見えてきます。', 'つまずく場所が分かったのは収穫です。問題が分かれば、半分は解けたも同然です。'],
   flow: ['数列の増減を見るように、判断の質の推移を眺めてみましょう。']
 };
-function rvNeta(who, k) { const T = who === 'root' ? ROOT_NETA : MASA_NETA, a = T[k] || (/^good/.test(k) ? T.good : null); return a ? RVP(a) : ''; }
+function rvNeta(who, k) { const T = who === 'root' ? ROOT_NETA : MASA_NETA, a = T[k] || (/^good/.test(k) ? T.good : /^bad/.test(k) ? T.bad : null); return a ? RVP(a) : ''; }
 // 名場面の種類に合うたとえの棚（速攻にスロープレイ、のような食い違いを防ぐ）
+const rvBadNeta = w => w.mine === 'あえて引く' ? 'badDraw' : w.best === 'あえて引く' ? 'badPlay' : 'badPick';
 const rvGoodNeta = k => k === 'defend' ? 'defend' : ['fast', 'three', 'run'].includes(k) ? 'goodFast' : ['aete', 'one', 'sutemi'].includes(k) ? 'goodWait' : 'good';
 // 判断の質（結果とは別に見る）：good=確率どおりに打てた / poor=最善が半分未満 / mid / none=選ぶ場面なし
 const rvQual = (n, b, g) => !n ? 'none' : (b / n >= 0.75 || (g / n >= 0.85 && b / n >= 0.5)) ? 'good' : b / n < 0.5 ? 'poor' : 'mid';
@@ -8520,7 +9279,7 @@ function rvGameSolo(who) {
   else if (f.won) B(`${nmY}の上がりです。PP0。最善を外した手もいくつかあったので、そこは結果と切り離して振り返りましょう。`, `${nmY}、上がりや！PP0！外した手もちょっとあったから、そこは振り返っとこな！`);
   else if (q === 'good') B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : '') + (f.luck === 'resultUnlucky' ? '' : '結果は伴いませんでしたが、判断は確率に沿っていました。大事なのはそちらです。'), RVP([`${nmY}、PP${f.pp}の${f.rank}位や。せやけど判断はしっかりしとった、結果は気にせんでええで！`, `PP${f.pp}で${f.n}人中${f.rank}位か。点は取られたけど、打ち方は間違うてへん。気を取り直して前に進むのみや！`]) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられたんは、巡り合わせや。` : ''));
   else B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : ''), (f.pp >= 25 ? RVP([`PP${f.pp}か〜、${nmY}、今回は大量失点やな…`, `うわ〜PP${f.pp}、ゴール前でボコボコにされたな${nmY}！`]) : RVP([`PP${f.pp}で${f.n}人中${f.rank}位やな。`, `${nmY}、PP${f.pp}の${f.rank}位や。`])) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられてもうた。` : ''));
-  if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : 'lose')); }
+  if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : 'lose')); }
   if (f.beatStar) B('★5の達人がいる卓での上がりです。価値ある一勝ですね。', 'しかも★5の達人がおる卓で上がったんやで！ジャイアントキリングや！');
   if (f.nDec) B(`選択肢のあった${f.nDec}回のうち、最善手は${f.nBest}回${f.nGood > f.nBest ? `、好手まで含めると${f.nGood}回` : ''}でした。${f.nHint ? `（AIの読みを見た${f.nHint}回は数えていません）` : ''}`, `最善手は${f.nDec}回中${f.nBest}回${f.nGood > f.nBest ? `、好手入れたら${f.nGood}回` : ''}や！${f.nBest === f.nDec && f.nDec >= 2 ? 'ハットトリックどころの騒ぎやないで！' : ''}`);
   else B('今回は選択の余地がない局面が続きました。', '今回は選ぶとこがほとんどなかったな！配られたカードで勝負するしかない日もあるんや。');
@@ -8549,7 +9308,7 @@ function rvGameSolo(who) {
       fast: `${pre}、第${f.round}巡という早い上がりです。序盤から無駄なく札を減らせていました。`
     }[h.k];
     const M = {
-      sutemi: `${preM}第${h.round}巡、上がれるのに上がらんかったやろ！捨て身や！`, aete: `${preM}第${h.round}巡、出せるのにあえて引いた我慢、しびれたで！`, divParen: `${preM}第${h.round}巡の「${h.mine}」、かっこ付きの割り算や！`, div: `${preM}第${h.round}巡の「${h.mine}」、割り算きれいに決めたな！`, three: `${preM}第${h.round}巡の「${h.mine}」、重い札まとめて3枚や！`, one: `${preM}第${h.round}巡、あえて1枚だけの「${h.mine}」！渋い！`, defend: `${preM}第${h.round}巡、相手リーチの場面で「${h.mine}」、ようしのいだ！`, perfect: `${preM}判断ぜんぶ最善やて！？パーフェクトゲームや！`, run: `${preM}最善手${f.run}連続や！流れ掴んどったで！`, fast: `${preM}第${f.round}巡で上がりや！速攻カウンターやな！`
+      sutemi: `${preM}第${h.round}巡、上がれるのに上がらんかったやろ！捨て身や！`, aete: `${preM}第${h.round}巡、出せるのにあえて引いた我慢、しびれたで！`, divParen: `${preM}第${h.round}巡の「${h.mine}」、かっこ付きの割り算や！`, div: `${preM}第${h.round}巡の「${h.mine}」、割り算きれいに決めたな！`, three: `${preM}第${h.round}巡の「${h.mine}」、重い札まとめて3枚や！`, one: `${preM}第${h.round}巡、あえて1枚だけの「${h.mine}」！渋い！`, defend: `${preM}第${h.round}巡、相手リーチの場面で「${h.mine}」、失点を抑える最善手や！ナイスディフェンス！`, perfect: `${preM}判断ぜんぶ最善やて！？パーフェクトゲームや！`, run: `${preM}最善手${f.run}連続や！流れ掴んどったで！`, fast: `${preM}第${f.round}巡で上がりや！速攻カウンターやな！`
     }[h.k];
     B(R, M); if (i === 0) N(rvGoodNeta(h.k));
   });
@@ -8560,7 +9319,7 @@ function rvGameSolo(who) {
     const rHead = i === 0 ? RVP([`一番差がついたのは第${w.round}巡、場${w.t}で「${w.mine}」を選んだ場面です。`, `最大の分かれ道は第${w.round}巡、場${w.t}です。選んだのは「${w.mine}」でした。`]) : RVP([`次に差がついたのは第${w.round}巡、場${w.t}の「${w.mine}」です。`, `第${w.round}巡、場${w.t}の「${w.mine}」も惜しい判断でした。`]);
     const mHead = i === 0 ? RVP([`せやけど第${w.round}巡、場${w.t}で「${w.mine}」はなんでやねん！`, `一番言いたいのはここや。第${w.round}巡の場${w.t}、「${w.mine}」はちゃうやろ〜！`]) : RVP([`ほんで第${w.round}巡の「${w.mine}」もな！`, `第${w.round}巡、場${w.t}の「${w.mine}」もツッコませて！`]);
     B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
-    if (i === 0) N('bad');
+    if (i === 0) N(rvBadNeta(w));
   });
   if (!f.misses.length && f.nDec >= 2) B('大きく外した手はなく、判断は安定していました。', '大きなミスはなしや。ええディフェンスやったで！');
   sec = 'danger'; // 5. 相手の動き
@@ -8586,6 +9345,12 @@ function rvGameSolo(who) {
     if (Math.abs(d) >= 0.15) B(`直近${rc.games}ゲームの最善率${Math.round(rc.rate * 100)}%と比べると、今回は${Math.round(now * 100)}%。${d > 0 ? 'いつもより冴えていました。' : '今回は少し崩れました。'}`, `いつもの最善率${Math.round(rc.rate * 100)}%に対して今回${Math.round(now * 100)}%や。${d > 0 ? '絶好調やな！' : '今日はちょっと調子悪かったな。'}`);
     if (rc.weak && f.missCats[rc.weak.k]) B(`「${rc.weak.label}」は、最近の苦手な場面でもあります（外す割合${Math.round(rc.weak.bad * 100)}%）。今回も同じところで外しています。`, `「${rc.weak.label}」は最近ずっと苦手やねん（外す割合${Math.round(rc.weak.bad * 100)}%）。今回もそこや！`);
     else if (rc.weak && !f.missCats[rc.weak.k] && f.nDec >= 4) B(`最近の苦手だった「${rc.weak.label}」では、今回は外していません。克服が進んでいます。`, `最近苦手やった「${rc.weak.label}」、今回はノーミスや！克服してきとるで！`);
+  }
+  sec = 'kanata'; // 奥義「絶対透視」が発動したゲーム：上がりより、被害をどこまで抑えたか
+  if (f.kanata) {
+    const K = f.kanata;
+    if (f.won) B(`第${K.round}巡にカナタの「絶対透視」が発動したゲームで、上がり切りました。すべてを見通す相手より先に上がるのは、確率の上では大きな番狂わせです。`, `カナタの絶対透視が出たゲームで上がったやて！？ 全部見えとる相手からゴール奪うて、ジャイアントキリングや！`);
+    else B(`第${K.round}巡にカナタの「絶対透視」が発動しました。上がりの可能性は残っていますが、カナタが先に上がる確率は大きく上がります。上がりを狙いつつ、上がられたときに備えて大きい札から処分しておくのが有力です。PP${f.pp}${f.pp <= 15 ? 'は、よく抑えました' : 'でした。大きい札から先に処分しておくと、上がられたときの被害を小さくできます'}。`, `第${K.round}巡でカナタの絶対透視や！ まだゴールは狙えるけど、カナタに先に決められる確率はグンと上がるんや。守備も固めながらやで。PP${f.pp}${f.pp <= 15 ? '、ようしのいだで！' : '、でかい札から先に逃がしとこな！'}`);
   }
   sec = 'luck'; // 8. 運と実力
   if (f.missHit) { B(`第${f.missHit.round}巡で最善を外して残した${f.missHit.card}が、最後の「${f.missHit.e}」に使われました。結果には助けられましたが、その手自体は最善ではありません。`, `第${f.missHit.round}巡で残した${f.missHit.card}が、最後の「${f.missHit.e}」にハマったんや！ミスが結果オーライやな〜。`); N(rt ? 'luck' : 'luckGood'); }
@@ -8634,7 +9399,7 @@ function rvSetSolo(who) {
   const sq = rvQual(nDec, nBest, nGood), top1 = c.rank === 1 || c.finalRank === 1;
   if (top1 && sq === 'poor') B('ただ、最善を外した手も多く、順位には運の後押しもありました。結果と判断は分けて振り返りましょう。', `…せやけど最善外した手も多いで。運も実力のうちやからな！中身はここから伸ばそ！`);
   else if (!top1 && sq === 'good') B('順位は伸びませんでしたが、判断は確率に沿っていました。結果はばらつきます。大事なのは、選び方が正しかったかどうかです。', `せやけど判断はしっかり確率どおりや。結果は気にせんでええで！`);
-  if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : 'lose'));
+  if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose'));
   if (!nDec) B(`上がりは${wins}回。採点の対象になる判断はありませんでした。`, `上がり${wins}回や！採点する場面はなかったけど、結果は結果や！`); else B(`上がりは${wins}回、判断は${nDec}回中${nBest}回が最善${nGood > nBest ? `、好手まで含めると${nGood}回` : ''}です${nDec ? `（最善率${Math.round(nBest / nDec * 100)}%）` : ''}。`, `上がり${wins}回、最善手は${nDec}回中${nBest}回やで！`);
   sec = 'games'; // 2. ゲームごとの一言
   if (Lg.length) {
@@ -8675,7 +9440,7 @@ function rvSetSolo(who) {
   if (top) {
     const where = top.round ? `第${top.game}ゲーム第${top.round}巡の` : `第${top.game}ゲームの`;
     const rTxt = { perfect: `${where}全手最善は見事でした。`, sutemi: `${where}上がりを見送った捨て身は、このセットの白眉です。`, divParen: `${where}「${top.mine}」、かっこ付きの割り算は見事でした。`, run: `${where}最善手の連続は、判断の安定を示しています。`, fast: `${where}速い上がりは、序盤の札の減らし方が良かった証拠です。`, aete: `${where}あえて引いた判断は、目先にとらわれない好判断でした。`, one: `${where}あえて1枚だけ出した判断は、気づきにくい好手です。`, div: `${where}「${top.mine}」の割り算は最善でした。`, defend: `${where}相手が残り少ない場面での「${top.mine}」は、失点を抑える最善手でした。`, three: `${where}「${top.mine}」で重い札をまとめて処分できました。` }[top.k];
-    const mTxt = { perfect: `${where}判断ぜんぶ最善、パーフェクトゲームや！`, sutemi: `${where}捨て身、上がれるのに見送ったやつ！しびれたで！`, divParen: `${where}「${top.mine}」、かっこ割り算や！`, run: `${where}最善の連続、流れ掴んどったな！`, fast: `${where}速攻の上がり、カウンター決まったな！`, aete: `${where}あえて引いた我慢、ええ判断やったで！`, one: `${where}あえて1枚、渋すぎるで！`, div: `${where}「${top.mine}」、割り算きれいに決めたな！`, defend: `${where}相手リーチをしのいだ「${top.mine}」、ナイスセーブや！`, three: `${where}「${top.mine}」で重い札まとめて処分、ナイスや！` }[top.k];
+    const mTxt = { perfect: `${where}判断ぜんぶ最善、パーフェクトゲームや！`, sutemi: `${where}捨て身、上がれるのに見送ったやつ！しびれたで！`, divParen: `${where}「${top.mine}」、かっこ割り算や！`, run: `${where}最善の連続、流れ掴んどったな！`, fast: `${where}速攻の上がり、カウンター決まったな！`, aete: `${where}あえて引いた我慢、ええ判断やったで！`, one: `${where}あえて1枚、渋すぎるで！`, div: `${where}「${top.mine}」、割り算きれいに決めたな！`, defend: `${where}相手リーチの場面で「${top.mine}」、失点を抑えるナイスディフェンスや！`, three: `${where}「${top.mine}」で重い札まとめて処分、ナイスや！` }[top.k];
     B(rTxt, mTxt); N(rvGoodNeta(top.k));
     sec = 'hlMore'; if (nSut || nAete) B(`このセットでは、${nSut ? `上がりを見送る捨て身の最善が${nSut}回` : ''}${nSut && nAete ? '、' : ''}${nAete ? `出せるのにあえて引く最善が${nAete}回` : ''}ありました。目先の1枚にとらわれない判断ができています。`, `${nSut ? `捨て身${nSut}回` : ''}${nSut && nAete ? '、' : ''}${nAete ? `あえて引く${nAete}回` : ''}、我慢のできる打ち手になってきたな！`);
   }
@@ -8686,7 +9451,7 @@ function rvSetSolo(who) {
     const why = rvWhy(w, who);
     B((i ? `次に大きかったのは第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」です。` : `最も差がついたのは第${w.game}ゲーム第${w.round}巡、場${w.t}で「${w.mine}」を選んだ場面です。`) + (w.gf ? w.gf.root : `最善は「${w.best}」でした。`) + why,
       (i ? `ほんで第${w.game}ゲーム第${w.round}巡の「${w.mine}」もな！` : `せやけど第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」はなんでやねん！`) + (w.gf ? w.gf.masa : `「${w.best}」やろ！`) + why);
-    if (i === 0) N('bad');
+    if (i === 0) N(rvBadNeta(w));
   });
   sec = 'tend'; // 6. 傾向とクセ（セット全体）、最近の自分との比較
   const mc = {}; F.forEach(f => f && Object.entries(f.missCats || {}).forEach(([k, n]) => mc[k] = (mc[k] || 0) + n));
@@ -8783,7 +9548,7 @@ function endSet() {
   go('set-end');
 }
 function standingsSorted(T) {
-  return T.players.slice().sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
+  return T.players.filter(p => !p.seed).sort((a, b) => T.points[b.id] - T.points[a.id] || T.totPP[a.id] - T.totPP[b.id] || T.tb[a.id] - T.tb[b.id] || a.id - b.id);
 }
 function myStanding() {
   const T = S.T; const s = standingsSorted(T); const i = s.findIndex(p => p.id === 0);
@@ -8858,10 +9623,11 @@ function openingHTML() {
     ['root', `計算ブリッジ大会へようこそ。今日は${c.nPlayers}名が集まりました。予選${c.sets}セットを戦い抜いて、決勝へ進めるのは上位${c.finalists}名だけです。`],
     ['masa', `${c.nPlayers}人で${c.finalists}枠の取り合いや！席替えしながらの長丁場、最後まで目ぇ離されへんで！ほな、キックオフや！`]
   ];
+  if (S.T && S.T.kanata) lines.push(['root', `それから、今日はシード選手が1名います。予選には出ず、決勝から登場する選手です。${S.T.kanataCut ? `決勝の席が1つ埋まるので、予選から進めるのは上位${c.finalists}名になります。` : `決勝は、予選の上位${c.finalists}名にシード選手を加えた${c.finalists + 1}名で戦います。`}`], ['masa', 'シードやて…誰が来るんや？ 正体は決勝までのお楽しみや！']);
   const step = 2.2;
   return `<div class="stage opening"><div class="spot"></div>
   <div class="stage-title">計算ブリッジ大会</div>
-  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝</div>
+  <div class="stage-sub">${c.nPlayers}名・${sizes.length}卓・予選${c.sets}セット（各${c.games}ゲーム）・上位${c.finalists}名が決勝${S.T && S.T.kanata ? '＋シード1名' : ''}</div>
   <div class="op-lines">${lines.map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.4 + i * step}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
   <div class="row" style="justify-content:center;gap:10px;margin-top:16px;position:relative">
     <button class="btn ghost" data-act="opening-skip">説明をすぐ表示</button>
@@ -8872,6 +9638,11 @@ function openingHTML() {
 function enterFinal() {
   const T = S.T; const s = standingsSorted(T);
   T.finalists = s.slice(0, T.cfg.finalists).map(p => p.id);
+  if (T.kanata) {
+    let k = T.players.find(p => p.seed);
+    if (!k) { const id = T.players.length; k = { id, human: false, level: 6, style: 'keisan', ch: KB.charToCh(KB.KANATA), clairvoyant: true, seed: true }; T.players.push(k); T.points[id] = 0; T.totPP[id] = 0; T.tb[id] = 0; }
+    T.finalists.push(k.id);
+  }
   saveSession();
   go('entrance');
   if (T.finalists.includes(0)) setTimeout(confetti, T.finalists.length * 550 + 300);
@@ -8881,10 +9652,11 @@ function entranceHTML() {
   const inF = T.finalists.includes(0);
   const myPre = s.findIndex(p => p.id === 0) + 1;
   const cards = T.finalists.map((id, i) => { const p = P(id); const st = p.human ? null : KB.style(p.style);
-    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">予選${i + 1}位</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${T.points[id]}点・PP ${T.totPP[id]}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
+    return `<div class="ent ${id === 0 ? 'me' : ''}" style="animation-delay:${0.4 + i * 0.55}s"><div class="ent-rank">${p.seed ? 'シード' : `予選${i + 1}位`}</div><div class="ent-av">${av(p, id === 0 ? 'happy' : (p.level >= 4 ? 'normal' : 'smug'))}</div><div class="ent-name">${esc(nm(p))}</div><div class="ent-meta">${p.seed ? '★6・予選免除' : `${T.points[id]}点・PP ${T.totPP[id]}`}</div>${st && S.settings.showStyle ? `<span class="chip stchip" style="background:${esc(st.color)}">${esc(st.label)}</span>` : ''}${p.human ? '<span class="chip lvchip">あなた</span>' : ''}</div>`; }).join('');
   return `<div class="stage"><div class="spot"></div>
   <div class="stage-title">${inF ? '決勝進出者、入場！' : '決勝進出者'}</div>
   <div class="stage-sub">${inF ? `あなたは予選${myPre}位で決勝へ。決勝は1セット（${T.cfg.games}ゲーム）のPPだけで順位が決まります。` : `あなたは予選${myPre}位で惜しくも敗退。決勝の行方を見届けましょう。`}</div>
+  ${T.kanata ? `<div class="op-lines kanata-ent">${[['root', 'そして最後に、シード選手の入場です。計算ブリッジ倶楽部の初代チャンピオン、★6「卓の彼方を視る者」カナタさん。予選を免除されて、決勝から登場します。'], ['masa', '出たで、伝説のカナタや！奥義「絶対透視」は、第2巡か第3巡に、全員の手札も山札の底まで見通すんや。ほんで、ゲームごとに出るか出えへんかは五分五分。出たら先に上がられる確率がグンと上がるで！'], ['root', '絶対透視が出ても、こちらが上がれないわけではありません。上がりを狙いつつ、上がられたときの失点に備えて、大きい札から処分していきましょう。']].map(([who, txt], i) => `<div class="op-line ${who}" style="animation-delay:${0.6 + T.finalists.length * 0.55 + i * 1.6}s"><div class="cm-av">${KB.casterSVG(who, who === 'masa' ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>` : ''}
   <div class="ent-row">${cards}</div>
   <div class="row" style="justify-content:center;margin-top:18px"><button class="btn primary" data-act="start-final" style="min-width:220px">${inF ? '決勝戦をはじめる' : '決勝の結果を見る'}</button></div></div>
   <details class="panel" style="margin-top:14px"><summary class="lbl" style="cursor:pointer">予選の最終順位を見る</summary>${standingsHTML(T)}</details>`;
@@ -8905,7 +9677,7 @@ function startFinal() {
   const T = S.T; T.phase = 'final'; T.set = 1; T.game = 1; T.finalPP = {}; S.T.setLog = []; T.setT0 = Date.now(); T.pbSnap = rvSnap();
   T.finalists.forEach(id => T.finalPP[id] = 0);
   seatSet(T);
-  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; startGame(); return; }
+  if (T.finalists.includes(0)) { const why = tourNoBadge(T); if (!why) { bump('qualify'); aimReward(T); if (['strong', 'master'].includes(T.cfg.mix)) setMax('qualify_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`決勝進出！ ただし${why}、大会のバッジは対象外です`), 1200); T.setFouls = 0; T.setHinted = false; startGame(); return; }
   // 観戦：全ゲーム自動
   const pls = T.tables[0].map(id => P(id));
   for (let gI = 0; gI < T.cfg.games; gI++) { const gm = KB.autoGame(pls, starterFor(T.tables[0], gI + 1)); pls.forEach((p, i) => { T.setPP[p.id].push(gm.pp[i]); T.finalPP[p.id] += gm.pp[i]; }); }
@@ -8920,7 +9692,7 @@ function finalResult() {
   while (i < ids.length) { let j = i; while (j + 1 < ids.length && T.finalPP[ids[j + 1]] === T.finalPP[ids[i]]) j++; groups.push(ids.slice(i, j + 1)); i = j + 1; }
   const order = [];
   const nextGroup = k => {
-    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
+    if (k >= groups.length) { T.finalOrder = order; T.done = true; store.del('session'); if (!T.statDone) { T.statDone = true; stat('tDone'); } if (badgeElig(T).tour) bump('tour_done'); if (order[0] === 0) { const why = tourNoBadge(T); if (!why) { bump('champion'); if (T.kanataClear) bump('toushi'); if (['strong', 'master'].includes(T.cfg.mix)) setMax('champion_strong', T.cfg.mix === 'master' ? 2 : 1); } else setTimeout(() => toast(`優勝！ ただし${why}、大会のバッジは対象外です`), 1500); } /* 参加15人以上の大会のみ */ go('result'); return; }
     const g = groups[k];
     if (g.length === 1) { order.push(g[0]); nextGroup(k + 1); return; }
     resolveTie(g, `決勝 ${order.length + 1}位決定戦`, 1, o => { order.push(...o); nextGroup(k + 1); });
@@ -9035,14 +9807,90 @@ function charProfile(id) {
   const inGame = S.view === 'game', showLv = !inGame || S.settings.showLevel || (S.T && S.T.revealAll), showSt = !inGame || S.settings.showStyle || (S.T && S.T.revealAll);
   const stl = KB.getStrategy().styles.find(x => x.id === c.st) || {};
   const say = c.lv >= 4 ? (c.idle || []).slice(0, 3) : c.idle ? c.idle.slice(0, 2) : [];
-  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(5 - c.lv) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
+  modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(Math.max(0, 5 - c.lv)) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
     <p style="margin:0">${esc(c.prof || '')}</p>
     ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
+// ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
+// 段取りより衝動を伝える。短く、事実だけ
+const STORY = [
+  '2026年10月25日、第4回計算ブリッジ・日本一決定戦。息子と初めて出て、ふたりとも決勝に行けずに惨敗しました。正直、なめてました。',
+  '悔しかったので、特訓用のアプリを作りはじめました。AI（Claude）に「こういう特訓用アプリを作ってくれ」と言っては試し、また言っては試し。息子が飽きないように、遊びも入れて。',
+  '特訓のつもりが、思いのほか遊べるものになったので、みなさんにも遊んでもらうことにしました。'
+];
+// ---------- 数字で見る計算ブリッジ（数字になったものの意味を見せる：期待PP・平均PP・順番の有利・決勝や優勝の確率） ----------
+let NUMS = null;
+// 大会の決勝進出と優勝の確率（estimateQualify と同じ考え方で、決勝の1セットまで続ける）
+function estimateTour(cfg, myMu, N) {
+  const n = cfg.nPlayers, sizes = KB.splitTables(n, 5), W = MIX[cfg.mix].w, tw = W.reduce((a, b) => a + b, 0);
+  const pick = () => { let x = KB.rand() * tw; for (let i = 0; i < 5; i++) { x -= W[i]; if (x <= 0) return i + 1; } return 5; };
+  const draw = m => Math.max(0, m[0] * cfg.games + KB.gauss() * m[1] * Math.sqrt(cfg.games));
+  let q = 0, w = 0;
+  for (let it = 0; it < N; it++) {
+    const mus = [[myMu, 9.0]]; for (let i = 1; i < n; i++) mus.push(LV_PP[pick()]);
+    const pts = new Array(n).fill(0), pp = new Array(n).fill(0);
+    for (let s = 0; s < cfg.sets; s++) { const ids = KB.shuffle([...Array(n).keys()]); let k = 0; for (const z of sizes) { const v = ids.slice(k, k + z).map(id => { const x = draw(mus[id]); pp[id] += x; return { id, x }; }).sort((a, b) => a.x - b.x); k += z; v.forEach((o, i) => { pts[o.id] += cfg.points[i] || 0; }); } }
+    const order = [...Array(n).keys()].sort((a, b) => pts[b] - pts[a] || pp[a] - pp[b]), fin = order.slice(0, cfg.finalists);
+    if (!fin.includes(0)) continue;
+    q++;
+    const fx = fin.map(id => ({ id, x: draw(mus[id]) })).sort((a, b) => a.x - b.x);
+    if (fx[0].id === 0) w++;
+  }
+  return { q: q / N, w: w / N };
+}
+function numbersData() {
+  if (NUMS) return NUMS;
+  // 順番の有利不利と、1ゲームの長さ：★3どうしの4人卓をAIだけで打たせて数える
+  const G = 3000, pos = [0, 0, 0, 0]; let rounds = 0, none = 0, losePP = 0, loseN = 0;
+  for (let i = 0; i < G; i++) {
+    const g = KB.autoGame([1, 2, 3, 4].map(id => ({ id, human: false, level: 3, style: 'keisan' })), i % 4);
+    if (g.winner >= 0) { pos[g.order.indexOf(g.winner)]++; rounds += g.round; } else none++;
+    g.pp.forEach((x, k) => { if (k !== g.winner) { losePP += x; loseN++; } });
+  }
+  const won = G - none;
+  // 3枚の待ち
+  const men = vals => { const c = KB.countsOf(vals); let n = 0; for (let t = 1; t <= 13; t++) if (KB.findMoves(c, t, 'all', 3).some(m => m.n === vals.length)) n++; return n; };
+  const tri = []; for (let a = 1; a <= 13; a++) for (let b = a; b <= 13; b++) for (let c = b; c <= 13; c++) tri.push({ v: [a, b, c], n: men([a, b, c]) });
+  const hist = {}; tri.forEach(x => hist[x.n] = (hist[x.n] || 0) + 1); tri.sort((x, y) => y.n - x.n);
+  // 大会（初期設定）の決勝進出・優勝の確率
+  const cfg = { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, mix: 'random' };
+  const tour = PLAY_STYLES.map(p => Object.assign({ label: p.label, mu: p.mu }, estimateTour(cfg, p.mu, 3000)));
+  NUMS = { G, pos: pos.map(x => x / won), rounds: rounds / won, none: none / G, losePP: losePP / loseN, tri, hist, avgMen: tri.reduce((a, x) => a + x.n, 0) / tri.length, tour, cfg };
+  return NUMS;
+}
+function numbersHTML() {
+  const N = numbersData(), pc = x => Math.round(x * 100) + '%', f1 = x => (Math.round(x * 10) / 10).toFixed(1);
+  const bar = (label, v, max, txt, hi) => `<div class="nb-row wide ${hi ? 'hi' : ''}"><span>${label}</span><i style="width:${Math.max(3, Math.round(v / max * 100))}%"></i><b>${txt}</b></div>`;
+  const maxH = Math.max(...Object.values(N.hist));
+  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}</div>`;
+  const ps = PLAY_STYLES;
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">数字で見る計算ブリッジ</div><div></div></div>
+  <div class="story"><div class="story-hero"><div class="sh-t">数字で見る<br>計算ブリッジ</div><p class="small">勘を、数字にしてみました</p></div>
+  <div class="num-grid">
+    ${card('期待PP', '', '「このまま進んだら何点失うか」の見込み', 'たとえば期待PP 6.0 の手は、同じ場面を何度もくり返したら、平均で6点くらい失うという意味です。上がれた回は0点、上がられた回は残った札の合計。それを全部ならした数字です。「AIの読み」は、出せる手ごとにこの期待PPと上がれる確率を出して比べています。')}
+    ${card(f1(ps[0].mu), 'PP', '1ゲームの平均の失点（打ち方別）', `AIの最善手どおりに打つと、1ゲームの失点は平均${f1(ps[0].mu)}。★3相当の打ち方なら${f1(ps[2].mu)}。差は1ゲームでは${f1(ps[2].mu - ps[0].mu)}点でも、5ゲームの1セットなら約${Math.round((ps[2].mu - ps[0].mu) * 5)}点。順位がひっくり返る差です。`, `<div class="num-bars">${ps.map((p, i) => bar(p.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), p.mu, ps[2].mu, f1(p.mu), i === 0)).join('')}</div>`)}
+    ${card(pc(N.pos[0]), '', '親（1番手）の上がり率', `だれかが上がったら、その場で終わり。だから順番が大事です。★3どうしの4人卓を${N.G.toLocaleString('ja-JP')}ゲーム打たせると、上がった人のうち親が${pc(N.pos[0])}、4番手は${pc(N.pos[3])}。前のゲームで負けた人が親になるのは、ささやかな救済です。`, `<div class="num-bars">${['親（1番手）', '2番手', '3番手', '4番手'].map((l, i) => bar(l, N.pos[i], N.pos[0], pc(N.pos[i]), i === 0)).join('')}</div>`)}
+    ${card(f1(N.rounds), '巡', '上がりまでの平均', `ゲームは平均で第${f1(N.rounds)}巡に終わります。7枚の手札を4〜5回の手番で出し切る計算。1回の手番でおよそ2枚ずつ減らしていく速さが目安です。上がれずにいる人の失点は、平均${f1(N.losePP)}点でした。`)}
+    ${card(f1(N.avgMen), '面', '3枚の手札の、平均の待ち', `残り3枚になったとき、13種類の場のうち平均${f1(N.avgMen)}種類で上がれます。最強は <b>${N.tri[0].v.map(KB.vname).join('・')}</b> の${N.tri[0].n}面。弱い組は2面しかありません。残す札で、上がりやすさは何倍も変わります。`, `<div class="num-bars">${Object.keys(N.hist).map(Number).sort((a, b) => b - a).map(k => `<div class="nb-row"><span>${k}面</span><i style="width:${Math.max(2, Math.round(N.hist[k] / maxH * 100))}%"></i><b>${N.hist[k]}</b></div>`).join('')}</div><p class="small muted" style="margin:4px 0 0">面数ごとの組の数（全455通り）</p>`)}
+    ${card(pc(N.tour[0].w), '', '大会で優勝する確率（最善手どおりの場合）', `参加${N.cfg.nPlayers}人・予選${N.cfg.sets}セット・上位${N.cfg.finalists}人が決勝の大会で、AIの最善手どおりに打ち続けた場合の見込みです。決勝に進むだけなら${pc(N.tour[0].q)}。打ち方の差は、大会の結果にここまで響きます。`, `<div class="num-bars">${N.tour.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.w, N.tour[0].w, `${pc(t.w)}（決勝 ${pc(t.q)}）`, i === 0)).join('')}</div><p class="small muted" style="margin:4px 0 0">参加者の平均は優勝${pc(1 / N.cfg.nPlayers)}・決勝${pc(N.cfg.finalists / N.cfg.nPlayers)}</p>`)}
+  </div>
+  <p class="small muted" style="margin:0;padding:0 6px">※ 平均や確率は、このアプリのAIどうしの対戦と、その結果から作ったモデルで計算した見込みです。実際の大会の結果ではありません。</p>
+  <div class="op-lines story-cast">${[['root', '勘で打っていたところに、数字の裏づけがあると、迷いが減ります。'], ['masa', '数字は裏切らへん！でも1ゲームは運も大きいで。そこがおもろいんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button><button class="btn primary" data-go="home">ホームへ</button></div></div>`;
+}
+function storyHTML() {
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
+  <div class="story"><div class="story-hero"><div class="sh-t">悔しかったので、<br>作りました。</div><p class="small">計算ブリッジ作戦研究所（非公式ファン制作）</p></div>
+  <div class="story-text">${STORY.map((t, i) => `<p style="animation-delay:${0.15 + i * 0.25}s">${esc(t)}</p>`).join('')}</div>
+  <p class="small muted story-note">「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、キャラクターはすべてオリジナルです。</p>
+  <div class="op-lines story-cast">${[['masa', '要するに、負けず嫌いが止まらんかったっちゅうことや！'], ['root', 'くやしさは、いちばん強い学びの入り口です。']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
+}
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>
+  <div class="panel row" style="justify-content:space-between;gap:8px;flex-wrap:wrap;max-width:70ch"><span class="small">博士とマサが、例を使って3分でルールとコツを説明します。</span><button class="btn primary sm" data-act="tut-start">チュートリアルで学ぶ</button></div>
   <div class="panel stack" style="max-width:70ch">
   <p style="margin:0">${esc(RULES_TXT)}</p>
   <div><b>このアプリでの前提</b><ul class="small">
@@ -9075,7 +9923,7 @@ function modal(html) {
   bindModal(bg);
   bindTBNext();
 }
-function closeModal() { const m = $('#modal'); if (m) m.remove(); resumeGame(); }
+function closeModal() { const m = $('#modal'), ch = m && m.querySelector('.chart-modal'); if (m) m.remove(); resumeGame(); if (ch && S.view === 'game') renderGame(); else if (ch && S.view === 'home') render(); } // 早見表を閉じたら、ボタンの進み具合を更新
 // お知らせは下から積み上げる（バッジ・冠・アイテムのお知らせが重ならないように）
 function toastStack() { let st = document.getElementById('toast-stack'); if (!st) { st = document.createElement('div'); st.id = 'toast-stack'; document.body.appendChild(st); } return st; }
 function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; toastStack().appendChild(d); setTimeout(() => d.remove(), 2600); }
@@ -9198,14 +10046,14 @@ function act(a, el) {
     case 'discard-save': store.del('session'); render(); break;
     case 'show-stats': showStats(); break;
     case 'profiles': profileModal(); break;
-    case 'drill': S.drill = newDrill(); go('drill'); break;
+    case 'drill': { const again = S.view === 'drill'; S.drill = newDrill(); go('drill'); if (!again) outsIntro(); break; }
     case 'drill-next': drillNext(); break;
     case 'drill-submit': drillSubmit(); break;
     case 'drill-hint': S.drill.hint = true; render(); break;
     case 'new-profile': askName(true); break;
     case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
     case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }
@@ -9234,14 +10082,34 @@ function act(a, el) {
     case 'quit': if (S.attack) { modal(`<div class="stack"><h3 style="margin:0">アタックを中止しますか？</h3><p class="small muted" style="margin:0">中止すると、ここまでのBPで終了します。完走のバッジ（バッジアタックの系統）は数えません。</p><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="attack-abort">中止する</button></div></div>`); break; } clearTimeout(S.timer); S.game = null; S.tiebreak = null; go('home'); break;
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
+    case 'chart-open': chartOpen(); break;
+    case 'rank-tab': S.rankTab = el.dataset.k; render(); break;
+    case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
+    case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
+    case 'cloud-restore': { const v = (($('#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } cloudRestore(v); break; }
+    case 'watch-start': { closeModal(); const first = !store.get('watched', false); store.set('watched', true); watchStart(first); break; } // 初めての観戦は、強さも性格もそろった決まった顔ぶれ
+    case 'watch-first': closeModal(); watchStart(true); break;
+    case 'tut-start': tutStart(); break;
+    case 'tut-next': tutGo(1); break;
+    case 'tut-back': tutGo(-1); break;
+    case 'tut-end': closeModal(); S.tut = null; tutPlay(); break;
+    case 'tut-skip': tutBye('skip'); break;
+    case 'tut-later': S.tut = null; tutBye('later'); break;
+    case 'tut-close': closeModal(); S.tut = null; break;
+    case 'watch-next': watchNext(); break;
+    case 'watch-quit': closeModal(); watchEnd(); go('home'); break;
+    case 'watch-again': closeModal(); watchStart(); break;
+    case 'watch-play': closeModal(); watchEnd(); go('setup-practice'); break;
+    case 'chart-view': chartOpen(true); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
-    case 'hunt-card': { const H = S.hunt; if (!H || !H.started || H.over || H.blocked) break; const id = +el.dataset.id; if (H.sel.includes(id)) H.sel = H.sel.filter(x => x !== id); else if (H.sel.length < 3) H.sel.push(id); else break;
+    case 'hunt-go-aim': huntGo(true); break;
+    case 'hunt-card': { const H = S.hunt; if (!H || !H.started || H.over || H.blocked || H.auto) break; const id = +el.dataset.id; if (H.sel.includes(id)) H.sel = H.sel.filter(x => x !== id); else if (H.sel.length < 3) H.sel.push(id); else break;
       if (H.sel.length === 3) { const vals = H.sel.map(i => H.hand.find(c => c.id === i).v).sort((a, b) => a - b); if (!((ZK.byCombo[vals.join(',')] || {})[H.field.v] || []).length) { H.sel = H.sel.slice(); render(); huntPass(`${vals.map(KB.vname).join('・')} では ${KB.vname(H.field.v)} を作れない`); break; } }
       KB.sfx('select'); render(); break; }
-    case 'hunt-play': huntPlay(); break;
-    case 'hunt-pass': huntPass(); break;
+    case 'hunt-play': if (!(S.hunt && S.hunt.auto)) huntPlay(); break;
+    case 'hunt-pass': if (!(S.hunt && S.hunt.auto)) huntPass(); break;
     case 'hunt-quit': if (S.hunt && S.hunt.started && !S.hunt.over) huntFinish(true); else { clearInterval(S.huntTimer); S.hunt = null; go('home'); } break;
     case 'avatar-edit': S.avDraft = myAvatar(); avatarEditor(); break;
     case 'av-locked': { const key = el.dataset.k + ':' + el.dataset.v; KB.sfx('back'); toast(`🔒 ${avItemName(key)}：${avLockText(key)}で使えます`); break; }
@@ -9315,7 +10183,8 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+else if (CLOUD_ON) setTimeout(cloudInit, 100);
+window.KBAPP = { S, act, cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>

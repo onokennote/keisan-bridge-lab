@@ -11,8 +11,8 @@ const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // �
 const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } },
-  del(k) { try { localStorage.removeItem(k); } catch (e) { } }
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
+  del(k) { try { localStorage.removeItem(k); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); }
 };
 let PID = raw.get('kb.profile', null);
 const keyOf = k => PROFILE_KEYS[k] && PID ? 'kb.p.' + PID + '.' + k : 'kb.' + k;
@@ -376,7 +376,7 @@ function ctxFor(pIdx) {
 // アプリ更新の検知：プレイ中の画面にいたことを、ビルド番号と一緒に記録しておく
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
-function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 function render() {
   const app = $('#app');
   if (S.view === 'home') app.innerHTML = homeHTML();
@@ -397,6 +397,7 @@ function render() {
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
   else if (S.view === 'numbers') app.innerHTML = numbersHTML();
+  else if (S.view === 'ranking') { app.innerHTML = rankingHTML(); rankingLoad(); }
   bind();
 }
 
@@ -1166,6 +1167,105 @@ const IS_ARTIFACT = typeof location === 'undefined' || !/^https?:$/.test(locatio
 const APP_URL = IS_ARTIFACT ? ARTIFACT_URL : PUBLIC_URL;
 // 引っ越しボタン（アーティファクト版 → 公開版）を出すか。考案者の了承が取れて公開版を出したら true にする
 const MIGRATE_ON = false;
+// ---------- クラウド保存とランキング（公開版だけ。window.KB_CLOUD_API にAPIのURLが入っているとき） ----------
+// 記録の正本はクラウド。端末には控え（すぐ遊べるように）と、ログインの鍵だけを置く。引き継ぎコードで別の端末からも同じ記録に入れる
+const CLOUD_API = (typeof window !== 'undefined' && window.KB_CLOUD_API) || '';
+const CLOUD_ON = !IS_ARTIFACT && !!CLOUD_API;
+const CLOUD_KEEP = { 'kb.cloud': 1, 'kb.cloudAt': 1, 'kb.migDone': 1 }; // 同期しない・消さないもの
+const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false };
+function cloudDirty(k) { if (!CLOUD_ON || !k || CLOUD_KEEP[k] || k === 'kb.recentLines' || !k.startsWith('kb.')) return; CLOUD.dirty = true; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudPush, 4000); }
+async function cloudReq(a, body, keep) {
+  const r = await fetch(CLOUD_API + '?a=' + a, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), keepalive: !!keep });
+  const j = await r.json().catch(() => ({ ok: false, error: '通信エラー' }));
+  if (!j.ok) { const e = new Error(j.error || '通信エラー'); e.status = r.status; e.conflict = !!j.conflict; throw e; }
+  return j;
+}
+function cloudData() { const d = migCollect(); for (const k in CLOUD_KEEP) delete d[k]; return d; }
+// ランキング用の数字（プレイヤーごと）：推定実力・バッジ数とBP・バッジアタックの自己ベスト
+function cloudStats() {
+  return profiles().map(p => {
+    const g = raw.get('kb.p.' + p.id + '.growth', null) || { games: [], ach: {} }, r = g.games ? ratingOf(g.games) : { ok: false };
+    const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
+    const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
+    const avr = raw.get('kb.p.' + p.id + '.avatar', null);
+    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null };
+  });
+}
+// 変更があったときだけ送る（force は新規登録の直後など）
+async function cloudPush(keep, force) {
+  const c = raw.get('kb.cloud', null); if (!CLOUD_ON || !c || !c.token || CLOUD.busy || (!CLOUD.dirty && !force)) return;
+  CLOUD.dirty = false;
+  CLOUD.busy = true;
+  try { const at = Date.now(), base = raw.get('kb.cloudAt', 0) || 0; await cloudReq('save', { token: c.token, data: cloudData(), at, base, stats: cloudStats() }, keep); try { localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { } CLOUD.status = 'saved'; CLOUD.err = ''; }
+  catch (e) {
+    if (!e.conflict) CLOUD.dirty = true; // 送れなかった変更は次に送る
+    if (e.conflict) { CLOUD.busy = false; return keep ? null : cloudPull(); } // ほかの端末のほうが新しい：そちらを読み込む（閉じるときは何もしない）
+    CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } }
+  }
+  CLOUD.busy = false;
+}
+// クラウドの新しい記録を読み込む。対局中なら、ホームに戻ったときに読み込む
+async function cloudPull() {
+  const c = raw.get('kb.cloud', null); if (!c) return;
+  if (S.view === 'game' || S.view === 'hunt' || S.view === 'drill') { CLOUD.pendingPull = true; return; }
+  try { const j = await cloudReq('load', { token: c.token }); if (j.data && cloudApply(j.data, j.at)) { toast('ほかの端末の新しい記録を読み込みました'); setTimeout(() => location.reload(), 800); } } catch (e) { }
+}
+function cloudApply(data, at) {
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !CLOUD_KEEP[k]) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); for (const k in data) if (k.startsWith('kb.') && !CLOUD_KEEP[k]) localStorage.setItem(k, data[k]); localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { return false; }
+  return true;
+}
+async function cloudInit() {
+  if (!CLOUD_ON) return;
+  try {
+    let c = raw.get('kb.cloud', null);
+    if (!c || !c.token) { const j = await cloudReq('register'); c = { uid: j.uid, token: j.token, code: j.code }; try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { } await cloudPush(false, true); return; }
+    const j = await cloudReq('load', { token: c.token }), localAt = raw.get('kb.cloudAt', 0) || 0;
+    if (j.data && j.at > localAt) { // クラウドのほうが新しい：クラウドの記録で開き直す（1回だけ）
+      let once = false; try { once = sessionStorage.getItem('kb.cloudReload') === String(j.at); sessionStorage.setItem('kb.cloudReload', String(j.at)); } catch (e) { }
+      if (!once && cloudApply(j.data, j.at)) { location.reload(); return; }
+    } else if (localAt > j.at || !j.data) await cloudPush(false, true); // 端末のほうが新しい（引っ越し直後など）ときだけ送る
+    CLOUD.status = 'saved';
+  } catch (e) { CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } } }
+}
+async function cloudRestore(code) {
+  try {
+    const j = await cloudReq('restore', { code }); const c = { uid: j.uid, token: j.token, code: j.code };
+    const d = await cloudReq('load', { token: j.token });
+    try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { }
+    if (d.data) cloudApply(d.data, d.at || Date.now());
+    toast('引き継ぎました'); setTimeout(() => location.reload(), 600);
+  } catch (e) { toast(e.message || '引き継げませんでした'); }
+}
+if (CLOUD_ON && typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(CLOUD.timer); cloudPush(true); } });
+function cloudPanelHTML() {
+  if (!CLOUD_ON) return '';
+  const c = raw.get('kb.cloud', null);
+  return `<div class="lbl">クラウド保存（引き継ぎコード）</div>
+    <p class="small" style="margin:0">記録はクラウドに保存されます。別の端末で続けるときは、この<b>引き継ぎコード</b>を入れてください。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
+    ${c && c.code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(c.code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、あなたの記録に入れます。</p>` : '<p class="small muted" style="margin:0">準備中…（通信できるようになると、コードが発行されます）</p>'}
+    <details class="small"><summary>別の端末の記録を引き継ぐ</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">引き継ぐ</button></div><p class="small muted" style="margin:4px 0 0">いまこの端末にある記録は、引き継いだ記録に置きかわります。</p></details>`;
+}
+// ---------- ランキング ----------
+const RANK_TABS = [['rating', '推定実力'], ['badges', 'バッジ数'], ['attack', 'バッジアタック']];
+function rankingHTML() {
+  const tab = S.rankTab || 'rating', R = S.rank && S.rank.type === tab ? S.rank : null, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
+  const val = x => tab === 'rating' ? `★${x.rating.toFixed(1)}` : tab === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : `${x.atk}BP`;
+  const rows = R ? R.list.map(x => `<div class="rk-row ${x.me ? 'me' : ''}"><b class="rk-n">${x.rank}</b><span class="rk-av">${x.avatar ? KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' }) : ''}</span><span class="rk-nm">${esc(x.name)}${x.me ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(x)}</span></div>`).join('') || '<p class="small muted">まだだれも載っていません。</p>' : '<p class="small muted">読み込み中…</p>';
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
+  <div class="panel stack"><div class="rk-tabs">${RANK_TABS.map(([k, l]) => `<button class="btn sm ${k === tab ? 'primary' : ''}" data-act="rank-tab" data-k="${k}">${l}</button>`).join('')}</div>
+    <p class="small muted" style="margin:0">${tab === 'rating' ? '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。' : tab === 'badges' ? '獲得したバッジの数（同じ数ならBPの多い順）。' : 'バッジアタック（15分）の自己ベスト。'}${R ? `　全${R.total}人` : ''}</p>
+    <div class="rk-list">${rows}</div>
+    <label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。</p></div>`;
+}
+async function rankingLoad() {
+  const tab = S.rankTab || 'rating'; const c = raw.get('kb.cloud', null);
+  const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); };
+  if (S.rank && S.rank.type === tab && Date.now() - S.rank.at < 30000) return;
+  try { await cloudPush(); const r = await fetch(CLOUD_API + '?a=ranking&type=' + tab + '&uid=' + encodeURIComponent((c && c.uid) || '')); const j = await r.json(); if (!j.ok) throw new Error(j.error); S.rank = Object.assign(j, { at: Date.now() }); }
+  catch (e) { S.rank = { type: tab, list: [], total: 0, at: Date.now() }; toast('ランキングを読み込めませんでした'); }
+  if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); const h2 = $('#rk-hide'); if (h2) h2.onchange = h.onchange || (() => { raw.set('kb.p.' + PID + '.rankHide', h2.checked); cloudPush().then(() => { S.rank = null; render(); }); }); }
+}
 const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
 function shareBoasts() {
@@ -1815,6 +1915,7 @@ function profileModal() {
   modal(`<h2>プレイヤー</h2>
     <div class="pf-list">${L.map(p => `<div class="pf-row ${p.id === PID ? 'cur' : ''}"><b>${esc(p.name)}</b><span class="small muted">${(() => { const g = raw.get('kb.p.' + p.id + '.growth', null); const r = g ? ratingOf(g.games) : null; return r && r.ok ? `★${r.r.toFixed(1)}・${g.games.length}ゲーム` : g ? `${g.games.length}ゲーム` : '記録なし'; })()}</span>${p.id === PID ? '<span class="pf-cur">プレイ中</span>' : ''}<span class="pf-btns">${p.id === PID ? '<button class="btn sm ghost" data-act="rename-profile">名前を変更</button>' : `<button class="btn sm" data-pf="${p.id}">この人で遊ぶ</button>`}${L.length > 1 ? `<button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button>` : ''}</span></div>`).join('')}</div>
     <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="new-profile">新しい名前で始める</button></div>
+    ${CLOUD_ON ? `<details class="save-note"><summary>記録の保存について</summary><ul><li>記録（成長記録・バッジ・図鑑・アバターなど）は<b>クラウド</b>に保存されます。ブラウザの履歴を消しても、引き継ぎコードがあれば戻せます。</li><li>端末には、すぐ遊べるように控えと、ログインの鍵だけを置いています。</li><li>同じ端末を使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li></ul></details>` : `
     <details class="save-note" open><summary>記録の保存について</summary><ul>
       <li>記録（成長記録・バッジ・続きから）は、<b>いま使っている端末のこのブラウザの中</b>に保存されます。成長記録やバッジはサーバーには送っていません（アプリの利用回数の集計だけは、名前や対局内容を含めずに記録しています）。</li>
       <li><b>別の端末や別のブラウザ</b>（スマホとパソコン、ChromeとSafariなど）では共有されません。</li>
@@ -1823,6 +1924,8 @@ function profileModal() {
       <li>同じ端末・同じブラウザを使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li>
       <li>大事な記録は、ときどき下の「書き出す」で保存しておくと安心です。</li>
     </ul></details>
+    `}
+    ${cloudPanelHTML()}
     <div class="lbl">記録の書き出し・読み込み</div>
     <p class="small muted" style="margin:0">書き出したファイル（JSON）を別の端末で読み込むと、成長記録と続きからのデータを引き継げます。読み込んだ記録は新しいプレイヤーとして追加されます。</p>
     <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="export-data">いまのプレイヤーの記録を書き出す</button><label class="btn file-btn">記録を読み込む<input type="file" id="imp-file" accept=".json,application/json" hidden></label></div>
@@ -2176,9 +2279,9 @@ const MIG_IN = (() => {
 })();
 function migApply(o) {
   const done = raw.get('kb.migDone', []);
-  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && k !== 'kb.migDone') ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && k !== 'kb.migDone' && !CLOUD_KEEP[k]) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
   try { for (const k in o.data) if (k.startsWith('kb.') && !MIG_SKIP[k]) localStorage.setItem(k, o.data[k]); } catch (e) { toast('保存できませんでした（容量の上限かもしれません）'); return; }
-  done.push(o.id); raw.set('kb.migDone', done.slice(-20)); raw.set('kb.migAt', Date.now());
+  done.push(o.id); raw.set('kb.migDone', done.slice(-20)); raw.set('kb.migAt', Date.now()); raw.set('kb.cloudAt', Date.now()); // 引っ越した記録をクラウドの正本にする
   location.reload();
 }
 async function migrateIn(t) {
@@ -2238,6 +2341,7 @@ ${saved ? `<div class="panel row" style="justify-content:space-between;margin-to
 </div>
 ${growthCardHTML()}
 <div class="row" style="margin-top:14px">
+  ${CLOUD_ON ? '<button class="btn" data-go="ranking">🏆 ランキング</button>' : ''}
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
@@ -4806,6 +4910,10 @@ function act(a, el) {
     case 'hunt-start': huntStart(); break;
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartOpen(); break;
+    case 'rank-tab': S.rankTab = el.dataset.k; render(); break;
+    case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
+    case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
+    case 'cloud-restore': { const v = (($('#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } cloudRestore(v); break; }
     case 'watch-start': { closeModal(); const first = !store.get('watched', false); store.set('watched', true); watchStart(first); break; } // 初めての観戦は、強さも性格もそろった決まった顔ぶれ
     case 'watch-first': closeModal(); watchStart(true); break;
     case 'tut-start': tutStart(); break;
@@ -4902,6 +5010,7 @@ setInterval(() => {
 
 document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('[data-char]'); if (t) { e.preventDefault(); charProfile(t.dataset.char); } });
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
-window.KBAPP = { S, act, tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+else if (CLOUD_ON) setTimeout(cloudInit, 100);
+window.KBAPP = { S, act, cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: T => aimReward(T), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();

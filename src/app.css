@@ -1626,3 +1626,16 @@ body.spectate .me .hand .card{cursor:default}
 .ch-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .ch-hintline{font-size:14px;padding:4px 8px;border-radius:8px;background:rgba(116,192,252,.12);color:#a5d8ff}
 .ch-table td.hint{color:#74c0fc;font-weight:900;background:rgba(116,192,252,.10)}
+
+/* ランキング・クラウド */
+.rk-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.rk-list{display:flex;flex-direction:column;gap:4px}
+.rk-row{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22)}
+.rk-row.me{outline:2px solid #f2b632;background:rgba(242,182,50,.12)}
+.rk-n{font-family:var(--f-display);color:#ffd43b;text-align:center}
+.rk-av svg{width:34px;height:34px;display:block}
+.rk-nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-nm small{margin-left:6px;font-size:10px;color:#f2b632}
+.rk-v{font-weight:900;text-align:right;font-variant-numeric:tabular-nums}
+.rk-v small{display:block;font-size:10px;font-weight:400;color:#c9c2ad}
+.cl-code{font-size:18px;letter-spacing:.08em;padding:4px 10px;border-radius:8px;background:#0b1a14;border:1px solid rgba(242,182,50,.4)}

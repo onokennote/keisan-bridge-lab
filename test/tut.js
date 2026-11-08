@@ -9,9 +9,9 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(await pg.evaluate(() => { const c = new Array(14).fill(0); [1, 2, 3].forEach(v => c[v]++); return KB.findMoves(c, 13, 'all', 3).length === 0 && !!KB.evalSelection([11, 4], 7) && !!KB.evalSelection([12, 3], 9); }), '例題の答えが正しい（A・2・3で13は作れない など）');
   await pg.evaluate(() => localStorage.setItem('kb.testAskName', '1')); await pg.reload(); await pg.waitForTimeout(600);
   await pg.fill('#new-name', 'おのけん'); await pg.click('[data-act="create-profile"]'); await pg.waitForTimeout(3300);
-  ok(!!(await pg.$('[data-act="tut-start"]')), '新規登録のあと、ルールの説明を受けるか聞く');
+  ok(!!(await pg.$('#modal [data-act="tut-start"]')), '新規登録のあと、ルールの説明を受けるか聞く');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'tut_invite.png') });
-  await pg.click('[data-act="tut-start"]'); await pg.waitForTimeout(500);
+  await pg.click('#modal [data-act="tut-start"]'); await pg.waitForTimeout(500);
   const n = await pg.evaluate(() => KBAPP.TUT_N());
   for (let i = 0; i < n; i++) {
     await pg.waitForTimeout(900);
