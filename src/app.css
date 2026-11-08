@@ -1706,3 +1706,19 @@ body.spectate .me .hand .card{cursor:default}
   .stage > .ent-row .chip{font-size:9px;padding:1px 5px}
 }
 .name-err{color:#ff8787;font-weight:700;margin:4px 0 0}
+/* 早見表：縦線・選んでいる行・何面待ちの見出し・チェック・残りの場ボタン */
+.ch-table td+td,.ch-table th+th{border-left:1px solid rgba(255,255,255,.08)}
+.ch-table tr.on td{background:rgba(242,182,50,.26)}
+.ch-table tr.on td:first-child{box-shadow:inset 4px 0 0 #f2b632}
+.ch-table tr.on .ch-cards span{background:#ffd43b}
+.ch-table tr.ch-sub td{text-align:left;padding:3px 6px;font-size:11px;color:#ffe8a3;background:rgba(242,182,50,.08);border-top:1px solid rgba(242,182,50,.3)}
+.ch-table tr.ch-sub b{margin-right:8px}
+.ch-dots{letter-spacing:-1px;color:#f2b632;font-size:9px}
+.ch-table td.ok.mk{background:rgba(105,219,124,.2);color:#b2f2bb}
+.ch-table td.ok i{font-style:normal;font-size:9px;color:#69db7c;vertical-align:super;margin-left:-1px}
+.ch-table td.ok{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ch-row-now{flex-wrap:wrap}
+.ch-hintbtn{margin-left:6px}
+.ch-hintbtn.on{background:rgba(116,192,252,.25);border-color:#74c0fc;color:#d0ebff}
+.ch-keys{grid-template-columns:repeat(5,1fr)}
+.ch-k.ch-clr{background:#5c2b2b;border-color:rgba(255,135,135,.5);color:#ffc9c9}

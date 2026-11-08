@@ -38,6 +38,22 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.click('[data-chint]'); await pg.waitForTimeout(200);
   ok(await pg.evaluate(() => /まだの場：/.test(document.querySelector('.ch-hintline').innerText) && document.querySelectorAll('tr.on td.hint').length === 10), '「残りの場」でまだ埋まっていない場（10個）を表示');
   await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_hint.png') });
+  ok(await pg.evaluate(() => document.querySelectorAll('tr[data-crow]:not(.on) td.hint').length > 50 && /ON/.test(document.querySelector('[data-chint]').innerText)), '「残りの場」はすべての行で一律にオン（ほかの行にも？が出る）');
+  ok(await pg.evaluate(() => [...document.querySelectorAll('tr.ch-sub')].map(r => r.innerText.match(/\d+面待ち/)[0]).join(',') === '12面待ち,11面待ち,10面待ち,9面待ち,4面待ち,3面待ち'), '何面待ちの小見出し（12・11・10・9・4・3面）');
+  // クリア：式を途中まで入れて C で全部消える
+  await tap('[data-ckc="0"]'); await tap('[data-cko="+"]'); await tap('[data-ckclr="1"]');
+  ok(await pg.evaluate(() => /札と記号をタップ/.test(document.querySelector('.ch-expr').innerText)), 'C（クリア）で式が全部消える');
+  // ○の長押しでチェック、もう一度長押しで外す
+  const cell = 'tr.on td.ok';
+  const lp = async () => { const bx = await (await pg.$(cell)).boundingBox(); await pg.mouse.move(bx.x + bx.width / 2, bx.y + bx.height / 2); await pg.mouse.down(); await pg.waitForTimeout(650); await pg.mouse.up(); await pg.waitForTimeout(200); };
+  await lp();
+  ok(await pg.evaluate(() => document.querySelectorAll('tr.on td.ok.mk').length === 1 && Object.keys(JSON.parse(Object.entries(localStorage).find(([k]) => /chartMark$/.test(k))[1])).length === 1), '○を長押しするとチェック（✓）が付いて保存される');
+  await pg.screenshot({ path: path.join(__dirname, 'out', 'chart_mark.png') });
+  await lp();
+  ok(await pg.evaluate(() => document.querySelectorAll('tr.on td.ok.mk').length === 0), 'もう一度長押しでチェックが外れる');
+  await lp();
+  await pg.click('[data-chint]'); await pg.waitForTimeout(200);
+  ok(await pg.evaluate(() => !document.querySelector('td.hint') && /OFF/.test(document.querySelector('[data-chint]').innerText)), '「残りの場」をもう一度押すと一律にオフ');
   // 2・6 の行（3・4・8・Q）を全部埋めて完成させる
   await pg.click('tr[data-crow="26"]'); await pg.waitForTimeout(200);
   for (const ks of [['6', '/', '2'], ['6', '-', '2'], ['6', '+', '2'], ['6', '*', '2']]) { for (const k of ks) { await pg.keyboard.press(k); await pg.waitForTimeout(50); } await pg.waitForTimeout(900); }

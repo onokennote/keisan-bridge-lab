@@ -1711,10 +1711,26 @@ body.spectate .me .hand .card{cursor:default}
   .stage > .ent-row .chip{font-size:9px;padding:1px 5px}
 }
 .name-err{color:#ff8787;font-weight:700;margin:4px 0 0}
+/* 早見表：縦線・選んでいる行・何面待ちの見出し・チェック・残りの場ボタン */
+.ch-table td+td,.ch-table th+th{border-left:1px solid rgba(255,255,255,.08)}
+.ch-table tr.on td{background:rgba(242,182,50,.26)}
+.ch-table tr.on td:first-child{box-shadow:inset 4px 0 0 #f2b632}
+.ch-table tr.on .ch-cards span{background:#ffd43b}
+.ch-table tr.ch-sub td{text-align:left;padding:3px 6px;font-size:11px;color:#ffe8a3;background:rgba(242,182,50,.08);border-top:1px solid rgba(242,182,50,.3)}
+.ch-table tr.ch-sub b{margin-right:8px}
+.ch-dots{letter-spacing:-1px;color:#f2b632;font-size:9px}
+.ch-table td.ok.mk{background:rgba(105,219,124,.2);color:#b2f2bb}
+.ch-table td.ok i{font-style:normal;font-size:9px;color:#69db7c;vertical-align:super;margin-left:-1px}
+.ch-table td.ok{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.ch-row-now{flex-wrap:wrap}
+.ch-hintbtn{margin-left:6px}
+.ch-hintbtn.on{background:rgba(116,192,252,.25);border-color:#74c0fc;color:#d0ebff}
+.ch-keys{grid-template-columns:repeat(5,1fr)}
+.ch-k.ch-clr{background:#5c2b2b;border-color:rgba(255,135,135,.5);color:#ffc9c9}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d90f6687dd';
+window.KB_BUILD='66eeadd6a0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5249,7 +5265,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1 };
+const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -7494,51 +7510,75 @@ function chartIntro() {
     noGo: true, extra: [{ label: done ? '早見表を見る' : '早見表を作る', primary: true, on: () => chartOpen() }] });
 }
 function chartOpen(view) { S.chart = S.chart || { row: 0, tok: [], msg: null }; S.chart.view = !!view; S.chart.tok = []; S.chart.msg = null; S.chart.lock = false; S.chart.scroll = null; chartRender(); if (S.view === 'game') pauseGame(); } // 開いている間は対局を止める
+// 早見表の共通部品：何面待ちごとの小見出し（●の数で待ちの多さを見せる）、○のチェック（長押しで付け外し。自分用の目印）
+const chartMarks = () => store.get('chartMark', null) || {};
+function chartGroups(idx, men, rowFn) {
+  let last = -1, out = '';
+  idx.forEach(i => { const n = men[i].length; if (n !== last) { last = n; out += `<tr class="ch-sub"><td colspan="14"><b>${n}面待ち</b><span class="ch-dots">${'●'.repeat(n)}</span></td></tr>`; } out += rowFn(i); });
+  return out;
+}
+function chartCell(d, t, i, mk, hintOn, men) {
+  if (d[t]) { const k = CHART_ROWS[i].join(',') + '@' + t, on = mk[k]; return `<td class="ok ${on ? 'mk' : ''}" data-cexp="${esc(d[t])} = ${KB.vname(t)}" data-cmk="${k}">○${on ? '<i>✓</i>' : ''}</td>`; }
+  return hintOn && men[i].includes(t) ? '<td class="hint">？</td>' : '<td></td>';
+}
+// ○：タップで式を見る、長押しでチェックを付け外し
+function chartBindCells(m) {
+  m.querySelectorAll('[data-cexp]').forEach(td => {
+    let tm = null, long = false;
+    const start = () => { long = false; clearTimeout(tm); tm = setTimeout(() => { long = true; const mk = chartMarks(), k = td.dataset.cmk; if (mk[k]) delete mk[k]; else mk[k] = 1; store.set('chartMark', mk); KB.sfx('select'); td.classList.toggle('mk', !!mk[k]); td.innerHTML = '○' + (mk[k] ? '<i>✓</i>' : ''); toast(mk[k] ? 'チェックを付けました' : 'チェックを外しました'); }, 450); };
+    const stop = () => clearTimeout(tm);
+    td.addEventListener('pointerdown', start); ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => td.addEventListener(ev, stop));
+    td.addEventListener('contextmenu', e => e.preventDefault());
+    td.onclick = e => { e.stopPropagation(); if (long) { long = false; return; } toast(td.dataset.cexp); };
+  });
+}
 function chartRender() {
   const C = S.chart, men = chartMen(), data = chartGet(), row = CHART_ROWS[C.row], key = row.join(','), mine = data[key] || {};
   if (C.view) return chartViewRender(men, data);
   const head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
-  const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + CHART_ROWS.slice(from, to).map((r, k) => {
-    const i = from + k, d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
-    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : C.hint === i && men[i].includes(t) ? '<td class="hint">？</td>' : '<td></td>').join('')}</tr>`;
-  }).join('');
+  const mk = chartMarks();
+  const sec = (title, from, to) => `<tr class="ch-sec"><td colspan="14">${title}</td></tr>` + chartGroups(CHART_ROWS.slice(from, to).map((_, k) => from + k), men, i => {
+    const r = CHART_ROWS[i], d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
+    return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => chartCell(d, t, i, mk, C.hint, men)).join('')}</tr>`;
+  });
   const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
   let preview = '';
   if (C.tok.length) { try { const v = chartEval(C.tok); preview = `= ${v}`; } catch (e) { preview = e.message === '…' ? '' : e.message; } }
   const done = chartDone(), total = chartTotal();
   const cur = $('#modal .chart-modal'), html = (`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表を作成</h2><span class="small">${done}/${total}</span></div>
-    <p class="small" style="margin:0">行を選び、札と記号で式を作ると答えの列に○。○をタップすると自分の式が見られます。</p>
+    <p class="small" style="margin:0">行を選び、札と記号で式を作ると答えの列に○。○をタップすると自分の式、<b>長押しでチェック</b>（気づきにくい待ちなどの目印）。</p>
     <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
     <div class="ch-wrap"><table class="ch-table">${head}${sec('3枚（9面以上）', 0, 26)}${sec('2枚（3面以上）', 26, CHART_ROWS.length)}</table></div>
     <div class="ch-input">
-      <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small></div>
+      <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small><button class="btn sm ch-hintbtn ${C.hint ? 'on' : ''}" data-chint="1" aria-pressed="${C.hint ? 'true' : 'false'}">💡 残りの場 ${C.hint ? 'ON' : 'OFF'}</button></div>
       <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
       <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
-        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button></div>
-      <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span><button class="btn sm ghost" data-chint="1">💡 残りの場</button></div>
-      ${C.hint === C.row ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
+        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button><button class="ch-k ch-clr" data-ckclr="1" aria-label="式をクリア">C</button></div>
+      <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span></div>
+      ${C.hint ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
     </div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   if (cur) { const keep = cur.querySelector('.ch-wrap'), st = keep ? keep.scrollTop : 0; cur.parentElement.innerHTML = html; bindModal($('#modal')); const w = $('#modal .ch-wrap'); if (w) w.scrollTop = st; } else modal(html); // 打つたびに作り直しても、対局は止めたまま
   const m = $('#modal'); if (!m) return;
   m.querySelectorAll('[data-crow]').forEach(tr => tr.onclick = () => { C.row = +tr.dataset.crow; C.tok = []; C.msg = null; chartRender(); });
-  m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = e => { e.stopPropagation(); toast(td.dataset.cexp); });
+  chartBindCells(m);
+  m.querySelectorAll('[data-ckclr]').forEach(b => b.onclick = () => { if (C.lock) return; C.tok = []; C.msg = null; chartRender(); });
   m.querySelectorAll('[data-ckc]').forEach(b => b.onclick = () => chartKey({ k: 'c', i: +b.dataset.ckc, v: row[+b.dataset.ckc] }));
   m.querySelectorAll('[data-cko]').forEach(b => b.onclick = () => chartKey({ k: b.dataset.cko }));
   m.querySelectorAll('[data-ckb]').forEach(b => b.onclick = () => chartKey(null));
-  m.querySelectorAll('[data-chint]').forEach(b => b.onclick = () => { C.hint = C.hint === C.row ? null : C.row; chartRender(); });
+  m.querySelectorAll('[data-chint]').forEach(b => b.onclick = () => { C.hint = !C.hint; chartRender(); }); // すべての行で一律にオン・オフ
   const on = m.querySelector('tr.on'); if (on && C.scroll !== C.row) { C.scroll = C.row; on.scrollIntoView({ block: 'nearest' }); }
 }
 // 対局中：完成した行だけを見る（入力はできない。作るのはホームから）
 function chartViewRender(men, data) {
   const full = chartFullRows(), head = `<tr><th>札</th>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<th>${KB.vname(v)}</th>`).join('')}</tr>`;
-  const rows = full.map(i => { const r = CHART_ROWS[i], d = data[r.join(',')] || {}; return `<tr class="full"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[i].length}面</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => d[t] ? `<td class="ok" data-cexp="${esc(d[t])} = ${KB.vname(t)}">○</td>` : '<td></td>').join('')}</tr>`; }).join('');
+  const mk = chartMarks(), rows = chartGroups(full, men, i => { const r = CHART_ROWS[i], d = data[r.join(',')] || {}; return `<tr class="full"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[i].length}面</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => chartCell(d, t, i, mk, false, men)).join('')}</tr>`; });
   modal(`<div class="chart-modal"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">早見表</h2><span class="small">完成 ${full.length}/${CHART_ROWS.length}行</span></div>
     <p class="small ch-rule" style="margin:0">法則：<b>A＋○</b> の2枚は、○−1・○・○＋1 の3面待ち（例：A・7 → 6・7・8）</p>
-    ${full.length ? `<div class="ch-wrap" style="max-height:52vh"><table class="ch-table">${head}${rows}</table></div><p class="small muted" style="margin:0">○をタップすると、自分で作った式が見られます。</p>` : '<p class="small" style="margin:0">まだ完成した行がありません。ホームの「早見表を作成」で、行のすべての待ちを自分の式で埋めると、ここに表示されます。</p>'}
+    ${full.length ? `<div class="ch-wrap" style="max-height:52vh"><table class="ch-table">${head}${rows}</table></div><p class="small muted" style="margin:0">○をタップすると自分で作った式、長押しでチェック（✓）を付け外しできます。</p>` : '<p class="small" style="margin:0">まだ完成した行がありません。ホームの「早見表を作成」で、行のすべての待ちを自分の式で埋めると、ここに表示されます。</p>'}
     <p class="small muted" style="margin:0">対局中は見るだけです。表を作るのはホームから。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
-  const m = $('#modal'); if (m) m.querySelectorAll('[data-cexp]').forEach(td => td.onclick = () => toast(td.dataset.cexp));
+  const m = $('#modal'); if (m) chartBindCells(m);
 }
 function chartKey(t) {
   const C = S.chart; if (!C || C.lock || C.view) return;
