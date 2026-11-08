@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="e1b740e 2026-11-09 00:37"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="e2b0e4c 2026-11-09 00:40"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1728,7 +1728,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='66eeadd6a0';
+window.KB_BUILD='9a0fac3986';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7539,7 +7539,7 @@ function chartRender() {
     const r = CHART_ROWS[i], d = data[r.join(',')] || {}, left = men[i].length - Object.keys(d).length;
     return `<tr class="${i === C.row ? 'on' : ''} ${left ? '' : 'full'}" data-crow="${i}"><td class="ch-cards">${r.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${left ? `あと${left}面` : '👑'}</small></td>${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(t => chartCell(d, t, i, mk, C.hint, men)).join('')}</tr>`;
   });
-  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i));
+  const used = new Set(C.tok.filter(t => t.k === 'c').map(t => t.i)), al = chartAllowed(C), busy = !!C.lock;
   let preview = '';
   if (C.tok.length) { try { const v = chartEval(C.tok); preview = `= ${v}`; } catch (e) { preview = e.message === '…' ? '' : e.message; } }
   const done = chartDone(), total = chartTotal();
@@ -7550,8 +7550,8 @@ function chartRender() {
     <div class="ch-input">
       <div class="ch-row-now">${row.map(v => `<span>${KB.vname(v)}</span>`).join('')}<small>${men[C.row].length - Object.keys(mine).length ? `あと${men[C.row].length - Object.keys(mine).length}面` : '👑 この行は完成'}</small><button class="btn sm ch-hintbtn ${C.hint ? 'on' : ''}" data-chint="1" aria-pressed="${C.hint ? 'true' : 'false'}">💡 残りの場 ${C.hint ? 'ON' : 'OFF'}</button></div>
       <div class="ch-expr ${C.msg ? (C.msg.ok ? 'good' : 'bad') : ''}"><span class="mono">${esc(chartStr(C.tok)) || '<span class="muted">札と記号をタップ</span>'}</span><b>${esc(C.msg ? C.msg.t : preview)}</b></div>
-      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
-        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}">${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す">⌫</button><button class="ch-k ch-clr" data-ckclr="1" aria-label="式をクリア">C</button></div>
+      <div class="ch-keys">${row.map((v, i) => `<button class="ch-k card-k" data-ckc="${i}" ${used.has(i) || !al.card || busy ? 'disabled' : ''}>${KB.vname(v)}</button>`).join('')}
+        ${['+', '−', '×', '÷', '('].map(o => `<button class="ch-k" data-cko="${o}" ${(o === '(' ? !al.open : !al.op) || busy ? 'disabled' : ''}>${o}</button>`).join('')}<button class="ch-k" data-ckb="1" aria-label="1つ消す" ${!C.tok.length || busy ? 'disabled' : ''}>⌫</button><button class="ch-k ch-clr" data-ckclr="1" aria-label="式をクリア" ${!C.tok.length || busy ? 'disabled' : ''}>C</button></div>
       <div class="ch-foot"><span class="small muted">「(」のあと札を2枚入れると「)」は自動で閉じます</span></div>
       ${C.hint ? `<div class="ch-hintline">まだの場：<b>${men[C.row].filter(t => !mine[t]).map(KB.vname).join('・') || 'なし（完成！）'}</b></div>` : ''}
     </div>
@@ -7578,8 +7578,18 @@ function chartViewRender(men, data) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   const m = $('#modal'); if (m) chartBindCells(m);
 }
+// 式として続けられるキーだけを押せるようにする：札・「(」のあとは札か「(」、札・「)」のあとは記号だけ。
+// 「(」は中に札を2枚入れる余裕があるときだけ（入れ子はなし）。札を使い切ったら記号は押せない
+function chartAllowed(C) {
+  const row = CHART_ROWS[C.row], last = C.tok[C.tok.length - 1], left = row.length - C.tok.filter(x => x.k === 'c').length;
+  let depth = 0; C.tok.forEach(x => { if (x.k === '(') depth++; else if (x.k === ')') depth--; });
+  const operand = !last || ['+', '−', '×', '÷', '('].includes(last.k);
+  return { card: operand && left > 0, op: !operand && left > 0, open: operand && depth === 0 && left >= 2, close: !operand && depth > 0 };
+}
+const chartOk = (C, t) => { const a = chartAllowed(C); return !t || (t.k === 'c' ? a.card : t.k === '(' ? a.open : t.k === ')' ? a.close : a.op); };
 function chartKey(t) {
   const C = S.chart; if (!C || C.lock || C.view) return;
+  if (t && !chartOk(C, t)) return; // 式として続かないキーは受け付けない
   C.msg = null;
   if (!t) C.tok.pop(); else C.tok.push(t);
   // カッコの自動補助：「(」のあとに札を2枚入れたら「)」を閉じる
