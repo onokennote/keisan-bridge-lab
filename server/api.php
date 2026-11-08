@@ -154,8 +154,13 @@ try {
     }
     case 'rankings': { // 6つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
       $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = 20; $res = [];
-      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, updated FROM ranks WHERE shown = 1')->fetchAll();
-      foreach ($all as &$r) { $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0; } unset($r);
+      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated FROM ranks WHERE shown = 1')->fetchAll();
+      foreach ($all as &$r) {
+        $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0;
+        // 連続最善の列ができる前に保存した人は、成績カードに入っている記録を使う
+        if ($r['card']) { $c = json_decode($r['card'], true); $r['streak'] = max($r['streak'], max(0, min(2000, (int)($c['streak'] ?? 0)))); }
+        unset($r['card']);
+      } unset($r);
       $defs = [
         'rating' => [fn($r) => $r['rating'] !== null, fn($a, $b) => $b['rating'] <=> $a['rating']],
         'badges' => [fn($r) => $r['badges'] > 0, fn($a, $b) => [$b['badges'], $b['bp']] <=> [$a['badges'], $a['bp']]],
