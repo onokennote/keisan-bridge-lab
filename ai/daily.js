@@ -84,6 +84,9 @@ async function play(b, c, data, sets, minis) {
   if (MODE === 'seed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
+  } else if (MODE === 'catchup') {
+    // 追いつき（1回だけ）：いるメンバーに、強さに応じた数のミニゲームを遊ばせる（★5は3〜4回、★1は0〜1回）
+    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (!c) continue; const n = rnd([0, 0, 1, 2, 3][c.lv - 1], [1, 1, 2, 3, 4][c.lv - 1]); if (n) jobs.push({ c, data: x.data, sets: 0, minis: mini(n) }); }
   } else {
     // いつもの1日：それぞれ6割の確率で1セット。ときどき（3割）新しいメンバーが1人入る
     // ミニゲームは4割の確率で1つ（対局しない日でも遊ぶことがある）

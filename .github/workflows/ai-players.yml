@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'daily（いつもの1日）か seed（最初の投入）'
+        description: 'daily（いつもの1日）・seed（最初の投入）・catchup（ミニゲームだけ追いつき）'
         default: daily
         required: true
 concurrency: ai-players
