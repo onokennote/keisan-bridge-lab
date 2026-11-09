@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1859,10 +1859,17 @@ body.spectate .me .hand .card{cursor:default}
 .su-custom .su-table{margin-top:4px}
 .su-custom .su-seated{background:rgba(0,0,0,.3)}
 .su-custom .su-step input{color:#e7f5ff}
+.su-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.su-pi{display:grid;gap:6px;justify-items:center;padding:10px 6px;border-radius:14px;background:rgba(0,0,0,.25)}
+.su-pi>small{font-size:11px;color:#c9c2ad;text-align:center}
+.su-pair .su-step.big{gap:8px}
+.su-pair .su-step.big .su-pm{width:38px;height:38px;font-size:20px}
+.su-val b{font-size:32px;font-weight:900;line-height:1;color:#fbf7ee}
+.su-pair .su-val small{display:inline;font-size:11px;color:#c9c2ad}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='1c58150227';
+window.KB_BUILD='8c7ed586c0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7937,7 +7944,7 @@ ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-
 }
 
 // ---------- 設定画面：おすすめセット（土台を1つ選ぶ）→ゲーム数（大会は予選のセット数）→開始。細かいことは「カスタム設定」にたたむ ----------
-const DEF_P = { n: 4, games: 3, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
+const DEF_P = { n: 4, games: 5, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
 const DEF_T = { nPlayers: 17, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
 const SU_PRESETS = [
   { k: 'first', icon: '🐣', label: 'はじめて', sub: '相手は★1〜2', p: c => { c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { mix: 'casual', nPlayers: 9, games: 3, finalists: 3 }), tsub: '★1〜2・9人の小さな大会' },
@@ -8007,14 +8014,17 @@ function setupPracticeHTML() {
     <div class="su-chips">${suChip('lv', 'r', 'おまかせ', c.opps[sel].level === 'r')}${[1, 2, 3, 4, 5].map(l => suChip('lv', l, `★${l} ${esc(KB.levelCfg(l).label)}`, String(c.opps[sel].level) === String(l))).join('')}</div>
     <div class="su-chips">${suChip('st', 'r', '性格おまかせ', c.opps[sel].style === 'r')}${sts.map(x => suChip('st', x.id, esc(x.label), c.opps[sel].style === x.id, `style="--sc:${esc(x.color)}"`)).join('')}</div></div>`;
   const fixed = c.opps.slice(0, k).filter(o => o.level !== 'r' || o.style !== 'r').length;
-  const table = suGroup('table', '🪑', '卓（人数・相手ひとりずつ）', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
-    `<div class="su-row"><div class="su-rl"><b>卓の人数</b><small>あなたを含む</small></div><span class="su-n"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><b>${c.n}人</b><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></span></div>
-     <div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
+  const table = suGroup('table', '🪑', '相手をひとりずつ決める', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
+    `<div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
   const hidden = `<div hidden><input id="p-n" value="${c.n}"><input id="p-games" value="${c.games}"><input id="p-mix" value="${c.mix}">${c.opps.map((o, i) => `<div class="opp-row" data-i="${i}" ${i >= k ? 'hidden' : ''}><select class="o-lv"><option value="${o.level}" selected></option></select><select class="o-st"><option value="${o.style}" selected></option></select></div>`).join('')}</div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">1セット練習</div><div></div></div>
 <div class="su">
 ${suPresetHTML('practice')}
-<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数</b><small>1セットで何ゲーム打つか</small></div><div class="su-chips big">${[3, 5, 7].map(n => suChip('games', n, n + 'ゲーム', c.games === n)).join('')}</div></section>
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数と人数</b></div>
+  <div class="su-pair">
+    <div class="su-pi"><small>1セットのゲーム数</small><div class="su-step big"><button class="su-pm" data-su="gstep" data-v="-1" ${c.games <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><b>${c.games}</b><small>ゲーム</small></span><button class="su-pm" data-su="gstep" data-v="1" ${c.games >= 10 ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>
+    <div class="su-pi"><small>卓の人数（あなたを含む）</small><div class="su-step big"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><span class="su-val"><b>${c.n}</b><small>人</small></span><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></div></div>
+  </div></section>
 ${suStartHTML('start-practice', 'この卓ではじめる')}
 ${suCustomHTML('practice', table)}
 ${hidden}
@@ -8038,6 +8048,7 @@ function suTap(d) {
     case 'lv': if (S.suSeat != null) c.opps[S.suSeat].level = String(v); break;
     case 'st': if (S.suSeat != null) c.opps[S.suSeat].style = v; break;
     case 'games': c.games = +v; break;
+    case 'gstep': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
     case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
     case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
