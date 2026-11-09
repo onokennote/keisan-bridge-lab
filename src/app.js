@@ -3603,11 +3603,11 @@ function gapFact(d) {
   const top = items.filter(x => gain(x) > 0).sort((x, y) => gain(y) * y.w - gain(x) * x.w)[0];
   // 最善手ならその場で上がれた（上がる確率100%）ときは、どの項目の差が大きくても「上がれた」と言う
   const wi = items.find(x => x.k === '上がる確率');
-  if (wi && wi.z >= 100 && wi.a < 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${wi.a}%→100%）。`, masa: `${bxM}その場で上がれとったで！上がる確率${wi.a}%→100%や！` };
+  if (wi && wi.z >= 100 && wi.a < 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${wi.a}%→100%）。`, masa: `${bxM}その場で上がれとったで！上がる確率${wi.a}%→100%や！`, sh: `上がる確率${wi.a}%→100%`, up: true };
   if (!top) return null;
-  if (top.k === '上がる確率' && top.z >= 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${top.a}%→100%）。`, masa: `${bxM}上がれとったで！` };
+  if (top.k === '上がる確率' && top.z >= 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${top.a}%→100%）。`, masa: `${bxM}上がれとったで！`, sh: `上がる確率${top.a}%→100%`, up: true };
   const verbR = top.up ? '上がっていました' : '下がっていました', verbM = top.up ? '上がっとったで！' : '減っとったで！';
-  return { root: `${bx}なら、${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbR}。`, masa: `${bxM}${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbM}` };
+  return { root: `${bx}なら、${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbR}。`, masa: `${bxM}${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbM}`, sh: `${top.k.replace('（失点の見込み）', '')}${top.f(top.a)}→${top.f(top.z)}` };
 }
 // 割り算のほめ方：かっこ付きの割り算（(11+13)÷6 など）はしっかりほめる、
 // かっこなしで3枚使った割り算は軽くほめる、12÷4 のような2枚の割り算や 13÷13・÷1 はほめない
@@ -4431,7 +4431,8 @@ function rvGameSolo(who) {
     const mHead = i === 0 ? RVP([`せやけど第${w.round}巡、場${w.t}で「${w.mine}」はなんでやねん！`, `一番言いたいのはここや。第${w.round}巡の場${w.t}、「${w.mine}」はちゃうやろ〜！`]) : RVP([`ほんで第${w.round}巡の「${w.mine}」もな！`, `第${w.round}巡、場${w.t}の「${w.mine}」もツッコませて！`]);
     // 3つ目からは短く：同じ型の説明をくり返さず、最善手だけを添える（前と同じ選び方なら「また」とまとめる）
     if (i >= 2) { const same = f.misses.slice(0, i).some(x => x.mine === w.mine);
-      B(`第${w.round}巡（場${w.t}）の「${w.mine}」も、最善は「${w.best}」でした。`, same ? `第${w.round}巡でもまた「${w.mine}」や。同じ形の取りこぼしやで、そこは「${w.best}」！` : `第${w.round}巡の「${w.mine}」も、ほんまは「${w.best}」やったで！`); return; }
+      const sh = gf && gf.sh ? `（${gf.sh}）` : '';
+      B(`第${w.round}巡（場${w.t}）の「${w.mine}」も、最善は「${w.best}」でした${sh}。`, same ? `第${w.round}巡でもまた「${w.mine}」や。同じ形の取りこぼしやで、そこは「${w.best}」${sh}！` : `第${w.round}巡の「${w.mine}」も、ほんまは「${w.best}」やったで${sh}！`); return; }
     const mHead2 = i === 1 && f.misses[0].mine === w.mine ? `しかも第${w.round}巡でもまた「${w.mine}」や！` : mHead;
     B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead2 + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
     if (i === 0) N(rvBadNeta(w));
@@ -4537,7 +4538,7 @@ function rvSetSolo(who) {
         const bi = Lg.indexOf(bestG), wi2 = Lg.indexOf(worstG), fw = F[wi2];
         mz += bestG.won ? `ベストゲームは上がった第${bestG.game}ゲームや！` : `いちばん粘れたんは第${bestG.game}ゲーム、PP${bestG.pp}で${bestG.rank}位や。`;
         const fb = F[bi]; if (fb && fb.hl && fb.hl[0]) { const n1 = one(bestG, fb).split('、')[1]; if (n1 && !/痛手/.test(n1)) mz += `${n1}な！`; }
-        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで。` : '');
+        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : '');
       }
     }
     B(`ゲームごとに振り返ると、${lines.join('。')}。`, mz);
