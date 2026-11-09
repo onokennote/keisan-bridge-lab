@@ -17,9 +17,9 @@ async function api(a, body) {
 // その日の調子：毎回の判断で、ときどき1〜2段弱い打ち方になる（★5でも推定実力は4点台が中心。たまに大きく崩す）
 function rollForm() {
   const r = Math.random();
-  if (r < 0.2) return { name: '不調', p: 0.7, by: 2 };
-  if (r < 0.7) return { name: 'ふつう', p: 0.5, by: 1 };
-  return { name: '好調', p: 0.25, by: 1 };
+  if (r < 0.2) return { name: '不調', p: 0.8, by: 2, by2: 0.6 };
+  if (r < 0.7) return { name: 'ふつう', p: 0.6, by: 1, by2: 0.3 };
+  return { name: '好調', p: 0.35, by: 1, by2: 0.1 };
 }
 async function play(b, c, data, sets, minis, form) {
   const pg = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs = [];
@@ -46,7 +46,7 @@ async function play(b, c, data, sets, minis, form) {
     await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(200);
     for (let step = 0; step < 60000; step++) {
       const st = await pg.evaluate(([lv0, style, form]) => {
-        const lv = Math.random() < form.p ? Math.max(1, lv0 - form.by) : lv0; // 調子の波
+        const lv = Math.random() < form.p ? Math.max(1, lv0 - (Math.random() < form.by2 ? 2 : 1)) : lv0; // 調子の波（ときどき2段落ちる）
         const S = KBAPP.S;
         const wk = document.querySelector('[data-act="win-ok"]'); if (wk) { wk.click(); return 'modal'; }
         const m = document.querySelector('#modal'); if (m) { const bt = m.querySelector('[data-act="win-ok"],[data-act="next-game"],#tb-ok,#aim-ok'); if (bt) { bt.click(); return 'modal'; } m.remove(); return 'm'; }
