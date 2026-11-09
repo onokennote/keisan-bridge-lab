@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="24ffbb7 2026-11-09 21:17"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="14fd3af 2026-11-10 04:21"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1881,7 +1881,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='91d133beb1';
+window.KB_BUILD='9cf29b449f';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9011,11 +9011,11 @@ function gapFact(d) {
   const top = items.filter(x => gain(x) > 0).sort((x, y) => gain(y) * y.w - gain(x) * x.w)[0];
   // 最善手ならその場で上がれた（上がる確率100%）ときは、どの項目の差が大きくても「上がれた」と言う
   const wi = items.find(x => x.k === '上がる確率');
-  if (wi && wi.z >= 100 && wi.a < 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${wi.a}%→100%）。`, masa: `${bxM}その場で上がれとったで！上がる確率${wi.a}%→100%や！` };
+  if (wi && wi.z >= 100 && wi.a < 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${wi.a}%→100%）。`, masa: `${bxM}その場で上がれとったで！上がる確率${wi.a}%→100%や！`, sh: `上がる確率${wi.a}%→100%`, up: true };
   if (!top) return null;
-  if (top.k === '上がる確率' && top.z >= 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${top.a}%→100%）。`, masa: `${bxM}上がれとったで！` };
+  if (top.k === '上がる確率' && top.z >= 100) return { root: `${bx}なら、その場で上がれていました（上がる確率${top.a}%→100%）。`, masa: `${bxM}上がれとったで！`, sh: `上がる確率${top.a}%→100%`, up: true };
   const verbR = top.up ? '上がっていました' : '下がっていました', verbM = top.up ? '上がっとったで！' : '減っとったで！';
-  return { root: `${bx}なら、${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbR}。`, masa: `${bxM}${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbM}` };
+  return { root: `${bx}なら、${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbR}。`, masa: `${bxM}${top.k}が${top.f(top.a)}から${top.f(top.z)}に${verbM}`, sh: `${top.k.replace('（失点の見込み）', '')}${top.f(top.a)}→${top.f(top.z)}` };
 }
 // 割り算のほめ方：かっこ付きの割り算（(11+13)÷6 など）はしっかりほめる、
 // かっこなしで3枚使った割り算は軽くほめる、12÷4 のような2枚の割り算や 13÷13・÷1 はほめない
@@ -9839,7 +9839,8 @@ function rvGameSolo(who) {
     const mHead = i === 0 ? RVP([`せやけど第${w.round}巡、場${w.t}で「${w.mine}」はなんでやねん！`, `一番言いたいのはここや。第${w.round}巡の場${w.t}、「${w.mine}」はちゃうやろ〜！`]) : RVP([`ほんで第${w.round}巡の「${w.mine}」もな！`, `第${w.round}巡、場${w.t}の「${w.mine}」もツッコませて！`]);
     // 3つ目からは短く：同じ型の説明をくり返さず、最善手だけを添える（前と同じ選び方なら「また」とまとめる）
     if (i >= 2) { const same = f.misses.slice(0, i).some(x => x.mine === w.mine);
-      B(`第${w.round}巡（場${w.t}）の「${w.mine}」も、最善は「${w.best}」でした。`, same ? `第${w.round}巡でもまた「${w.mine}」や。同じ形の取りこぼしやで、そこは「${w.best}」！` : `第${w.round}巡の「${w.mine}」も、ほんまは「${w.best}」やったで！`); return; }
+      const sh = gf && gf.sh ? `（${gf.sh}）` : '';
+      B(`第${w.round}巡（場${w.t}）の「${w.mine}」も、最善は「${w.best}」でした${sh}。`, same ? `第${w.round}巡でもまた「${w.mine}」や。同じ形の取りこぼしやで、そこは「${w.best}」${sh}！` : `第${w.round}巡の「${w.mine}」も、ほんまは「${w.best}」やったで${sh}！`); return; }
     const mHead2 = i === 1 && f.misses[0].mine === w.mine ? `しかも第${w.round}巡でもまた「${w.mine}」や！` : mHead;
     B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead2 + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
     if (i === 0) N(rvBadNeta(w));
@@ -9945,7 +9946,7 @@ function rvSetSolo(who) {
         const bi = Lg.indexOf(bestG), wi2 = Lg.indexOf(worstG), fw = F[wi2];
         mz += bestG.won ? `ベストゲームは上がった第${bestG.game}ゲームや！` : `いちばん粘れたんは第${bestG.game}ゲーム、PP${bestG.pp}で${bestG.rank}位や。`;
         const fb = F[bi]; if (fb && fb.hl && fb.hl[0]) { const n1 = one(bestG, fb).split('、')[1]; if (n1 && !/痛手/.test(n1)) mz += `${n1}な！`; }
-        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで。` : '');
+        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : '');
       }
     }
     B(`ゲームごとに振り返ると、${lines.join('。')}。`, mz);
