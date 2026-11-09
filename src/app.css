@@ -1865,3 +1865,9 @@ body.spectate .me .hand .card{cursor:default}
 .su-pair .su-val small{display:inline;font-size:11px;color:#c9c2ad}
 .chip.tagchip{background:rgba(255,255,255,.1);color:#e9e3cf;border:1px solid rgba(255,255,255,.18);font-weight:700}
 .seat .meta{flex-wrap:wrap;row-gap:2px}
+/* モードのカード：ランキングと同じように大きなアイコン */
+.mode-head{display:flex;align-items:center;gap:12px}
+.mode-head .lbl{margin:0}
+.mode-head h2{margin:2px 0 0}
+.mode-ic{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:14px;font-size:30px;background:linear-gradient(180deg,rgba(242,182,50,.28),rgba(242,182,50,.08));border:1px solid rgba(242,182,50,.55);box-shadow:0 0 14px rgba(242,182,50,.18)}
+.mode-ic.sm{display:inline-grid;width:28px;height:28px;font-size:16px;border-radius:8px;margin-right:6px;vertical-align:middle}

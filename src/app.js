@@ -1142,7 +1142,7 @@ function huntResultHTML() {
 }
 function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
-  return `<div class="mode hunt-card"><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2>${modeBadgeRows(MB_HUNT, true)}
+  return `<div class="mode hunt-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🎯</span><div><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2></div></div>${modeBadgeRows(MB_HUNT, true)}
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
     <div class="mode-rec">${b ? `<div>自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</div>` : ''}
       <div class="row zk-mini" style="align-items:center;gap:8px"><span>図鑑 <b>${zukanCount(z)}</b>/${ZUKAN.length}</span><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
@@ -1153,14 +1153,14 @@ function huntCardHTML() {
 // ホーム：早見表を作成（ここで式を入れて作る。対局中は、完成した行を見るだけ）
 function chartCardHTML() {
   const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
-  return `<div class="mode chart-card"><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2>${modeBadgeRows(MB_CHART, true)}
+  return `<div class="mode chart-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">📋</span><div><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2></div></div>${modeBadgeRows(MB_CHART, true)}
     <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。完成した行は、対局中に見返せます。</p>
     <div class="mode-rec"><div>進み具合：<b>${done}</b>/${total}面・完成 <b>${full}</b>/${CHART_ROWS.length}行</div></div>
     <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
 }
 function outsCardHTML() {
   const g = G_(), d = g.drill || null, c = g.cnt || {};
-  return `<div class="mode outs-card"><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2>${modeBadgeRows(MB_OUTS, true)}
+  return `<div class="mode outs-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🔍</span><div><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2></div></div>${modeBadgeRows(MB_OUTS, true)}
     <p class="small muted" style="margin:0">見えている札から、次の番で上がれる札（アウツ）がいちばん多くなる出し方を選ぶ問題。5問連続で正解するとクリア、1問でも間違えると最初からやり直し。問題はだんだん難しくなります。</p>
     ${d && d.n ? `<div class="mode-rec"><div>これまで <b>${d.ok}</b>/${d.n}問正解・クリア <b>${c.outs5 || 0}</b>回</div></div>` : ''}
     <button class="btn primary" data-act="drill">アウツチャレンジに挑戦</button></div>`;
@@ -1168,7 +1168,7 @@ function outsCardHTML() {
 function growthCardHTML() {
   const g = G_(), r = ratingOf(g.games);
   return `<div class="panel growth-card">
-    <div class="gc-head"><div class="lbl">あなたの成長</div></div>
+    <div class="gc-head"><div class="lbl"><span class="mode-ic sm" aria-hidden="true">📈</span>あなたの成長</div></div>
     <div class="gc-body">
       <div class="gc-rate">${r.ok ? `<span class="gc-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<b class="gc-wait">測定中</b><small>あと${r.need}回の判断で推定実力を表示</small>`}</div>
       ${sparkSVG(ratingSeries(g.games).slice(-15), 160, 46)}
@@ -1910,7 +1910,7 @@ function whistle(title, sub, then, o) {
 }
 function attackCardHTML() {
   const best = attackBests()[ATTACK_MIN];
-  return `<div class="mode atk-card"><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2>${modeBadgeRows(MB_ATK, true)}
+  return `<div class="mode atk-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">⏱️</span><div><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2></div></div>${modeBadgeRows(MB_ATK, true)}
     <p class="small muted" style="margin:0">15分間で、どれだけバッジ（BP）を取れるかの勝負。4人卓・相手まんべんなく・1セット3ゲームを、時間いっぱいくり返します。セット1位は+30BP・2位は+10BPの順位ボーナス。速さ・判定・解説（掛け合い）は固定。AIの読みとゲームごとの総括はありません。</p>
     ${best ? `<div class="mode-rec row" style="align-items:center;gap:8px"><p style="margin:0;flex:1">自己ベスト：<b class="atk-bp">${best.bp} BP</b>（バッジ${best.badges}個・${new Date(best.at).toLocaleDateString('ja-JP')}）</p><button class="btn sm" data-act="attack-best">ベスト記録を見る</button></div>` : ''}
     <button class="btn primary" data-act="attack-start">バッジアタック開始</button></div>`;
@@ -2513,12 +2513,12 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
 ${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
 <div class="mode-grid">
-  <div class="mode"><div class="lbl">PRACTICE</div><h2>1セット練習</h2>${modeBadgeRows(MB_PRAC, true)}
+  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     ${pracFacts()}
     <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
-  <div class="mode"><div class="lbl">TOURNAMENT</div><h2>大会モード</h2>${modeBadgeRows(MB_TOUR, true)}
+  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT</div><h2>大会モード</h2></div></div>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
     ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
