@@ -3995,8 +3995,12 @@ function whyHTML(d) {
   const evs = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score).slice(0, 6);
   const isMine = e => (e.m && mine.m) ? e.m.key === mine.m.key : (!e.m && !mine.m);
   // 大会の決勝進出率・優勝率、練習のセット期待点など、目的の値も並べる（そのときの目的で記録しておいた名前を使う）
+  // 総合評価の式（totalScore と同じ）：目的の値は「この卓で1位のときの値」を100とする
+  const gm = d.goalMax || 1, gm100 = Math.round(gm * 100);
+  const gPart = !d.goalLbl ? '' : d.goalPct ? (gm100 >= 100 ? `${d.goalLbl}（%）` : `${d.goalLbl}（%）÷${gm100}×100`) : `${d.goalLbl}×${Math.round(100 / gm * 10) / 10}`;
+  const gNote = d.goalLbl && d.goalPct && gm100 < 100 ? `（${gm100}%はこのセットを1位で終えたときの${d.goalLbl}）` : '';
   const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（評価の高い順）</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${i === 0 ? '<em class="t-best">最善</em>' : ''}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st">${gTxt(e)}上がり${pct(e.win)}・期待PP ${fx1(e.pp)}${i ? `・差 ${((evs[0].score - e.score) * 100).toFixed(1)}pt` : ''}</span></div>`).join('')}</div>` : '';
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${i === 0 ? '<em class="t-best">最善</em>' : ''}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st">総合 ${(e.score * 100).toFixed(1)}・${gTxt(e)}上がり${pct(e.win)}・期待PP ${fx1(e.pp)}${i ? `・差 ${((evs[0].score - e.score) * 100).toFixed(1)}pt` : ''}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);
@@ -5007,7 +5011,19 @@ function numbersHTML() {
   const N = numbersData(), pc = x => Math.round(x * 100) + '%', f1 = x => (Math.round(x * 10) / 10).toFixed(1);
   const bar = (label, v, max, txt, hi) => `<div class="nb-row wide ${hi ? 'hi' : ''}"><span>${label}</span><i style="width:${Math.max(3, Math.round(v / max * 100))}%"></i><b>${txt}</b></div>`;
   const maxH = Math.max(...Object.values(N.hist));
-  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}</div>`;
+  // 根拠：どうやって出した数字か（タイトルの書き出しで引く）
+  const SRC = [
+    ['「このまま', 'AIの読みと同じ計算です。候補手ごとに、まだ見えていないカードを相手の手札と山札に何千通りも割り振り、最後まで打ち切ってみて失点を平均します（モンテカルロ法）。'],
+    ['1ゲームの平均', '最善手どおりの7.4は、人の席をAIの最善手で打たせた大会160回のシミュレーションで測った値。★4・★3相当の値は、大会の設定画面の決勝進出率の目安と同じものです。'],
+    ['「セット期待点」', `相手${N.pcfg.n - 1}人の強さを「まんべんなく」の割合（★1〜★5を1：1.5：2：1.5：1）で選び、★ごとの1ゲームのPP（平均とばらつき。AIだけの大会600回で測定）から${N.pcfg.games}ゲームの合計を作って順位を決めます。これを6,000セットくり返した平均です。`],
+    ['「決勝進出率」', `参加者の強さを「まんべんなく」の割合で選び、セットごとに卓を作り直して予選${N.cfg.sets}セットを行い、総合順位（得点→累計PP）を決めます。3,000大会のうち上位${N.cfg.finalists}人に入った割合です。自分の1ゲームのPPは打ち方別の平均（ばらつき9.0）を使います。`],
+    ['親（1番手）', `★3どうしの4人卓を、AIだけで実際に${N.G.toLocaleString('ja-JP')}ゲーム打たせ、上がった人の順番を数えました。`],
+    ['上がりまで', `上と同じ${N.G.toLocaleString('ja-JP')}ゲームで、上がった巡と、上がれなかった人の失点を平均しました。`],
+    ['3枚の手札', '3枚の組455通りすべてについて、場1〜13のどれで3枚とも出し切れるかを調べ上げた数です（見込みではなく、計算で確定した値）。'],
+    ['大会で優勝', `決勝進出率と同じ3,000大会で、決勝（進出した${N.cfg.finalists}人で1セット。PPの合計が最少の人が優勝）まで続けた割合です。`]
+  ];
+  const srcOf = t => { const x = SRC.find(([k]) => t.startsWith(k)); return x ? `<details class="nc-src"><summary>根拠</summary><p>${x[1]}</p></details>` : ''; };
+  const card = (num, unit, title, text, extra) => `<div class="num-card"><div class="nc-n"><b>${num}</b><small>${unit}</small></div><div class="nc-t">${title}</div><p>${text}</p>${extra || ''}${srcOf(title)}</div>`;
   const ps = PLAY_STYLES;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">数字で見る計算ブリッジ</div><div></div></div>
   <div class="story"><div class="story-hero"><div class="sh-t">数字で見る<br>計算ブリッジ</div><p class="small">勘を、数字にしてみました</p></div>
