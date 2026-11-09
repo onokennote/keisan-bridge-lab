@@ -108,22 +108,34 @@ async function play(b, c, data, sets, minis, form) {
   } else {
     // いつもの1日：それぞれ6割の確率で1セット。ときどき（3割）新しいメンバーが1人入る
     // ミニゲームは4割の確率で1つ（対局しない日でも遊ぶことがある）
-    // 本物の参加者に、強さに応じて追いついていく：本物のプレイヤーのBPの1位を基準に、★ごとの目標（★1は3割…★5は同じくらい）より
-    // 少なければ、その日は多めに打つ（足りない分に応じて最大3セット＋ミニゲーム2つ）。目標より多ければいつもどおり
+    // 本物の参加者に、強さに応じて追いついていく。目標＝本物のBPの1位×★ごとの割合（★1は3割…★5は同じくらい）
+    //  ・目標より3割以上少ない：その日は多めに打つ（最大3セット＋ミニゲーム2つ）
+    //  ・1〜3割少ない：少し多め／1割以内まで近づいた：ペースを落とす（なかなか追いつかない）
+    //  ・目標に届いた・越えた：ほとんど打たない（離れていかない）
+    //  ・ごくたまに（1日あたり1/14の確率で、1割以内まで近づいたAIのうち1人だけ）ラストスパートの日があり、追い抜くことがある
     let topHuman = 0, aiBp = {};
     try { const j = await (await fetch(API + '?a=rankings')).json(); (j.rankings && j.rankings.bp ? j.rankings.bp.list : []).forEach(r => { if (r.ai) aiBp[r.name] = r.bp; else topHuman = Math.max(topHuman, r.bp); }); } catch (e) { }
+    const close = [];
     for (const x of cur) {
       const c = roster.find(r => r.id === x.cid); if (!c) continue;
-      const target = topHuman * [0.3, 0.45, 0.6, 0.8, 1.0][c.lv - 1], gap = target - (aiBp[c.name] || 0);
-      let sets = Math.random() < 0.6 ? 1 : 0, minis = mini(Math.random() < 0.4 ? 1 : 0);
-      if (gap > 0) { const extra = Math.min(3, Math.ceil(gap / 200)); sets = Math.max(sets, Math.min(3, 1 + Math.floor(extra / 2))); minis = mini(Math.min(2, extra)); x.catchUp = Math.round(gap); }
-      if (sets || minis.length) jobs.push({ c, data: x.data, sets, minis, catchUp: x.catchUp });
+      const target = topHuman * [0.3, 0.45, 0.6, 0.8, 1.0][c.lv - 1], g = target > 0 ? 1 - (aiBp[c.name] || 0) / target : -1;
+      let sets, minis, note = '';
+      if (g > 0.3) { const extra = Math.min(3, Math.ceil((target - (aiBp[c.name] || 0)) / 200)); sets = Math.min(3, 1 + Math.floor(extra / 2)); minis = mini(Math.min(2, extra)); note = `追いつき：あと${Math.round(g * 100)}%`; }
+      else if (g > 0.1) { sets = Math.random() < 0.8 ? 1 + (Math.random() < 0.3 ? 1 : 0) : 0; minis = mini(Math.random() < 0.5 ? 1 : 0); note = `接近中：あと${Math.round(g * 100)}%`; }
+      else if (g > 0) { sets = Math.random() < 0.45 ? 1 : 0; minis = mini(Math.random() < 0.25 ? 1 : 0); note = `目前：あと${Math.round(g * 100)}%`; close.push(c.id); }
+      else if (target > 0) { sets = Math.random() < 0.2 ? 1 : 0; minis = mini(Math.random() < 0.1 ? 1 : 0); note = '目標に到達'; }
+      else { sets = Math.random() < 0.6 ? 1 : 0; minis = mini(Math.random() < 0.4 ? 1 : 0); }
+      if (sets || minis.length) jobs.push({ c, data: x.data, sets, minis, note });
+    }
+    if (close.length && Math.random() < 1 / 14) { // ラストスパート
+      const id = close[rnd(0, close.length - 1)], x = cur.find(y => y.cid === id), c = roster.find(r => r.id === id), j0 = jobs.find(j => j.c.id === id);
+      if (j0) Object.assign(j0, { sets: 3, minis: mini(2), note: 'ラストスパート！' }); else jobs.push({ c, data: x.data, sets: 3, minis: mini(2), note: 'ラストスパート！' });
     }
     console.log('本物の参加者のBPの1位：', topHuman);
     if (cur.length < MAX && Math.random() < 0.3) add([1, 2, 2, 3, 3, 4][rnd(0, 5)], 1);
   }
   if (process.env.KB_AI_LIMIT) { jobs.splice(+process.env.KB_AI_LIMIT); jobs.forEach(j => j.sets = 1); } // 試すとき用
-  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}${j.catchUp ? `（追いつき：あと${j.catchUp}BP）` : ''}`).join(' / '));
+  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}${j.note ? `（${j.note}）` : ''}`).join(' / '));
   // 4人ずつ並べて打つ
   let i = 0; const worker = async () => { while (i < jobs.length) { const j = jobs[i++]; const t0 = Date.now();
     try { const form = rollForm(); const r = await play(b, j.c, j.data, j.sets, j.minis, form); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}（${form.name}）：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
