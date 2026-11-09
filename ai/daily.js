@@ -68,6 +68,7 @@ async function play(b, c, data, sets, minis, form) {
     }
   }
   // ミニゲーム（式ハンター・アウツチャレンジ・早見表・バッジアタック）は、強さに合った結果で「遊んだことにする」（記録とバッジはアプリの本物の処理）
+  await pg.evaluate(() => KBAPP.aiFixAttack()); // 半端なバッジアタックの記録を直す（前の版の分）
   const fAdj = form.name === '不調' ? -0.8 : form.name === '好調' ? 0.3 : 0; // バッジアタックのBPに効く調子
   for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv, fa]) => KBAPP.aiMini(k, lv, fa), [k, Math.max(1, c.lv - (form.name === '不調' ? 2 : form.name === 'ふつう' ? (Math.random() < 0.5 ? 1 : 0) : 0)), fAdj])));
   const out = await pg.evaluate(([pid, c]) => {
@@ -95,6 +96,9 @@ async function play(b, c, data, sets, minis, form) {
   if (MODE === 'seed' || MODE === 'reseed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
+  } else if (MODE === 'fix') {
+    // 記録の直しだけ（対局もミニゲームもしない。開いて保存し直す）
+    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c) jobs.push({ c, data: x.data, sets: 0, minis: [] }); }
   } else if (MODE === 'attack') {
     // バッジアタックの日（手で動かす）：半分くらいのメンバーが1回ずつ挑戦
     for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c && Math.random() < 0.6) jobs.push({ c, data: x.data, sets: 0, minis: ['attack'] }); }
