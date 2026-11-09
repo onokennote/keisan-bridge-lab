@@ -14,7 +14,7 @@ async function api(a, body) {
   const j = await r.json(); if (!j.ok) throw new Error(a + ': ' + (j.error || r.status)); return j;
 }
 // 1人ぶん：記録を戻して、sets セット（1セット5ゲーム）打ち、記録とランキングの数字を返す
-async function play(b, c, data, sets) {
+async function play(b, c, data, sets, minis) {
   const pg = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
   await pg.goto(PAGE); await pg.waitForTimeout(300);
@@ -58,6 +58,8 @@ async function play(b, c, data, sets) {
       await pg.waitForTimeout(st === 'ai' || st === 'wait' ? 25 : 8);
     }
   }
+  // ミニゲーム（式ハンター・アウツチャレンジ・早見表・バッジアタック）は、強さに合った結果で「遊んだことにする」（記録とバッジはアプリの本物の処理）
+  for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv]) => KBAPP.aiMini(k, lv), [k, c.lv])));
   const out = await pg.evaluate(([pid, c]) => {
     const data = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('kb.') && !/^kb\.(cloud|recentLines|migDone|testAskName)/.test(k)) data[k] = localStorage.getItem(k); }
     const st = KBAPP.cloudStats().find(x => x.pid === pid) || {};
@@ -77,20 +79,22 @@ async function play(b, c, data, sets) {
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }
   const pick = lv => { const cands = roster.filter(c => c.lv === lv && !have.has(c.id) && !jobs.some(j => j.c.id === c.id)); return cands[rnd(0, cands.length - 1)]; };
-  const add = (lv, sets) => { const c = pick(lv); if (c) jobs.push({ c, data: null, sets }); };
+  const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
+  const add = (lv, sets) => { const c = pick(lv); if (c) jobs.push({ c, data: null, sets, minis: mini(Math.max(0, sets - 1)) }); };
   if (MODE === 'seed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
   } else {
     // いつもの1日：それぞれ6割の確率で1セット。ときどき（3割）新しいメンバーが1人入る
-    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c && Math.random() < 0.6) jobs.push({ c, data: x.data, sets: 1 }); }
+    // ミニゲームは4割の確率で1つ（対局しない日でも遊ぶことがある）
+    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (!c) continue; const sets = Math.random() < 0.6 ? 1 : 0, minis = mini(Math.random() < 0.4 ? 1 : 0); if (sets || minis.length) jobs.push({ c, data: x.data, sets, minis }); }
     if (cur.length < MAX && Math.random() < 0.3) add([1, 2, 2, 3, 3, 4][rnd(0, 5)], 1);
   }
   if (process.env.KB_AI_LIMIT) { jobs.splice(+process.env.KB_AI_LIMIT); jobs.forEach(j => j.sets = 1); } // 試すとき用
-  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}`).join(' / '));
+  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}`).join(' / '));
   // 4人ずつ並べて打つ
   let i = 0; const worker = async () => { while (i < jobs.length) { const j = jobs[i++]; const t0 = Date.now();
-    try { const r = await play(b, j.c, j.data, j.sets); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
+    try { const r = await play(b, j.c, j.data, j.sets, j.minis); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
     catch (e) { console.log('  失敗', j.c.name, e.message); } } };
   await Promise.all([worker(), worker(), worker(), worker()]);
   await b.close();
