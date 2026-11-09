@@ -14,7 +14,14 @@ async function api(a, body) {
   const j = await r.json(); if (!j.ok) throw new Error(a + ': ' + (j.error || r.status)); return j;
 }
 // 1人ぶん：記録を戻して、sets セット（1セット5ゲーム）打ち、記録とランキングの数字を返す
-async function play(b, c, data, sets, minis) {
+// その日の調子：毎回の判断で、ときどき1〜2段弱い打ち方になる（★5でも推定実力は4点台が中心。たまに大きく崩す）
+function rollForm() {
+  const r = Math.random();
+  if (r < 0.2) return { name: '不調', p: 0.7, by: 2 };
+  if (r < 0.7) return { name: 'ふつう', p: 0.5, by: 1 };
+  return { name: '好調', p: 0.25, by: 1 };
+}
+async function play(b, c, data, sets, minis, form) {
   const pg = await b.newPage({ viewport: { width: 390, height: 844 } }); const errs = [];
   pg.on('pageerror', e => errs.push(e.message));
   await pg.goto(PAGE); await pg.waitForTimeout(300);
@@ -34,10 +41,12 @@ async function play(b, c, data, sets, minis) {
   await pg.reload(); await pg.waitForTimeout(300);
   await pg.evaluate(() => { KBAPP.S.settings.speed = 'instant'; KBAPP.S.settings.autoHint = false; document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); });
   for (let set = 0; set < sets; set++) {
+    const f = set === 0 ? form : rollForm(); // 何セットも打つときは、セットごとに調子が変わる
     await pg.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); });
     await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(200);
     for (let step = 0; step < 60000; step++) {
-      const st = await pg.evaluate(([lv, style]) => {
+      const st = await pg.evaluate(([lv0, style, form]) => {
+        const lv = Math.random() < form.p ? Math.max(1, lv0 - form.by) : lv0; // 調子の波
         const S = KBAPP.S;
         const wk = document.querySelector('[data-act="win-ok"]'); if (wk) { wk.click(); return 'modal'; }
         const m = document.querySelector('#modal'); if (m) { const bt = m.querySelector('[data-act="win-ok"],[data-act="next-game"],#tb-ok,#aim-ok'); if (bt) { bt.click(); return 'modal'; } m.remove(); return 'm'; }
@@ -53,13 +62,13 @@ async function play(b, c, data, sets, minis) {
         const hand = g.hands[p], used = new Set(); S.sel = [];
         for (const v of mv.vals) { const cd = hand.find(x => x.v === v && !used.has(x.id)); used.add(cd.id); S.sel.push(cd.id); }
         KBAPP.act('play'); return 'play';
-      }, [c.lv, c.st]);
+      }, [c.lv, c.st, f]);
       if (st === 'end' && step > 5) break;
       await pg.waitForTimeout(st === 'ai' || st === 'wait' ? 25 : 8);
     }
   }
   // ミニゲーム（式ハンター・アウツチャレンジ・早見表・バッジアタック）は、強さに合った結果で「遊んだことにする」（記録とバッジはアプリの本物の処理）
-  for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv]) => KBAPP.aiMini(k, lv), [k, c.lv])));
+  for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv]) => KBAPP.aiMini(k, lv), [k, Math.max(1, c.lv - (form.name === '不調' ? 2 : form.name === 'ふつう' ? (Math.random() < 0.5 ? 1 : 0) : 0))])));
   const out = await pg.evaluate(([pid, c]) => {
     const data = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('kb.') && !/^kb\.(cloud|recentLines|migDone|testAskName)/.test(k)) data[k] = localStorage.getItem(k); }
     const st = KBAPP.cloudStats().find(x => x.pid === pid) || {};
@@ -76,12 +85,13 @@ async function play(b, c, data, sets, minis) {
   const b = await chromium.launch();
   const pg0 = await b.newPage(); await pg0.goto(PAGE); await pg0.waitForTimeout(300);
   const roster = await pg0.evaluate(() => KB.ROSTER.map(c => ({ id: c.id, name: c.name, lv: c.lv, st: c.st }))); await pg0.close();
+  if (MODE === 'reseed') { for (const x of (await api('ai_list')).list) await api('ai_del', { cid: x.cid }); console.log('いったん全員を引退させて、最初から投入し直します'); }
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }
   const pick = lv => { const cands = roster.filter(c => c.lv === lv && !have.has(c.id) && !jobs.some(j => j.c.id === c.id)); return cands[rnd(0, cands.length - 1)]; };
   const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
   const add = (lv, sets) => { const c = pick(lv); if (c) jobs.push({ c, data: null, sets, minis: mini(Math.max(0, sets - 1)) }); };
-  if (MODE === 'seed') {
+  if (MODE === 'seed' || MODE === 'reseed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
   } else if (MODE === 'catchup') {
@@ -97,7 +107,7 @@ async function play(b, c, data, sets, minis) {
   console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}`).join(' / '));
   // 4人ずつ並べて打つ
   let i = 0; const worker = async () => { while (i < jobs.length) { const j = jobs[i++]; const t0 = Date.now();
-    try { const r = await play(b, j.c, j.data, j.sets, j.minis); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
+    try { const form = rollForm(); const r = await play(b, j.c, j.data, j.sets, j.minis, form); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}（${form.name}）：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
     catch (e) { console.log('  失敗', j.c.name, e.message); } } };
   await Promise.all([worker(), worker(), worker(), worker()]);
   await b.close();
