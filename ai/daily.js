@@ -68,7 +68,8 @@ async function play(b, c, data, sets, minis, form) {
     }
   }
   // ミニゲーム（式ハンター・アウツチャレンジ・早見表・バッジアタック）は、強さに合った結果で「遊んだことにする」（記録とバッジはアプリの本物の処理）
-  for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv]) => KBAPP.aiMini(k, lv), [k, Math.max(1, c.lv - (form.name === '不調' ? 2 : form.name === 'ふつう' ? (Math.random() < 0.5 ? 1 : 0) : 0))])));
+  const fAdj = form.name === '不調' ? -0.8 : form.name === '好調' ? 0.3 : 0; // バッジアタックのBPに効く調子
+  for (const k of minis || []) console.log('  ', c.name, JSON.stringify(await pg.evaluate(([k, lv, fa]) => KBAPP.aiMini(k, lv, fa), [k, Math.max(1, c.lv - (form.name === '不調' ? 2 : form.name === 'ふつう' ? (Math.random() < 0.5 ? 1 : 0) : 0)), fAdj])));
   const out = await pg.evaluate(([pid, c]) => {
     const data = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('kb.') && !/^kb\.(cloud|recentLines|migDone|testAskName)/.test(k)) data[k] = localStorage.getItem(k); }
     const st = KBAPP.cloudStats().find(x => x.pid === pid) || {};
@@ -89,11 +90,14 @@ async function play(b, c, data, sets, minis, form) {
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }
   const pick = lv => { const cands = roster.filter(c => c.lv === lv && !have.has(c.id) && !jobs.some(j => j.c.id === c.id)); return cands[rnd(0, cands.length - 1)]; };
-  const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
+  const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack', 'attack'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
   const add = (lv, sets) => { const c = pick(lv); if (c) jobs.push({ c, data: null, sets, minis: mini(Math.max(0, sets - 1)) }); };
   if (MODE === 'seed' || MODE === 'reseed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
+  } else if (MODE === 'attack') {
+    // バッジアタックの日（手で動かす）：半分くらいのメンバーが1回ずつ挑戦
+    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c && Math.random() < 0.6) jobs.push({ c, data: x.data, sets: 0, minis: ['attack'] }); }
   } else if (MODE === 'catchup') {
     // 追いつき（1回だけ）：いるメンバーに、強さに応じた数のミニゲームを遊ばせる（★5は3〜4回、★1は0〜1回）
     for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (!c) continue; const n = rnd([0, 0, 1, 2, 3][c.lv - 1], [1, 1, 2, 3, 4][c.lv - 1]); if (n) jobs.push({ c, data: x.data, sets: 0, minis: mini(n) }); }
