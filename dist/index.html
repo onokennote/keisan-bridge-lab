@@ -1800,10 +1800,69 @@ body.spectate .me .hand .card{cursor:default}
 .su-step input{width:2.2em}
 .su-unit{white-space:nowrap;font-size:11px}
 .su-item{min-width:0}
+.su-step{justify-content:space-between}
+.su-val{display:flex;align-items:baseline;gap:2px}
+.su-val input{width:2em}
+.su-val small{font-size:11px;color:#c9c2ad;white-space:nowrap}
+.su-val small{display:none}
+.su-val input{width:2.4em;font-size:22px}
+/* ===== 設定画面 v2：ステップ・おすすめ（土台）・開始・カスタム（ゲームのメニュー風） ===== */
+.su{padding-bottom:24px}
+.su-block{display:grid;gap:10px;padding:14px 12px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.18));border:1px solid rgba(242,182,50,.28)}
+.su-bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.su-bh b{font-family:var(--f-display);font-weight:400;font-size:18px;color:#ffd43b}
+.su-bh small{color:#c9c2ad;font-size:12px}
+.su-bh.sm b{font-size:14px}
+.su-step-no{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f2b632;color:#1a1408;font-weight:900;font-size:14px;box-shadow:0 0 10px rgba(242,182,50,.5)}
+.su-preset{position:relative;border-width:2px;transition:transform .12s,box-shadow .12s}
+.su-preset.on{border-color:#ffd43b;background:linear-gradient(180deg,rgba(255,212,59,.38),rgba(242,182,50,.12));box-shadow:0 0 0 3px rgba(255,212,59,.35),0 0 18px rgba(255,212,59,.35);transform:translateY(-2px)}
+.su-preset:not(.on){opacity:.82}
+.sp-check{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ffd43b;color:#1a1408;font-style:normal;font-weight:900;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.su-chips.big .su-chip{flex:1;padding:12px 8px;font-size:16px;border-radius:14px;text-align:center}
+.su-step.big{justify-content:center;gap:18px}
+.su-step.big .su-pm{width:46px;height:46px;font-size:24px}
+.su-step.big input{font-size:34px;width:2.2em}
+.su-step.big .su-val small{display:inline;font-size:13px}
+.su-go{display:grid;gap:6px}
+.su-start{width:100%;font-size:20px;padding:16px;border-radius:18px;box-shadow:0 6px 0 #a87200,0 10px 22px rgba(242,182,50,.35)}
+.su-start:active{transform:translateY(3px);box-shadow:0 3px 0 #a87200}
+/* カスタム設定：暗いゲームメニュー */
+.su-custom{border-radius:18px;background:linear-gradient(180deg,#0d1f2b,#0a1712);border:2px solid #2c4a5a;box-shadow:inset 0 0 0 1px rgba(116,192,252,.12),0 8px 20px rgba(0,0,0,.35);overflow:hidden}
+.su-custom>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;cursor:pointer;background:linear-gradient(90deg,rgba(116,192,252,.18),rgba(116,192,252,0))}
+.su-custom>summary::-webkit-details-marker{display:none}
+.su-custom>summary span{font-family:var(--f-display);font-size:18px;color:#a5d8ff;letter-spacing:.04em}
+.su-custom>summary small{color:#7fa8bf;font-size:11px}
+.su-custom[open]>summary{border-bottom:1px solid rgba(116,192,252,.25)}
+.su-gs{display:grid;gap:8px;padding:10px}
+.su-g{border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(116,192,252,.18)}
+.su-g.open{border-color:rgba(116,192,252,.5);box-shadow:0 0 14px rgba(116,192,252,.15)}
+.su-gh{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.su-gi{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#123447;font-size:18px;box-shadow:inset 0 0 0 1px rgba(116,192,252,.35)}
+.su-gt{flex:1;display:grid;gap:1px;min-width:0}
+.su-gt b{font-size:14px;color:#e7f5ff}
+.su-gt small{font-size:11px;color:#8fb8cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.su-ga{color:#74c0fc;font-size:12px}
+.su-gb{display:grid;gap:10px;padding:4px 12px 12px}
+.su-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.su-row.col{flex-direction:column;align-items:stretch;gap:6px}
+.su-row b{font-size:13px;color:#e7f5ff}
+.su-rl{display:grid;gap:2px;min-width:0}
+.su-rl small{font-size:11px;color:#8fb8cf;line-height:1.4}
+.su-seg{display:flex;flex-wrap:wrap;gap:4px;padding:3px;border-radius:12px;background:#08131b;border:1px solid rgba(116,192,252,.25)}
+.su-seg button{flex:1 1 auto;padding:8px 10px;border-radius:9px;border:0;background:none;color:#a5c8db;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.su-seg button.on{background:linear-gradient(180deg,#74c0fc,#339af0);color:#06121a;box-shadow:0 0 10px rgba(116,192,252,.6)}
+.su-sw{flex:0 0 auto;position:relative;width:54px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:#2a3540;cursor:pointer;transition:background .15s}
+.su-sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#cfd8dc;transition:left .15s,background .15s;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.su-sw.on{background:linear-gradient(90deg,#2b8a3e,#51cf66);border-color:#8ce99a;box-shadow:0 0 10px rgba(81,207,102,.45)}
+.su-sw.on i{left:27px;background:#fff}
+.su-in{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(116,192,252,.35);background:#08131b;color:#e7f5ff;font:inherit;font-size:16px}
+.su-custom .su-table{margin-top:4px}
+.su-custom .su-seated{background:rgba(0,0,0,.3)}
+.su-custom .su-step input{color:#e7f5ff}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='bd825ea9bf';
+window.KB_BUILD='1c58150227';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5654,8 +5713,9 @@ function estimateQualify(cfg, myMu) {
   }
   return q / N;
 }
-function readTourCfg() {
-  return { nPlayers: Math.max(5, Math.min(40, +$('#t-n').value || 17)), sets: Math.max(1, Math.min(8, +$('#t-sets').value || 4)), games: Math.max(1, Math.min(10, +$('#t-games').value || 5)), points: readPoints($('#t-points').value), finalists: Math.max(2, Math.min(5, +$('#t-fin').value || 5)), tie: ($('#t-tie') || { value: 'janken' }).value, mix: $('#t-mix').value };
+function readTourCfg() { // 閉じているグループの欄は画面にないので、そのときは下書き（suT）の値を使う
+  const d = S.suT || DEF_T, v = (id, x) => { const e = $(id); return e ? e.value : x; };
+  return { nPlayers: Math.max(5, Math.min(40, +v('#t-n', d.nPlayers) || 17)), sets: Math.max(1, Math.min(8, +v('#t-sets', d.sets) || 3)), games: Math.max(1, Math.min(10, +v('#t-games', d.games) || 5)), points: readPoints(v('#t-points', d.points.join(','))), finalists: Math.max(2, Math.min(5, +v('#t-fin', d.finalists) || 5)), tie: v('#t-tie', d.tie || 'janken'), mix: v('#t-mix', d.mix || 'even'), preset: d.preset };
 }
 function renderEst() {
   const el = $('#t-est'); const w = $('#t-est-wrap'); if (!el || !w || (w.tagName === 'DETAILS' && !w.open)) return;
@@ -5920,7 +5980,7 @@ function ruleBoxHTML(kind) {
     const avg = lv.length ? lv.reduce((a, b) => a + b, 0) / lv.length : 0, rnd = [...document.querySelectorAll('.opp-row')].filter(r => !r.hidden).some(r => r.querySelector('.o-lv').value === 'r');
     rows = [[n >= ELIG.table, `卓の人数 ${ELIG.table}人以上（いま${n}人）`], [games >= ELIG.games, `1セット ${ELIG.games}ゲーム以上（いま${games}ゲーム）`], [avg >= ELIG.oppAvg, `相手の平均の強さ ★${ELIG.oppAvg}以上（いま★${avg.toFixed(1)}${rnd ? '・ランダムは見込み。実際に決まった強さで判定' : ''}）`]];
   } else {
-    const n = +(($('#t-n') || {}).value || 17), sets = +(($('#t-sets') || {}).value || 4), games = +(($('#t-games') || {}).value || 5), mix = ($('#t-mix') || {}).value || 'random', avg = MIX_AVG(mix);
+    const tc = readTourCfg(), n = tc.nPlayers, sets = tc.sets, games = tc.games, mix = tc.mix, avg = MIX_AVG(mix);
     rows = [[n >= ELIG.tourPlayers, `参加人数 ${ELIG.tourPlayers}人以上（いま${n}人）`], [sets >= ELIG.tourSets, `予選 ${ELIG.tourSets}セット以上（いま${sets}セット）`], [games >= ELIG.games, `1セット ${ELIG.games}ゲーム以上（いま${games}ゲーム）`], [avg >= ELIG.oppAvg, `AIの平均の強さ ★${ELIG.oppAvg}以上（いま★${avg.toFixed(1)}の見込み。実際に決まった強さで判定）`]];
   }
   all = rows.every(r => r[0]);
@@ -7876,85 +7936,88 @@ ${growthCardHTML()}
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
 
-// ---------- 設定画面（卓をつくる）：おすすめ・卓のイラスト・チップで選ぶ。細かい設定は「こだわり設定」にたたむ ----------
-const DEF_P = { n: 4, games: 5, mix: 'random', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
-const DEF_T = { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'random' };
+// ---------- 設定画面：おすすめセット（土台を1つ選ぶ）→ゲーム数（大会は予選のセット数）→開始。細かいことは「カスタム設定」にたたむ ----------
+const DEF_P = { n: 4, games: 3, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
+const DEF_T = { nPlayers: 17, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
 const SU_PRESETS = [
-  { k: 'first', icon: '🐣', label: 'はじめて', sub: '★1〜2・3ゲーム', p: c => { c.n = 4; c.games = 3; c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 9, sets: 2, games: 3, finalists: 3, mix: 'casual' }) },
-  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく・5ゲーム', p: c => { c.n = 4; c.games = 5; c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'even' }) },
-  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.n = 4; c.games = 5; c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'strong' }) },
-  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員達人', p: c => { c.n = 4; c.games = 5; c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'master' }) }
+  { k: 'first', icon: '🐣', label: 'はじめて', sub: '相手は★1〜2', p: c => { c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { mix: 'casual', nPlayers: 9, games: 3, finalists: 3 }), tsub: '★1〜2・9人の小さな大会' },
+  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく', p: c => { c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'even', nPlayers: 17, games: 5, finalists: 5 }), tsub: 'まんべんなく・17人' },
+  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'strong', nPlayers: 17, games: 5, finalists: 5 }), tsub: '強豪ぞろい・17人' },
+  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員★5', p: c => { c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { mix: 'master', nPlayers: 17, games: 5, finalists: 5 }), tsub: '全員達人・17人' }
 ];
-const MIX_ICON = { random: '🎲', casual: '🐣', even: '⚖️', strong: '🔥', master: '👑' };
-const suP = () => { if (!S.suP) { S.suP = JSON.parse(JSON.stringify(store.get('cfgPractice', DEF_P))); while (S.suP.opps.length < 4) S.suP.opps.push({ level: 'r', style: 'r' }); } return S.suP; };
-const suT = () => S.suT || (S.suT = JSON.parse(JSON.stringify(store.get('cfgTour', DEF_T))));
+const MIX_PRESET = { casual: 'first', even: 'usual', random: 'usual', strong: 'strong', master: 'master' };
+const suP = () => { if (!S.suP) { S.suP = JSON.parse(JSON.stringify(store.get('cfgPractice', DEF_P))); while (S.suP.opps.length < 4) S.suP.opps.push({ level: 'r', style: 'r' }); S.suP.preset = S.suP.preset || MIX_PRESET[S.suP.mix] || 'usual'; } return S.suP; };
+const suT = () => { if (!S.suT) { S.suT = JSON.parse(JSON.stringify(store.get('cfgTour', DEF_T))); S.suT.preset = S.suT.preset || MIX_PRESET[S.suT.mix] || 'usual'; } return S.suT; };
 // マサの合いの手（選んだ内容に反応）
 function suMasa(kind) {
-  const c = kind === 'tour' ? suT() : suP(), mix = c.mix, lv = kind === 'tour' ? [] : c.opps.slice(0, c.n - 1).map(o => o.level);
-  if (kind === 'practice' && lv.length && lv.every(x => x === '5')) return '全員達人か！ええ度胸や！ワールドカップの決勝に乗り込むようなもんやで！';
-  if (mix === 'master') return kind === 'tour' ? '全員達人の大会か！ええ度胸や！謎のシード選手も出てくるかもしれへんで！' : 'おまかせの席は全員達人や！ええ度胸や！';
-  if (mix === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！シード選手が出てくることもあるで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
+  const c = kind === 'tour' ? suT() : suP(), lv = kind === 'tour' ? [] : c.opps.slice(0, c.n - 1).map(o => o.level);
+  if (c.preset === 'master') return kind === 'tour' ? '全員達人の大会か！ええ度胸や！謎のシード選手も出てくるかもしれへんで！' : '全員達人か！ええ度胸や！ワールドカップの決勝に乗り込むようなもんやで！';
+  if (c.preset === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！シード選手が出てくることもあるで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
   if (kind === 'practice' && c.n === 2) return 'サシの勝負や！ポーカーのヘッズアップみたいなもんやで！';
-  if (mix === 'casual' || (kind === 'practice' && lv.length && lv.every(x => x === '1' || x === '2'))) return '肩慣らしにちょうどええな！まずは楽しんでいこか！';
-  if (kind === 'tour' && c.nPlayers >= 30) return `${c.nPlayers}人の大舞台や！満員のスタジアムやで！`;
-  return kind === 'tour' ? 'ほな、大会の準備や！どんな相手がおるか楽しみやな！' : 'ほな、卓をつくろか！誰と打つか決めてや！';
+  if (c.preset === 'first') return '肩慣らしにちょうどええな！まずは楽しんでいこか！';
+  if (kind === 'practice' && c.games >= 7) return `${c.games}ゲームの長丁場や！スタミナ勝負やで！`;
+  return kind === 'tour' ? 'ほな、大会の準備や！どんな相手がおるか楽しみやな！' : 'ほな、卓をつくろか！今日はどの相手と打つ？';
 }
 const suChip = (su, v, label, on, extra) => `<button class="su-chip ${on ? 'on' : ''}" data-su="${su}" data-v="${esc(String(v))}" ${extra || ''}>${label}</button>`;
-function suHeadHTML(kind) {
-  return `<div class="su-masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(suMasa(kind))}</div></div>
-  <div class="su-presets">${SU_PRESETS.map(p => `<button class="su-preset" data-su="preset" data-v="${p.k}"><span class="sp-ic">${p.icon}</span><b>${p.label}</b><small>${p.sub}</small></button>`).join('')}</div>`;
-}
-function suMixHTML(kind, c) {
-  return `<div class="su-mix">${Object.entries(MIX).map(([k, v]) => `<button class="su-mixc ${c.mix === k ? 'on' : ''}" data-su="mix" data-v="${k}"><span>${MIX_ICON[k] || ''}</span><b>${esc(v.label)}</b><small>平均★${MIX_AVG(k).toFixed(1)}</small></button>`).join('')}</div>`;
-}
-// こだわり設定（練習・大会で共通。ホームから移した設定もここ）
-function suAdvHTML(kind) {
+const suSeg = (su, opts, cur) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" data-su="${su}" data-v="${esc(String(v))}">${l}</button>`).join('')}</div>`;
+const suSw = (key, on, label, note) => `<div class="su-row"><div class="su-rl"><b>${label}</b>${note ? `<small>${note}</small>` : ''}</div><button class="su-sw ${on ? 'on' : ''}" data-su="sw" data-v="${key}" role="switch" aria-checked="${on}" aria-label="${esc(label)}"><i></i></button></div>`;
+function suPresetHTML(kind) {
   const c = kind === 'tour' ? suT() : suP();
-  return `<details class="panel su-adv" id="su-adv" ${S.suAdv ? 'open' : ''}><summary>⚙ こだわり設定</summary>
-  <div class="su-grp"><div class="lbl">対局の進み方</div>
-    <div class="field"><label>AIの手番の速さ</label><div class="su-chips">${Object.entries({ slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }).map(([k, v]) => suChip('speed', k, v, S.settings.speed === k)).join('')}</div></div>
-    ${judgeHTML()}
-    <label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label></div>
-  <div class="su-grp"><div class="lbl">実況・解説</div>
-    <div class="field"><label>実況・解説</label><select class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
-    ${cmOthersHTML()}
-    <label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label></div>
-  <div class="su-grp"><div class="lbl">表示とAIの読み</div>
-    <label class="check"><input type="checkbox" id="set-lv" ${S.settings.showLevel ? 'checked' : ''}> 相手の強さを表示</label>
-    <label class="check"><input type="checkbox" id="set-st" ${S.settings.showStyle ? 'checked' : ''}> 相手の性格を表示</label>
-    <p class="small muted" style="margin:0">強さ・性格を隠すと、AIの読みも「相手は中級・平均的な打ち手」と仮定して計算します。</p>
-    <label class="check"><input type="checkbox" id="set-auto" ${S.settings.autoHint ? 'checked' : ''}> 自分の番で自動的にAIの読みを出す</label>
-    <p class="small muted" style="margin:0">オンにすると毎回AIの読みを見ることになるため、成績のバッジ（上がり・最善・セット・大会など）は対象外になります。</p></div>
-  <div class="su-grp"><div class="lbl">効果音</div><div class="su-chips">${Object.entries(KB.SFX_LEVELS).map(([k, v]) => suChip('snd', k, v[0], S.settings.sndLv === k)).join('')}</div></div>
-  <div class="su-grp"><div class="lbl">得点のつけ方</div>
-    <div class="field"><label for="${kind === 'tour' ? 't' : 'p'}-points">セット順位の得点（1位,2位,…）</label><input id="${kind === 'tour' ? 't' : 'p'}-points" value="${c.points.join(',')}"><div class="hint">表にない順位は0点</div></div>
-    ${kind === 'tour' ? `<div class="field"><label for="t-tie">同点（得点・PPとも同じ）のとき</label><select id="t-tie"><option value="janken" ${c.tie === 'janken' ? 'selected' : ''}>ジャンケン</option><option value="sudden" ${c.tie === 'sudden' ? 'selected' : ''}>サドンデス（1ゲーム勝負）</option></select></div>` : ''}</div>
-  </details>`;
+  return `<div class="su-masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(suMasa(kind))}</div></div>
+  <section class="su-block"><div class="su-bh"><span class="su-step-no">1</span><b>相手を選ぶ</b><small>おすすめセットから1つ</small></div>
+  <div class="su-presets">${SU_PRESETS.map(p => `<button class="su-preset ${c.preset === p.k ? 'on' : ''}" data-su="preset" data-v="${p.k}" aria-pressed="${c.preset === p.k}"><span class="sp-ic">${p.icon}</span><b>${p.label}</b><small>${kind === 'tour' ? p.tsub : p.sub}</small>${c.preset === p.k ? '<i class="sp-check">✓</i>' : ''}</button>`).join('')}</div></section>`;
 }
-function suFootHTML(act, label) {
-  return `<div class="su-foot"><details class="su-badge"><summary id="rule-sum">バッジの条件</summary><div class="badge-rule" id="rule-box"></div></details><button class="btn primary su-start" data-act="${act}">${label}</button></div>`;
+// 開始ボタンとバッジの対象（🏅／⚠。押すと条件）
+function suStartHTML(act, label) {
+  return `<div class="su-go"><button class="btn primary su-start" data-act="${act}">${label}</button><details class="su-badge"><summary id="rule-sum">バッジの条件</summary><div class="badge-rule" id="rule-box"></div></details></div>`;
+}
+// カスタム設定：ゲームのメニュー風。グループごとに開け閉めできる
+function suGroup(id, icon, title, now, body) {
+  const open = !!(S.suOpen && S.suOpen[id]);
+  return `<div class="su-g ${open ? 'open' : ''}"><button class="su-gh" data-su="grp" data-v="${id}" aria-expanded="${open}"><span class="su-gi">${icon}</span><span class="su-gt"><b>${title}</b><small>${now}</small></span><span class="su-ga">${open ? '▲' : '▼'}</span></button>${open ? `<div class="su-gb">${body}</div>` : ''}</div>`;
+}
+function suCustomHTML(kind, tableGroup) {
+  const c = kind === 'tour' ? suT() : suP(), st = S.settings;
+  const SPD = { slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }, JG = { before: '出す前に表示', after3: '出した後（お手つき3枚）', after2: '出した後（お手つき2枚）' }, CM = { both: '博士とマサ', root: '博士だけ', masa: 'マサだけ', off: 'なし' };
+  const fast = st.speed === 'fast' || st.speed === 'instant';
+  const groups = [tableGroup,
+    suGroup('pace', '⏱️', '対局の進み方', `速さ：${SPD[st.speed] || 'ふつう'}・判定：${JG[st.judge || 'before']}`,
+      `<div class="su-row col"><b>AIの手番の速さ</b>${suSeg('speed', Object.entries(SPD), st.speed)}</div>
+       <div class="su-row col"><b>計算式の判定</b>${suSeg('judge', Object.entries(JG), st.judge || 'before')}</div>
+       ${suSw('warnMiss', !!st.warnMiss, '「引く」の前に確認', '出せるのに引こうとしたら確認する（あえて引くのもOK）')}`),
+    suGroup('talk', '🎙️', '実況・解説', `${CM[st.commentary] || '博士とマサ'}${st.spoiler ? '・ネタバレあり' : ''}`,
+      `<div class="su-row col"><b>実況・解説</b>${suSeg('cm', Object.entries(CM), st.commentary)}</div>
+       ${fast ? '<p class="small muted" style="margin:0">速さが「はやい」「一瞬」のときは、実況は自分の手だけです。</p>' : suSw('cmOthers', st.cmOthers !== false, 'ほかの人の手も実況')}
+       ${suSw('spoiler', !!st.spoiler, 'ネタバレありのツッコミ', '実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」）')}`),
+    suGroup('view', '👁️', '表示とAIの読み', `強さ${st.showLevel ? '表示' : 'かくす'}・性格${st.showStyle ? '表示' : 'かくす'}${st.autoHint ? '・読みを自動' : ''}`,
+      `${suSw('showLevel', !!st.showLevel, '相手の強さを表示')}${suSw('showStyle', !!st.showStyle, '相手の性格を表示', 'かくすと、AIの読みも「相手は中級・平均的」と仮定して計算します')}
+       ${suSw('autoHint', !!st.autoHint, '自分の番で自動的にAIの読み', 'オンにすると成績のバッジは対象外になります')}`),
+    suGroup('snd', '🔊', '効果音', `音量：${(KB.SFX_LEVELS[st.sndLv] || KB.SFX_LEVELS.l)[0]}`, `<div class="su-row col">${suSeg('snd', Object.entries(KB.SFX_LEVELS).map(([k, v]) => [k, v[0]]), st.sndLv)}</div>`),
+    suGroup('pts', '🏅', '得点のつけ方', `${c.points.join('・')}点${kind === 'tour' ? '・同点は' + (c.tie === 'sudden' ? 'サドンデス' : 'ジャンケン') : ''}`,
+      `<div class="su-row col"><b>セット順位の得点（1位,2位,…）</b><input id="${kind === 'tour' ? 't' : 'p'}-points" class="su-in" value="${c.points.join(',')}"><small class="muted">表にない順位は0点</small></div>
+       ${kind === 'tour' ? `<div class="su-row col"><b>同点（得点・PPとも同じ）のとき</b>${suSeg('tie', [['janken', 'ジャンケン'], ['sudden', 'サドンデス']], c.tie)}</div><input type="hidden" id="t-tie" value="${c.tie}">` : ''}`)];
+  return `<details class="su-custom" id="su-adv" ${S.suAdv ? 'open' : ''}><summary><span>⚙️ カスタム設定</span><small>ふだんは変えなくてOK</small></summary><div class="su-gs">${groups.join('')}</div></details>`;
 }
 function setupPracticeHTML() {
   const c = suP(), sts = KB.getStrategy().styles, k = c.n - 1, sel = S.suSeat != null && S.suSeat < k ? S.suSeat : null;
-  // 卓のイラスト：下が自分、相手は上の弧に並ぶ。席を押すと強さ・性格を選べる
   const pos = i => { const a = Math.PI * (k === 1 ? 0.5 : 0.12 + 0.76 * (i / (k - 1))); return `left:${(50 - 42 * Math.cos(a)).toFixed(1)}%;top:${(52 - 40 * Math.sin(a)).toFixed(1)}%`; };
   const seat = i => { const o = c.opps[i], st = sts.find(x => x.id === o.style); return `<button class="su-seat ${sel === i ? 'on' : ''}" style="${pos(i)};${st ? `--sc:${st.color}` : ''}" data-su="seat" data-v="${i}" aria-label="相手${i + 1}の設定">
     <span class="ss-face">${o.level === 'r' ? '？' : '★' + o.level}</span><small>${o.level === 'r' ? 'おまかせ' : esc(KB.levelCfg(+o.level).label)}</small><small class="ss-st">${st ? esc(st.label) : '性格おまかせ'}</small></button>`; };
-  const ed = sel == null ? `<p class="small muted su-hint">席を押すと、その相手の強さと性格を選べます</p>` : `<div class="su-seated"><div class="lbl">相手${sel + 1}</div>
+  const ed = sel == null ? `<p class="small muted su-hint">席を押すと、その相手の強さと性格を選べます（「おまかせ」はおすすめセットの強さ）</p>` : `<div class="su-seated"><div class="lbl">相手${sel + 1}</div>
     <div class="su-chips">${suChip('lv', 'r', 'おまかせ', c.opps[sel].level === 'r')}${[1, 2, 3, 4, 5].map(l => suChip('lv', l, `★${l} ${esc(KB.levelCfg(l).label)}`, String(c.opps[sel].level) === String(l))).join('')}</div>
     <div class="su-chips">${suChip('st', 'r', '性格おまかせ', c.opps[sel].style === 'r')}${sts.map(x => suChip('st', x.id, esc(x.label), c.opps[sel].style === x.id, `style="--sc:${esc(x.color)}"`)).join('')}</div></div>`;
+  const fixed = c.opps.slice(0, k).filter(o => o.level !== 'r' || o.style !== 'r').length;
+  const table = suGroup('table', '🪑', '卓（人数・相手ひとりずつ）', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
+    `<div class="su-row"><div class="su-rl"><b>卓の人数</b><small>あなたを含む</small></div><span class="su-n"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><b>${c.n}人</b><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></span></div>
+     <div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
   const hidden = `<div hidden><input id="p-n" value="${c.n}"><input id="p-games" value="${c.games}"><input id="p-mix" value="${c.mix}">${c.opps.map((o, i) => `<div class="opp-row" data-i="${i}" ${i >= k ? 'hidden' : ''}><select class="o-lv"><option value="${o.level}" selected></option></select><select class="o-st"><option value="${o.style}" selected></option></select></div>`).join('')}</div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">1セット練習</div><div></div></div>
 <div class="su">
-${suHeadHTML('practice')}
-<section class="panel su-card"><div class="su-h"><b>卓</b><span class="su-n"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><b>${c.n}人</b><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></span></div>
-  <div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>
-  ${ed}</section>
-<section class="panel su-card"><div class="su-h"><b>1セットのゲーム数</b></div><div class="su-chips">${[1, 3, 5, 7, 10].map(n => suChip('games', n, n + 'ゲーム', c.games === n)).join('')}</div></section>
-<section class="panel su-card"><div class="su-h"><b>「おまかせ」の席の強さ</b></div>${suMixHTML('practice', c)}</section>
-${suAdvHTML('practice')}
+${suPresetHTML('practice')}
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数</b><small>1セットで何ゲーム打つか</small></div><div class="su-chips big">${[3, 5, 7].map(n => suChip('games', n, n + 'ゲーム', c.games === n)).join('')}</div></section>
+${suStartHTML('start-practice', 'この卓ではじめる')}
+${suCustomHTML('practice', table)}
 ${hidden}
-${suFootHTML('start-practice', 'この卓ではじめる')}
 </div>`;
 }
 function suTourRefresh() {
@@ -7967,20 +8030,25 @@ function suTourRefresh() {
 function suTap(d) {
   const tour = S.view === 'setup-tour', c = tour ? suT() : suP(), v = d.v;
   if (!tour) { const pts = $('#p-points'); if (pts) c.points = readPoints(pts.value); } else Object.assign(c, readTourCfg());
+  const st = S.settings, save = () => store.set('settings', st);
   switch (d.su) {
-    case 'preset': { const p = SU_PRESETS.find(x => x.k === v); if (p) { (tour ? p.t : p.p)(c); S.suSeat = null; toast(`「${p.label}」の設定にしました`); } break; }
+    case 'preset': { const p = SU_PRESETS.find(x => x.k === v); if (p) { (tour ? p.t : p.p)(c); c.preset = v; S.suSeat = null; } break; }
     case 'n': c.n = Math.max(2, Math.min(5, c.n + (+v))); break;
     case 'seat': S.suSeat = S.suSeat === +v ? null : +v; break;
     case 'lv': if (S.suSeat != null) c.opps[S.suSeat].level = String(v); break;
     case 'st': if (S.suSeat != null) c.opps[S.suSeat].style = v; break;
     case 'games': c.games = +v; break;
-    case 'mix': c.mix = v; break;
     case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
     case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
     case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tfin': c.finalists = Math.max(2, Math.min(5, c.finalists + (+v))); break;
-    case 'speed': S.settings.speed = v; store.set('settings', S.settings); break;
+    case 'tie': c.tie = v; break;
+    case 'grp': S.suOpen = S.suOpen || {}; S.suOpen[v] = !S.suOpen[v]; break;
+    case 'speed': st.speed = v; save(); break;
+    case 'judge': st.judge = v; st.judgeSet = true; save(); break;
+    case 'cm': st.commentary = v; save(); break;
     case 'snd': setSnd(v); break;
+    case 'sw': if (v === 'cmOthers') st.cmOthers = st.cmOthers === false; else st[v] = !st[v]; save(); KB.sfx('click'); break;
   }
   const y = window.scrollY; render(); window.scrollTo(0, y);
 }
@@ -8014,23 +8082,19 @@ const judgeAfter = () => (S.settings.judge || 'before') !== 'before';
 const foulN = () => S.settings.judge === 'after2' ? 2 : 3;
 function setupTourHTML() {
   const c = suT(), sizes = KB.splitTables(c.nPlayers, 5);
-  const step = (su, id, val, min, max, unit) => `<div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric"><span class="su-unit">${unit}</span><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div>`;
+  const step = (su, id, val, min, max, label) => `<div class="su-row"><div class="su-rl"><b>${label}</b></div><div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric" aria-label="${esc(label)}"><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>`;
+  const tables = `<div class="su-tables" id="t-tables" aria-label="卓分け">${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small></div>`;
+  const size = suGroup('size', '🏟️', '大会の規模', `${c.nPlayers}人・${sizes.length}卓・${c.games}ゲーム・決勝${c.finalists}人`,
+    `${step('tn', 't-n', c.nPlayers, 5, 40, '参加人数（あなたを含む）')}${step('tgames', 't-games', c.games, 1, 10, '1セットのゲーム数')}${step('tfin', 't-fin', c.finalists, 2, 5, '決勝に進める人数')}${tables}`);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">大会モード</div><div></div></div>
 <div class="su">
-${suHeadHTML('tour')}
-<section class="panel su-card su-poster"><div class="sp-title">🏆 計算ブリッジ大会</div>
-  <div class="su-grid">
-    <div class="su-item"><small>参加人数（あなたを含む）</small>${step('tn', 't-n', c.nPlayers, 5, 40, '人')}</div>
-    <div class="su-item"><small>予選</small>${step('tsets', 't-sets', c.sets, 1, 8, 'セット')}</div>
-    <div class="su-item"><small>1セットのゲーム数</small>${step('tgames', 't-games', c.games, 1, 10, 'ゲーム')}</div>
-    <div class="su-item"><small>決勝に進める人数</small>${step('tfin', 't-fin', c.finalists, 2, 5, '人')}</div>
-  </div>
-  <div class="su-tables" id="t-tables" aria-label="卓分け">${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small></div>
-</section>
-<section class="panel su-card"><div class="su-h"><b>相手の強さの混ざり方</b></div>${suMixHTML('tour', c)}<input type="hidden" id="t-mix" value="${c.mix}"><p class="small muted" style="margin:0">性格はランダム。「強豪ぞろい」「全員達人」では、決勝に謎のシード選手が現れることがあります。</p></section>
-<section class="panel su-card est-box" id="t-est-wrap"><div class="su-h"><b>この設定での決勝進出率の目安</b></div><div id="t-est" aria-live="polite"></div></section>
-${suAdvHTML('tour')}
-${suFootHTML('start-tour', '大会を開始')}
+${suPresetHTML('tour')}
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
+  <div class="su-step big"><button class="su-pm" data-su="tsets" data-v="-1" ${c.sets <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="t-sets" type="number" min="1" max="8" value="${c.sets}" inputmode="numeric" aria-label="予選のセット数"><small>セット</small></span><button class="su-pm" data-su="tsets" data-v="1" ${c.sets >= 8 ? 'disabled' : ''} aria-label="増やす">＋</button></div>
+  <div class="est-box" id="t-est-wrap"><div class="su-bh sm"><b>この設定での決勝進出率の目安</b></div><div id="t-est" aria-live="polite"></div></div></section>
+${suStartHTML('start-tour', '大会を開始')}
+${suCustomHTML('tour', size)}
+<input type="hidden" id="t-mix" value="${c.mix}">
 </div>`;
 }
 
@@ -10461,7 +10525,7 @@ function act(a, el) {
     case 'start-practice': {
       const n = +$('#p-n').value;
       const opps = []; document.querySelectorAll('.opp-row').forEach(r => opps.push({ level: r.querySelector('.o-lv').value, style: r.querySelector('.o-st').value }));
-      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: readPoints($('#p-points').value) };
+      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: readPoints($('#p-points') ? $('#p-points').value : suP().points.join(',')), preset: suP().preset };
       store.set('cfgPractice', c);
       S.T = newSession({ kind: 'practice', games: c.games, mix: c.mix, opps: opps.slice(0, n - 1), points: c.points, tie: 'janken' });
       stat('pStart'); startSet(); break;

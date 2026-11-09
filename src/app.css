@@ -1803,3 +1803,56 @@ body.spectate .me .hand .card{cursor:default}
 .su-val small{font-size:11px;color:#c9c2ad;white-space:nowrap}
 .su-val small{display:none}
 .su-val input{width:2.4em;font-size:22px}
+/* ===== 設定画面 v2：ステップ・おすすめ（土台）・開始・カスタム（ゲームのメニュー風） ===== */
+.su{padding-bottom:24px}
+.su-block{display:grid;gap:10px;padding:14px 12px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.18));border:1px solid rgba(242,182,50,.28)}
+.su-bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.su-bh b{font-family:var(--f-display);font-weight:400;font-size:18px;color:#ffd43b}
+.su-bh small{color:#c9c2ad;font-size:12px}
+.su-bh.sm b{font-size:14px}
+.su-step-no{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f2b632;color:#1a1408;font-weight:900;font-size:14px;box-shadow:0 0 10px rgba(242,182,50,.5)}
+.su-preset{position:relative;border-width:2px;transition:transform .12s,box-shadow .12s}
+.su-preset.on{border-color:#ffd43b;background:linear-gradient(180deg,rgba(255,212,59,.38),rgba(242,182,50,.12));box-shadow:0 0 0 3px rgba(255,212,59,.35),0 0 18px rgba(255,212,59,.35);transform:translateY(-2px)}
+.su-preset:not(.on){opacity:.82}
+.sp-check{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ffd43b;color:#1a1408;font-style:normal;font-weight:900;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.su-chips.big .su-chip{flex:1;padding:12px 8px;font-size:16px;border-radius:14px;text-align:center}
+.su-step.big{justify-content:center;gap:18px}
+.su-step.big .su-pm{width:46px;height:46px;font-size:24px}
+.su-step.big input{font-size:34px;width:2.2em}
+.su-step.big .su-val small{display:inline;font-size:13px}
+.su-go{display:grid;gap:6px}
+.su-start{width:100%;font-size:20px;padding:16px;border-radius:18px;box-shadow:0 6px 0 #a87200,0 10px 22px rgba(242,182,50,.35)}
+.su-start:active{transform:translateY(3px);box-shadow:0 3px 0 #a87200}
+/* カスタム設定：暗いゲームメニュー */
+.su-custom{border-radius:18px;background:linear-gradient(180deg,#0d1f2b,#0a1712);border:2px solid #2c4a5a;box-shadow:inset 0 0 0 1px rgba(116,192,252,.12),0 8px 20px rgba(0,0,0,.35);overflow:hidden}
+.su-custom>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;cursor:pointer;background:linear-gradient(90deg,rgba(116,192,252,.18),rgba(116,192,252,0))}
+.su-custom>summary::-webkit-details-marker{display:none}
+.su-custom>summary span{font-family:var(--f-display);font-size:18px;color:#a5d8ff;letter-spacing:.04em}
+.su-custom>summary small{color:#7fa8bf;font-size:11px}
+.su-custom[open]>summary{border-bottom:1px solid rgba(116,192,252,.25)}
+.su-gs{display:grid;gap:8px;padding:10px}
+.su-g{border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(116,192,252,.18)}
+.su-g.open{border-color:rgba(116,192,252,.5);box-shadow:0 0 14px rgba(116,192,252,.15)}
+.su-gh{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.su-gi{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#123447;font-size:18px;box-shadow:inset 0 0 0 1px rgba(116,192,252,.35)}
+.su-gt{flex:1;display:grid;gap:1px;min-width:0}
+.su-gt b{font-size:14px;color:#e7f5ff}
+.su-gt small{font-size:11px;color:#8fb8cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.su-ga{color:#74c0fc;font-size:12px}
+.su-gb{display:grid;gap:10px;padding:4px 12px 12px}
+.su-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.su-row.col{flex-direction:column;align-items:stretch;gap:6px}
+.su-row b{font-size:13px;color:#e7f5ff}
+.su-rl{display:grid;gap:2px;min-width:0}
+.su-rl small{font-size:11px;color:#8fb8cf;line-height:1.4}
+.su-seg{display:flex;flex-wrap:wrap;gap:4px;padding:3px;border-radius:12px;background:#08131b;border:1px solid rgba(116,192,252,.25)}
+.su-seg button{flex:1 1 auto;padding:8px 10px;border-radius:9px;border:0;background:none;color:#a5c8db;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.su-seg button.on{background:linear-gradient(180deg,#74c0fc,#339af0);color:#06121a;box-shadow:0 0 10px rgba(116,192,252,.6)}
+.su-sw{flex:0 0 auto;position:relative;width:54px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:#2a3540;cursor:pointer;transition:background .15s}
+.su-sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#cfd8dc;transition:left .15s,background .15s;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.su-sw.on{background:linear-gradient(90deg,#2b8a3e,#51cf66);border-color:#8ce99a;box-shadow:0 0 10px rgba(81,207,102,.45)}
+.su-sw.on i{left:27px;background:#fff}
+.su-in{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(116,192,252,.35);background:#08131b;color:#e7f5ff;font:inherit;font-size:16px}
+.su-custom .su-table{margin-top:4px}
+.su-custom .su-seated{background:rgba(0,0,0,.3)}
+.su-custom .su-step input{color:#e7f5ff}
