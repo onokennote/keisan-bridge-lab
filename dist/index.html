@@ -1736,7 +1736,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='0a8b18e0f0';
+window.KB_BUILD='44f796e35c';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -10494,7 +10494,7 @@ document.addEventListener('click', e => { const t = e.target.closest && e.target
 if (MIG_IN) { S.askedName = true; setTimeout(() => migrateIn(MIG_IN), 50); }
 else if (CLOUD_ON) setTimeout(cloudInit, 100);
 // AI研究員（毎朝の自動対局。ai/daily.js）用：ミニゲームを強さ lv に合った結果で「遊んだことにする」。記録とバッジは本物と同じ処理を通す
-function aiMini(kind, lv) {
+function aiMini(kind, lv, formAdj) {
   const R = (a, b) => a + Math.floor(Math.random() * (b - a + 1)), L = Math.max(1, Math.min(5, lv | 0)) - 1;
   if (kind === 'hunt') { // 式ハンター：まだの式をいくつか捕獲
     const z = zukanGet(), want = R([3, 5, 8, 11, 14][L], [6, 9, 13, 17, 22][L]), free = KB.shuffle(ZUKAN.filter(e => !z[e.id])).slice(0, want);
@@ -10515,15 +10515,16 @@ function aiMini(kind, lv) {
     store.set('chart', data); setMax('chart', chartFullRows().length);
     return { kind, rows: chartFullRows().length };
   }
-  if (kind === 'attack') { // バッジアタック：強さに応じたBP
-    const bp = R([150, 250, 350, 450, 550][L], [300, 400, 550, 700, 850][L]), nb = Math.round(bp / R(18, 26));
+  if (kind === 'attack') { // バッジアタック：今の推定実力（まだなければ★）と、その日の調子でBPが決まる。自己ベストは上回ったときだけ更新
+    const r = ratingOf(G_().games), base = Math.max(0.5, (r.ok ? r.r : lv) + (formAdj || 0));
+    const bp = Math.max(60, Math.round((100 + base * 130) * (0.82 + Math.random() * 0.36))), nb = Math.round(bp / R(18, 26));
     const bests = attackBests(); if (!bests[ATTACK_MIN] || bp > bests[ATTACK_MIN].bp) { bests[ATTACK_MIN] = { bp, badges: nb, at: Date.now(), ach: [] }; store.set('attackBest', bests); }
     const gr = G_(); gr.cnt.atk_done = (gr.cnt.atk_done || 0) + 1; gr.cnt.atk_bp = Math.max(gr.cnt.atk_bp || 0, bp); gr.cnt.atk_badges = Math.max(gr.cnt.atk_badges || 0, nb); ['atk_done', 'atk_bp', 'atk_badges'].forEach(k => checkAch(gr, k)); G_save(gr);
-    return { kind, bp };
+    return { kind, bp, best: attackBests()[ATTACK_MIN].bp, rating: r.ok ? +r.r.toFixed(2) : null };
   }
   return null;
 }
-window.KBAPP = { S, act, aiMini: (k, lv) => aiMini(k, lv), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, aiMini: (k, lv, f) => aiMini(k, lv, f), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>
