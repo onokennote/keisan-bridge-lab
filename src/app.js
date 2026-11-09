@@ -2548,7 +2548,7 @@ ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-
 }
 
 // ---------- 設定画面：おすすめセット（土台を1つ選ぶ）→ゲーム数（大会は予選のセット数）→開始。細かいことは「カスタム設定」にたたむ ----------
-const DEF_P = { n: 4, games: 3, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
+const DEF_P = { n: 4, games: 5, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
 const DEF_T = { nPlayers: 17, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
 const SU_PRESETS = [
   { k: 'first', icon: '🐣', label: 'はじめて', sub: '相手は★1〜2', p: c => { c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { mix: 'casual', nPlayers: 9, games: 3, finalists: 3 }), tsub: '★1〜2・9人の小さな大会' },
