@@ -108,11 +108,22 @@ async function play(b, c, data, sets, minis, form) {
   } else {
     // いつもの1日：それぞれ6割の確率で1セット。ときどき（3割）新しいメンバーが1人入る
     // ミニゲームは4割の確率で1つ（対局しない日でも遊ぶことがある）
-    for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (!c) continue; const sets = Math.random() < 0.6 ? 1 : 0, minis = mini(Math.random() < 0.4 ? 1 : 0); if (sets || minis.length) jobs.push({ c, data: x.data, sets, minis }); }
+    // 本物の参加者に、強さに応じて追いついていく：本物のプレイヤーのBPの1位を基準に、★ごとの目標（★1は3割…★5は同じくらい）より
+    // 少なければ、その日は多めに打つ（足りない分に応じて最大3セット＋ミニゲーム2つ）。目標より多ければいつもどおり
+    let topHuman = 0, aiBp = {};
+    try { const j = await (await fetch(API + '?a=rankings')).json(); (j.rankings && j.rankings.bp ? j.rankings.bp.list : []).forEach(r => { if (r.ai) aiBp[r.name] = r.bp; else topHuman = Math.max(topHuman, r.bp); }); } catch (e) { }
+    for (const x of cur) {
+      const c = roster.find(r => r.id === x.cid); if (!c) continue;
+      const target = topHuman * [0.3, 0.45, 0.6, 0.8, 1.0][c.lv - 1], gap = target - (aiBp[c.name] || 0);
+      let sets = Math.random() < 0.6 ? 1 : 0, minis = mini(Math.random() < 0.4 ? 1 : 0);
+      if (gap > 0) { const extra = Math.min(3, Math.ceil(gap / 200)); sets = Math.max(sets, Math.min(3, 1 + Math.floor(extra / 2))); minis = mini(Math.min(2, extra)); x.catchUp = Math.round(gap); }
+      if (sets || minis.length) jobs.push({ c, data: x.data, sets, minis, catchUp: x.catchUp });
+    }
+    console.log('本物の参加者のBPの1位：', topHuman);
     if (cur.length < MAX && Math.random() < 0.3) add([1, 2, 2, 3, 3, 4][rnd(0, 5)], 1);
   }
   if (process.env.KB_AI_LIMIT) { jobs.splice(+process.env.KB_AI_LIMIT); jobs.forEach(j => j.sets = 1); } // 試すとき用
-  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}`).join(' / '));
+  console.log(MODE, '：いる', cur.length, '人、今日打つ', jobs.length, '人', jobs.map(j => `${j.c.name}★${j.c.lv}×${j.sets}${j.minis && j.minis.length ? '+' + j.minis.join(',') : ''}${j.catchUp ? `（追いつき：あと${j.catchUp}BP）` : ''}`).join(' / '));
   // 4人ずつ並べて打つ
   let i = 0; const worker = async () => { while (i < jobs.length) { const j = jobs[i++]; const t0 = Date.now();
     try { const form = rollForm(); const r = await play(b, j.c, j.data, j.sets, j.minis, form); await api('ai_save', { cid: j.c.id, data: r.data, stats: r.stats }); console.log(`  ${j.c.name}（${form.name}）：★${(r.stats.rating || 0).toFixed ? (r.stats.rating || 0).toFixed(2) : '-'}・バッジ${r.stats.badges}・${r.stats.bp}BP・連続${r.stats.streak}（${Math.round((Date.now() - t0) / 1000)}秒）`); }
