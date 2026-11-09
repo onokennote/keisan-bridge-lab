@@ -69,7 +69,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(await pg.evaluate(() => { const g = JSON.parse(Object.entries(localStorage).find(([k]) => /growth$/.test(k))[1]); return g.cnt.chart === 1 && !!g.ach['chart:1']; }), '行を完成させるとバッジ「早見表の一行目」が付く');
   await pg.evaluate(() => document.querySelectorAll('.ach-toast,.ach-pop,#achq').forEach(e => e.remove()));
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
-  ok(await pg.evaluate(() => /6\/279面/.test(document.body.innerText) && /完成 1行/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
+  ok(await pg.evaluate(() => /6\/279面/.test(document.body.innerText) && /完成 1\/37行/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
   // 対局中は見るだけ（完成した行だけ）
   await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(800);
   ok(await pg.evaluate(() => /早見表（完成1行）/.test(document.body.innerText)), '対局画面のボタンに完成行数が出る');
