@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="b2b8758 2026-11-09 14:09"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="0055091 2026-11-09 15:11"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1733,10 +1733,143 @@ body.spectate .me .hand .card{cursor:default}
 .rk-ai-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
 .rk-ai-tg.on{background:rgba(116,192,252,.22);border-color:#74c0fc;color:#d0ebff}
 .ai-chip{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;background:#1c3d5a;border:1px solid #74c0fc;color:#a5d8ff;font-style:normal;font-size:10px;font-weight:900;vertical-align:middle}
+/* ===== 設定画面（卓をつくる） ===== */
+.su{display:grid;gap:12px;padding-bottom:96px}
+.su-masa{display:grid;grid-template-columns:52px minmax(0,1fr);gap:10px;align-items:start}
+.su-masa .cm-av svg{width:52px;height:52px;border-radius:12px}
+.su-masa .op-bubble{border-color:rgba(28,126,214,.5)}
+.su-presets{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.su-preset{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:14px;border:1px solid rgba(242,182,50,.45);background:linear-gradient(180deg,rgba(242,182,50,.16),rgba(242,182,50,.04));color:inherit;cursor:pointer;font:inherit;text-align:center}
+.su-preset .sp-ic{font-size:24px;line-height:1.1}
+.su-preset b{font-size:13px;color:#ffe8a3}
+.su-preset small{font-size:10px;color:#c9c2ad;line-height:1.3}
+.su-preset:active{transform:scale(.97)}
+.su-card{display:grid;gap:10px}
+.su-h{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.su-h>b{font-family:var(--f-display);font-weight:400;font-size:18px;color:#ffd43b}
+.su-n{display:flex;align-items:center;gap:8px}
+.su-n b{min-width:3em;text-align:center;font-size:18px}
+.su-pm{width:38px;height:38px;border-radius:50%;border:1px solid rgba(242,182,50,.6);background:#173d2f;color:#ffe8a3;font-size:20px;font-weight:900;cursor:pointer;line-height:1}
+.su-pm:disabled{opacity:.3;cursor:default}
+.su-table{position:relative;height:230px;margin:0 auto;width:100%;max-width:420px}
+.su-felt{position:absolute;left:8%;right:8%;top:14%;bottom:18%;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#2f7a55,#174d34 70%);border:6px solid #6b4a2b;box-shadow:inset 0 0 30px rgba(0,0,0,.45),0 6px 16px rgba(0,0,0,.4)}
+.su-seat{position:absolute;transform:translate(-50%,-50%);width:78px;padding:6px 2px;border-radius:14px;border:2px solid var(--sc,rgba(255,255,255,.35));background:#0f241b;color:inherit;display:flex;flex-direction:column;align-items:center;gap:1px;cursor:pointer;font:inherit;box-shadow:0 4px 10px rgba(0,0,0,.4)}
+.su-seat .ss-face{font-family:var(--f-display);font-size:20px;color:#ffd43b;line-height:1.1}
+.su-seat small{font-size:10px;color:#e9e3cf;line-height:1.2;white-space:nowrap}
+.su-seat .ss-st{color:var(--sc,#c9c2ad);font-weight:700}
+.su-seat.on{border-color:#ffd43b;box-shadow:0 0 0 3px rgba(255,212,59,.45),0 4px 10px rgba(0,0,0,.4);transform:translate(-50%,-50%) scale(1.06)}
+.su-me{position:absolute;left:50%;bottom:-2px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:2px}
+.su-me .ss-av svg{width:52px;height:52px;border-radius:14px;box-shadow:0 0 0 3px #f2b632}
+.su-me small{font-size:11px;font-weight:900;color:#ffe8a3}
+.su-hint{margin:0;text-align:center}
+.su-seated{display:grid;gap:8px;padding:10px;border-radius:12px;background:rgba(0,0,0,.25);border:1px solid rgba(255,212,59,.35)}
+.su-chips{display:flex;flex-wrap:wrap;gap:6px}
+.su-chip{padding:8px 12px;border-radius:999px;border:1px solid var(--sc,rgba(255,255,255,.25));background:#173d2f;color:#fbf7ee;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+.su-chip.on{background:#f2b632;color:#1a1408;border-color:#f2b632}
+.su-mix{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px}
+.su-mixc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:#173d2f;color:inherit;font:inherit;cursor:pointer}
+.su-mixc span{font-size:22px}
+.su-mixc b{font-size:13px}
+.su-mixc small{font-size:10px;color:#c9c2ad}
+.su-mixc.on{border:2px solid #f2b632;background:rgba(242,182,50,.18)}
+.su-poster{border:2px solid rgba(242,182,50,.6);background:linear-gradient(160deg,rgba(242,182,50,.14),rgba(0,0,0,.2))}
+.sp-title{font-family:var(--f-display);font-size:22px;color:#ffd43b;text-align:center}
+.su-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.su-item{display:grid;gap:4px;padding:8px;border-radius:12px;background:rgba(0,0,0,.25)}
+.su-item>small{font-size:11px;color:#c9c2ad}
+.su-step{display:flex;align-items:center;gap:4px}
+.su-step input{width:3.2em;text-align:center;font:inherit;font-size:20px;font-weight:900;background:transparent;border:0;color:#fbf7ee;padding:0;-moz-appearance:textfield}
+.su-step input::-webkit-outer-spin-button,.su-step input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.su-step .su-pm{width:32px;height:32px;font-size:18px}
+.su-unit{font-size:12px;color:#c9c2ad;margin-right:auto}
+.su-tables{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.su-tb{display:flex;flex-direction:column;align-items:center;padding:4px 8px;border-radius:999px;background:#174d34;border:2px solid #6b4a2b}
+.su-tb i{font-style:normal;font-size:9px;letter-spacing:1px;color:#ffe8a3}
+.su-tb small{font-size:10px;color:#e9e3cf}
+.su-adv summary{cursor:pointer;font-weight:900;color:#ffd43b}
+.su-adv[open] summary{margin-bottom:8px}
+.su-grp{display:grid;gap:8px;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}
+.su-foot{position:sticky;bottom:0;z-index:5;display:grid;gap:6px;padding:10px 0 calc(10px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(7,20,14,0),rgba(7,20,14,.95) 30%)}
+.su-badge summary{cursor:pointer;font-size:13px;font-weight:700;text-align:center;list-style:none}
+.su-badge summary::-webkit-details-marker{display:none}
+.su-badge summary.ok{color:#8ce99a}
+.su-badge summary.ng{color:#ffc078}
+.su-badge .badge-rule{margin-top:6px}
+.su-start{width:100%;font-size:18px;padding:14px}
+@media (max-width:420px){.su-presets{grid-template-columns:repeat(2,1fr)}.su-seat{width:70px}}
+.su-step input{width:2.2em}
+.su-unit{white-space:nowrap;font-size:11px}
+.su-item{min-width:0}
+.su-step{justify-content:space-between}
+.su-val{display:flex;align-items:baseline;gap:2px}
+.su-val input{width:2em}
+.su-val small{font-size:11px;color:#c9c2ad;white-space:nowrap}
+.su-val small{display:none}
+.su-val input{width:2.4em;font-size:22px}
+/* ===== 設定画面 v2：ステップ・おすすめ（土台）・開始・カスタム（ゲームのメニュー風） ===== */
+.su{padding-bottom:24px}
+.su-block{display:grid;gap:10px;padding:14px 12px;border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.04),rgba(0,0,0,.18));border:1px solid rgba(242,182,50,.28)}
+.su-bh{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.su-bh b{font-family:var(--f-display);font-weight:400;font-size:18px;color:#ffd43b}
+.su-bh small{color:#c9c2ad;font-size:12px}
+.su-bh.sm b{font-size:14px}
+.su-step-no{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#f2b632;color:#1a1408;font-weight:900;font-size:14px;box-shadow:0 0 10px rgba(242,182,50,.5)}
+.su-preset{position:relative;border-width:2px;transition:transform .12s,box-shadow .12s}
+.su-preset.on{border-color:#ffd43b;background:linear-gradient(180deg,rgba(255,212,59,.38),rgba(242,182,50,.12));box-shadow:0 0 0 3px rgba(255,212,59,.35),0 0 18px rgba(255,212,59,.35);transform:translateY(-2px)}
+.su-preset:not(.on){opacity:.82}
+.sp-check{position:absolute;top:-8px;right:-8px;width:24px;height:24px;border-radius:50%;background:#ffd43b;color:#1a1408;font-style:normal;font-weight:900;display:grid;place-items:center;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.su-chips.big .su-chip{flex:1;padding:12px 8px;font-size:16px;border-radius:14px;text-align:center}
+.su-step.big{justify-content:center;gap:18px}
+.su-step.big .su-pm{width:46px;height:46px;font-size:24px}
+.su-step.big input{font-size:34px;width:2.2em}
+.su-step.big .su-val small{display:inline;font-size:13px}
+.su-go{display:grid;gap:6px}
+.su-start{width:100%;font-size:20px;padding:16px;border-radius:18px;box-shadow:0 6px 0 #a87200,0 10px 22px rgba(242,182,50,.35)}
+.su-start:active{transform:translateY(3px);box-shadow:0 3px 0 #a87200}
+/* カスタム設定：暗いゲームメニュー */
+.su-custom{border-radius:18px;background:linear-gradient(180deg,#0d1f2b,#0a1712);border:2px solid #2c4a5a;box-shadow:inset 0 0 0 1px rgba(116,192,252,.12),0 8px 20px rgba(0,0,0,.35);overflow:hidden}
+.su-custom>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px;cursor:pointer;background:linear-gradient(90deg,rgba(116,192,252,.18),rgba(116,192,252,0))}
+.su-custom>summary::-webkit-details-marker{display:none}
+.su-custom>summary span{font-family:var(--f-display);font-size:18px;color:#a5d8ff;letter-spacing:.04em}
+.su-custom>summary small{color:#7fa8bf;font-size:11px}
+.su-custom[open]>summary{border-bottom:1px solid rgba(116,192,252,.25)}
+.su-gs{display:grid;gap:8px;padding:10px}
+.su-g{border-radius:14px;background:rgba(255,255,255,.035);border:1px solid rgba(116,192,252,.18)}
+.su-g.open{border-color:rgba(116,192,252,.5);box-shadow:0 0 14px rgba(116,192,252,.15)}
+.su-gh{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;background:none;border:0;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.su-gi{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#123447;font-size:18px;box-shadow:inset 0 0 0 1px rgba(116,192,252,.35)}
+.su-gt{flex:1;display:grid;gap:1px;min-width:0}
+.su-gt b{font-size:14px;color:#e7f5ff}
+.su-gt small{font-size:11px;color:#8fb8cf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.su-ga{color:#74c0fc;font-size:12px}
+.su-gb{display:grid;gap:10px;padding:4px 12px 12px}
+.su-row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.su-row.col{flex-direction:column;align-items:stretch;gap:6px}
+.su-row b{font-size:13px;color:#e7f5ff}
+.su-rl{display:grid;gap:2px;min-width:0}
+.su-rl small{font-size:11px;color:#8fb8cf;line-height:1.4}
+.su-seg{display:flex;flex-wrap:wrap;gap:4px;padding:3px;border-radius:12px;background:#08131b;border:1px solid rgba(116,192,252,.25)}
+.su-seg button{flex:1 1 auto;padding:8px 10px;border-radius:9px;border:0;background:none;color:#a5c8db;font:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.su-seg button.on{background:linear-gradient(180deg,#74c0fc,#339af0);color:#06121a;box-shadow:0 0 10px rgba(116,192,252,.6)}
+.su-sw{flex:0 0 auto;position:relative;width:54px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:#2a3540;cursor:pointer;transition:background .15s}
+.su-sw i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#cfd8dc;transition:left .15s,background .15s;box-shadow:0 2px 4px rgba(0,0,0,.4)}
+.su-sw.on{background:linear-gradient(90deg,#2b8a3e,#51cf66);border-color:#8ce99a;box-shadow:0 0 10px rgba(81,207,102,.45)}
+.su-sw.on i{left:27px;background:#fff}
+.su-in{width:100%;box-sizing:border-box;padding:10px;border-radius:10px;border:1px solid rgba(116,192,252,.35);background:#08131b;color:#e7f5ff;font:inherit;font-size:16px}
+.su-custom .su-table{margin-top:4px}
+.su-custom .su-seated{background:rgba(0,0,0,.3)}
+.su-custom .su-step input{color:#e7f5ff}
+.su-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.su-pi{display:grid;gap:6px;justify-items:center;padding:10px 6px;border-radius:14px;background:rgba(0,0,0,.25)}
+.su-pi>small{font-size:11px;color:#c9c2ad;text-align:center}
+.su-pair .su-step.big{gap:8px}
+.su-pair .su-step.big .su-pm{width:38px;height:38px;font-size:20px}
+.su-val b{font-size:32px;font-weight:900;line-height:1;color:#fbf7ee}
+.su-pair .su-val small{display:inline;font-size:11px;color:#c9c2ad}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='47e4cf2b89';
+window.KB_BUILD='8c7ed586c0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5587,11 +5720,12 @@ function estimateQualify(cfg, myMu) {
   }
   return q / N;
 }
-function readTourCfg() {
-  return { nPlayers: Math.max(5, Math.min(40, +$('#t-n').value || 17)), sets: Math.max(1, Math.min(8, +$('#t-sets').value || 4)), games: Math.max(1, Math.min(10, +$('#t-games').value || 5)), points: readPoints($('#t-points').value), finalists: +$('#t-fin').value, tie: $('#t-tie').value, mix: $('#t-mix').value };
+function readTourCfg() { // 閉じているグループの欄は画面にないので、そのときは下書き（suT）の値を使う
+  const d = S.suT || DEF_T, v = (id, x) => { const e = $(id); return e ? e.value : x; };
+  return { nPlayers: Math.max(5, Math.min(40, +v('#t-n', d.nPlayers) || 17)), sets: Math.max(1, Math.min(8, +v('#t-sets', d.sets) || 3)), games: Math.max(1, Math.min(10, +v('#t-games', d.games) || 5)), points: readPoints(v('#t-points', d.points.join(','))), finalists: Math.max(2, Math.min(5, +v('#t-fin', d.finalists) || 5)), tie: v('#t-tie', d.tie || 'janken'), mix: v('#t-mix', d.mix || 'even'), preset: d.preset };
 }
 function renderEst() {
-  const el = $('#t-est'); const w = $('#t-est-wrap'); if (!el || !w || !w.open) return;
+  const el = $('#t-est'); const w = $('#t-est-wrap'); if (!el || !w || (w.tagName === 'DETAILS' && !w.open)) return;
   const c = readTourCfg();
   const rows = PLAY_STYLES.map(p => ({ p, v: estimateQualify(c, p.mu) }));
   const base = c.finalists / c.nPlayers;
@@ -5853,7 +5987,7 @@ function ruleBoxHTML(kind) {
     const avg = lv.length ? lv.reduce((a, b) => a + b, 0) / lv.length : 0, rnd = [...document.querySelectorAll('.opp-row')].filter(r => !r.hidden).some(r => r.querySelector('.o-lv').value === 'r');
     rows = [[n >= ELIG.table, `卓の人数 ${ELIG.table}人以上（いま${n}人）`], [games >= ELIG.games, `1セット ${ELIG.games}ゲーム以上（いま${games}ゲーム）`], [avg >= ELIG.oppAvg, `相手の平均の強さ ★${ELIG.oppAvg}以上（いま★${avg.toFixed(1)}${rnd ? '・ランダムは見込み。実際に決まった強さで判定' : ''}）`]];
   } else {
-    const n = +(($('#t-n') || {}).value || 17), sets = +(($('#t-sets') || {}).value || 4), games = +(($('#t-games') || {}).value || 5), mix = ($('#t-mix') || {}).value || 'random', avg = MIX_AVG(mix);
+    const tc = readTourCfg(), n = tc.nPlayers, sets = tc.sets, games = tc.games, mix = tc.mix, avg = MIX_AVG(mix);
     rows = [[n >= ELIG.tourPlayers, `参加人数 ${ELIG.tourPlayers}人以上（いま${n}人）`], [sets >= ELIG.tourSets, `予選 ${ELIG.tourSets}セット以上（いま${sets}セット）`], [games >= ELIG.games, `1セット ${ELIG.games}ゲーム以上（いま${games}ゲーム）`], [avg >= ELIG.oppAvg, `AIの平均の強さ ★${ELIG.oppAvg}以上（いま★${avg.toFixed(1)}の見込み。実際に決まった強さで判定）`]];
   }
   all = rows.every(r => r[0]);
@@ -5861,7 +5995,7 @@ function ruleBoxHTML(kind) {
     <ul>${rows.map(([b, t]) => `<li>${ok(b)}${esc(t)}</li>`).join('')}</ul>
     <p class="small muted" style="margin:0">${kind === 'practice' ? '上がり・3枚出しなどゲームのバッジは「人数」と「強さ」、セット優勝・低PPセットなどセットのバッジは3つすべてが条件です。' : '大会のバッジ（決勝進出・優勝・完走・全セット優勝）は上の条件すべて、各セット・各ゲームのバッジは卓4人以上・5ゲーム以上・相手の強さが条件です。'}連続最善・推定実力・アウツチャレンジはいつでも数えます。AIの読みを見たゲーム・セット・大会は、結果のバッジの対象外です。</p>`;
 }
-function renderRuleBox() { const el = $('#rule-box'); if (el) el.innerHTML = ruleBoxHTML(S.view === 'setup-tour' ? 'tour' : 'practice'); }
+function renderRuleBox() { const el = $('#rule-box'); if (el) el.innerHTML = ruleBoxHTML(S.view === 'setup-tour' ? 'tour' : 'practice'); const sm = $('#rule-sum'); if (sm) { const all = !!(el && el.querySelector('.br-head .ok')); sm.className = all ? 'ok' : 'ng'; sm.textContent = all ? '🏅 この設定はバッジの対象です' : '⚠ この設定ではバッジの一部が対象外（タップで条件）'; } }
 function G_() {
   if (S.attack) return S.attack.g; // バッジアタック中は別集計
   let g = store.get('growth', null);
@@ -7794,14 +7928,6 @@ ${growthCardHTML()}
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
-<div class="panel" style="margin-top:14px"><div class="form">
-  <div class="field"><label for="set-speed">AIの手番の速さ</label><select id="set-speed">${Object.entries({ slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }).map(([k, v]) => `<option value="${k}" ${S.settings.speed === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
-  <label class="check"><input type="checkbox" id="set-lv" ${S.settings.showLevel ? 'checked' : ''}> 相手の強さを表示</label>
-  <label class="check"><input type="checkbox" id="set-st" ${S.settings.showStyle ? 'checked' : ''}> 相手の性格を表示</label>
-  <div class="field"><label for="set-snd">効果音の音量</label><select id="set-snd">${Object.entries(KB.SFX_LEVELS).map(([k, v]) => `<option value="${k}" ${S.settings.sndLv === k ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div>
-  <label class="check"><input type="checkbox" id="set-auto" ${S.settings.autoHint ? 'checked' : ''}> 自分の番で自動的にAIの読みを出す</label>
-  <p class="small muted" style="margin:-6px 0 0 28px">オンにすると毎回AIの読みを見ることになるため、成績のバッジ（上がり・最善・セット・大会など）は対象外になります。</p>
-</div><p class="small muted" style="margin:8px 0 0">強さ・性格を隠すと、AIの読みも「相手は中級・平均的な打ち手」と仮定して計算します。</p></div>
 <div class="panel about-box" id="about">
   <h3>このアプリについて</h3>
   <p>「計算ブリッジ作戦研究所」は、カードゲーム「計算ブリッジ」を練習・研究するための、<b>非公式のファン制作アプリ</b>です。考案者・公式とは関係なく、個人が作成しています。</p>
@@ -7817,35 +7943,125 @@ ${growthCardHTML()}
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
 
+// ---------- 設定画面：おすすめセット（土台を1つ選ぶ）→ゲーム数（大会は予選のセット数）→開始。細かいことは「カスタム設定」にたたむ ----------
+const DEF_P = { n: 4, games: 5, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
+const DEF_T = { nPlayers: 17, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
+const SU_PRESETS = [
+  { k: 'first', icon: '🐣', label: 'はじめて', sub: '相手は★1〜2', p: c => { c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { mix: 'casual', nPlayers: 9, games: 3, finalists: 3 }), tsub: '★1〜2・9人の小さな大会' },
+  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく', p: c => { c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'even', nPlayers: 17, games: 5, finalists: 5 }), tsub: 'まんべんなく・17人' },
+  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'strong', nPlayers: 17, games: 5, finalists: 5 }), tsub: '強豪ぞろい・17人' },
+  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員★5', p: c => { c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { mix: 'master', nPlayers: 17, games: 5, finalists: 5 }), tsub: '全員達人・17人' }
+];
+const MIX_PRESET = { casual: 'first', even: 'usual', random: 'usual', strong: 'strong', master: 'master' };
+const suP = () => { if (!S.suP) { S.suP = JSON.parse(JSON.stringify(store.get('cfgPractice', DEF_P))); while (S.suP.opps.length < 4) S.suP.opps.push({ level: 'r', style: 'r' }); S.suP.preset = S.suP.preset || MIX_PRESET[S.suP.mix] || 'usual'; } return S.suP; };
+const suT = () => { if (!S.suT) { S.suT = JSON.parse(JSON.stringify(store.get('cfgTour', DEF_T))); S.suT.preset = S.suT.preset || MIX_PRESET[S.suT.mix] || 'usual'; } return S.suT; };
+// マサの合いの手（選んだ内容に反応）
+function suMasa(kind) {
+  const c = kind === 'tour' ? suT() : suP(), lv = kind === 'tour' ? [] : c.opps.slice(0, c.n - 1).map(o => o.level);
+  if (c.preset === 'master') return kind === 'tour' ? '全員達人の大会か！ええ度胸や！謎のシード選手も出てくるかもしれへんで！' : '全員達人か！ええ度胸や！ワールドカップの決勝に乗り込むようなもんやで！';
+  if (c.preset === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！シード選手が出てくることもあるで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
+  if (kind === 'practice' && c.n === 2) return 'サシの勝負や！ポーカーのヘッズアップみたいなもんやで！';
+  if (c.preset === 'first') return '肩慣らしにちょうどええな！まずは楽しんでいこか！';
+  if (kind === 'practice' && c.games >= 7) return `${c.games}ゲームの長丁場や！スタミナ勝負やで！`;
+  return kind === 'tour' ? 'ほな、大会の準備や！どんな相手がおるか楽しみやな！' : 'ほな、卓をつくろか！今日はどの相手と打つ？';
+}
+const suChip = (su, v, label, on, extra) => `<button class="su-chip ${on ? 'on' : ''}" data-su="${su}" data-v="${esc(String(v))}" ${extra || ''}>${label}</button>`;
+const suSeg = (su, opts, cur) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(cur) === String(v) ? 'on' : ''}" data-su="${su}" data-v="${esc(String(v))}">${l}</button>`).join('')}</div>`;
+const suSw = (key, on, label, note) => `<div class="su-row"><div class="su-rl"><b>${label}</b>${note ? `<small>${note}</small>` : ''}</div><button class="su-sw ${on ? 'on' : ''}" data-su="sw" data-v="${key}" role="switch" aria-checked="${on}" aria-label="${esc(label)}"><i></i></button></div>`;
+function suPresetHTML(kind) {
+  const c = kind === 'tour' ? suT() : suP();
+  return `<div class="su-masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(suMasa(kind))}</div></div>
+  <section class="su-block"><div class="su-bh"><span class="su-step-no">1</span><b>相手を選ぶ</b><small>おすすめセットから1つ</small></div>
+  <div class="su-presets">${SU_PRESETS.map(p => `<button class="su-preset ${c.preset === p.k ? 'on' : ''}" data-su="preset" data-v="${p.k}" aria-pressed="${c.preset === p.k}"><span class="sp-ic">${p.icon}</span><b>${p.label}</b><small>${kind === 'tour' ? p.tsub : p.sub}</small>${c.preset === p.k ? '<i class="sp-check">✓</i>' : ''}</button>`).join('')}</div></section>`;
+}
+// 開始ボタンとバッジの対象（🏅／⚠。押すと条件）
+function suStartHTML(act, label) {
+  return `<div class="su-go"><button class="btn primary su-start" data-act="${act}">${label}</button><details class="su-badge"><summary id="rule-sum">バッジの条件</summary><div class="badge-rule" id="rule-box"></div></details></div>`;
+}
+// カスタム設定：ゲームのメニュー風。グループごとに開け閉めできる
+function suGroup(id, icon, title, now, body) {
+  const open = !!(S.suOpen && S.suOpen[id]);
+  return `<div class="su-g ${open ? 'open' : ''}"><button class="su-gh" data-su="grp" data-v="${id}" aria-expanded="${open}"><span class="su-gi">${icon}</span><span class="su-gt"><b>${title}</b><small>${now}</small></span><span class="su-ga">${open ? '▲' : '▼'}</span></button>${open ? `<div class="su-gb">${body}</div>` : ''}</div>`;
+}
+function suCustomHTML(kind, tableGroup) {
+  const c = kind === 'tour' ? suT() : suP(), st = S.settings;
+  const SPD = { slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }, JG = { before: '出す前に表示', after3: '出した後（お手つき3枚）', after2: '出した後（お手つき2枚）' }, CM = { both: '博士とマサ', root: '博士だけ', masa: 'マサだけ', off: 'なし' };
+  const fast = st.speed === 'fast' || st.speed === 'instant';
+  const groups = [tableGroup,
+    suGroup('pace', '⏱️', '対局の進み方', `速さ：${SPD[st.speed] || 'ふつう'}・判定：${JG[st.judge || 'before']}`,
+      `<div class="su-row col"><b>AIの手番の速さ</b>${suSeg('speed', Object.entries(SPD), st.speed)}</div>
+       <div class="su-row col"><b>計算式の判定</b>${suSeg('judge', Object.entries(JG), st.judge || 'before')}</div>
+       ${suSw('warnMiss', !!st.warnMiss, '「引く」の前に確認', '出せるのに引こうとしたら確認する（あえて引くのもOK）')}`),
+    suGroup('talk', '🎙️', '実況・解説', `${CM[st.commentary] || '博士とマサ'}${st.spoiler ? '・ネタバレあり' : ''}`,
+      `<div class="su-row col"><b>実況・解説</b>${suSeg('cm', Object.entries(CM), st.commentary)}</div>
+       ${fast ? '<p class="small muted" style="margin:0">速さが「はやい」「一瞬」のときは、実況は自分の手だけです。</p>' : suSw('cmOthers', st.cmOthers !== false, 'ほかの人の手も実況')}
+       ${suSw('spoiler', !!st.spoiler, 'ネタバレありのツッコミ', '実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」）')}`),
+    suGroup('view', '👁️', '表示とAIの読み', `強さ${st.showLevel ? '表示' : 'かくす'}・性格${st.showStyle ? '表示' : 'かくす'}${st.autoHint ? '・読みを自動' : ''}`,
+      `${suSw('showLevel', !!st.showLevel, '相手の強さを表示')}${suSw('showStyle', !!st.showStyle, '相手の性格を表示', 'かくすと、AIの読みも「相手は中級・平均的」と仮定して計算します')}
+       ${suSw('autoHint', !!st.autoHint, '自分の番で自動的にAIの読み', 'オンにすると成績のバッジは対象外になります')}`),
+    suGroup('snd', '🔊', '効果音', `音量：${(KB.SFX_LEVELS[st.sndLv] || KB.SFX_LEVELS.l)[0]}`, `<div class="su-row col">${suSeg('snd', Object.entries(KB.SFX_LEVELS).map(([k, v]) => [k, v[0]]), st.sndLv)}</div>`),
+    suGroup('pts', '🏅', '得点のつけ方', `${c.points.join('・')}点${kind === 'tour' ? '・同点は' + (c.tie === 'sudden' ? 'サドンデス' : 'ジャンケン') : ''}`,
+      `<div class="su-row col"><b>セット順位の得点（1位,2位,…）</b><input id="${kind === 'tour' ? 't' : 'p'}-points" class="su-in" value="${c.points.join(',')}"><small class="muted">表にない順位は0点</small></div>
+       ${kind === 'tour' ? `<div class="su-row col"><b>同点（得点・PPとも同じ）のとき</b>${suSeg('tie', [['janken', 'ジャンケン'], ['sudden', 'サドンデス']], c.tie)}</div><input type="hidden" id="t-tie" value="${c.tie}">` : ''}`)];
+  return `<details class="su-custom" id="su-adv" ${S.suAdv ? 'open' : ''}><summary><span>⚙️ カスタム設定</span><small>ふだんは変えなくてOK</small></summary><div class="su-gs">${groups.join('')}</div></details>`;
+}
 function setupPracticeHTML() {
-  const c = store.get('cfgPractice', { n: 4, games: 5, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: [10, 8, 5, 2, 0] });
-  const sts = KB.getStrategy().styles;
-  const rows = [];
-  for (let i = 0; i < 4; i++) {
-    const o = c.opps[i] || { level: 'r', style: 'r' };
-    rows.push(`<div class="opp-row" data-i="${i}" ${i >= c.n - 1 ? 'hidden' : ''}>
-      <div class="muted small">相手${i + 1}</div>
-      <select class="o-lv" aria-label="相手${i + 1}の強さ"><option value="r">強さランダム</option>${[1, 2, 3, 4, 5].map(l => `<option value="${l}" ${String(o.level) === String(l) ? 'selected' : ''}>${'★'.repeat(l)} ${esc(KB.levelCfg(l).label)}</option>`).join('')}</select>
-      <select class="o-st" aria-label="相手${i + 1}の性格"><option value="r">性格ランダム</option>${sts.map(s => `<option value="${esc(s.id)}" ${o.style === s.id ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select>
-      <div></div></div>`);
-  }
+  const c = suP(), sts = KB.getStrategy().styles, k = c.n - 1, sel = S.suSeat != null && S.suSeat < k ? S.suSeat : null;
+  const pos = i => { const a = Math.PI * (k === 1 ? 0.5 : 0.12 + 0.76 * (i / (k - 1))); return `left:${(50 - 42 * Math.cos(a)).toFixed(1)}%;top:${(52 - 40 * Math.sin(a)).toFixed(1)}%`; };
+  const seat = i => { const o = c.opps[i], st = sts.find(x => x.id === o.style); return `<button class="su-seat ${sel === i ? 'on' : ''}" style="${pos(i)};${st ? `--sc:${st.color}` : ''}" data-su="seat" data-v="${i}" aria-label="相手${i + 1}の設定">
+    <span class="ss-face">${o.level === 'r' ? '？' : '★' + o.level}</span><small>${o.level === 'r' ? 'おまかせ' : esc(KB.levelCfg(+o.level).label)}</small><small class="ss-st">${st ? esc(st.label) : '性格おまかせ'}</small></button>`; };
+  const ed = sel == null ? `<p class="small muted su-hint">席を押すと、その相手の強さと性格を選べます（「おまかせ」はおすすめセットの強さ）</p>` : `<div class="su-seated"><div class="lbl">相手${sel + 1}</div>
+    <div class="su-chips">${suChip('lv', 'r', 'おまかせ', c.opps[sel].level === 'r')}${[1, 2, 3, 4, 5].map(l => suChip('lv', l, `★${l} ${esc(KB.levelCfg(l).label)}`, String(c.opps[sel].level) === String(l))).join('')}</div>
+    <div class="su-chips">${suChip('st', 'r', '性格おまかせ', c.opps[sel].style === 'r')}${sts.map(x => suChip('st', x.id, esc(x.label), c.opps[sel].style === x.id, `style="--sc:${esc(x.color)}"`)).join('')}</div></div>`;
+  const fixed = c.opps.slice(0, k).filter(o => o.level !== 'r' || o.style !== 'r').length;
+  const table = suGroup('table', '🪑', '相手をひとりずつ決める', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
+    `<div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
+  const hidden = `<div hidden><input id="p-n" value="${c.n}"><input id="p-games" value="${c.games}"><input id="p-mix" value="${c.mix}">${c.opps.map((o, i) => `<div class="opp-row" data-i="${i}" ${i >= k ? 'hidden' : ''}><select class="o-lv"><option value="${o.level}" selected></option></select><select class="o-st"><option value="${o.style}" selected></option></select></div>`).join('')}</div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">1セット練習</div><div></div></div>
-<div class="panel stack">
-<div class="form">
-  <div class="field"><label for="p-n">卓の人数（あなたを含む）</label><select id="p-n">${[2, 3, 4, 5].map(n => `<option ${c.n === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-games">1セットのゲーム数</label><select id="p-games">${[1, 3, 5, 7, 10].map(n => `<option ${c.games === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-mix">「ランダム」の強さの混ざり方</label><select id="p-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-points">セット順位の得点（1位,2位,…）</label><input id="p-points" value="${c.points.join(',')}"></div>
-  <div class="field"><label for="p-cm">実況・解説</label><select id="p-cm" class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>${cmOthersHTML()}
-</div>
-${judgeHTML()}
-<label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label>
-<label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label>
-<div class="lbl">相手</div>
-<div class="opp-edit">${rows.join('')}</div>
-<div class="badge-rule" id="rule-box"></div>
-<button class="btn primary" data-act="start-practice">この卓ではじめる</button>
+<div class="su">
+${suPresetHTML('practice')}
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数と人数</b></div>
+  <div class="su-pair">
+    <div class="su-pi"><small>1セットのゲーム数</small><div class="su-step big"><button class="su-pm" data-su="gstep" data-v="-1" ${c.games <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><b>${c.games}</b><small>ゲーム</small></span><button class="su-pm" data-su="gstep" data-v="1" ${c.games >= 10 ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>
+    <div class="su-pi"><small>卓の人数（あなたを含む）</small><div class="su-step big"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><span class="su-val"><b>${c.n}</b><small>人</small></span><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></div></div>
+  </div></section>
+${suStartHTML('start-practice', 'この卓ではじめる')}
+${suCustomHTML('practice', table)}
+${hidden}
 </div>`;
+}
+function suTourRefresh() {
+  const c = Object.assign(suT(), readTourCfg()), sizes = KB.splitTables(c.nPlayers, 5), tb = $('#t-tables');
+  if (tb) tb.innerHTML = `${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small>`;
+  [['tn', c.nPlayers, 5, 40], ['tsets', c.sets, 1, 8], ['tgames', c.games, 1, 10], ['tfin', c.finalists, 2, 5]].forEach(([su, v, mn, mx]) => { const m = $(`[data-su="${su}"][data-v="-1"]`), p = $(`[data-su="${su}"][data-v="1"]`); if (m) m.disabled = v <= mn; if (p) p.disabled = v >= mx; });
+  renderEst(); renderRuleBox();
+}
+// 設定画面のタップ
+function suTap(d) {
+  const tour = S.view === 'setup-tour', c = tour ? suT() : suP(), v = d.v;
+  if (!tour) { const pts = $('#p-points'); if (pts) c.points = readPoints(pts.value); } else Object.assign(c, readTourCfg());
+  const st = S.settings, save = () => store.set('settings', st);
+  switch (d.su) {
+    case 'preset': { const p = SU_PRESETS.find(x => x.k === v); if (p) { (tour ? p.t : p.p)(c); c.preset = v; S.suSeat = null; } break; }
+    case 'n': c.n = Math.max(2, Math.min(5, c.n + (+v))); break;
+    case 'seat': S.suSeat = S.suSeat === +v ? null : +v; break;
+    case 'lv': if (S.suSeat != null) c.opps[S.suSeat].level = String(v); break;
+    case 'st': if (S.suSeat != null) c.opps[S.suSeat].style = v; break;
+    case 'games': c.games = +v; break;
+    case 'gstep': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
+    case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
+    case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
+    case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
+    case 'tfin': c.finalists = Math.max(2, Math.min(5, c.finalists + (+v))); break;
+    case 'tie': c.tie = v; break;
+    case 'grp': S.suOpen = S.suOpen || {}; S.suOpen[v] = !S.suOpen[v]; break;
+    case 'speed': st.speed = v; save(); break;
+    case 'judge': st.judge = v; st.judgeSet = true; save(); break;
+    case 'cm': st.commentary = v; save(); break;
+    case 'snd': setSnd(v); break;
+    case 'sw': if (v === 'cmOthers') st.cmOthers = st.cmOthers === false; else st[v] = !st[v]; save(); KB.sfx('click'); break;
+  }
+  const y = window.scrollY; render(); window.scrollTo(0, y);
 }
 
 // 計算式の判定タイミング：出す前に表示（いまの方式）／出した後に判定（不成立ならお手つき）
@@ -7854,6 +8070,8 @@ function judgeHTML() {
   return `<div class="field"><label>計算式の判定</label><select class="set-judge">${[['before', '出す前に成立するか表示する'], ['after3', '出した後に判定（不成立はお手つき：3枚引く）'], ['after2', '出した後に判定（不成立はお手つき：2枚引く）']].map(([k, v]) => `<option value="${k}" ${j === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`;
 }
 // 効果音の音量：なし／小／中／大／最大
+const SPD_ORDER = ['slow', 'normal', 'fast', 'instant'], SPD_JA = { slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' };
+const spdLabel = () => '速さ：' + (SPD_JA[S.settings.speed] || 'ふつう');
 const sndLabel = () => '音：' + (KB.SFX_LEVELS[S.settings.sndLv] || KB.SFX_LEVELS.l)[0];
 function setSnd(k) {
   S.settings.sndLv = k; S.settings.sound = k !== 'off'; store.set('settings', S.settings); KB.sfxLevel(k);
@@ -7874,26 +8092,20 @@ if (typeof document !== 'undefined') document.addEventListener('click', e => {
 const judgeAfter = () => (S.settings.judge || 'before') !== 'before';
 const foulN = () => S.settings.judge === 'after2' ? 2 : 3;
 function setupTourHTML() {
-  const c = store.get('cfgTour', { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'random' });
-  const sizes = KB.splitTables(c.nPlayers, 5);
+  const c = suT(), sizes = KB.splitTables(c.nPlayers, 5);
+  const step = (su, id, val, min, max, label) => `<div class="su-row"><div class="su-rl"><b>${label}</b></div><div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric" aria-label="${esc(label)}"><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>`;
+  const tables = `<div class="su-tables" id="t-tables" aria-label="卓分け">${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small></div>`;
+  const size = suGroup('size', '🏟️', '大会の規模', `${c.nPlayers}人・${sizes.length}卓・${c.games}ゲーム・決勝${c.finalists}人`,
+    `${step('tn', 't-n', c.nPlayers, 5, 40, '参加人数（あなたを含む）')}${step('tgames', 't-games', c.games, 1, 10, '1セットのゲーム数')}${step('tfin', 't-fin', c.finalists, 2, 5, '決勝に進める人数')}${tables}`);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">大会モード</div><div></div></div>
-<div class="panel stack">
-<div class="form">
-  <div class="field"><label for="t-n">参加人数（あなたを含む）</label><input id="t-n" type="number" min="5" max="40" value="${c.nPlayers}"><div class="hint" id="t-tables">卓分け：${sizes.join('・')}人（${sizes.length}卓）</div></div>
-  <div class="field"><label for="t-sets">予選セット数</label><input id="t-sets" type="number" min="1" max="8" value="${c.sets}"></div>
-  <div class="field"><label for="t-games">1セットのゲーム数</label><input id="t-games" type="number" min="1" max="10" value="${c.games}"></div>
-  <div class="field"><label for="t-points">セット順位の得点（1位,2位,…）</label><input id="t-points" value="${c.points.join(',')}"><div class="hint">表にない順位は0点</div></div>
-  <div class="field"><label for="t-fin">決勝進出人数</label><select id="t-fin">${[2, 3, 4, 5].map(n => `<option ${c.finalists === n ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="hint">決勝は1セットだけで順位を決めます</div></div>
-  <div class="field"><label for="t-tie">同点（得点・PPとも同じ）のとき</label><select id="t-tie"><option value="janken" ${c.tie === 'janken' ? 'selected' : ''}>ジャンケン</option><option value="sudden" ${c.tie === 'sudden' ? 'selected' : ''}>サドンデス（1ゲーム勝負）</option></select></div>
-  <div class="field"><label for="t-mix">相手の強さの混ざり方</label><select id="t-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select><div class="hint">性格はランダム。席順は毎セット抽選。「強豪ぞろい」「全員達人」では、決勝に謎のシード選手が現れることがあります</div></div>
-  <div class="field"><label for="t-cm">実況・解説</label><select id="t-cm" class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>${cmOthersHTML()}
-</div>
-${judgeHTML()}
-<label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label>
-<label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label>
-<details class="est-box" id="t-est-wrap" ${S.estOpen ? 'open' : ''}><summary>この設定での決勝進出率の目安</summary><div id="t-est" aria-live="polite"></div></details>
-<div class="badge-rule" id="rule-box"></div>
-<button class="btn primary" data-act="start-tour">大会を開始</button>
+<div class="su">
+${suPresetHTML('tour')}
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
+  <div class="su-step big"><button class="su-pm" data-su="tsets" data-v="-1" ${c.sets <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="t-sets" type="number" min="1" max="8" value="${c.sets}" inputmode="numeric" aria-label="予選のセット数"><small>セット</small></span><button class="su-pm" data-su="tsets" data-v="1" ${c.sets >= 8 ? 'disabled' : ''} aria-label="増やす">＋</button></div>
+  <div class="est-box" id="t-est-wrap"><div class="su-bh sm"><b>この設定での決勝進出率の目安</b></div><div id="t-est" aria-live="polite"></div></div></section>
+${suStartHTML('start-tour', '大会を開始')}
+${suCustomHTML('tour', size)}
+<input type="hidden" id="t-mix" value="${c.mix}">
 </div>`;
 }
 
@@ -8253,7 +8465,7 @@ function whereText() {
 }
 function gameHTML() {
   return `<div class="topbar"><div class="where">${S.tiebreak ? whereText() : progTopHTML(S.T)}</div>${S.attack ? `<span class="atk-box"><span class="atk-clock" title="残り時間">${fmtClock(S.attack.end - Date.now())}</span><small class="atk-now">${atkBP()} BP</small></span>` : ''}
-  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
+  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm ghost spd-btn" data-act="speed-cycle" title="AIの手番の速さ（押すたびに切り替え）">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
   <div id="tablewrap"></div>
   <div class="under"><div class="panel" id="unseenpanel"></div><div class="stack under-main"><div class="panel" id="hintpanel"></div><div class="panel" id="prevpanel" hidden></div></div><div class="panel stack" id="sidepanel"></div></div>`;
 }
@@ -10253,8 +10465,6 @@ function bind() {
   document.querySelectorAll('.set-warn').forEach(el => el.onchange = e => { S.settings.warnMiss = e.target.checked; store.set('settings', S.settings); });
   on('#set-snd', 'onchange', e => { setSnd(e.target.value); });
   on('#set-auto', 'onchange', e => { S.settings.autoHint = e.target.checked; store.set('settings', S.settings); });
-  on('#p-n', 'onchange', e => { const n = +e.target.value; document.querySelectorAll('.opp-row').forEach(r => { r.hidden = +r.dataset.i >= n - 1; }); });
-  on('#t-n', 'oninput', e => { const n = Math.max(5, Math.min(40, +e.target.value || 5)); const s = KB.splitTables(n, 5); $('#t-tables').textContent = `卓分け：${s.join('・')}人（${s.length}卓）`; });
   document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b));
   document.querySelectorAll('[data-dqc]').forEach(b => b.onclick = () => { const D = S.drill, i = +b.dataset.dqc, k = D.sel.indexOf(i); if (k >= 0) D.sel.splice(k, 1); else { if (D.sel.length >= 3) D.sel.shift(); D.sel.push(i); } KB.sfx(k >= 0 ? 'unselect' : 'select'); render(); });
   document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); badgeTalk(k, +i); });
@@ -10266,6 +10476,13 @@ function bind() {
   if (S.view === 'opening') { // 新しいセリフが出るたびに、そこまで自動でスクロール
     (S.opTimers || []).forEach(clearTimeout); S.opTimers = [];
     document.querySelectorAll('.op-line, #op-start').forEach(el => { const dl = parseFloat(el.style.animationDelay) || 0; S.opTimers.push(setTimeout(() => { if (S.view === 'opening' && el.isConnected) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, dl * 1000 + 250)); });
+  }
+  if (S.view === 'setup-practice' || S.view === 'setup-tour') { // 設定画面：チップ・席・＋−、こだわり設定の開け閉め、数字を打ち込んだとき
+    document.querySelectorAll('[data-su]').forEach(b => b.onclick = () => suTap(b.dataset));
+    const adv = $('#su-adv'); if (adv) adv.addEventListener('toggle', () => { S.suAdv = adv.open; });
+    // 数字を打ち込んだとき：画面ごと作り直すと、そのまま押した「大会を開始」が効かなくなるので、関係するところだけ直す
+    ['#t-n', '#t-sets', '#t-games', '#t-fin'].forEach(q => { const e = $(q); if (e) e.addEventListener('change', suTourRefresh); });
+    ['#p-points', '#t-points', '#t-tie'].forEach(q => { const e = $(q); if (e) e.addEventListener('change', () => { if (S.view === 'setup-tour') Object.assign(suT(), readTourCfg()); else suP().points = readPoints(e.value); }); });
   }
   if (S.view === 'setup-practice' || S.view === 'setup-tour') { renderRuleBox(); document.querySelectorAll('#app select, #app input').forEach(e => { e.addEventListener('change', () => setTimeout(renderRuleBox, 0)); e.addEventListener('input', () => setTimeout(renderRuleBox, 0)); }); }
   if (S.view === 'setup-tour') {
@@ -10319,7 +10536,7 @@ function act(a, el) {
     case 'start-practice': {
       const n = +$('#p-n').value;
       const opps = []; document.querySelectorAll('.opp-row').forEach(r => opps.push({ level: r.querySelector('.o-lv').value, style: r.querySelector('.o-st').value }));
-      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: readPoints($('#p-points').value) };
+      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: readPoints($('#p-points') ? $('#p-points').value : suP().points.join(',')), preset: suP().preset };
       store.set('cfgPractice', c);
       S.T = newSession({ kind: 'practice', games: c.games, mix: c.mix, opps: opps.slice(0, n - 1), points: c.points, tie: 'janken' });
       stat('pStart'); startSet(); break;
@@ -10370,6 +10587,7 @@ function act(a, el) {
     case 'draw-yes': humanDraw(true); break;
     case 'draw-no': S.confirmDraw = false; renderGame(); break;
     case 'clear': S.sel = []; renderGame(); break;
+    case 'speed-cycle': { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
     case 'sound': { const ks = Object.keys(KB.SFX_LEVELS); setSnd(ks[(ks.indexOf(S.settings.sndLv) + 1) % ks.length]); break; }
     case 'toggle-unseen': S.showUnseen = !S.showUnseen; renderSide(); break;
     case 'hint': computeHint(); break;
