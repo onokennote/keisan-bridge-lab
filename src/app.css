@@ -1871,3 +1871,7 @@ body.spectate .me .hand .card{cursor:default}
 .mode-head h2{margin:2px 0 0}
 .mode-ic{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:14px;font-size:30px;background:linear-gradient(180deg,rgba(242,182,50,.28),rgba(242,182,50,.08));border:1px solid rgba(242,182,50,.55);box-shadow:0 0 14px rgba(242,182,50,.18)}
 .mode-ic.sm{display:inline-grid;width:28px;height:28px;font-size:16px;border-radius:8px;margin-right:6px;vertical-align:middle}
+.btn.ic-btn{min-width:40px;padding-left:8px;padding-right:8px;font-size:18px;line-height:1}
+.topbar .where{flex:1 1 auto;min-width:0}
+.topbar > .row{flex:0 0 auto;flex-wrap:nowrap;gap:4px}
+.gpt-row{flex-wrap:wrap;row-gap:2px}
