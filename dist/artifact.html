@@ -1883,7 +1883,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='9714fc9f96';
+window.KB_BUILD='026ff4e237';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -10377,6 +10377,19 @@ function estimateTour(cfg, myMu, N) {
   }
   return { q: q / N, w: w / N };
 }
+// 練習の1セット（4人卓）のセット期待点と1位の確率：相手は「まんべんなく」の強さから選ぶ
+function estimateSet(cfg, myMu, N) {
+  const W = MIX[cfg.mix].w, tw = W.reduce((a, b) => a + b, 0);
+  const pick = () => { let x = KB.rand() * tw; for (let i = 0; i < 5; i++) { x -= W[i]; if (x <= 0) return i + 1; } return 5; };
+  const draw = m => Math.max(0, m[0] * cfg.games + KB.gauss() * m[1] * Math.sqrt(cfg.games));
+  let pts = 0, top = 0;
+  for (let it = 0; it < N; it++) {
+    const v = [{ id: 0, x: draw([myMu, 9.0]) }]; for (let i = 1; i < cfg.n; i++) v.push({ id: i, x: draw(LV_PP[pick()]) });
+    v.sort((a, b) => a.x - b.x); const r = v.findIndex(o => o.id === 0);
+    pts += cfg.points[r] || 0; if (r === 0) top++;
+  }
+  return { pts: pts / N, top: top / N };
+}
 function numbersData() {
   if (NUMS) return NUMS;
   // 順番の有利不利と、1ゲームの長さ：★3どうしの4人卓をAIだけで打たせて数える
@@ -10392,9 +10405,12 @@ function numbersData() {
   const tri = []; for (let a = 1; a <= 13; a++) for (let b = a; b <= 13; b++) for (let c = b; c <= 13; c++) tri.push({ v: [a, b, c], n: men([a, b, c]) });
   const hist = {}; tri.forEach(x => hist[x.n] = (hist[x.n] || 0) + 1); tri.sort((x, y) => y.n - x.n);
   // 大会（初期設定）の決勝進出・優勝の確率
-  const cfg = { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, mix: 'random' };
+  const cfg = { nPlayers: DEF_T.nPlayers, sets: DEF_T.sets, games: DEF_T.games, points: DEF_T.points, finalists: DEF_T.finalists, mix: DEF_T.mix };
   const tour = PLAY_STYLES.map(p => Object.assign({ label: p.label, mu: p.mu }, estimateTour(cfg, p.mu, 3000)));
-  NUMS = { G, pos: pos.map(x => x / won), rounds: rounds / won, none: none / G, losePP: losePP / loseN, tri, hist, avgMen: tri.reduce((a, x) => a + x.n, 0) / tri.length, tour, cfg };
+  // 練習（初期設定：4人卓・5ゲーム・まんべんなく）のセット期待点
+  const pcfg = { n: DEF_P.n, games: DEF_P.games, points: DEF_P.points, mix: DEF_P.mix };
+  const set = PLAY_STYLES.map(p => Object.assign({ label: p.label, mu: p.mu }, estimateSet(pcfg, p.mu, 6000)));
+  NUMS = { set, pcfg, G, pos: pos.map(x => x / won), rounds: rounds / won, none: none / G, losePP: losePP / loseN, tri, hist, avgMen: tri.reduce((a, x) => a + x.n, 0) / tri.length, tour, cfg };
   return NUMS;
 }
 function numbersHTML() {
@@ -10408,10 +10424,12 @@ function numbersHTML() {
   <div class="num-grid">
     ${card('期待PP', '', '「このまま進んだら何点失うか」の見込み', 'たとえば期待PP 6.0 の手は、同じ場面を何度もくり返したら、平均で6点くらい失うという意味です。上がれた回は0点、上がられた回は残った札の合計。それを全部ならした数字です。「AIの読み」は、出せる手ごとにこの期待PPと上がれる確率を出して比べています。')}
     ${card(f1(ps[0].mu), 'PP', '1ゲームの平均の失点（打ち方別）', `AIの最善手どおりに打つと、1ゲームの失点は平均${f1(ps[0].mu)}。★3相当の打ち方なら${f1(ps[2].mu)}。差は1ゲームでは${f1(ps[2].mu - ps[0].mu)}点でも、5ゲームの1セットなら約${Math.round((ps[2].mu - ps[0].mu) * 5)}点。順位がひっくり返る差です。`, `<div class="num-bars">${ps.map((p, i) => bar(p.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), p.mu, ps[2].mu, f1(p.mu), i === 0)).join('')}</div>`)}
+    ${card(f1(N.set[0].pts), '点', '「セット期待点」＝1セットで取れる得点の見込み', `セットはPPの合計が少ない順に${N.pcfg.points.slice(0, N.pcfg.n).map((x, i) => `${i + 1}位${x}点`).join('・')}。セット期待点は、同じセットを何度もくり返したときの得点の平均です。練習のAIの読みは、失点の少なさ（期待PP）だけでなく、この点数で手を比べます。大きくリードしていれば無理をしない手、離されていれば上がりを狙う手が上に来るのはそのためです。${N.pcfg.n}人卓・${N.pcfg.games}ゲーム（相手はまんべんなく）なら、最善手どおりで平均${f1(N.set[0].pts)}点・1位${pc(N.set[0].top)}、★3相当で${f1(N.set[2].pts)}点です。`, `<div class="num-bars">${N.set.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.pts, N.set[0].pts, `${f1(t.pts)}点（1位 ${pc(t.top)}）`, i === 0)).join('')}</div>`)}
+    ${card(pc(N.tour[0].q), '', '「決勝進出率」＝予選を勝ち抜く確率', `大会の予選では、AIの読みは「この手で決勝に進める確率」で手を比べます。今のセットの残りのゲーム、ほかの卓の進み具合、残りのセットの席替えまで何千回も試して、総合順位（得点→累計PP）が決勝ラインの内側に入った割合を出します。ラインより十分上なら安全な手、ぎりぎりや下なら、PPが少し増えても順位を上げる手が上に来ます。参加${N.cfg.nPlayers}人・予選${N.cfg.sets}セット・上位${N.cfg.finalists}人が決勝なら、最善手どおりで${pc(N.tour[0].q)}、★3相当で${pc(N.tour[2].q)}です。`, `<div class="num-bars">${N.tour.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.q, N.tour[0].q, pc(t.q), i === 0)).join('')}</div><p class="small muted" style="margin:4px 0 0">参加者の平均は${pc(N.cfg.finalists / N.cfg.nPlayers)}</p>`)}
     ${card(pc(N.pos[0]), '', '親（1番手）の上がり率', `だれかが上がったら、その場で終わり。だから順番が大事です。★3どうしの4人卓を${N.G.toLocaleString('ja-JP')}ゲーム打たせると、上がった人のうち親が${pc(N.pos[0])}、4番手は${pc(N.pos[3])}。前のゲームで負けた人が親になるのは、ささやかな救済です。`, `<div class="num-bars">${['親（1番手）', '2番手', '3番手', '4番手'].map((l, i) => bar(l, N.pos[i], N.pos[0], pc(N.pos[i]), i === 0)).join('')}</div>`)}
     ${card(f1(N.rounds), '巡', '上がりまでの平均', `ゲームは平均で第${f1(N.rounds)}巡に終わります。7枚の手札を4〜5回の手番で出し切る計算。1回の手番でおよそ2枚ずつ減らしていく速さが目安です。上がれずにいる人の失点は、平均${f1(N.losePP)}点でした。`)}
     ${card(f1(N.avgMen), '面', '3枚の手札の、平均の待ち', `残り3枚になったとき、13種類の場のうち平均${f1(N.avgMen)}種類で上がれます。最強は <b>${N.tri[0].v.map(KB.vname).join('・')}</b> の${N.tri[0].n}面。弱い組は2面しかありません。残す札で、上がりやすさは何倍も変わります。`, `<div class="num-bars">${Object.keys(N.hist).map(Number).sort((a, b) => b - a).map(k => `<div class="nb-row"><span>${k}面</span><i style="width:${Math.max(2, Math.round(N.hist[k] / maxH * 100))}%"></i><b>${N.hist[k]}</b></div>`).join('')}</div><p class="small muted" style="margin:4px 0 0">面数ごとの組の数（全455通り）</p>`)}
-    ${card(pc(N.tour[0].w), '', '大会で優勝する確率（最善手どおりの場合）', `参加${N.cfg.nPlayers}人・予選${N.cfg.sets}セット・上位${N.cfg.finalists}人が決勝の大会で、AIの最善手どおりに打ち続けた場合の見込みです。決勝に進むだけなら${pc(N.tour[0].q)}。打ち方の差は、大会の結果にここまで響きます。`, `<div class="num-bars">${N.tour.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.w, N.tour[0].w, `${pc(t.w)}（決勝 ${pc(t.q)}）`, i === 0)).join('')}</div><p class="small muted" style="margin:4px 0 0">参加者の平均は優勝${pc(1 / N.cfg.nPlayers)}・決勝${pc(N.cfg.finalists / N.cfg.nPlayers)}</p>`)}
+    ${card(pc(N.tour[0].w), '', '大会で優勝する確率（最善手どおりの場合）', `上と同じ大会で、決勝まで含めて最善手どおりに打ち続けた場合の見込みです。決勝はその1セットのPPだけで決まり、価値があるのは1位だけ。だから決勝のAIの読みは「優勝率」で手を比べ、2位を守るより1位を狙う手を選びます（上がれるのにあえて上がらない「捨て身」が最善になることも）。打ち方の差は、大会の結果にここまで響きます。`, `<div class="num-bars">${N.tour.map((t, i) => bar(t.label.replace('の打ち方', '').replace('AIの最善手を打ち続けた場合', '最善手どおり'), t.w, N.tour[0].w, `${pc(t.w)}（決勝 ${pc(t.q)}）`, i === 0)).join('')}</div><p class="small muted" style="margin:4px 0 0">参加者の平均は優勝${pc(1 / N.cfg.nPlayers)}・決勝${pc(N.cfg.finalists / N.cfg.nPlayers)}</p>`)}
   </div>
   <p class="small muted" style="margin:0;padding:0 6px">※ 平均や確率は、このアプリのAIどうしの対戦と、その結果から作ったモデルで計算した見込みです。実際の大会の結果ではありません。</p>
   <div class="op-lines story-cast">${[['root', '勘で打っていたところに、数字の裏づけがあると、迷いが減ります。'], ['masa', '数字は裏切らへん！でも1ゲームは運も大きいで。そこがおもろいんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
