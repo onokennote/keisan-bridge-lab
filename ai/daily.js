@@ -91,7 +91,7 @@ async function play(b, c, data, sets, minis, form) {
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }
   const pick = lv => { const cands = roster.filter(c => c.lv === lv && !have.has(c.id) && !jobs.some(j => j.c.id === c.id)); return cands[rnd(0, cands.length - 1)]; };
-  const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack', 'attack'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
+  const MINI = ['hunt', 'hunt', 'hunt', 'outs', 'outs', 'chart', 'chart', 'attack', 'attack', 'tour'], mini = n => Array.from({ length: n }, () => MINI[rnd(0, MINI.length - 1)]);
   const add = (lv, sets) => { const c = pick(lv); if (c) jobs.push({ c, data: null, sets, minis: mini(Math.max(0, sets - 1)) }); };
   if (MODE === 'seed' || MODE === 'reseed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり

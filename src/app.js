@@ -5342,6 +5342,17 @@ function aiMini(kind, lv, formAdj) {
     store.set('chart', data); setMax('chart', chartFullRows().length);
     return { kind, rows: chartFullRows().length };
   }
+  if (kind === 'tour') { // 大会：15〜17人・予選3〜4セット・5ゲーム（大会のバッジの対象）に出たことにする。決勝進出・優勝の確率は今の推定実力と調子で決まる。冠（優勝）は大きいので控えめ
+    const r = ratingOf(G_().games), e = Math.max(0.5, Math.min(5.5, (r.ok ? r.r : lv) + (formAdj || 0)));
+    const lerp = (tbl) => { if (e <= 1) return tbl[0]; if (e >= 5) return tbl[4]; const i = Math.floor(e) - 1; return tbl[i] + (tbl[i + 1] - tbl[i]) * (e - Math.floor(e)); };
+    const x = Math.random(), mix = e >= 4.5 && x < 0.2 ? 'master' : e >= 3.5 && x < 0.45 ? 'strong' : 'even', sets = R(3, 4);
+    const pq = lerp([0.08, 0.18, 0.32, 0.5, 0.65]) * { even: 1, strong: 0.7, master: 0.5 }[mix], pc = lerp([0.1, 0.15, 0.22, 0.3, 0.38]) * { even: 1, strong: 0.8, master: 0.65 }[mix];
+    const allSets = Math.random() < Math.pow(lerp([0.12, 0.18, 0.25, 0.33, 0.42]), sets), qual = allSets || Math.random() < pq, champ = qual && Math.random() < pc;
+    bump('tour_done'); if (allSets) bump('all_sets');
+    if (qual) { bump('qualify'); if (mix !== 'even') setMax('qualify_strong', mix === 'master' ? 2 : 1); }
+    if (champ) { bump('champion'); if (mix !== 'even') setMax('champion_strong', mix === 'master' ? 2 : 1); }
+    return { kind, mix, sets, allSets, qual, champ, e: +e.toFixed(2) };
+  }
   if (kind === 'attack') { // バッジアタック：今の推定実力（まだなければ★）と、その日の調子でBPが決まる。自己ベストは上回ったときだけ更新
     const r = ratingOf(G_().games), base = Math.max(0.5, (r.ok ? r.r : lv) + (formAdj || 0));
     const bp = Math.max(60, Math.round((100 + base * 130) * (0.82 + Math.random() * 0.36) / 5) * 5), nb = Math.round(bp / R(18, 26)); // 本物と同じく5の倍数（バッジのBPと順位ボーナスの合計なので）
