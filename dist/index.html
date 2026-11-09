@@ -1866,10 +1866,12 @@ body.spectate .me .hand .card{cursor:default}
 .su-pair .su-step.big .su-pm{width:38px;height:38px;font-size:20px}
 .su-val b{font-size:32px;font-weight:900;line-height:1;color:#fbf7ee}
 .su-pair .su-val small{display:inline;font-size:11px;color:#c9c2ad}
+.chip.tagchip{background:rgba(255,255,255,.1);color:#e9e3cf;border:1px solid rgba(255,255,255,.18);font-weight:700}
+.seat .meta{flex-wrap:wrap;row-gap:2px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='8c7ed586c0';
+window.KB_BUILD='d093597dd1';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7945,12 +7947,12 @@ ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-
 
 // ---------- 設定画面：おすすめセット（土台を1つ選ぶ）→ゲーム数（大会は予選のセット数）→開始。細かいことは「カスタム設定」にたたむ ----------
 const DEF_P = { n: 4, games: 5, mix: 'even', preset: 'usual', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
-const DEF_T = { nPlayers: 17, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
+const DEF_T = { nPlayers: 15, sets: 3, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'even', preset: 'usual' };
 const SU_PRESETS = [
   { k: 'first', icon: '🐣', label: 'はじめて', sub: '相手は★1〜2', p: c => { c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { mix: 'casual', nPlayers: 9, games: 3, finalists: 3 }), tsub: '★1〜2・9人の小さな大会' },
-  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく', p: c => { c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'even', nPlayers: 17, games: 5, finalists: 5 }), tsub: 'まんべんなく・17人' },
-  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'strong', nPlayers: 17, games: 5, finalists: 5 }), tsub: '強豪ぞろい・17人' },
-  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員★5', p: c => { c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { mix: 'master', nPlayers: 17, games: 5, finalists: 5 }), tsub: '全員達人・17人' }
+  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく', p: c => { c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'even', nPlayers: 15, games: 5, finalists: 5 }), tsub: 'まんべんなく・15人' },
+  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { mix: 'strong', nPlayers: 15, games: 5, finalists: 5 }), tsub: '強豪ぞろい・15人' },
+  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員★5', p: c => { c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { mix: 'master', nPlayers: 15, games: 5, finalists: 5 }), tsub: '全員達人・15人' }
 ];
 const MIX_PRESET = { casual: 'first', even: 'usual', random: 'usual', strong: 'strong', master: 'master' };
 const suP = () => { if (!S.suP) { S.suP = JSON.parse(JSON.stringify(store.get('cfgPractice', DEF_P))); while (S.suP.opps.length < 4) S.suP.opps.push({ level: 'r', style: 'r' }); S.suP.preset = S.suP.preset || MIX_PRESET[S.suP.mix] || 'usual'; } return S.suP; };
@@ -8553,7 +8555,7 @@ function renderGame0() {
     opp.push(`<div data-pi="${i}" data-k="${k - 1}" class="seat ${i === g.order[0] ? 'dealer' : ''} ${cur === i ? 'turn' : ''} ${S.thinking === i ? 'thinking' : ''} ${S.justActed === i ? 'acted' : ''} ${g.over && g.winner === i ? 'out winner' : g.over ? 'loser' : ''}">${i === g.order[0] ? dealerChip('dbtn seat-chip' + (S.chipSpun === S.gameNo ? '' : ' spin')) : ''}${S.winShow && g.winner === i ? confettiHTML() : ''}
       <div class="av" ${p.ch && p.ch.charId ? `data-char="${p.ch.charId}" role="button" aria-label="${esc(nm(p))}のプロフィール"` : ''}>${av(p, S.thinking === i ? 'normal' : moodOf(g, i))}${bubble}</div>
       <div class="nm"><span>${esc(nm(p))}</span><span class="ord">${ordInRound}番手</span>${pvr ? `<span class="prov"><span class="lv-full">暫定</span>${pvr.rank[p.id]}位</span>` : ''}</div>
-      <div class="meta">${lvChip(p) || `<span class="chip lvchip">${esc(p.ch.ageJa)}</span>`}</div>
+      <div class="meta">${lvChip(p)}${p.ch.ageJa ? `<span class="chip tagchip" title="肩書き">${esc(p.ch.ageJa)}</span>` : ''}</div>
       <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over || S.spectate ? '' : handBacks(n)}</span>
         <span>${g.over ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${setpp}</b>`}</span></div>
       ${S.spectate && !g.over && n ? `<div class="open-hand">${g.hands[i].map(c => `<i class="oh ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>`).join('')}</div>` : ''}${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
