@@ -1874,10 +1874,14 @@ body.spectate .me .hand .card{cursor:default}
 .mode-head h2{margin:2px 0 0}
 .mode-ic{flex:0 0 auto;display:grid;place-items:center;width:52px;height:52px;border-radius:14px;font-size:30px;background:linear-gradient(180deg,rgba(242,182,50,.28),rgba(242,182,50,.08));border:1px solid rgba(242,182,50,.55);box-shadow:0 0 14px rgba(242,182,50,.18)}
 .mode-ic.sm{display:inline-grid;width:28px;height:28px;font-size:16px;border-radius:8px;margin-right:6px;vertical-align:middle}
+.btn.ic-btn{min-width:40px;padding-left:8px;padding-right:8px;font-size:18px;line-height:1}
+.topbar .where{flex:1 1 auto;min-width:0}
+.topbar > .row{flex:0 0 auto;flex-wrap:nowrap;gap:4px}
+.gpt-row{flex-wrap:wrap;row-gap:2px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='71b382d691';
+window.KB_BUILD='34c3d8159a';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8079,12 +8083,14 @@ function judgeHTML() {
 }
 // 効果音の音量：なし／小／中／大／最大
 const SPD_ORDER = ['slow', 'normal', 'fast', 'instant'], SPD_JA = { slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' };
-const spdLabel = () => '速さ：' + (SPD_JA[S.settings.speed] || 'ふつう');
+const SPD_IC = { slow: '🐢', normal: '🚶', fast: '🏃', instant: '⚡' }, SND_IC = { off: '🔇', s: '🔈', m: '🔉', l: '🔊', xl: '📢' };
+const spdLabel = () => SPD_IC[S.settings.speed] || '🚶'; // 対局画面の上はアイコンだけ（場所をとらない）
+const sndIcon = () => SND_IC[S.settings.sndLv] || '🔊';
 const sndLabel = () => '音：' + (KB.SFX_LEVELS[S.settings.sndLv] || KB.SFX_LEVELS.l)[0];
 function setSnd(k) {
   S.settings.sndLv = k; S.settings.sound = k !== 'off'; store.set('settings', S.settings); KB.sfxLevel(k);
   KB.sfx('click');
-  document.querySelectorAll('.snd-btn').forEach(b => { b.textContent = sndLabel(); });
+  document.querySelectorAll('.snd-btn').forEach(b => { b.textContent = sndIcon(); b.title = b.ariaLabel = sndLabel(); });
   const sel = document.getElementById('set-snd'); if (sel && sel.value !== k) sel.value = k;
 }
 // ボタンを押したときの音（出す・引く・カードなど、専用の音があるものは除く）
@@ -8473,7 +8479,7 @@ function whereText() {
 }
 function gameHTML() {
   return `<div class="topbar"><div class="where">${S.tiebreak ? whereText() : progTopHTML(S.T)}</div>${S.attack ? `<span class="atk-box"><span class="atk-clock" title="残り時間">${fmtClock(S.attack.end - Date.now())}</span><small class="atk-now">${atkBP()} BP</small></span>` : ''}
-  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm ghost spd-btn" data-act="speed-cycle" title="AIの手番の速さ（押すたびに切り替え）">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
+  <div class="row"><button class="btn sm ghost snd-btn ic-btn" data-act="sound" title="${esc(sndLabel())}（押すたびに切り替え）" aria-label="${esc(sndLabel())}">${sndIcon()}</button><button class="btn sm ghost spd-btn ic-btn" data-act="speed-cycle" title="AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}（押すたびに切り替え）" aria-label="AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
   <div id="tablewrap"></div>
   <div class="under"><div class="panel" id="unseenpanel"></div><div class="stack under-main"><div class="panel" id="hintpanel"></div><div class="panel" id="prevpanel" hidden></div></div><div class="panel stack" id="sidepanel"></div></div>`;
 }
@@ -10595,7 +10601,7 @@ function act(a, el) {
     case 'draw-yes': humanDraw(true); break;
     case 'draw-no': S.confirmDraw = false; renderGame(); break;
     case 'clear': S.sel = []; renderGame(); break;
-    case 'speed-cycle': { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
+    case 'speed-cycle': { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); b.title = b.ariaLabel = 'AIの手番の速さ：' + SPD_JA[k]; }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
     case 'sound': { const ks = Object.keys(KB.SFX_LEVELS); setSnd(ks[(ks.indexOf(S.settings.sndLv) + 1) % ks.length]); break; }
     case 'toggle-unseen': S.showUnseen = !S.showUnseen; renderSide(); break;
     case 'hint': computeHint(); break;
