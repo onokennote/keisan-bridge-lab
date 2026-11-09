@@ -2618,14 +2618,17 @@ function setupPracticeHTML() {
     <div class="su-chips">${suChip('lv', 'r', 'おまかせ', c.opps[sel].level === 'r')}${[1, 2, 3, 4, 5].map(l => suChip('lv', l, `★${l} ${esc(KB.levelCfg(l).label)}`, String(c.opps[sel].level) === String(l))).join('')}</div>
     <div class="su-chips">${suChip('st', 'r', '性格おまかせ', c.opps[sel].style === 'r')}${sts.map(x => suChip('st', x.id, esc(x.label), c.opps[sel].style === x.id, `style="--sc:${esc(x.color)}"`)).join('')}</div></div>`;
   const fixed = c.opps.slice(0, k).filter(o => o.level !== 'r' || o.style !== 'r').length;
-  const table = suGroup('table', '🪑', '卓（人数・相手ひとりずつ）', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
-    `<div class="su-row"><div class="su-rl"><b>卓の人数</b><small>あなたを含む</small></div><span class="su-n"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><b>${c.n}人</b><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></span></div>
-     <div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
+  const table = suGroup('table', '🪑', '相手をひとりずつ決める', `${c.n}人卓${fixed ? `・${fixed}席を指定` : '・相手はおまかせ'}`,
+    `<div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>${ed}`);
   const hidden = `<div hidden><input id="p-n" value="${c.n}"><input id="p-games" value="${c.games}"><input id="p-mix" value="${c.mix}">${c.opps.map((o, i) => `<div class="opp-row" data-i="${i}" ${i >= k ? 'hidden' : ''}><select class="o-lv"><option value="${o.level}" selected></option></select><select class="o-st"><option value="${o.style}" selected></option></select></div>`).join('')}</div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">1セット練習</div><div></div></div>
 <div class="su">
 ${suPresetHTML('practice')}
-<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数</b><small>1セットで何ゲーム打つか</small></div><div class="su-chips big">${[3, 5, 7].map(n => suChip('games', n, n + 'ゲーム', c.games === n)).join('')}</div></section>
+<section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>ゲーム数と人数</b></div>
+  <div class="su-pair">
+    <div class="su-pi"><small>1セットのゲーム数</small><div class="su-step big"><button class="su-pm" data-su="gstep" data-v="-1" ${c.games <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><b>${c.games}</b><small>ゲーム</small></span><button class="su-pm" data-su="gstep" data-v="1" ${c.games >= 10 ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>
+    <div class="su-pi"><small>卓の人数（あなたを含む）</small><div class="su-step big"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><span class="su-val"><b>${c.n}</b><small>人</small></span><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></div></div>
+  </div></section>
 ${suStartHTML('start-practice', 'この卓ではじめる')}
 ${suCustomHTML('practice', table)}
 ${hidden}
@@ -2649,6 +2652,7 @@ function suTap(d) {
     case 'lv': if (S.suSeat != null) c.opps[S.suSeat].level = String(v); break;
     case 'st': if (S.suSeat != null) c.opps[S.suSeat].style = v; break;
     case 'games': c.games = +v; break;
+    case 'gstep': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
     case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
     case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
