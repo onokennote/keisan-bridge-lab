@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="15c44a1 2026-11-10 08:24"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="d9735ee 2026-11-10 08:31"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -716,7 +716,8 @@ table.st tr.cut td{border-bottom:2px dashed var(--good)}
 .cand-list{display:flex;flex-direction:column;gap:4px}
 .cl-row{display:grid;grid-template-columns:20px 1fr auto;grid-template-areas:"rk ex tags" "rk st st";gap:0 6px;padding:5px 6px;border-radius:8px;background:rgba(255,255,255,.04)}
 .cl-row.top1{box-shadow:inset 0 0 0 1px var(--good,#5bd17a)}
-.cl-row.mine{background:rgba(242,182,50,.12)}
+.cl-row.mine{background:rgba(242,182,50,.12);box-shadow:inset 0 0 0 2px var(--accent)}
+.cl-gap{text-align:center;color:var(--muted);line-height:1;margin:-2px 0}
 .cl-rk{grid-area:rk;font-weight:800;color:var(--muted,#8a8f98);text-align:center}
 .cl-ex{grid-area:ex;font-family:var(--f-mono);font-weight:700;overflow-wrap:anywhere}
 .cl-tags{grid-area:tags;display:flex;gap:4px}
@@ -1891,7 +1892,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='b459db9fce';
+window.KB_BUILD='ef03512363';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9410,7 +9411,7 @@ function whyHTML(d) {
   };
   const best = d.bestStats, mine = d.mineStats;
   // AIが考えた手（総合評価の順）：最善かどうかに関係なく一覧で見せる
-  const evs = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score).slice(0, 6);
+  const allEv = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score), evs = allEv.slice(0, 6);
   const isMine = e => (e.m && mine.m) ? e.m.key === mine.m.key : (!e.m && !mine.m);
   // 大会の決勝進出率・優勝率、練習のセット期待点など、目的の値も並べる（そのときの目的で記録しておいた名前を使う）
   // 総合評価の式（totalScore と同じ）：目的の値は「この卓で1位のときの値」を100とする
@@ -9427,7 +9428,9 @@ function whyHTML(d) {
   // 数字は「見出し／値」の2段で並べる（総合・目的・上がり・期待PP・差）
   const mx = (e, i) => [['総合', (e.score * 100).toFixed(1)], gL && e.goal != null ? [({ 'セット期待点': '期待点', '決勝進出率': '決勝進出', '優勝率': '優勝', '勝ち抜け率': '勝ち抜け' })[gL] || gL, d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'] : null, ['上がり', pct(e.win)], ['期待PP', fx1(e.pp)], ['差', i ? ((evs[0].score - e.score) * 100).toFixed(1) + 'pt' : '—']].filter(Boolean).map(([k, v]) => `<span class="mx"><small>${k}</small><b>${v}</b></span>`).join('');
   const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
+  // 自分の手が6位より下でも、その順位で最後に足して見せる（枠の強調は自分の手）
+  const rows = evs.map((e, i) => [e, i]); if (!evs.some(isMine)) { const k = allEv.findIndex(isMine); if (k >= 6) rows.push([allEv[k], k]); }
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);
