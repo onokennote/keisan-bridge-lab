@@ -1,0 +1,36 @@
+# AI研究員（ごちゃまぜ倶楽部のキャラ）を毎朝少しずつ育てる。ランキングに「AI」の印つきで並ぶ
+# 必要な Secrets：KB_ADMIN_KEY（さくらの kb_data/admin_key.txt と同じ鍵。「さくらにAPIを送る」が送る）
+# 手で動かすとき：Actions →「AI研究員の毎日の対局」→ Run workflow（mode：daily＝いつもの1日／seed＝最初の投入）
+name: AI研究員の毎日の対局
+on:
+  schedule:
+    - cron: '17 21 * * *' # 毎朝6:17（日本時間）
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'daily（いつもの1日）か seed（最初の投入）'
+        default: daily
+        required: true
+concurrency: ai-players
+jobs:
+  play:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/lucid-curie-k2el7s
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 準備（Playwright と Chromium）
+        run: |
+          npm i --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: アプリを組み立てる
+        run: ./build.sh
+      - name: 対局してサーバーに保存
+        env:
+          KB_API: https://onoken-web.sakura.ne.jp/kb/api.php
+          KB_ADMIN_KEY: ${{ secrets.KB_ADMIN_KEY }}
+        run: node ai/daily.js "${{ github.event.inputs.mode || 'daily' }}"

@@ -37,6 +37,8 @@ function db(): PDO {
   if (!in_array('bio', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN bio TEXT');
   if (!in_array('card', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN card TEXT');
   if (!in_array('streak', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN streak INTEGER DEFAULT 0');
+  if (!in_array('ai', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN ai INTEGER DEFAULT 0'); // AI研究員（倶楽部のキャラ）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
   return $pdo;
 }
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見まちがえやすい I・O・0・1 は使わない
@@ -90,6 +92,11 @@ function nameTaken(string $name, string $uid, string $pid): bool {
   $st = db()->prepare('SELECT uid, pid, name FROM ranks'); $st->execute();
   foreach ($st->fetchAll() as $r) { if ($r['uid'] === $uid && $r['pid'] === $pid) continue; if (normName((string)$r['name']) === $n) return true; }
   return false;
+}
+// AI研究員を動かすための鍵（GitHub Actions だけが持つ）。データベースと同じ、公開フォルダの外の admin_key.txt に置く
+function adminOk(array $b): void {
+  global $CFG; $f = dirname($CFG['db']) . '/admin_key.txt'; $k = $CFG['admin_key'] ?? (is_file($f) ? trim((string)file_get_contents($f)) : '');
+  if (strlen($k) < 16 || !hash_equals($k, (string)($b['key'] ?? ''))) fail('権限がありません', 403);
 }
 function rid(string $uid, string $pid): string { return substr(h('rid:' . $uid . ':' . $pid), 0, 16); } // ランキングで人を指す公開用の番号
 function safeName(string $s, string $uid, string $pid): string {
@@ -165,7 +172,8 @@ try {
     }
     case 'rankings': { // 6つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
       $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = 20; $res = [];
-      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated FROM ranks WHERE shown = 1')->fetchAll();
+      $withAi = ($_GET['ai'] ?? '1') !== '0'; // ai=0 でAI研究員を外す
+      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1' . ($withAi ? '' : ' AND (ai IS NULL OR ai = 0)'))->fetchAll();
       foreach ($all as &$r) {
         $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0;
         // 連続最善の列ができる前に保存した人は、成績カードに入っている記録を使う
@@ -192,7 +200,7 @@ try {
       $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmpT($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1;
       $sorted = ['total' => [$l, $rk]] + $sorted;
       $tot = []; foreach ($all as $r) $tot[$r['uid'] . ':' . $r['pid']] = $r['total'];
-      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid, 'pid' => ($uid !== '' && $r['uid'] === $uid) ? $r['pid'] : null]; // pid は自分の行だけ（今のプレイヤーを見分けるため）
+      $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid, 'pid' => ($uid !== '' && $r['uid'] === $uid) ? $r['pid'] : null, 'ai' => !empty($r['ai'])]; // pid は自分の行だけ（今のプレイヤーを見分けるため）
       foreach ($sorted as $type => [$l, $rk]) {
         $list = []; $mine = [];
         foreach ($l as $i => $r) { if ($i < $lim) $list[] = $row($r, $rk[$i]); elseif ($uid !== '' && $r['uid'] === $uid) $mine[] = $row($r, $rk[$i]); }
@@ -207,15 +215,37 @@ try {
       if (!nameOk($n)) out(['ok' => true, 'free' => false, 'why' => 'ng']);
       out(['ok' => true, 'free' => !nameTaken($n, $uid, $pid), 'why' => 'taken']);
     }
+    case 'ai_list': { // AI研究員の一覧と記録（GitHub Actions の毎日の自動対局から）
+      $b = body(); adminOk($b);
+      out(['ok' => true, 'list' => array_map(fn($r) => ['cid' => $r['cid'], 'data' => json_decode((string)$r['data'], true), 'updated' => (int)$r['updated']], db()->query('SELECT cid, data, updated FROM ai_data ORDER BY updated')->fetchAll())]);
+    }
+    case 'ai_save': { // AI研究員の記録とランキングの数字を保存（uid は「ai」、pid はキャラのid）
+      $b = body(); adminOk($b);
+      $cid = substr(preg_replace('/[^a-z0-9]/i', '', (string)($b['cid'] ?? '')), 0, 24); if ($cid === '') fail('cid がありません');
+      $data = $b['data'] ?? null; $s = $b['stats'] ?? null; if (!is_array($data) || !is_array($s)) fail('データがありません');
+      $d = db(); $d->beginTransaction();
+      $d->prepare('INSERT INTO ai_data (cid, data, updated) VALUES (?,?,?) ON CONFLICT(cid) DO UPDATE SET data=excluded.data, updated=excluded.updated')->execute([$cid, json_encode($data, JSON_UNESCAPED_UNICODE), time()]);
+      $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
+      $name = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($s['name'] ?? '')), 0, 12));
+      $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
+      $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, streak, ai, updated) VALUES (?,?,?,1,?,?,?,?,?,?,?,?,1,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, streak=excluded.streak, ai=1, updated=excluded.updated')
+        ->execute(['ai', $cid, $name, $rating, max(0, min(500, (int)($s['badges'] ?? 0))), max(0, min(20000, (int)($s['bp'] ?? 0))), max(0, min(5000, (int)($s['atk'] ?? 0))), $av, trim(mb_substr((string)($s['bio'] ?? ''), 0, 140)), safeCard($s['card'] ?? null), max(0, min(2000, (int)($s['streak'] ?? 0))), time()]);
+      $d->commit(); out(['ok' => true]);
+    }
+    case 'ai_del': { // AI研究員を引退させる（ランキングからも消す）
+      $b = body(); adminOk($b); $cid = substr(preg_replace('/[^a-z0-9]/i', '', (string)($b['cid'] ?? '')), 0, 24);
+      db()->prepare('DELETE FROM ai_data WHERE cid = ?')->execute([$cid]); db()->prepare("DELETE FROM ranks WHERE uid = 'ai' AND pid = ?")->execute([$cid]);
+      out(['ok' => true]);
+    }
     case 'card': { // ランキングの人の成績カード（自己紹介つき）。rid で指す
       $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
-      foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card FROM ranks WHERE shown = 1')->fetchAll() as $r) {
+      foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card, ai FROM ranks WHERE shown = 1')->fetchAll() as $r) {
         if (rid($r['uid'], $r['pid']) !== $rid) continue;
-        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? '')])]);
+        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 7]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 8]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

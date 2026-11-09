@@ -1726,3 +1726,7 @@ body.spectate .me .hand .card{cursor:default}
 .mode-rec{display:grid;gap:6px;padding:8px 10px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid rgba(242,182,50,.18);font-size:13px}
 .mode-rec b{color:#ffd43b}
 .mode-rec .aim-fact{justify-self:start}
+/* ランキング：AI研究員 */
+.rk-ai-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 12px}
+.rk-ai-tg.on{background:rgba(116,192,252,.22);border-color:#74c0fc;color:#d0ebff}
+.ai-chip{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;background:#1c3d5a;border:1px solid #74c0fc;color:#a5d8ff;font-style:normal;font-size:10px;font-weight:900;vertical-align:middle}

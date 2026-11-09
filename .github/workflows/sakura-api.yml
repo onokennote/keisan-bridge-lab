@@ -6,7 +6,7 @@ name: さくらにAPIを送る
 on:
   push:
     branches: [claude/lucid-curie-k2el7s]
-    paths: [server/api.php]
+    paths: [server/api.php, .github/workflows/sakura-api.yml]
   workflow_dispatch:
 concurrency: sakura-api
 jobs:
@@ -41,6 +41,18 @@ jobs:
             echo "SFTPで入れませんでした。FTPSで試します"
             lftp -e "set ftp:ssl-force true; set ftp:ssl-protect-data true; set net:max-retries 1; put server/api.php -o www/kb/api.php; bye" --env-password -u "$U" "ftp://$H" && echo "FTPSで送りました"
           fi
+      - name: AI研究員の鍵を送る（KB_ADMIN_KEY があるときだけ。公開フォルダの外の kb_data に置く）
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+          U: ${{ secrets.SAKURA_USER }}
+          LFTP_PASSWORD: ${{ secrets.SAKURA_PASSWORD }}
+          K: ${{ secrets.KB_ADMIN_KEY }}
+        run: |
+          if [ -z "$K" ]; then echo "KB_ADMIN_KEY が未設定なので送りません"; exit 0; fi
+          printf '%s' "$K" > admin_key.txt
+          lftp -e "set sftp:auto-confirm yes; set net:max-retries 1; put admin_key.txt -o kb_data/admin_key.txt; chmod 600 kb_data/admin_key.txt; bye" --env-password -u "$U" "sftp://$H"
+          rm -f admin_key.txt
       - name: 動いているか確かめる
         if: steps.cfg.outputs.skip != '1'
         env:

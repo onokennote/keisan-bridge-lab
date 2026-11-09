@@ -6,6 +6,7 @@ const root = path.join(__dirname, '..'), ok = (c, m) => { console.log((c ? 'OK  
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'kbcloud-'));
 fs.copyFileSync(path.join(root, 'server/api.php'), path.join(work, 'api.php'));
 fs.writeFileSync(path.join(work, 'config.php'), "<?php return ['db' => __DIR__ . '/data/kb.sqlite', 'origins' => ['http://localhost:8124']];");
+fs.mkdirSync(path.join(work, 'data'), { recursive: true }); fs.writeFileSync(path.join(work, 'data', 'admin_key.txt'), 'test-admin-key-0123456789');
 try { execSync('pkill -f "php -S localhost:8099"'); } catch (e) { } // 前回のサーバーが残っていたら止める
 const php = spawn('php', ['-S', 'localhost:8099', '-t', work], { stdio: 'ignore' });
 execSync('KB_CLOUD_API=http://localhost:8099/api.php ./deploy.sh', { cwd: root });
@@ -46,6 +47,17 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(/ケン/.test(sec('総合').t) && /\d+\.\d点/.test(sec('総合').t), '総合のランキングに点数つきで出る：' + sec('総合').t.replace(/\s+/g, ' '));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ranking.png') });
   ok(/820BP/.test(sec('バッジアタック').t), 'バッジアタックの自己ベスト（820BP）が出る');
+  // AI研究員：ランキングに「AI」の印つきで並び、ボタンで外せる（はじめはON）。鍵がないと書き込めない
+  const aiPost = (a, body) => fetch('http://localhost:8099/api.php?a=' + a, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then(r => r.json());
+  ok(!(await aiPost('ai_save', { key: 'wrong-key-000000000', cid: 'zero', data: {}, stats: {} })).ok, '鍵が違うとAI研究員は書き込めない');
+  ok((await aiPost('ai_save', { key: 'test-admin-key-0123456789', cid: 'zero', data: { 'kb.x': '1' }, stats: { name: 'ゼロ', rating: 5.2, badges: 30, bp: 9000, atk: 0, streak: 40, bio: '「静かなる天才」テスト', card: { ach: [] } } })).ok, '鍵があればAI研究員を保存できる');
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('home'); KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
+  ok(await pa.evaluate(() => [...document.querySelectorAll('.rk-row')].some(r => /ゼロ/.test(r.innerText) && r.querySelector('.ai-chip')) && /ON/.test(document.querySelector('[data-act="rank-ai"]').innerText)), 'ランキングにAI研究員が「AI」の印つきで出る（はじめはON）');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_ai.png') });
+  await pa.click('[data-act="rank-ai"]'); await pa.waitForTimeout(1800);
+  ok(await pa.evaluate(() => ![...document.querySelectorAll('.rk-row')].some(r => /ゼロ/.test(r.innerText)) && /OFF/.test(document.querySelector('[data-act="rank-ai"]').innerText)), 'ボタンでAI研究員を外せる');
+  await pa.click('[data-act="rank-ai"]'); await pa.waitForTimeout(1500);
+  ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p') || ![...document.querySelectorAll('.title .cast .cast-p')].some(b => /ゼロ/.test(b.title)); }), 'タイトルの6人にはAI研究員を入れない');
   // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
   ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p'); }), 'アバターを作っていない人はタイトルに並ばない');
   await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });
@@ -99,10 +111,13 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   // 端末Aは鍵が切れずに使い続けられる
   await settle(pa, () => { KBAPP.testAch('three', 70); return KBAPP.cloudPush(); }); ok(await settle(pa, () => KBAPP.cloud().CLOUD.status === 'saved'), '引き継いだあとも、もとの端末で保存を続けられる');
   // 同じ端末の2人目：ランキングの「あなた」は今プレイしているプレイヤーだけ
+  await pc.close().catch(() => { }); // 端末Cはここで閉じる（あとから保存して、Aの記録を上書きしないように）
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); KBAPP.act('new-profile'); });
-  await pa.fill('#new-name', 'ジロウ'); await pa.click('[data-act="create-profile"]'); await pa.waitForTimeout(1500);
+  await pa.fill('#new-name', 'ジロウ'); await pa.click('[data-act="create-profile"]');
+  await pa.waitForFunction(() => KBAPP.S.settings.name === 'ジロウ', null, { timeout: 8000 }); await pa.waitForTimeout(500); // 名前の確認（サーバー）を待つ
   await settle(pa, () => { document.querySelectorAll('#modal,.whistle-ov,.ach-toast').forEach(e => e.remove()); KBAPP.testAch('win', 5); return KBAPP.cloudPush(); });
-  await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
+  // ほかの端末の新しい記録を読み込むと開き直しになることがあるので、ランキングが出るまで開き直す
+  for (let k = 0; k < 6; k++) { await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }).catch(() => { }); await pa.waitForTimeout(1800); if (await pa.evaluate(() => KBAPP.S.view === 'ranking' && document.querySelectorAll('.rk-sec .rk-row').length > 0).catch(() => false)) break; }
   const meRows = await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')].find(e => /バッジ数/.test(e.querySelector('h2').innerText)).querySelectorAll('.rk-row').length ? [...[...document.querySelectorAll('.rk-sec')].find(e => /バッジ数/.test(e.querySelector('h2').innerText)).querySelectorAll('.rk-row')].map(r => r.querySelector('.rk-nm').innerText.replace(/\s+/g, '')) : []);
   ok(meRows.some(n => n === 'ジロウあなた') && meRows.some(n => n === 'ケン'), '「あなた」は今のプレイヤー（ジロウ）だけ、同じ端末のケンは名前だけ：' + meRows.join(' / '));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_me.png') });
