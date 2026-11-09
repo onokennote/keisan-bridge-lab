@@ -118,9 +118,12 @@ async function play(b, c, data, sets, minis, form) {
     const close = [];
     for (const x of cur) {
       const c = roster.find(r => r.id === x.cid); if (!c) continue;
-      const target = topHuman * [0.3, 0.45, 0.6, 0.8, 1.0][c.lv - 1], g = target > 0 ? 1 - (aiBp[c.name] || 0) / target : -1;
+      // 目標の割合は「今の推定実力」で決める（まだ出ていなければ★）。★1→3割・★2→45%・★3→6割・★4→8割・★5→1位より少し上（105%）。キャラごとにばらつく
+      const rt = x.rating != null ? x.rating : c.lv, P = [[1, 0.3], [2, 0.45], [3, 0.6], [4, 0.8], [5, 1.05]];
+      let ratio = rt <= 1 ? 0.3 : rt >= 5 ? 1.05 : 0; for (let k = 0; k < 4; k++) if (rt > P[k][0] && rt <= P[k + 1][0]) ratio = P[k][1] + (P[k + 1][1] - P[k][1]) * (rt - P[k][0]);
+      const bpNow = aiBp[c.name] != null ? aiBp[c.name] : (x.bp || 0), target = topHuman * ratio, g = target > 0 ? 1 - bpNow / target : -1;
       let sets, minis, note = '';
-      if (g > 0.3) { const extra = Math.min(3, Math.ceil((target - (aiBp[c.name] || 0)) / 200)); sets = Math.min(3, 1 + Math.floor(extra / 2)); minis = mini(Math.min(2, extra)); note = `追いつき：あと${Math.round(g * 100)}%`; }
+      if (g > 0.3) { const extra = Math.min(3, Math.ceil((target - bpNow) / 200)); sets = Math.min(3, 1 + Math.floor(extra / 2)); minis = mini(Math.min(2, extra)); note = `★${rt.toFixed(1)}→目標${Math.round(target)}BP・あと${Math.round(g * 100)}%`; }
       else if (g > 0.1) { sets = Math.random() < 0.8 ? 1 + (Math.random() < 0.3 ? 1 : 0) : 0; minis = mini(Math.random() < 0.5 ? 1 : 0); note = `接近中：あと${Math.round(g * 100)}%`; }
       else if (g > 0) { sets = Math.random() < 0.45 ? 1 : 0; minis = mini(Math.random() < 0.25 ? 1 : 0); note = `目前：あと${Math.round(g * 100)}%`; close.push(c.id); }
       else if (target > 0) { sets = Math.random() < 0.2 ? 1 : 0; minis = mini(Math.random() < 0.1 ? 1 : 0); note = '目標に到達'; }

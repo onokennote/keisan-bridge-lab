@@ -217,7 +217,8 @@ try {
     }
     case 'ai_list': { // AI研究員の一覧と記録（GitHub Actions の毎日の自動対局から）
       $b = body(); adminOk($b);
-      out(['ok' => true, 'list' => array_map(fn($r) => ['cid' => $r['cid'], 'data' => json_decode((string)$r['data'], true), 'updated' => (int)$r['updated']], db()->query('SELECT cid, data, updated FROM ai_data ORDER BY updated')->fetchAll())]);
+      out(['ok' => true, 'list' => array_map(fn($r) => ['cid' => $r['cid'], 'data' => json_decode((string)$r['data'], true), 'updated' => (int)$r['updated'], 'rating' => $r['rating'] !== null ? (float)$r['rating'] : null, 'bp' => (int)($r['bp'] ?? 0)],
+        db()->query("SELECT a.cid, a.data, a.updated, r.rating, r.bp FROM ai_data a LEFT JOIN ranks r ON r.uid = 'ai' AND r.pid = a.cid ORDER BY a.updated")->fetchAll())]); // 今の推定実力とBPも返す（追いつきの目標に使う）
     }
     case 'ai_save': { // AI研究員の記録とランキングの数字を保存（uid は「ai」、pid はキャラのid）
       $b = body(); adminOk($b);
@@ -245,7 +246,7 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 8]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 9]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();
