@@ -75,7 +75,7 @@ async function play(b, c, data, sets, minis, form) {
     const data = {}; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k.startsWith('kb.') && !/^kb\.(cloud|recentLines|migDone|testAskName)/.test(k)) data[k] = localStorage.getItem(k); }
     const st = KBAPP.cloudStats().find(x => x.pid === pid) || {};
     const ch = KB.charById(c.id);
-    st.name = c.name; st.bio = `${ch.title ? `「${ch.title}」` : ''}${ch.prof || ''}`.slice(0, 140); // 二つ名がないキャラは「」を付けない st.avatar = KB.charToCh(ch);
+    st.name = c.name; st.bio = `${ch.title ? `「${ch.title}」` : ''}${ch.prof || ''}`.slice(0, 140); st.avatar = KB.charToCh(ch); // 二つ名がないキャラは「」を付けない
     return { data, stats: st };
   }, [pid, c]);
   await pg.close();
