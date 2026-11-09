@@ -1881,7 +1881,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='9cf29b449f';
+window.KB_BUILD='9714fc9f96';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8885,7 +8885,7 @@ function recordDecision(move) {
   if (sutemi) sutemi.chose = mine === best;
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
   S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: near || (sutemi && sutemi.outOk) ? mine : best0, // 「ほぼ互角」で最善扱いにした手も、統計（3枚・引いた回数など）では自分の手を最善として数える
-     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -9395,14 +9395,16 @@ function whyHTML(d) {
     const rs = e.m ? KB.reasons(d.counts, e.m, d.unseen) : [`あえて出さずに1枚引く（手札${KB.nCounts(d.counts) + 1}枚に）`, `次の場で出せる確率 ${pct(KB.nextPlayableProb(d.counts, d.unseen))}`];
     if (e.danger > 0.08) rs.push(`次の自分の番までに誰かが上がる確率 ${pct(e.danger)}`);
     return `<div class="cand ${cls}"><div class="top"><span class="rk ${cls === 'best' ? 'r1' : ''}">${label}</span><span class="expr">${e.m ? esc(e.m.expr) + ' = ' + d.t : 'あえて引く'}</span></div>
-    <div class="metrics"><div class="metric">${goalLabel()}<b>${fmtGoal(e.goal)}</b></div><div class="metric">上がる確率<b>${pct(e.win)}</b></div><div class="metric">期待PP<b>${fx1(e.pp)}</b></div><div class="metric">期待順位<b>${fx1(e.rank)}位</b></div></div>
+    <div class="metrics"><div class="metric">${d.goalLbl || goalLabel()}<b>${d.goalLbl ? (d.goalPct ? pct(e.goal) : fx1(e.goal) + '点') : fmtGoal(e.goal)}</b></div><div class="metric">上がる確率<b>${pct(e.win)}</b></div><div class="metric">期待PP<b>${fx1(e.pp)}</b></div><div class="metric">期待順位<b>${fx1(e.rank)}位</b></div></div>
     <ul class="reasons">${rs.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
   };
   const best = d.bestStats, mine = d.mineStats;
   // AIが考えた手（総合評価の順）：最善かどうかに関係なく一覧で見せる
   const evs = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score).slice(0, 6);
   const isMine = e => (e.m && mine.m) ? e.m.key === mine.m.key : (!e.m && !mine.m);
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（評価の高い順）</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${i === 0 ? '<em class="t-best">最善</em>' : ''}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st">上がり${pct(e.win)}・期待PP ${fx1(e.pp)}${i ? `・差 ${((evs[0].score - e.score) * 100).toFixed(1)}pt` : ''}</span></div>`).join('')}</div>` : '';
+  // 大会の決勝進出率・優勝率、練習のセット期待点など、目的の値も並べる（そのときの目的で記録しておいた名前を使う）
+  const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（評価の高い順）</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${i === 0 ? '<em class="t-best">最善</em>' : ''}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st">${gTxt(e)}上がり${pct(e.win)}・期待PP ${fx1(e.pp)}${i ? `・差 ${((evs[0].score - e.score) * 100).toFixed(1)}pt` : ''}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);
