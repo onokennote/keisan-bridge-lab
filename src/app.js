@@ -3992,7 +3992,7 @@ function whyHTML(d) {
   };
   const best = d.bestStats, mine = d.mineStats;
   // AIが考えた手（総合評価の順）：最善かどうかに関係なく一覧で見せる
-  const evs = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score).slice(0, 6);
+  const allEv = (d.evs || d.top || []).filter(e => e && e.score != null).slice().sort((a, b) => b.score - a.score), evs = allEv.slice(0, 6);
   const isMine = e => (e.m && mine.m) ? e.m.key === mine.m.key : (!e.m && !mine.m);
   // 大会の決勝進出率・優勝率、練習のセット期待点など、目的の値も並べる（そのときの目的で記録しておいた名前を使う）
   // 総合評価の式（totalScore と同じ）：目的の値は「この卓で1位のときの値」を100とする
@@ -4009,7 +4009,9 @@ function whyHTML(d) {
   // 数字は「見出し／値」の2段で並べる（総合・目的・上がり・期待PP・差）
   const mx = (e, i) => [['総合', (e.score * 100).toFixed(1)], gL && e.goal != null ? [({ 'セット期待点': '期待点', '決勝進出率': '決勝進出', '優勝率': '優勝', '勝ち抜け率': '勝ち抜け' })[gL] || gL, d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'] : null, ['上がり', pct(e.win)], ['期待PP', fx1(e.pp)], ['差', i ? ((evs[0].score - e.score) * 100).toFixed(1) + 'pt' : '—']].filter(Boolean).map(([k, v]) => `<span class="mx"><small>${k}</small><b>${v}</b></span>`).join('');
   const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${evs.map((e, i) => `<div class="cl-row ${i === 0 ? 'top1' : ''} ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
+  // 自分の手が6位より下でも、その順位で最後に足して見せる（枠の強調は自分の手）
+  const rows = evs.map((e, i) => [e, i]); if (!evs.some(isMine)) { const k = allEv.findIndex(isMine); if (k >= 6) rows.push([allEv[k], k]); }
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);

@@ -713,7 +713,8 @@ table.st tr.cut td{border-bottom:2px dashed var(--good)}
 .cand-list{display:flex;flex-direction:column;gap:4px}
 .cl-row{display:grid;grid-template-columns:20px 1fr auto;grid-template-areas:"rk ex tags" "rk st st";gap:0 6px;padding:5px 6px;border-radius:8px;background:rgba(255,255,255,.04)}
 .cl-row.top1{box-shadow:inset 0 0 0 1px var(--good,#5bd17a)}
-.cl-row.mine{background:rgba(242,182,50,.12)}
+.cl-row.mine{background:rgba(242,182,50,.12);box-shadow:inset 0 0 0 2px var(--accent)}
+.cl-gap{text-align:center;color:var(--muted);line-height:1;margin:-2px 0}
 .cl-rk{grid-area:rk;font-weight:800;color:var(--muted,#8a8f98);text-align:center}
 .cl-ex{grid-area:ex;font-family:var(--f-mono);font-weight:700;overflow-wrap:anywhere}
 .cl-tags{grid-area:tags;display:flex;gap:4px}
