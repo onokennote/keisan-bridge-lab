@@ -325,10 +325,10 @@ function estimateQualify(cfg, myMu) {
   return q / N;
 }
 function readTourCfg() {
-  return { nPlayers: Math.max(5, Math.min(40, +$('#t-n').value || 17)), sets: Math.max(1, Math.min(8, +$('#t-sets').value || 4)), games: Math.max(1, Math.min(10, +$('#t-games').value || 5)), points: readPoints($('#t-points').value), finalists: +$('#t-fin').value, tie: $('#t-tie').value, mix: $('#t-mix').value };
+  return { nPlayers: Math.max(5, Math.min(40, +$('#t-n').value || 17)), sets: Math.max(1, Math.min(8, +$('#t-sets').value || 4)), games: Math.max(1, Math.min(10, +$('#t-games').value || 5)), points: readPoints($('#t-points').value), finalists: Math.max(2, Math.min(5, +$('#t-fin').value || 5)), tie: ($('#t-tie') || { value: 'janken' }).value, mix: $('#t-mix').value };
 }
 function renderEst() {
-  const el = $('#t-est'); const w = $('#t-est-wrap'); if (!el || !w || !w.open) return;
+  const el = $('#t-est'); const w = $('#t-est-wrap'); if (!el || !w || (w.tagName === 'DETAILS' && !w.open)) return;
   const c = readTourCfg();
   const rows = PLAY_STYLES.map(p => ({ p, v: estimateQualify(c, p.mu) }));
   const base = c.finalists / c.nPlayers;
@@ -598,7 +598,7 @@ function ruleBoxHTML(kind) {
     <ul>${rows.map(([b, t]) => `<li>${ok(b)}${esc(t)}</li>`).join('')}</ul>
     <p class="small muted" style="margin:0">${kind === 'practice' ? '上がり・3枚出しなどゲームのバッジは「人数」と「強さ」、セット優勝・低PPセットなどセットのバッジは3つすべてが条件です。' : '大会のバッジ（決勝進出・優勝・完走・全セット優勝）は上の条件すべて、各セット・各ゲームのバッジは卓4人以上・5ゲーム以上・相手の強さが条件です。'}連続最善・推定実力・アウツチャレンジはいつでも数えます。AIの読みを見たゲーム・セット・大会は、結果のバッジの対象外です。</p>`;
 }
-function renderRuleBox() { const el = $('#rule-box'); if (el) el.innerHTML = ruleBoxHTML(S.view === 'setup-tour' ? 'tour' : 'practice'); }
+function renderRuleBox() { const el = $('#rule-box'); if (el) el.innerHTML = ruleBoxHTML(S.view === 'setup-tour' ? 'tour' : 'practice'); const sm = $('#rule-sum'); if (sm) { const all = !!(el && el.querySelector('.br-head .ok')); sm.className = all ? 'ok' : 'ng'; sm.textContent = all ? '🏅 この設定はバッジの対象です' : '⚠ この設定ではバッジの一部が対象外（タップで条件）'; } }
 function G_() {
   if (S.attack) return S.attack.g; // バッジアタック中は別集計
   let g = store.get('growth', null);
@@ -2531,14 +2531,6 @@ ${growthCardHTML()}
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
-<div class="panel" style="margin-top:14px"><div class="form">
-  <div class="field"><label for="set-speed">AIの手番の速さ</label><select id="set-speed">${Object.entries({ slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }).map(([k, v]) => `<option value="${k}" ${S.settings.speed === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
-  <label class="check"><input type="checkbox" id="set-lv" ${S.settings.showLevel ? 'checked' : ''}> 相手の強さを表示</label>
-  <label class="check"><input type="checkbox" id="set-st" ${S.settings.showStyle ? 'checked' : ''}> 相手の性格を表示</label>
-  <div class="field"><label for="set-snd">効果音の音量</label><select id="set-snd">${Object.entries(KB.SFX_LEVELS).map(([k, v]) => `<option value="${k}" ${S.settings.sndLv === k ? 'selected' : ''}>${v[0]}</option>`).join('')}</select></div>
-  <label class="check"><input type="checkbox" id="set-auto" ${S.settings.autoHint ? 'checked' : ''}> 自分の番で自動的にAIの読みを出す</label>
-  <p class="small muted" style="margin:-6px 0 0 28px">オンにすると毎回AIの読みを見ることになるため、成績のバッジ（上がり・最善・セット・大会など）は対象外になります。</p>
-</div><p class="small muted" style="margin:8px 0 0">強さ・性格を隠すと、AIの読みも「相手は中級・平均的な打ち手」と仮定して計算します。</p></div>
 <div class="panel about-box" id="about">
   <h3>このアプリについて</h3>
   <p>「計算ブリッジ作戦研究所」は、カードゲーム「計算ブリッジ」を練習・研究するための、<b>非公式のファン制作アプリ</b>です。考案者・公式とは関係なく、個人が作成しています。</p>
@@ -2554,35 +2546,113 @@ ${growthCardHTML()}
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
 
+// ---------- 設定画面（卓をつくる）：おすすめ・卓のイラスト・チップで選ぶ。細かい設定は「こだわり設定」にたたむ ----------
+const DEF_P = { n: 4, games: 5, mix: 'random', opps: [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })), points: [10, 8, 5, 2, 0] };
+const DEF_T = { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'random' };
+const SU_PRESETS = [
+  { k: 'first', icon: '🐣', label: 'はじめて', sub: '★1〜2・3ゲーム', p: c => { c.n = 4; c.games = 3; c.mix = 'casual'; c.opps = [0, 1, 2, 3].map(() => ({ level: String(1 + ((Math.random() * 2) | 0)), style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 9, sets: 2, games: 3, finalists: 3, mix: 'casual' }) },
+  { k: 'usual', icon: '⚖️', label: 'いつもの', sub: 'まんべんなく・5ゲーム', p: c => { c.n = 4; c.games = 5; c.mix = 'even'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'even' }) },
+  { k: 'strong', icon: '🔥', label: '腕だめし', sub: '強豪ぞろい', p: c => { c.n = 4; c.games = 5; c.mix = 'strong'; c.opps = [0, 1, 2, 3].map(() => ({ level: 'r', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'strong' }) },
+  { k: 'master', icon: '👑', label: '達人に挑む', sub: '全員達人', p: c => { c.n = 4; c.games = 5; c.mix = 'master'; c.opps = [0, 1, 2, 3].map(() => ({ level: '5', style: 'r' })); }, t: c => Object.assign(c, { nPlayers: 17, sets: 4, games: 5, finalists: 5, mix: 'master' }) }
+];
+const MIX_ICON = { random: '🎲', casual: '🐣', even: '⚖️', strong: '🔥', master: '👑' };
+const suP = () => { if (!S.suP) { S.suP = JSON.parse(JSON.stringify(store.get('cfgPractice', DEF_P))); while (S.suP.opps.length < 4) S.suP.opps.push({ level: 'r', style: 'r' }); } return S.suP; };
+const suT = () => S.suT || (S.suT = JSON.parse(JSON.stringify(store.get('cfgTour', DEF_T))));
+// マサの合いの手（選んだ内容に反応）
+function suMasa(kind) {
+  const c = kind === 'tour' ? suT() : suP(), mix = c.mix, lv = kind === 'tour' ? [] : c.opps.slice(0, c.n - 1).map(o => o.level);
+  if (kind === 'practice' && lv.length && lv.every(x => x === '5')) return '全員達人か！ええ度胸や！ワールドカップの決勝に乗り込むようなもんやで！';
+  if (mix === 'master') return kind === 'tour' ? '全員達人の大会か！ええ度胸や！謎のシード選手も出てくるかもしれへんで！' : 'おまかせの席は全員達人や！ええ度胸や！';
+  if (mix === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！シード選手が出てくることもあるで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
+  if (kind === 'practice' && c.n === 2) return 'サシの勝負や！ポーカーのヘッズアップみたいなもんやで！';
+  if (mix === 'casual' || (kind === 'practice' && lv.length && lv.every(x => x === '1' || x === '2'))) return '肩慣らしにちょうどええな！まずは楽しんでいこか！';
+  if (kind === 'tour' && c.nPlayers >= 30) return `${c.nPlayers}人の大舞台や！満員のスタジアムやで！`;
+  return kind === 'tour' ? 'ほな、大会の準備や！どんな相手がおるか楽しみやな！' : 'ほな、卓をつくろか！誰と打つか決めてや！';
+}
+const suChip = (su, v, label, on, extra) => `<button class="su-chip ${on ? 'on' : ''}" data-su="${su}" data-v="${esc(String(v))}" ${extra || ''}>${label}</button>`;
+function suHeadHTML(kind) {
+  return `<div class="su-masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(suMasa(kind))}</div></div>
+  <div class="su-presets">${SU_PRESETS.map(p => `<button class="su-preset" data-su="preset" data-v="${p.k}"><span class="sp-ic">${p.icon}</span><b>${p.label}</b><small>${p.sub}</small></button>`).join('')}</div>`;
+}
+function suMixHTML(kind, c) {
+  return `<div class="su-mix">${Object.entries(MIX).map(([k, v]) => `<button class="su-mixc ${c.mix === k ? 'on' : ''}" data-su="mix" data-v="${k}"><span>${MIX_ICON[k] || ''}</span><b>${esc(v.label)}</b><small>平均★${MIX_AVG(k).toFixed(1)}</small></button>`).join('')}</div>`;
+}
+// こだわり設定（練習・大会で共通。ホームから移した設定もここ）
+function suAdvHTML(kind) {
+  const c = kind === 'tour' ? suT() : suP();
+  return `<details class="panel su-adv" id="su-adv" ${S.suAdv ? 'open' : ''}><summary>⚙ こだわり設定</summary>
+  <div class="su-grp"><div class="lbl">対局の進み方</div>
+    <div class="field"><label>AIの手番の速さ</label><div class="su-chips">${Object.entries({ slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' }).map(([k, v]) => suChip('speed', k, v, S.settings.speed === k)).join('')}</div></div>
+    ${judgeHTML()}
+    <label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label></div>
+  <div class="su-grp"><div class="lbl">実況・解説</div>
+    <div class="field"><label>実況・解説</label><select class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>
+    ${cmOthersHTML()}
+    <label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label></div>
+  <div class="su-grp"><div class="lbl">表示とAIの読み</div>
+    <label class="check"><input type="checkbox" id="set-lv" ${S.settings.showLevel ? 'checked' : ''}> 相手の強さを表示</label>
+    <label class="check"><input type="checkbox" id="set-st" ${S.settings.showStyle ? 'checked' : ''}> 相手の性格を表示</label>
+    <p class="small muted" style="margin:0">強さ・性格を隠すと、AIの読みも「相手は中級・平均的な打ち手」と仮定して計算します。</p>
+    <label class="check"><input type="checkbox" id="set-auto" ${S.settings.autoHint ? 'checked' : ''}> 自分の番で自動的にAIの読みを出す</label>
+    <p class="small muted" style="margin:0">オンにすると毎回AIの読みを見ることになるため、成績のバッジ（上がり・最善・セット・大会など）は対象外になります。</p></div>
+  <div class="su-grp"><div class="lbl">効果音</div><div class="su-chips">${Object.entries(KB.SFX_LEVELS).map(([k, v]) => suChip('snd', k, v[0], S.settings.sndLv === k)).join('')}</div></div>
+  <div class="su-grp"><div class="lbl">得点のつけ方</div>
+    <div class="field"><label for="${kind === 'tour' ? 't' : 'p'}-points">セット順位の得点（1位,2位,…）</label><input id="${kind === 'tour' ? 't' : 'p'}-points" value="${c.points.join(',')}"><div class="hint">表にない順位は0点</div></div>
+    ${kind === 'tour' ? `<div class="field"><label for="t-tie">同点（得点・PPとも同じ）のとき</label><select id="t-tie"><option value="janken" ${c.tie === 'janken' ? 'selected' : ''}>ジャンケン</option><option value="sudden" ${c.tie === 'sudden' ? 'selected' : ''}>サドンデス（1ゲーム勝負）</option></select></div>` : ''}</div>
+  </details>`;
+}
+function suFootHTML(act, label) {
+  return `<div class="su-foot"><details class="su-badge"><summary id="rule-sum">バッジの条件</summary><div class="badge-rule" id="rule-box"></div></details><button class="btn primary su-start" data-act="${act}">${label}</button></div>`;
+}
 function setupPracticeHTML() {
-  const c = store.get('cfgPractice', { n: 4, games: 5, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: [10, 8, 5, 2, 0] });
-  const sts = KB.getStrategy().styles;
-  const rows = [];
-  for (let i = 0; i < 4; i++) {
-    const o = c.opps[i] || { level: 'r', style: 'r' };
-    rows.push(`<div class="opp-row" data-i="${i}" ${i >= c.n - 1 ? 'hidden' : ''}>
-      <div class="muted small">相手${i + 1}</div>
-      <select class="o-lv" aria-label="相手${i + 1}の強さ"><option value="r">強さランダム</option>${[1, 2, 3, 4, 5].map(l => `<option value="${l}" ${String(o.level) === String(l) ? 'selected' : ''}>${'★'.repeat(l)} ${esc(KB.levelCfg(l).label)}</option>`).join('')}</select>
-      <select class="o-st" aria-label="相手${i + 1}の性格"><option value="r">性格ランダム</option>${sts.map(s => `<option value="${esc(s.id)}" ${o.style === s.id ? 'selected' : ''}>${esc(s.label)}</option>`).join('')}</select>
-      <div></div></div>`);
-  }
+  const c = suP(), sts = KB.getStrategy().styles, k = c.n - 1, sel = S.suSeat != null && S.suSeat < k ? S.suSeat : null;
+  // 卓のイラスト：下が自分、相手は上の弧に並ぶ。席を押すと強さ・性格を選べる
+  const pos = i => { const a = Math.PI * (k === 1 ? 0.5 : 0.12 + 0.76 * (i / (k - 1))); return `left:${(50 - 42 * Math.cos(a)).toFixed(1)}%;top:${(52 - 40 * Math.sin(a)).toFixed(1)}%`; };
+  const seat = i => { const o = c.opps[i], st = sts.find(x => x.id === o.style); return `<button class="su-seat ${sel === i ? 'on' : ''}" style="${pos(i)};${st ? `--sc:${st.color}` : ''}" data-su="seat" data-v="${i}" aria-label="相手${i + 1}の設定">
+    <span class="ss-face">${o.level === 'r' ? '？' : '★' + o.level}</span><small>${o.level === 'r' ? 'おまかせ' : esc(KB.levelCfg(+o.level).label)}</small><small class="ss-st">${st ? esc(st.label) : '性格おまかせ'}</small></button>`; };
+  const ed = sel == null ? `<p class="small muted su-hint">席を押すと、その相手の強さと性格を選べます</p>` : `<div class="su-seated"><div class="lbl">相手${sel + 1}</div>
+    <div class="su-chips">${suChip('lv', 'r', 'おまかせ', c.opps[sel].level === 'r')}${[1, 2, 3, 4, 5].map(l => suChip('lv', l, `★${l} ${esc(KB.levelCfg(l).label)}`, String(c.opps[sel].level) === String(l))).join('')}</div>
+    <div class="su-chips">${suChip('st', 'r', '性格おまかせ', c.opps[sel].style === 'r')}${sts.map(x => suChip('st', x.id, esc(x.label), c.opps[sel].style === x.id, `style="--sc:${esc(x.color)}"`)).join('')}</div></div>`;
+  const hidden = `<div hidden><input id="p-n" value="${c.n}"><input id="p-games" value="${c.games}"><input id="p-mix" value="${c.mix}">${c.opps.map((o, i) => `<div class="opp-row" data-i="${i}" ${i >= k ? 'hidden' : ''}><select class="o-lv"><option value="${o.level}" selected></option></select><select class="o-st"><option value="${o.style}" selected></option></select></div>`).join('')}</div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">1セット練習</div><div></div></div>
-<div class="panel stack">
-<div class="form">
-  <div class="field"><label for="p-n">卓の人数（あなたを含む）</label><select id="p-n">${[2, 3, 4, 5].map(n => `<option ${c.n === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-games">1セットのゲーム数</label><select id="p-games">${[1, 3, 5, 7, 10].map(n => `<option ${c.games === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-mix">「ランダム」の強さの混ざり方</label><select id="p-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select></div>
-  <div class="field"><label for="p-points">セット順位の得点（1位,2位,…）</label><input id="p-points" value="${c.points.join(',')}"></div>
-  <div class="field"><label for="p-cm">実況・解説</label><select id="p-cm" class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>${cmOthersHTML()}
-</div>
-${judgeHTML()}
-<label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label>
-<label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label>
-<div class="lbl">相手</div>
-<div class="opp-edit">${rows.join('')}</div>
-<div class="badge-rule" id="rule-box"></div>
-<button class="btn primary" data-act="start-practice">この卓ではじめる</button>
+<div class="su">
+${suHeadHTML('practice')}
+<section class="panel su-card"><div class="su-h"><b>卓</b><span class="su-n"><button class="su-pm" data-su="n" data-v="-1" ${c.n <= 2 ? 'disabled' : ''} aria-label="ひとり減らす">−</button><b>${c.n}人</b><button class="su-pm" data-su="n" data-v="1" ${c.n >= 5 ? 'disabled' : ''} aria-label="ひとり増やす">＋</button></span></div>
+  <div class="su-table"><div class="su-felt"></div>${Array.from({ length: k }, (_, i) => seat(i)).join('')}<div class="su-me"><span class="ss-av">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}</span><small>${esc(S.settings.name)}</small></div></div>
+  ${ed}</section>
+<section class="panel su-card"><div class="su-h"><b>1セットのゲーム数</b></div><div class="su-chips">${[1, 3, 5, 7, 10].map(n => suChip('games', n, n + 'ゲーム', c.games === n)).join('')}</div></section>
+<section class="panel su-card"><div class="su-h"><b>「おまかせ」の席の強さ</b></div>${suMixHTML('practice', c)}</section>
+${suAdvHTML('practice')}
+${hidden}
+${suFootHTML('start-practice', 'この卓ではじめる')}
 </div>`;
+}
+function suTourRefresh() {
+  const c = Object.assign(suT(), readTourCfg()), sizes = KB.splitTables(c.nPlayers, 5), tb = $('#t-tables');
+  if (tb) tb.innerHTML = `${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small>`;
+  [['tn', c.nPlayers, 5, 40], ['tsets', c.sets, 1, 8], ['tgames', c.games, 1, 10], ['tfin', c.finalists, 2, 5]].forEach(([su, v, mn, mx]) => { const m = $(`[data-su="${su}"][data-v="-1"]`), p = $(`[data-su="${su}"][data-v="1"]`); if (m) m.disabled = v <= mn; if (p) p.disabled = v >= mx; });
+  renderEst(); renderRuleBox();
+}
+// 設定画面のタップ
+function suTap(d) {
+  const tour = S.view === 'setup-tour', c = tour ? suT() : suP(), v = d.v;
+  if (!tour) { const pts = $('#p-points'); if (pts) c.points = readPoints(pts.value); } else Object.assign(c, readTourCfg());
+  switch (d.su) {
+    case 'preset': { const p = SU_PRESETS.find(x => x.k === v); if (p) { (tour ? p.t : p.p)(c); S.suSeat = null; toast(`「${p.label}」の設定にしました`); } break; }
+    case 'n': c.n = Math.max(2, Math.min(5, c.n + (+v))); break;
+    case 'seat': S.suSeat = S.suSeat === +v ? null : +v; break;
+    case 'lv': if (S.suSeat != null) c.opps[S.suSeat].level = String(v); break;
+    case 'st': if (S.suSeat != null) c.opps[S.suSeat].style = v; break;
+    case 'games': c.games = +v; break;
+    case 'mix': c.mix = v; break;
+    case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
+    case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
+    case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
+    case 'tfin': c.finalists = Math.max(2, Math.min(5, c.finalists + (+v))); break;
+    case 'speed': S.settings.speed = v; store.set('settings', S.settings); break;
+    case 'snd': setSnd(v); break;
+  }
+  const y = window.scrollY; render(); window.scrollTo(0, y);
 }
 
 // 計算式の判定タイミング：出す前に表示（いまの方式）／出した後に判定（不成立ならお手つき）
@@ -2591,6 +2661,8 @@ function judgeHTML() {
   return `<div class="field"><label>計算式の判定</label><select class="set-judge">${[['before', '出す前に成立するか表示する'], ['after3', '出した後に判定（不成立はお手つき：3枚引く）'], ['after2', '出した後に判定（不成立はお手つき：2枚引く）']].map(([k, v]) => `<option value="${k}" ${j === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>`;
 }
 // 効果音の音量：なし／小／中／大／最大
+const SPD_ORDER = ['slow', 'normal', 'fast', 'instant'], SPD_JA = { slow: 'ゆっくり', normal: 'ふつう', fast: 'はやい', instant: '一瞬' };
+const spdLabel = () => '速さ：' + (SPD_JA[S.settings.speed] || 'ふつう');
 const sndLabel = () => '音：' + (KB.SFX_LEVELS[S.settings.sndLv] || KB.SFX_LEVELS.l)[0];
 function setSnd(k) {
   S.settings.sndLv = k; S.settings.sound = k !== 'off'; store.set('settings', S.settings); KB.sfxLevel(k);
@@ -2611,26 +2683,24 @@ if (typeof document !== 'undefined') document.addEventListener('click', e => {
 const judgeAfter = () => (S.settings.judge || 'before') !== 'before';
 const foulN = () => S.settings.judge === 'after2' ? 2 : 3;
 function setupTourHTML() {
-  const c = store.get('cfgTour', { nPlayers: 17, sets: 4, games: 5, points: [10, 8, 5, 2, 0], finalists: 5, tie: 'janken', mix: 'random' });
-  const sizes = KB.splitTables(c.nPlayers, 5);
+  const c = suT(), sizes = KB.splitTables(c.nPlayers, 5);
+  const step = (su, id, val, min, max, unit) => `<div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric" aria-label="${unit}"><small>${unit}</small></span><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div>`;
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">大会モード</div><div></div></div>
-<div class="panel stack">
-<div class="form">
-  <div class="field"><label for="t-n">参加人数（あなたを含む）</label><input id="t-n" type="number" min="5" max="40" value="${c.nPlayers}"><div class="hint" id="t-tables">卓分け：${sizes.join('・')}人（${sizes.length}卓）</div></div>
-  <div class="field"><label for="t-sets">予選セット数</label><input id="t-sets" type="number" min="1" max="8" value="${c.sets}"></div>
-  <div class="field"><label for="t-games">1セットのゲーム数</label><input id="t-games" type="number" min="1" max="10" value="${c.games}"></div>
-  <div class="field"><label for="t-points">セット順位の得点（1位,2位,…）</label><input id="t-points" value="${c.points.join(',')}"><div class="hint">表にない順位は0点</div></div>
-  <div class="field"><label for="t-fin">決勝進出人数</label><select id="t-fin">${[2, 3, 4, 5].map(n => `<option ${c.finalists === n ? 'selected' : ''}>${n}</option>`).join('')}</select><div class="hint">決勝は1セットだけで順位を決めます</div></div>
-  <div class="field"><label for="t-tie">同点（得点・PPとも同じ）のとき</label><select id="t-tie"><option value="janken" ${c.tie === 'janken' ? 'selected' : ''}>ジャンケン</option><option value="sudden" ${c.tie === 'sudden' ? 'selected' : ''}>サドンデス（1ゲーム勝負）</option></select></div>
-  <div class="field"><label for="t-mix">相手の強さの混ざり方</label><select id="t-mix">${Object.entries(MIX).map(([k, v]) => `<option value="${k}" ${c.mix === k ? 'selected' : ''}>${v.label}</option>`).join('')}</select><div class="hint">性格はランダム。席順は毎セット抽選。「強豪ぞろい」「全員達人」では、決勝に謎のシード選手が現れることがあります</div></div>
-  <div class="field"><label for="t-cm">実況・解説</label><select id="t-cm" class="set-cm">${[['both', 'ルート博士とナニワのマサの掛け合い'], ['root', '解説：ルート博士（理知的）'], ['masa', '実況：ナニワのマサ（大阪弁ツッコミ）'], ['off', 'なし']].map(([k, v]) => `<option value="${k}" ${S.settings.commentary === k ? 'selected' : ''}>${v}</option>`).join('')}</select></div>${cmOthersHTML()}
-</div>
-${judgeHTML()}
-<label class="check"><input type="checkbox" class="set-warn" ${S.settings.warnMiss ? 'checked' : ''}> 出せるのに「引く」を押したら確認を出す（あえて引くのもルール上OK）</label>
-<label class="check"><input type="checkbox" class="set-spoil" ${S.settings.spoiler ? 'checked' : ''}> 実況がAIの手札を知っている前提でツッコむ（「あちゃー、出せたのに！」などネタバレあり）</label>
-<details class="est-box" id="t-est-wrap" ${S.estOpen ? 'open' : ''}><summary>この設定での決勝進出率の目安</summary><div id="t-est" aria-live="polite"></div></details>
-<div class="badge-rule" id="rule-box"></div>
-<button class="btn primary" data-act="start-tour">大会を開始</button>
+<div class="su">
+${suHeadHTML('tour')}
+<section class="panel su-card su-poster"><div class="sp-title">🏆 計算ブリッジ大会</div>
+  <div class="su-grid">
+    <div class="su-item"><small>参加人数（あなたを含む）</small>${step('tn', 't-n', c.nPlayers, 5, 40, '人')}</div>
+    <div class="su-item"><small>予選のセット数</small>${step('tsets', 't-sets', c.sets, 1, 8, 'セット')}</div>
+    <div class="su-item"><small>1セットのゲーム数</small>${step('tgames', 't-games', c.games, 1, 10, 'ゲーム')}</div>
+    <div class="su-item"><small>決勝に進める人数</small>${step('tfin', 't-fin', c.finalists, 2, 5, '人')}</div>
+  </div>
+  <div class="su-tables" id="t-tables" aria-label="卓分け">${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small></div>
+</section>
+<section class="panel su-card"><div class="su-h"><b>相手の強さの混ざり方</b></div>${suMixHTML('tour', c)}<input type="hidden" id="t-mix" value="${c.mix}"><p class="small muted" style="margin:0">性格はランダム。「強豪ぞろい」「全員達人」では、決勝に謎のシード選手が現れることがあります。</p></section>
+<section class="panel su-card est-box" id="t-est-wrap"><div class="su-h"><b>この設定での決勝進出率の目安</b></div><div id="t-est" aria-live="polite"></div></section>
+${suAdvHTML('tour')}
+${suFootHTML('start-tour', '大会を開始')}
 </div>`;
 }
 
@@ -2990,7 +3060,7 @@ function whereText() {
 }
 function gameHTML() {
   return `<div class="topbar"><div class="where">${S.tiebreak ? whereText() : progTopHTML(S.T)}</div>${S.attack ? `<span class="atk-box"><span class="atk-clock" title="残り時間">${fmtClock(S.attack.end - Date.now())}</span><small class="atk-now">${atkBP()} BP</small></span>` : ''}
-  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
+  <div class="row"><button class="btn sm ghost snd-btn" data-act="sound" title="効果音の音量（押すたびに切り替え）">${sndLabel()}</button><button class="btn sm ghost spd-btn" data-act="speed-cycle" title="AIの手番の速さ（押すたびに切り替え）">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
   <div id="tablewrap"></div>
   <div class="under"><div class="panel" id="unseenpanel"></div><div class="stack under-main"><div class="panel" id="hintpanel"></div><div class="panel" id="prevpanel" hidden></div></div><div class="panel stack" id="sidepanel"></div></div>`;
 }
@@ -4990,8 +5060,6 @@ function bind() {
   document.querySelectorAll('.set-warn').forEach(el => el.onchange = e => { S.settings.warnMiss = e.target.checked; store.set('settings', S.settings); });
   on('#set-snd', 'onchange', e => { setSnd(e.target.value); });
   on('#set-auto', 'onchange', e => { S.settings.autoHint = e.target.checked; store.set('settings', S.settings); });
-  on('#p-n', 'onchange', e => { const n = +e.target.value; document.querySelectorAll('.opp-row').forEach(r => { r.hidden = +r.dataset.i >= n - 1; }); });
-  on('#t-n', 'oninput', e => { const n = Math.max(5, Math.min(40, +e.target.value || 5)); const s = KB.splitTables(n, 5); $('#t-tables').textContent = `卓分け：${s.join('・')}人（${s.length}卓）`; });
   document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b));
   document.querySelectorAll('[data-dqc]').forEach(b => b.onclick = () => { const D = S.drill, i = +b.dataset.dqc, k = D.sel.indexOf(i); if (k >= 0) D.sel.splice(k, 1); else { if (D.sel.length >= 3) D.sel.shift(); D.sel.push(i); } KB.sfx(k >= 0 ? 'unselect' : 'select'); render(); });
   document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); badgeTalk(k, +i); });
@@ -5003,6 +5071,13 @@ function bind() {
   if (S.view === 'opening') { // 新しいセリフが出るたびに、そこまで自動でスクロール
     (S.opTimers || []).forEach(clearTimeout); S.opTimers = [];
     document.querySelectorAll('.op-line, #op-start').forEach(el => { const dl = parseFloat(el.style.animationDelay) || 0; S.opTimers.push(setTimeout(() => { if (S.view === 'opening' && el.isConnected) el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }, dl * 1000 + 250)); });
+  }
+  if (S.view === 'setup-practice' || S.view === 'setup-tour') { // 設定画面：チップ・席・＋−、こだわり設定の開け閉め、数字を打ち込んだとき
+    document.querySelectorAll('[data-su]').forEach(b => b.onclick = () => suTap(b.dataset));
+    const adv = $('#su-adv'); if (adv) adv.addEventListener('toggle', () => { S.suAdv = adv.open; });
+    // 数字を打ち込んだとき：画面ごと作り直すと、そのまま押した「大会を開始」が効かなくなるので、関係するところだけ直す
+    ['#t-n', '#t-sets', '#t-games', '#t-fin'].forEach(q => { const e = $(q); if (e) e.addEventListener('change', suTourRefresh); });
+    ['#p-points', '#t-points', '#t-tie'].forEach(q => { const e = $(q); if (e) e.addEventListener('change', () => { if (S.view === 'setup-tour') Object.assign(suT(), readTourCfg()); else suP().points = readPoints(e.value); }); });
   }
   if (S.view === 'setup-practice' || S.view === 'setup-tour') { renderRuleBox(); document.querySelectorAll('#app select, #app input').forEach(e => { e.addEventListener('change', () => setTimeout(renderRuleBox, 0)); e.addEventListener('input', () => setTimeout(renderRuleBox, 0)); }); }
   if (S.view === 'setup-tour') {
@@ -5107,6 +5182,7 @@ function act(a, el) {
     case 'draw-yes': humanDraw(true); break;
     case 'draw-no': S.confirmDraw = false; renderGame(); break;
     case 'clear': S.sel = []; renderGame(); break;
+    case 'speed-cycle': { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
     case 'sound': { const ks = Object.keys(KB.SFX_LEVELS); setSnd(ks[(ks.indexOf(S.settings.sndLv) + 1) % ks.length]); break; }
     case 'toggle-unseen': S.showUnseen = !S.showUnseen; renderSide(); break;
     case 'hint': computeHint(); break;
