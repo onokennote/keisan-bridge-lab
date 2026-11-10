@@ -2134,10 +2134,17 @@ body.rewinding #home-fab{display:none}
 .inv-nm small{font-weight:400;color:var(--muted);font-size:11px}
 .inv-add{font-weight:800;color:var(--trim);white-space:nowrap}
 .inv-p.raw{border-style:dashed}
+/* オンライン対局：ひとこと */
+.on-chat-btn{padding:2px 8px;margin-right:6px;font-size:15px;line-height:1.2}
+.me-av{position:relative}
+.me-bub{left:110%;top:-4px;bottom:auto;white-space:nowrap;z-index:5}
+.on-stamps{display:flex;flex-wrap:wrap;gap:6px}
+.on-chat-log{display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto;background:rgba(0,0,0,.25);border-radius:8px;padding:6px 8px;font-size:13px}
+.on-chat-log b{color:var(--trim);margin-right:6px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='ea26503a23';
+window.KB_BUILD='f57d56de14';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11290,6 +11297,8 @@ function act(a, el) {
     case 'on-kick': onAct('kick', { seat: +el.dataset.seat }); break;
     case 'on-begin': onAct('start'); break;
     case 'on-back': onAct('back'); break;
+    case 'on-chat': onChatModal(); break;
+    case 'on-chat-send': onChatSend(($('#on-chat-in') || {}).value); break;
     case 'on-auto': { const r = ratingOf(G_().games), lv = r.ok ? Math.max(2, Math.min(4, Math.floor(r.r - 1))) : 2; onAct('auto', { lv }); toast(`AI★${lv}に任せました（「自分で打つ」でいつでも戻れます）`); break; }
     case 'on-draw': onAct('draw'); break;
     case 'on-play': { const vals = onSelVals(); if (vals.length) onAct('play', { vals }); break; }
@@ -11613,6 +11622,7 @@ async function onPoll() {
 }
 function onApply(v) {
   const prev = ON.v; ON.v = v; ON.ver = v.ver;
+  onChatIn(v, prev);
   const g = v.game;
   let fresh = [];
   if (g) {
@@ -11633,6 +11643,34 @@ function onApply(v) {
   }
   render();
   if (fresh.length) setTimeout(() => onAnimate(v, fresh), 0);
+}
+// ひとこと：新しく届いたものを、その人の席のふきだしに少し長めに出す（はじめて開いたときの古いものは出さない）
+const ON_STAMPS = ['よろしく！', 'ナイス！', 'おしい！', 'やられた〜', 'ありがとう', 'おつかれさま！'];
+function onChatIn(v, prev) {
+  const L = v.chat || [], last = L.length ? L[L.length - 1].id : 0;
+  if (!prev || prev.id !== v.id) { ON.chatSeen = last; return; }
+  const nw = L.filter(c => c.id > (ON.chatSeen || 0)); ON.chatSeen = Math.max(ON.chatSeen || 0, last);
+  ON.bub = ON.bub || {}; nw.forEach(c => { ON.bub[c.p] = { text: c.t, at: Date.now(), dur: 5000, chat: 1 }; });
+  if (nw.some(c => c.p !== v.me)) { KB.sfx('select'); setTimeout(() => { if (S.view === 'online') render(); }, 5100); }
+}
+function onChatModal() {
+  const v = ON.v; if (!v || v.me < 0) return;
+  const L = (v.chat || []).slice(-8);
+  modal(`<div class="stack on-chat-m"><h3 style="margin:0">💬 ひとこと</h3>
+    <div class="on-stamps">${ON_STAMPS.map(t => `<button class="btn sm" data-onstamp="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+    <div class="row" style="gap:6px"><input id="on-chat-in" class="su-in" maxlength="30" placeholder="30文字まで" autocomplete="off" style="flex:1"><button class="btn primary" data-act="on-chat-send">送る</button></div>
+    <p class="small muted" style="margin:0">卓のみんなの席に、ふきだしで出ます。ふさわしくない言葉や連絡先は送れません。</p>
+    ${L.length ? `<div class="on-chat-log">${L.map(c => `<div><b>${esc(c.p === v.me ? 'あなた' : onName(v.seats[c.p] || {}))}</b>${esc(c.t)}</div>`).join('')}</div>` : ''}
+    <div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="close">閉じる</button></div></div>`);
+  document.querySelectorAll('#modal [data-onstamp]').forEach(b => b.onclick = () => onChatSend(b.dataset.onstamp));
+  const i = $('#on-chat-in'); if (i) i.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); act('on-chat-send'); } };
+}
+async function onChatSend(text) {
+  text = String(text || '').trim(); if (!text || !ON.v) return;
+  if (ON.chatBusy) return; ON.chatBusy = true;
+  try { const v = await onReq('on_act', { id: ON.v.id, act: 'chat', text }); closeModal(); onApply(v); KB.sfx('select'); }
+  catch (e) { toast(e.message || '送れませんでした'); }
+  ON.chatBusy = false;
 }
 // 新しい手の動き：起きた順に1つずつ再生する。出した札は場へ飛んで、場札の上に式といっしょに少し残る。引いた札は山札から席へ。
 // 巡が変わったら、前の巡の手を見せ終わってから「第N巡」と新しい場札を大きく出す
@@ -11816,7 +11854,7 @@ function onTableHTML(v) {
   const order = g.order, myPos = order.indexOf(pov), cur = g.cur, ordIn = i => order.indexOf(i) + 1;
   const bub = ON.bub || {};
   const seat = i => {
-    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b = bub[i] && Date.now() - bub[i].at < 2600 ? bub[i] : null;
+    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null;
     let act;
     if (cur === i && v.phase === 'play') act = `<div class="act thinking">${s.ai || s.sub ? 'AIが考え中' : '考え中'}<span class="dots"><i></i><i></i><i></i></span></div>`;
     else if (l && l.type === 'play') act = `<div class="act">${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}</div>`;
@@ -11852,7 +11890,7 @@ function onTableHTML(v) {
     : hand.map(c => cardHTML(c, { cls: (ON.sel.includes(c.id) ? 'sel ' : '') + ((ON.newIds || []).includes(c.id) ? 'new' : ''), extra: `data-oncard="${c.id}" ${myTurn ? '' : 'disabled'} aria-pressed="${ON.sel.includes(c.id)}"` })).join('');
   const meBox = `<div data-pi="${pov}" class="me ${cur === pov && v.phase === 'play' ? 'turn' : ''} ${g.over && g.winner === pov ? 'winner' : ''}">
       ${pov === order[0] ? dealerChip('dbtn seat-chip') : ''}${g.over && g.winner === pov ? confettiHTML() : ''}
-      <div class="head"><span class="me-id"><span class="av me-av">${onAv(ps, g.over ? (g.winner === pov ? 'happy' : 'normal') : (g.handN[pov] <= 2 ? 'smug' : 'normal'))}</span><b>${esc(spec ? onName(ps) : ps.name)}</b><span class="me-info">手札 <b class="tnum">${g.handN[pov]}</b>枚${spec ? '' : `・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b>`}</span></span><span class="me-pp">セットPP <b class="tnum">${tot(pov)}</b></span></div>
+      <div class="head"><span class="me-id"><span class="av me-av">${onAv(ps, g.over ? (g.winner === pov ? 'happy' : 'normal') : (g.handN[pov] <= 2 ? 'smug' : 'normal'))}${(() => { const b = bub[pov]; return b && Date.now() - b.at < (b.dur || 2600) ? `<div class="bubble me-bub ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''; })()}</span><b>${esc(spec ? onName(ps) : ps.name)}</b><span class="me-info">手札 <b class="tnum">${g.handN[pov]}</b>枚${spec ? '' : `・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b>`}</span></span><span class="me-pp">${spec ? '' : '<button class="btn sm felt-btn on-chat-btn" data-act="on-chat" aria-label="ひとことを送る">💬</button>'}セットPP <b class="tnum">${tot(pov)}</b></span></div>
       ${spec ? '<div class="on-watch">👀 観戦中（手札は見えません）・ほかの席を押すと、その人の席から見られます</div>' : ''}
       ${mySub ? `<div class="on-sub">🤖 ${ps.auto ? `AI★${ps.subLv}に任せています（推定実力−1）` : '時間切れが3回続いたので、AI★2が代わりに打っています'} <button class="btn sm primary" data-act="on-back">自分で打つ</button></div>` : ''}
       ${myPlayed.length ? `<div class="mine-played"><span>出した札</span>${onPlayedHTML(g, pov, true)}</div>` : ''}
