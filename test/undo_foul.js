@@ -16,7 +16,7 @@ const { chromium } = require('playwright');
     g.players.forEach((p, i) => { let n = 7; g.log.forEach(e => { if (e.p !== i) return; if (e.type === 'play') n -= e.vals.length; if (e.type === 'draw') n += e.foul ? e.n : (e.missedUnknown && !e.foul && e.left == null ? 0 : 1); }); if (n !== g.hands[i].length) bad.push(`${i}:${n}vs${g.hands[i].length}`); });
     return { total: all.length, dup, bad };
   });
-  let undos = 0, fouls = 0, probs = [];
+  let undos = 0, fouls = 0, probs = [], noBtnAfterFoul = 0, retry = false;
   for (let i = 0; i < 6000 && undos < 25; i++) {
     const st = await pg.evaluate(() => {
       const S = KBAPP.S; const m = document.querySelector('#modal'); if (m) { const x = m.querySelector('[data-act="close"],[data-act="next-game"]'); if (x) x.click(); else m.remove(); return 'modal'; }
@@ -35,16 +35,17 @@ const { chromium } = require('playwright');
       for (const v of mv.vals) { const c = h.find(c => c.v === v && !used.has(c.id)); used.add(c.id); S.sel.push(c.id); }
       KBAPP.act('play'); return 'play';
     });
-    if (st === 'foul') fouls++;
+    if (st === 'foul') { fouls++; await pg.waitForTimeout(60); if (!retry && !(await pg.evaluate(() => !!KBAPP.S.undoSnap))) noBtnAfterFoul++; } // やり直した手のお手つきは戻せないのが正しい
+    if (['foul', 'play', 'draw'].includes(st)) retry = false;
     if (st === 'undo') {
       const before = await check();
       await pg.evaluate(() => KBAPP.act('undo')); await pg.waitForTimeout(50); await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(2400);
-      const after = await check(); undos++;
+      const after = await check(); undos++; retry = true;
       if (after.dup || after.bad.length || after.total !== before.total) probs.push({ before, after });
     }
     if (st === 'view') { const v = await pg.evaluate(() => KBAPP.S.view); if (v === 'set-end') { await pg.evaluate(() => { KBAPP.S.T = null; KBAPP.go('home'); }); await pg.waitForTimeout(200); await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(400); } }
     await pg.waitForTimeout(20);
   }
-  console.log('待った', undos, '回・お手つき', fouls, '回・ずれ', probs.length, JSON.stringify(probs.slice(0, 3)), errs.slice(0, 3));
+  console.log((probs.length || noBtnAfterFoul ? 'NG  ' : 'OK  ') + '待った', undos, '回・お手つき', fouls, '回・ずれ', probs.length, '・お手つきのあと待ったが出ない', noBtnAfterFoul, JSON.stringify(probs.slice(0, 3)), errs.slice(0, 3));
   await b.close();
 })();

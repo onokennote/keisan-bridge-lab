@@ -3714,6 +3714,7 @@ function humanFoul(vals) {
   const ids = S.sel.slice();
   const t = g.field.v, r0 = g.round;
   const cs = g.counts(me), alts = KB.findMoves(cs, t, 'all', 3).map(m => ({ m, s: KB.heurScore(cs, m, KB.style('keisan'), g.unseenCounts(me), 1) })).sort((x, y) => y.s - x.s); const alt = alts.length ? '例）' + alts[0].m.expr + ' = ' + t : '引く（出せる組み合わせなし）';
+  { const wasRetry = S.undoRetry; S.undoRetry = false; if (!wasRetry && undoAllowed()) try { S.undoSnap = undoTake(); } catch (e) { } } // お手つきも「待った」で取り消せる（やり直した手のお手つきは除く）
   const got = g.foul(N, vals);
   (S.fouls = S.fouls || []).push({ round: r0, t, vals: vals.slice(), n: got.length, alt });
   S.foulCount = (S.foulCount || 0) + 1;
@@ -3750,7 +3751,7 @@ function humanDraw(force) {
   const playable = KB.findMoves(g.counts(me), g.field.v, 'all', 3).length > 0;
   if (playable && S.settings.warnMiss && !force) { S.confirmDraw = true; renderGame(); return; }
   const nd = S.decisions.length; // 判定を記録する前の件数
-  if (playable) recordDecision(null);
+  if (playable) recordDecision(null); else S.undoRetry = false; // 出せずに引いただけの手でも、やり直しは終わり
   const before = new Set(g.hands[me].map(c => c.id));
   const r0 = g.round;
   g.apply(null);
