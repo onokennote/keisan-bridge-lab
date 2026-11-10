@@ -2003,10 +2003,11 @@ body.rewinding #home-fab{display:none}
 .pv-emb span{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--muted)}
 .pv-badges{display:flex;flex-wrap:wrap;gap:3px;max-height:150px;overflow:auto;padding:6px;border-radius:10px;background:rgba(0,0,0,.25)}
 .pv-badges svg{width:26px;height:26px}
+.rk-row[data-act]{cursor:pointer}.rk-row[data-act]:active{filter:brightness(1.15)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='313b79d710';
+window.KB_BUILD='a019f64251';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6828,7 +6829,7 @@ const rankMe = x => !!x.me && (x.pid == null || x.pid === PID);
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
   const val = (k, x) => k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
-  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}"><b class="rk-n">${x.rank}</b><button class="rk-av" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
+  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.filter(rankMe).length ? '<div class="rk-gap">…</div>' + d.mine.filter(rankMe).map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   const withAi = rankWithAi();
