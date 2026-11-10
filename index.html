@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="eb74d2f 2026-11-10 14:08"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="b693ac4 2026-11-10 14:16"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1968,10 +1968,43 @@ body.rewinding #home-fab{display:none}
 .rk-hero-rk:empty{display:none}
 .rk-hero-rk span{white-space:nowrap}
 .rk-hero-rk b{color:var(--accent);font-size:17px;margin-left:4px}
+/* アイコンから開くプロフィール（スマホ向けの独自の表示） */
+.pv{display:flex;flex-direction:column;gap:12px}
+.pv-head{display:flex;gap:14px;align-items:center}
+.pv-av{width:96px;height:96px;flex:none;border-radius:22px;overflow:hidden;border:2px solid var(--trim);box-shadow:0 4px 14px rgba(0,0,0,.45);background:var(--surface)}
+.pv-av svg{width:100%;height:100%;display:block}
+.pv-tx{display:flex;flex-direction:column;gap:4px;min-width:0}
+.pv-nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.pv-nm b{font:400 26px/1.15 var(--f-display);color:var(--ink);overflow-wrap:anywhere}
+.pv-me{color:var(--trim);font-weight:800}
+.pv-rt{display:flex;align-items:baseline;gap:6px;flex-wrap:wrap}
+.pv-rt b{font:400 20px var(--f-display);color:var(--ink)}
+.pv-rt small{color:var(--accent);font-weight:800;font-size:11.5px}
+.pv-st i{font-style:normal;color:rgba(255,255,255,.18);font-size:15px}
+.pv-st i.on{color:var(--accent)}.pv-st i.half{color:rgba(242,182,50,.55)}
+.pv-rk{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;font-size:12px;color:var(--muted)}
+.pv-rk:empty{display:none}
+.pv-rk span{white-space:nowrap}
+.pv-rk b{color:var(--accent);font-size:17px;margin-left:4px}
+.pv-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media (max-width:420px){.pv-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pv-tile{background:rgba(0,0,0,.3);border:1px solid rgba(242,182,50,.45);border-radius:12px;padding:7px 10px;display:flex;flex-direction:column;min-width:0}
+.pv-tile small{color:var(--muted);font-size:11px;font-weight:700}
+.pv-tile b{font:400 22px/1.25 var(--f-display);color:#ffd77a;text-shadow:0 0 10px rgba(255,190,70,.45);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pv-tile.none b{color:rgba(255,255,255,.3);text-shadow:none}
+.pv-tile em{font-style:normal;font-size:10.5px;color:var(--muted)}
+.pv-bh{display:flex;justify-content:space-between;align-items:baseline}
+.pv-bh>b{font:400 17px var(--f-display);color:var(--ink)}
+.pv-bh span{color:var(--muted);font-size:12.5px}
+.pv-bh span b{color:var(--accent);font-size:18px}
+.pv-emb{display:flex;justify-content:space-between;gap:2px}
+.pv-emb span{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--muted)}
+.pv-badges{display:flex;flex-wrap:wrap;gap:3px;max-height:150px;overflow:auto;padding:6px;border-radius:10px;background:rgba(0,0,0,.25)}
+.pv-badges svg{width:26px;height:26px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='df6c821371';
+window.KB_BUILD='313b79d710';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6821,33 +6854,51 @@ async function rankingLoad() {
   if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); bindHide(); }
 }
 // ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
+// ランキング・タイトルのアイコンを押したときのプロフィール（スマホで見やすい独自の表示。X用の画像とは別）
+// 上にアイコンと名前を大きく＋推定実力・総合の順位（AI込み・人だけ）、その下に成績のタイル・カテゴリーの紋章・バッジ・自己紹介
+function profHTML(D, o) {
+  const g = { ach: D.ach || {} }, NAME = D.name || 'プレイヤー', r = D.rating;
+  const stars = r != null ? [...Array(5)].map((_, i) => `<i class="${i < Math.floor(r + 1e-9) ? 'on' : (i === Math.floor(r) && r % 1 >= 0.5) ? 'half' : ''}">★</i>`).join('') : '';
+  const tiles = [
+    ['大会', D.champion ? `優勝${D.champion}回` : D.qualify ? `決勝${D.qualify}回` : '—', g.ach['champion_strong:2'] ? '全員達人で優勝' : g.ach['champion_strong:1'] ? '強豪ぞろいで優勝' : g.ach['qualify_strong:2'] ? '全員達人で決勝' : ''],
+    ['バッジアタック', D.atk ? `${D.atk}BP` : '—', D.atk ? `バッジ${D.atkBadges || 0}個` : ''],
+    ['式ハンター', D.hunt ? `${D.hunt}式` : '—', D.hunt ? '1回の最多捕獲' : ''],
+    ['式の図鑑', `${D.zukan || 0}`, `/ ${ZUKAN.length}式`],
+    ['連続最善', `${D.streak || 0}回`, '最長記録'],
+    ['アウツチャレンジ', D.outs5 ? `${D.outs5}回` : '—', D.outs5 ? 'クリア' : '']];
+  const all = []; ACH_GROUPS.forEach(([, ks]) => ks.forEach(k => { const a = ACH.find(z => z[0] === k); if (a) a[2].forEach((t, i) => all.push({ a, i, got: !!g.ach[a[0] + ':' + t] })); }));
+  const got = all.filter(b => b.got);
+  return `<div class="pv">
+    <div class="pv-head"><div class="pv-av">${KB.avatarSVG(Object.assign({}, D.avatar || AVATAR_DEF, { name: NAME }), { mood: 'happy' })}</div>
+      <div class="pv-tx"><div class="pv-nm"><b>${esc(NAME)}</b>${o.ai ? '<em class="ai-chip">AI研究員</em>' : ''}${o.me ? '<small class="pv-me">あなた</small>' : ''}</div>
+        ${r != null ? `<div class="pv-rt"><span class="pv-st">${stars}</span><b>${r.toFixed(1)}</b><small>推定実力 ${rateLabel(r)}相当</small></div>` : '<div class="pv-rt"><small>推定実力はまだ出ていません</small></div>'}
+        <div class="pv-rk" id="pv-rk"></div></div></div>
+    <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
+    <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
+    <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
+    <div class="pv-badges">${got.length ? got.map(b => badgeSVG(b.a, b.i, true, 26)).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
+    ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
+  </div>`;
+}
 async function rankCardOpen(rid, me, el) {
-  // 上にアイコンと名前を大きく（押したアイコンをそのまま使う）
-  const row = el && el.closest('.rk-row'), nmEl = row && row.querySelector('.rk-nm'), svg = el && el.querySelector('svg');
-  const nm0 = nmEl ? (nmEl.childNodes[0] && nmEl.childNodes[0].textContent || '').trim() : (el && el.dataset.name) || (me ? S.settings.name : '');
-  const isAi = !!((row && row.querySelector('.ai-chip')) || (el && /AI研究員/.test(el.title || '')));
-  const hero = svg ? `<div class="rk-hero"><div class="rk-hero-av">${svg.outerHTML}</div><div class="rk-hero-tx"><b>${esc(nm0)}</b>${isAi ? '<em class="ai-chip">AI研究員</em>' : ''}${me ? '<small>あなた</small>' : ''}<span class="rk-hero-rk"></span></div></div>` : '';
-  // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
-  (async () => {
-    await new Promise(r => setTimeout(r, 0)); // 下の modal() を先に出す
-    try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await homeRankFetch(); } catch (e) { }
-    const a = totalRankOf(S.homeRank, rid, me), h = isAi ? null : totalRankOf(S.rankHuman, rid, me), box = $('#modal .rk-hero-rk');
-    if (box && (a || h)) box.innerHTML = `🏆 総合${a ? `<span>AI込み<b>${a}位</b></span>` : ''}${h ? `<span>人だけ<b>${h}位</b></span>` : ''}`;
-  })();
-  modal(`<div class="stack share-modal rk-card">${hero}<div class="share-prev"><span class="small muted">成績カードを読み込んでいます…</span></div><div class="rk-bio-box"></div>
+  const isAi = !!((el && el.closest('.rk-row') && el.closest('.rk-row').querySelector('.ai-chip')) || (el && /AI研究員/.test(el.title || '')));
+  modal(`<div class="stack share-modal rk-card"><div class="pv-box"><span class="small muted">プロフィールを読み込んでいます…</span></div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
-  const put = (html, bio, name) => { const b = $('#modal .share-prev'); if (b) b.innerHTML = html; const q = $('#modal .rk-bio-box'); if (q) q.innerHTML = bio ? `<div class="rk-bio"><small>${esc(name)}の${S.rankCardAi ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(bio).replace(/\n/g, '<br>')}</div>` : `<p class="small muted" style="margin:0">${esc(name)}の自己紹介はまだありません。</p>`; };
   try {
     let d;
-    S.rankCardAi = false; if (me) d = null;
+    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', '') });
     else {
       if (!rid) throw new Error('old');
       const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error);
-      d = Object.assign({}, j.card, { ach: Object.fromEntries((j.card.ach || []).map(k => [k, 1])) }); S.rankCardAi = !!j.card.ai;
+      d = Object.assign({}, j.card, { ach: Object.fromEntries((j.card.ach || []).map(k => [k, 1])) });
     }
-    const cv = await shareCard(d);
-    put(`<img src="${cv.toDataURL('image/png')}" alt="成績カード" style="width:100%;border-radius:10px;display:block">`, d ? d.bio : store.get('bio', ''), d ? d.name : S.settings.name);
-  } catch (e) { put('<span class="small">成績カードを読み込めませんでした。</span>', '', ''); }
+    const ai = isAi || !!d.ai, b = $('#modal .pv-box'); if (!b) return;
+    b.innerHTML = profHTML(d, { ai, me });
+    // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
+    try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await homeRankFetch(); } catch (e) { }
+    const a = totalRankOf(S.homeRank, rid, me), h = ai ? null : totalRankOf(S.rankHuman, rid, me), box = $('#modal #pv-rk');
+    if (box && (a || h)) box.innerHTML = `🏆 総合${a ? `<span>AI込み<b>${a}位</b></span>` : ''}${h ? `<span>人だけ<b>${h}位</b></span>` : ''}`;
+  } catch (e) { const b = $('#modal .pv-box'); if (b) b.innerHTML = '<span class="small">プロフィールを読み込めませんでした。</span>'; }
 }
 function bioEdit(from) {
   S.bioFrom = from || 'profiles';
