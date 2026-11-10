@@ -5661,7 +5661,7 @@ function aiMini(kind, lv, formAdj) {
 // ================= オンライン対局（テスト版で試し中。段階1：1卓2〜5人） =================
 // 山札と手札はサーバー（api.php の on_*）が持つ。画面は1.5秒ごとに様子を読み、自分の手札だけを受け取る。
 // 時間切れは自動で「引く」。3回続くとAI★2が代わりに打つ（「自分で打つ」で戻れる）
-const ON_ENABLED = () => CLOUD_ON && !!window.KB_STAGING;
+const ON_ENABLED = () => CLOUD_ON; // オンライン大会：クラウド版（本番・テスト版）で使える
 const ON = { v: null, ver: 0, timer: null, tick: null, sel: [], busy: false, lastCur: null, lastLog: 0, err: '', opened: {}, bub: {}, cer: {} };
 function onlineHomeHTML() {
   if (!ON_ENABLED()) return '';
@@ -5669,7 +5669,7 @@ function onlineHomeHTML() {
   const fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
   const stat = v => v.phase === 'entry' ? (v.now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'done' ? '<em class="on-st">終了</em>' : '<em class="on-st">中止</em>';
   const rows = L ? (L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '招待されています' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
-  return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE（テスト中）</div><h2>オンライン大会</h2></div></div>
+  return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
     <div class="on-tlist">${rows}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
