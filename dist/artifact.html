@@ -1922,7 +1922,7 @@ body.rewinding #app{animation:rw-jit .12s steps(2) infinite;filter:hue-rotate(16
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d0a78e26f9';
+window.KB_BUILD='b15d7b7890';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9240,10 +9240,10 @@ function summaryText() {
   if (!S.tiebreak && S.T) lines.push('セット累計PP：' + g.players.map(p => `${nm(p)} ${setTotal(S.T, p.id)}`).join('、'));
   return lines.join('\n');
 }
-// ---------- 待った（練習だけ）：直前の自分の手（選択肢のあった手）まで巻き戻す ----------
+// ---------- 待った（練習と大会。バッジアタック・観戦・サドンデスでは使えない）：直前の自分の手（選択肢のあった手）まで巻き戻す ----------
 // 選択肢のある手を打つ直前に、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
 // 上がられたあと（「結果を見る」の前）でも戻れる。戻したゲーム・セットは結果のバッジの対象外、やり直した手は推定実力に入れない
-const undoAllowed = () => !!(S.T && S.T.cfg.kind === 'practice' && !S.attack && !S.spectate && !S.tiebreak);
+const undoAllowed = () => !!(S.T && ['practice', 'tournament'].includes(S.T.cfg.kind) && !S.attack && !S.spectate && !S.tiebreak);
 const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
 function undoTake() {
   const g = S.game, o = {}; for (const k in g) if (k !== 'players') o[k] = g[k];
@@ -9253,7 +9253,8 @@ function undoAsk() {
   if (!undoOk()) return;
   const u = S.undoSnap, g = S.game, n = rvName(), free = S.gameHinted || !badgeElig(S.T).game;
   const head = (g.over ? `上がられてもうたけど、一手前（第${u.round}巡）の${n}の番まで巻き戻せるで。` : `一手前（第${u.round}巡）の${n}の番まで巻き戻すで。`) + 'やり直した手は、もういっぺん戻すことはできへんで。';
-  const warn = free ? 'このゲームはもともとバッジの対象外やから、遠慮なくいこか。やり直した手は推定実力には入れへんで。' : '戻ったら、このゲームとこのセットの結果のバッジ（上がり・セット1位・ノーミスなど）はもらえんようになるし、やり直した手は推定実力にも入れへん。それでもええか？';
+  const tour = S.T.cfg.kind === 'tournament' && !S.T.tourHinted && badgeElig(S.T).tour;
+  const warn = free && !tour ? 'このゲームはもともとバッジの対象外やから、遠慮なくいこか。やり直した手は推定実力には入れへんで。' : `戻ったら、このゲームとこのセット${tour ? '、それにこの大会' : ''}の結果のバッジ（上がり・セット1位・ノーミス${tour ? '・決勝進出・優勝' : ''}など）はもらえんようになるし、やり直した手は推定実力にも入れへん。それでもええか？`;
   modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(head + warn)}</div></div></div>
     <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn" data-act="undo-no">やめとく</button><button class="btn primary" data-act="undo-go">⏪ 巻き戻す</button></div>`);
   pauseGame(); // modal() は前のモーダルを閉じて再開させるので、開いたあとで止める
@@ -9271,6 +9272,7 @@ function undoGo() {
     S.game = g; S.gameNo = (S.gameNo || 0) + 1; // 古いタイマー（セリフ・演出）は gameNo で止まる
     S.decisions = JSON.parse(u.dec); S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak;
     S.gameHinted = true; S.T.setHinted = true; S.T.tourHinted = true; S.undoRetry = true;
+    S.qual = (S.T.cfg.kind === 'tournament' && S.T.phase === 'prelim') ? qualifyTable(S.T) : null;
     S.sel = []; S.hint = null; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = g.field;
     S.bigBanner = null; S.introUntil = 0; S.roundStart = 0; S.dealDur = 0; S.chimeKey = null; S.liveKey = null; S.newCard = null; S.newCards = null;
     S.reshuffleSeen = g.log.filter(e => e.type === 'reshuffle').length;
@@ -9285,12 +9287,12 @@ function undoGo() {
 // 巻き戻しの演出：画面が青く揺らぎ、時計の針が逆回り。そのあいだに、戻す手を新しい順に1手ずつさかのぼって見せる
 // （出した札は出した人の手元へ、引いた札は裏向きで山札へ飛んで戻り、手札の枚数と場札も前の状態に変わる）
 function rewindFx(then, steps) {
-  const fast = S.settings.speed === 'instant' || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
-  if (fast) { then(); return; }
+  // 速さが「一瞬」でも巻き戻しは見せる（動きを減らす設定のときだけ省く）
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { then(); return; }
   steps = (steps || []).filter(x => ['play', 'draw', 'field'].includes(x.e.type));
   const g = S.game, me = me0(), nPlay = steps.filter(x => x.e.type !== 'field').length;
   // 1手の間隔：はじめはゆっくり、だんだん速く。全部で2秒以内
-  const iv = k => { const base = Math.min(240, 1700 / Math.max(1, nPlay)); return Math.max(60, base * (1.25 - 0.6 * k / Math.max(1, steps.length))); };
+  const iv = k => { const base = Math.min(320, 1800 / Math.max(1, nPlay)); return Math.max(60, base * (1.25 - 0.6 * k / Math.max(1, steps.length))); };
   KB.sfx('rewind');
   document.querySelectorAll('.win-strip').forEach(e => e.remove());
   const el = document.createElement('div'); el.className = 'rewind-fx';
@@ -9308,10 +9310,10 @@ function rewindFx(then, steps) {
       if (e.type === 'play') {
         const s = seat(e.p); if (!s) return; const gs = [...s.querySelectorAll('.pg:not(.ret)')]; used[e.p] = (used[e.p] || 0) + 1; const grp = gs[gs.length - used[e.p]];
         const to = s.querySelector('.av') || s;
-        if (grp) { e.vals.forEach((v, n) => flyCard(grp, to, `<span>${KB.vname(v)}</span>`, n * 40, 300)); setTimeout(() => { grp.style.visibility = 'hidden'; }, 60); }
+        if (grp) { e.vals.forEach((v, n) => flyCard(grp, to, `<span>${KB.vname(v)}</span>`, n * 40, 340, true)); setTimeout(() => { grp.style.visibility = 'hidden'; }, 60); }
         bump(e.p, e.vals.length); bubble(e.p, '↩ ' + e.expr); KB.sfx('unselect');
       } else if (e.type === 'draw') {
-        const n = e.foul ? (e.n || 1) : 1; for (let q = 0; q < n; q++) flyCard(seat(e.p), document.querySelector('.deck'), null, q * 40, 300);
+        const n = e.foul ? (e.n || 1) : 1; for (let q = 0; q < n; q++) flyCard(seat(e.p), document.querySelector('.deck'), null, q * 40, 340, true);
         bump(e.p, -n); KB.sfx('select');
       } else if (e.type === 'field') { // 場札を1つ前に戻す
         const prev = g.log.slice(0, i).reverse().find(x => x.type === 'field'), fc = document.querySelector('.fieldcard.top');
@@ -9320,7 +9322,7 @@ function rewindFx(then, steps) {
     }, t);
     t += e.type === 'field' ? 80 : iv(k);
   });
-  const end = Math.max(1100, t + 250);
+  const end = Math.max(1700, t + 350);
   setTimeout(() => { then(); }, end);
   setTimeout(() => { el.classList.add('out'); document.body.classList.remove('rewinding'); }, end + 120);
   setTimeout(() => el.remove(), end + 520);
@@ -9389,8 +9391,8 @@ function winStripHTML(g, me) {
     <div class="ws-btns">${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}<button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button></div></div>`;
 }
 // カードが飛ぶ演出（山札→人、人→場）
-function flyCard(fromEl, toEl, html, delay, dur) {
-  if (!fromEl || !toEl || S.settings.speed === 'instant') return;
+function flyCard(fromEl, toEl, html, delay, dur, force) {
+  if (!fromEl || !toEl || (S.settings.speed === 'instant' && !force)) return;
   if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
   const el = document.createElement('div'); el.className = 'flycard'; el.innerHTML = html || '';
@@ -10345,7 +10347,7 @@ function entranceHTML() {
 }
 // 大会のバッジが付かない理由（付かないときは黙らず、理由を知らせる）
 function tourNoBadge(T) {
-  if (T.tourHinted) return 'この大会でAIの読みを見たため';
+  if (T.tourHinted) return 'この大会でAIの読みを見たか、待ったを使ったため';
   const e = badgeElig(T); if (e.tour) return null;
   const r = [];
   if (T.cfg.nPlayers < ELIG.tourPlayers) r.push(`参加${ELIG.tourPlayers}人以上`);

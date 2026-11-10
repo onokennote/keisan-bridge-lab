@@ -6,7 +6,7 @@ const path = require('path');
   const errs = []; pg.on('pageerror', e => errs.push(e.message));
   await pg.addInitScript(() => { window.KB_TEST = 1; });
   await pg.goto('file://' + path.join(__dirname, 'page.html')); await pg.waitForTimeout(500);
-  await pg.evaluate(() => { KBAPP.S.settings.speed = 'fast'; });
+  await pg.evaluate(() => { KBAPP.S.settings.speed = 'instant'; });
   await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(400);
   let shot = false;
   for (let i = 0; i < 6000 && !shot; i++) {

@@ -34,7 +34,7 @@ const path = require('path');
   await pg.evaluate(() => KBAPP.act('undo')); await pg.waitForTimeout(100);
   const ask = await pg.evaluate(() => (document.querySelector('#modal') || {}).textContent || '');
   ok(/巻き戻す/.test(ask) && /バッジ|対象外/.test(ask), 'マサが確認する：' + ask.slice(0, 60));
-  await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(300);
+  await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(2600);
   const after = await pg.evaluate(() => { const S = KBAPP.S, g = S.game; return { n: S.decisions.length, round: g.round, human: g.players[g.current()].human, hinted: S.gameHinted, retry: S.undoRetry }; });
   ok(after.n === before.n - 1 && after.round === before.snap && after.human, `自分の番に戻る（判断 ${before.n}→${after.n}、第${after.round}巡）`);
   ok(after.hinted && after.retry, 'このゲームはバッジの対象外・やり直した手は実力に入れない');
@@ -52,7 +52,7 @@ const path = require('path');
       const w = await pg.evaluate(() => { const S = KBAPP.S, g = S.game; return { me: g.winner === g.players.findIndex(p => p.human), undo: !!document.querySelector('.win-strip [data-act="undo"]'), games: (JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => k.endsWith('growth')) || 'x') || '{"games":[]}').games || []).length, pp: JSON.stringify(S.T.setPP) }; });
       if (!w.me && w.undo) {
         tried++;
-        await pg.evaluate(() => KBAPP.act('undo')); await pg.waitForTimeout(80); await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(300);
+        await pg.evaluate(() => KBAPP.act('undo')); await pg.waitForTimeout(80); await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(2600);
         const r = await pg.evaluate(() => { const S = KBAPP.S, g = S.game; return { over: g.over, win: !!S.winShow, human: g.players[g.current()].human, games: (JSON.parse(localStorage.getItem(Object.keys(localStorage).find(k => k.endsWith('growth')) || 'x') || '{"games":[]}').games || []).length, pp: JSON.stringify(S.T.setPP) }; });
         ok(!r.over && !r.win && r.human, '上がられたあとでも、自分の番まで戻れる');
         ok(r.games === w.games - 1, `そのゲームの記録は取り消される（${w.games}→${r.games}）`);
@@ -76,6 +76,18 @@ const path = require('path');
     await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(600); await pg.screenshot({ path: path.join(__dirname, 'out', 'undo_fx.png') });
     await pg.waitForTimeout(1600); await pg.screenshot({ path: path.join(__dirname, 'out', 'undo_after.png') });
   }
+  // ③ 大会でも使える（大会のバッジも対象外になる）
+  await pg.evaluate(() => { const m = document.querySelector('#modal'); if (m) m.remove(); KBAPP.S.T = null; KBAPP.S.settings.speed = 'instant'; KBAPP.go('home'); }); await pg.waitForTimeout(300);
+  await pg.click('[data-go="setup-tour"]'); await pg.click('[data-act="start-tour"]'); await pg.waitForTimeout(300); await pg.evaluate(() => { if (KBAPP.S.view === 'opening') KBAPP.act('opening-start'); }); await pg.waitForTimeout(400);
+  let tb = null;
+  for (let i = 0; i < 3000; i++) { st = await step(); if (st === 'play' && await pg.evaluate(() => !!KBAPP.S.undoSnap)) { tb = await pg.evaluate(() => KBAPP.S.decisions.length); break; } if (st === 'win') await pg.evaluate(() => KBAPP.act('win-ok')); await pg.waitForTimeout(20); }
+  await pg.waitForTimeout(100);
+  ok(tb != null && await pg.evaluate(() => !!document.querySelector('[data-act="undo"]')), '大会でも「待った」ボタンが出る');
+  await pg.evaluate(() => KBAPP.act('undo')); await pg.waitForTimeout(100);
+  ok(/大会/.test(await pg.evaluate(() => (document.querySelector('#modal') || {}).textContent || '')), '大会では、大会のバッジも対象外になると確認する');
+  await pg.evaluate(() => KBAPP.act('undo-go')); await pg.waitForTimeout(2600);
+  const ta = await pg.evaluate(() => { const S = KBAPP.S, g = S.game; return { n: S.decisions.length, human: g.players[g.current()].human, th: S.T.tourHinted, q: !!S.qual }; });
+  ok(ta.n === tb - 1 && ta.human && ta.th && ta.q, `大会でも一手前に戻れる（判断 ${tb}→${ta.n}）`);
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 2).join(' / '));
   await b.close();
 })();
