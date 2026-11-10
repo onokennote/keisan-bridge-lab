@@ -2005,7 +2005,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='a019f64251';
+window.KB_BUILD='4917811d9f';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6956,7 +6956,7 @@ function cardDataOf(pid, name) {
 }
 // サーバーに送るカード：バッジは取ったものの名前だけ
 function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5 }; }
-async function shareCard(data) {
+async function shareCard(data, opt) {
   const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
   try { await Promise.all(['400 60px "Dela Gothic One"', '900 30px "Zen Kaku Gothic New"', '700 30px "Zen Kaku Gothic New"'].map(f => document.fonts.load(f))); } catch (e) { }
@@ -6983,6 +6983,16 @@ async function shareCard(data) {
     x.fillStyle = '#f2b632'; x.font = `900 20px ${BODY}`; x.fillText(`推定実力 ${rateLabel(r.r)}相当`, NX + nameW + 26, 140);
   }
   for (let gi = 0; gi < ACH_GROUPS.length; gi++) { const done = catProgress(g, gi).done, im = await svgToImg(emblemSVG(gi, done, 60)); const X = W - 52 - (ACH_GROUPS.length - gi) * 54; if (im) { if (done) { x.save(); x.shadowColor = 'rgba(217,164,255,.8)'; x.shadowBlur = 16; } x.globalAlpha = done ? 1 : 0.35; x.drawImage(im, X, 44, 50, 50); x.globalAlpha = 1; if (done) x.restore(); } x.fillStyle = done ? '#e9c8ff' : 'rgba(255,255,255,.35)'; x.font = `700 11px ${BODY}`; x.textAlign = 'center'; x.fillText(ACH_GROUPS[gi][0], X + 25, 108, 52); x.textAlign = 'left'; }
+  // 右上（紋章の下）：総合ランキングの順位（AI込み・人だけ）
+  if (opt && opt.ranks && (opt.ranks.a || opt.ranks.h)) {
+    const parts = [opt.ranks.a ? ['AI込み', opt.ranks.a] : null, opt.ranks.h ? ['人だけ', opt.ranks.h] : null].filter(Boolean);
+    x.textAlign = 'right'; let rx = W - 56;
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const [l, v] = parts[i]; x.fillStyle = '#f2b632'; x.font = `34px ${DISP}`; x.fillText(`${v}位`, rx, 156); rx -= x.measureText(`${v}位`).width + 8;
+      x.fillStyle = '#c9c2ad'; x.font = `700 19px ${BODY}`; x.fillText(l, rx, 154); rx -= x.measureText(l).width + 22;
+    }
+    x.fillStyle = '#fbf3dc'; x.font = `900 20px ${BODY}`; x.fillText('🏆 総合ランキング', rx, 154); x.textAlign = 'left';
+  }
   // 左：バッジをズラッと（全スロット。取ったものは輝き、まだのものは影）
   const all = []; ACH_GROUPS.forEach(([, ks]) => ks.forEach(k => { const a = ACH.find(z => z[0] === k); if (a) a[2].forEach((t, i) => all.push({ a, i, got: !!g.ach[a[0] + ':' + t] })); }));
   // バッジはいつも同じ位置（カテゴリー順）。取ったものだけが輝くので、埋まり具合が見える
@@ -7035,7 +7045,9 @@ async function shareOpen() {
     <div class="share-text small">${esc(shareText()).replace(/\n/g, '<br>')}<br><span class="muted">${SHARE_TAGS.map(t => '#' + t).join(' ')} ${esc(APP_URL)}</span></div>
     <div class="row" style="justify-content:flex-end;flex-wrap:wrap;gap:8px"><button class="btn" data-act="close">閉じる</button><button class="btn" data-act="share-save" disabled>① 画像を保存</button><a class="btn x-btn" href="${esc(shareIntentURL())}" target="_blank" rel="noopener"><b>𝕏</b> ② Xに投稿</a></div></div>`);
   try {
-    const cv = await shareCard(); S.shareCanvas = cv;
+    let ranks = null; // 総合ランキングの順位（クラウド版だけ。読み込めなければ入れない）
+    if (CLOUD_ON) { try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await Promise.race([homeRankFetch(), new Promise(r => setTimeout(r, 3000))]); } catch (e) { } ranks = { a: totalRankOf(S.homeRank, null, true), h: totalRankOf(S.rankHuman, null, true) }; }
+    const cv = await shareCard(null, { ranks }); S.shareCanvas = cv;
     const url = cv.toDataURL('image/png'), box = document.querySelector('.share-prev');
     if (box) box.innerHTML = `<img src="${url}" alt="成績カード" style="width:100%;border-radius:10px;display:block">`;
     const sb = document.querySelector('[data-act="share-save"]'); if (sb) sb.disabled = false;
