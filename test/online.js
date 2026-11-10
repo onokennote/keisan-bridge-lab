@@ -32,7 +32,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const code = await pa.evaluate(() => KBAPP.ON.v && KBAPP.ON.v.id);
   ok(/^[A-Z2-9]{6}$/.test(code || ''), '卓ができてコードが出る：' + code);
   // B：コードで入る
-  await pb.fill('#on-code', code); await pb.click('[data-act="on-join"]'); await pb.waitForTimeout(1200);
+  await pb.evaluate(() => { const d = document.querySelector('.on-free'); if (d) d.open = true; }); await pb.fill('#on-code', code); await pb.click('[data-act="on-join"]'); await pb.waitForTimeout(1200);
   await pa.waitForTimeout(1800);
   ok(await pa.evaluate(() => KBAPP.ON.v.seats.length === 2 && /ユイ/.test(document.querySelector('.on-seats').innerText)), 'コードで2人目が入れる（ホストの画面に出る）');
   await pa.click('[data-act="on-addai"]'); await pa.waitForTimeout(800);

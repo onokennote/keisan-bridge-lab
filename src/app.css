@@ -2030,3 +2030,18 @@ body.rewinding #home-fab{display:none}
 .on-prev{min-height:22px;font-size:13px;margin:6px 0}
 .on-res .on-rrow{display:grid;grid-template-columns:2em 1fr auto;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
 .on-res .on-rrow.me{color:var(--accent)}
+.on-tlist{display:flex;flex-direction:column;gap:6px}
+.on-trow{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;cursor:pointer}
+.on-tn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.on-tn b{font-size:15px}
+.on-st{font-style:normal;font-size:10px;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.12);color:var(--muted)}
+.on-st.open{background:rgba(91,209,122,.2);color:var(--good)}.on-st.live{background:rgba(255,107,107,.2);color:var(--bad)}
+.on-off{font-style:normal;font-size:10px;padding:1px 7px;border-radius:999px;background:var(--accent);color:#2a1c00;font-weight:800}
+.on-in{color:var(--good)}
+.on-free summary{cursor:pointer;font-size:12px;color:var(--muted)}.on-free[open]{display:flex;flex-direction:column;gap:6px}
+.on-new textarea{width:100%;box-sizing:border-box;font:inherit;background:#08131b;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+.on-th{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.on-ent{display:flex;flex-wrap:wrap;gap:6px}.on-e{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px 2px 2px;border-radius:999px;background:rgba(255,255,255,.06)}.on-e .on-av{width:26px;height:26px;border-radius:50%}
+.on-stand{display:flex;flex-direction:column;font-size:13px}
+.on-sh,.on-sr{display:grid;grid-template-columns:2.4em 1fr 4.5em 4em;gap:6px;padding:5px 4px;border-bottom:1px solid var(--line);align-items:center}
+.on-sh{font-size:11px;color:var(--muted)}.on-sr.me{color:var(--accent);font-weight:800}.on-sr em{font-style:normal;font-size:10px;margin-left:4px;color:var(--info)}
+.on-sr span:nth-child(3),.on-sr span:nth-child(4),.on-sh span:nth-child(3),.on-sh span:nth-child(4){text-align:right}

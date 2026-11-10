@@ -405,7 +405,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -420,6 +420,7 @@ function render() {
   else if (S.view === 'zukan') app.innerHTML = zukanHTML();
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
   else if (S.view === 'online') { app.innerHTML = onlineHTML(); setTimeout(onBind, 0); }
+  else if (S.view === 'otour') { app.innerHTML = otourHTML(); setTimeout(onTourClock, 0); }
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
@@ -5490,6 +5491,13 @@ function act(a, el) {
     case 'next-game': nextGame(); break;
     case 'fab-home': fabHome(); break;
     case 'on-new': onNewModal(); break;
+    case 'on-tour-new': onTourNewModal(); break;
+    case 'on-tour-create': onTourCreate(); break;
+    case 'on-tour-open': onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
+    case 'on-tour-home': clearInterval(ON.ttimer); ON.t = null; ON.toursAt = 0; go('home'); break;
+    case 'on-tour-entry': case 'on-tour-cancel': case 'on-tour-startnow': case 'on-tour-delete': onReq('on_tour_act', Object.assign(onMe(), { id: ON.t.id, act: a.slice(8) })).then(j => { ON.t = j.tour; if (j.tour.myRoom) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); } else render(); }).catch(e => toast(e.message)); break;
+    case 'on-room-open': S.onAutoRoom = el.dataset.id; onRoomOpen(el.dataset.id); break;
+    case 'on-to-tour': onStop(); onReq('on_tour', { id: ON.v.tour }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
     case 'on-create': onEnter('on_create', S.onCfg); break;
     case 'on-join': { const c = ($('#on-code') || {}).value || ''; if (c.trim().length < 6) { toast('6文字のコードを入れてください'); break; } onEnter('on_join', { id: c.trim() }); break; }
     case 'on-quit': onStop(); if (ON.v && ON.v.phase === 'lobby') onReq('on_act', { id: ON.v.id, act: 'leave' }).catch(() => { }); ON.v = null; go('home'); break;
@@ -5619,11 +5627,94 @@ const ON_ENABLED = () => CLOUD_ON && !!window.KB_STAGING;
 const ON = { v: null, ver: 0, timer: null, tick: null, sel: [], busy: false, lastCur: null, lastLog: 0, err: '' };
 function onlineHomeHTML() {
   if (!ON_ENABLED()) return '';
-  const last = store.get('onRoom', null);
+  const last = store.get('onRoom', null), L = ON.tours;
+  const fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const stat = v => v.phase === 'entry' ? (v.now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'done' ? '<em class="on-st">終了</em>' : '<em class="on-st">中止</em>';
+  const rows = L ? (L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '招待されています' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
   return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE（テスト中）</div><h2>オンライン大会</h2></div></div>
-    <p class="small muted" style="margin:0">いまは段階1：卓をつくって、コードを知らせた人と対局できます（2〜5人。AI★2も入れられます）。</p>
-    <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
-    <button class="btn primary" data-act="on-new">大会をひらく（卓をつくる）</button></div>`;
+    <div class="on-tlist">${rows}</div>
+    <button class="btn primary" data-act="on-tour-new">大会をひらく</button>
+    <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
+      <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
+      <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
+}
+async function onToursLoad() {
+  if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
+  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
+// ---- 大会をひらく ----
+function onTourNewModal() {
+  const d0 = new Date(Date.now() + 20 * 60000); d0.setMinutes(Math.ceil(d0.getMinutes() / 5) * 5, 0, 0);
+  const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, min: 4, max: 15, aiFill: true, aiLv: 2, entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, pts: 'std' };
+  const seg = (k, opts) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(c[k]) === String(v) ? 'on' : ''}" data-ot="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const num = (k, mn, mx) => `<div class="su-step"><button class="su-pm" data-otn="${k}" data-v="-1" ${c[k] <= mn ? 'disabled' : ''}>−</button><b class="tnum">${c[k]}</b><button class="su-pm" data-otn="${k}" data-v="1" ${c[k] >= mx ? 'disabled' : ''}>＋</button></div>`;
+  modal(`<div class="stack on-new"><h3 style="margin:0">🌐 大会をひらく</h3>
+    <label class="su-row col"><b>大会の名前</b><input id="ot-name" class="su-in" maxlength="30" value="${esc(c.name)}"></label>
+    <label class="su-row col"><b>大会の説明</b><textarea id="ot-desc" rows="2" maxlength="300" placeholder="例）初心者歓迎！ 3セットの予選のあと、上位5人で決勝">${esc(c.desc)}</textarea></label>
+    <label class="su-row col"><b>開始日時</b><input id="ot-start" type="datetime-local" class="su-in" value="${esc(c.start)}"><small class="muted">開始の15分前からエントリーできます</small></label>
+    <div class="su-row col"><b>1手の制限時間</b>${seg('limit', [[60, '1分'], [30, '30秒'], [15, '15秒'], [10, '10秒']])}</div>
+    <div class="su-row"><b>最少人数</b>${num('min', 2, 40)}</div><div class="su-row"><b>最大人数</b>${num('max', 2, 40)}</div>
+    <div class="su-row col"><b>最少人数に足りないとき</b>${seg('aiFill', [['true', 'AIを入れて開催'], ['false', '中止']])}</div>
+    ${c.aiFill ? `<div class="su-row col"><b>入れるAIの強さ</b>${seg('aiLv', [[1, '★1'], [2, '★2'], [3, '★3']])}</div>` : ''}
+    <div class="su-row col"><b>エントリーできる人</b>${seg('entry', [['open', '誰でも'], ['invite', '招待した人だけ']])}</div>
+    ${c.entry === 'invite' ? `<label class="su-row col"><b>招待する人の名前</b><textarea id="ot-inv" rows="2" placeholder="ランキングの名前を、改行か「、」で区切って">${esc(c.invites)}</textarea></label>` : ''}
+    <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
+    <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
+    <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
+    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">ひらく</button></div></div>`);
+  const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value; };
+  document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
+  document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; onTourNewModal(); });
+}
+async function onTourCreate() {
+  const c = S.onTour; c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value;
+  const startAt = Math.round(new Date(c.start).getTime() / 1000);
+  if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
+  if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
+  try {
+    const j = await onReq('on_tour_new', Object.assign(onMe(), { tname: c.name, desc: c.desc, startAt, limit: c.limit, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    closeModal(); S.onTour = null; onTourShow(j.tour);
+  } catch (e) { toast(e.message || 'ひらけませんでした'); }
+}
+// ---- 大会の画面（詳細・エントリー・進み具合・順位）----
+function onTourShow(t) { ON.t = t; go('otour'); onTourPollStart(); }
+function onTourPollStart() { clearInterval(ON.ttimer); ON.ttimer = setInterval(onTourPoll, 3000); }
+async function onTourPoll() {
+  if (S.view !== 'otour' || !ON.t) { clearInterval(ON.ttimer); return; }
+  try { const j = await onReq('on_tour', { id: ON.t.id }); const prev = ON.t; ON.t = j.tour;
+    if (j.tour.myRoom && (!prev || prev.myRoom !== j.tour.myRoom || S.onAutoRoom !== j.tour.myRoom)) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); return; }
+    if (!prev || prev.ver !== j.tour.ver) render(); else onTourClock();
+  } catch (e) { }
+}
+async function onRoomOpen(id) { try { const v = await onReq('on_state', { id }); clearInterval(ON.ttimer); onStart(v); } catch (e) { toast(e.message || '卓を開けませんでした'); } }
+function onTourClock() { const el = $('#ot-clock'), t = ON.t; if (!el || !t) return; const left = Math.max(0, Math.round(t.startAt - Date.now() / 1000)); el.textContent = t.phase === 'entry' ? (left > 0 ? `開始まで ${left >= 3600 ? Math.floor(left / 3600) + '時間' : ''}${Math.floor(left % 3600 / 60)}分${left < 600 ? (left % 60) + '秒' : ''}` : 'まもなく開始') : ''; }
+function otourHTML() {
+  const t = ON.t; if (!t) return '';
+  const d = new Date(t.startAt * 1000), when = `${d.getMonth() + 1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const now = Date.now() / 1000, open = t.phase === 'entry' && now >= t.entryAt;
+  const ph = { entry: open ? '受付中' : '受付前', prelim: `予選 第${t.set}/${t.sets}セット`, final: '決勝', done: '終了', cancel: '中止' }[t.phase];
+  const av = e => KB.avatarSVG(Object.assign({}, e.avatar || AVATAR_DEF, { name: e.name }), { mood: 'happy' });
+  let body = '';
+  if (t.phase === 'entry') {
+    body = `<div class="on-ent">${t.entrants.map(e => `<span class="on-e"><span class="on-av">${av(e)}</span>${esc(e.name)}</span>`).join('') || '<span class="small muted">まだエントリーした人はいません</span>'}</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">${open ? (t.entered ? '<button class="btn" data-act="on-tour-cancel">エントリーを取り消す</button>' : t.invited ? `<button class="btn primary" data-act="on-tour-entry" ${t.n >= t.max ? 'disabled' : ''}>エントリーする</button>` : '<span class="small">招待された人だけが出られます</span>') : `<span class="small muted">エントリーは ${new Date(t.entryAt * 1000).getHours()}:${String(new Date(t.entryAt * 1000).getMinutes()).padStart(2, '0')} から（開始の15分前）</span>`}
+      ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
+  } else if (t.stand) {
+    const isDone = t.phase === 'done';
+    body = `${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.phase === 'prelim' || t.phase === 'final' ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
+      <div class="on-stand"><div class="on-sh"><span>順位</span><span>名前</span><span>${isDone && t.finalists ? '決勝PP' : '得点'}</span><span>累計PP</span></div>
+      ${t.stand.map((r, i) => `<div class="on-sr ${r.me ? 'me' : ''} ${isDone && i < 3 ? 'top' + (i + 1) : ''}"><b>${isDone && i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</b><span>${esc(r.name)}${r.fin ? '<em>決勝</em>' : ''}</span><span>${isDone && r.fpp != null ? r.fpp + 'PP' : r.pts + '点'}</span><span>${r.pp}</span></div>`).join('')}</div>
+      ${(t.rooms || []).length > 1 ? `<div class="small muted">${t.rooms.map(r => `${esc(r.label)}：${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}`).join('　')}</div>` : ''}`;
+  } else if (t.phase === 'cancel') body = `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
+  return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
+    <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
+      <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
+      ${t.desc ? `<p style="margin:0;white-space:pre-wrap">${esc(t.desc)}</p>` : ''}
+      <div class="on-facts small muted">${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・${t.aiFill ? `足りなければAI★${t.aiLv}で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}</div>
+      ${body}</div>`;
 }
 function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar() }; }
 async function onReq(a, extra) { const c = raw.get('kb.cloud', null); if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
@@ -5665,6 +5756,7 @@ function onApply(v) {
     if (prev && prev.game && prev.gameNo === v.gameNo) { lg.slice(Math.max(0, n - (v.ver - (prev.ver || v.ver)) * 3)).forEach(e => { if (e.p !== v.me && e.type === 'play') KB.sfx(e.vals.length === 3 ? 'play3' : 'play', e.vals.length); }); }
     if (!mine) ON.sel = [];
     if (prev && prev.phase === 'play' && v.phase === 'between' && g.winner === v.me) { KB.sfx('win'); confetti(); }
+    if (v.tour && v.phase === 'done' && prev && prev.phase !== 'done') setTimeout(() => { if (S.view === 'online' && ON.v && ON.v.id === v.id) act('on-to-tour'); }, 5000); // 大会の卓が終わったら、大会の画面へ
   }
   render();
 }
@@ -5683,7 +5775,7 @@ const onCards = h => (h || []).map((c, i) => ({ v: c[0], s: c[1], id: i }));
 function onSelVals() { const v = ON.v, h = onCards(v.game && v.game.hand); return ON.sel.map(i => h[i] && h[i].v).filter(x => x != null); }
 function onlineHTML() {
   const v = ON.v; if (!v) return '<div class="panel">読み込み中…</div>';
-  const top = `<div class="topbar"><button class="btn ghost sm" data-act="on-quit">← ホーム</button><div class="where">🌐 卓 <b class="mono">${esc(v.id)}</b></div><div class="small muted">${v.phase === 'lobby' ? '受付中' : v.phase === 'done' ? '終了' : `第${v.gameNo}/${v.cfg.games}ゲーム`}</div></div>`;
+  const top = `<div class="topbar">${v.tour ? '<button class="btn ghost sm" data-act="on-to-tour">← 大会</button>' : '<button class="btn ghost sm" data-act="on-quit">← ホーム</button>'}<div class="where">🌐 ${v.tour ? esc(v.label || '大会') : `卓 <b class="mono">${esc(v.id)}</b>`}</div><div class="small muted">${v.phase === 'lobby' ? '受付中' : v.phase === 'done' ? '終了' : `第${v.gameNo}/${v.cfg.games}ゲーム`}</div></div>`;
   const tot = i => (v.setPP[i] || []).reduce((a, b) => a + b, 0);
   const avatar = (s, mood) => KB.avatarSVG(Object.assign({}, s.avatar || AVATAR_DEF, { name: s.name }), { mood: mood || 'normal' });
   if (v.phase === 'lobby') {
@@ -5697,7 +5789,7 @@ function onlineHTML() {
   const g = v.game, me = v.me, n = v.seats.length;
   const seatOrder = [...Array(n).keys()].map(k => (Math.max(0, me) + k) % n).filter(i => i !== me);
   const lastTxt = (i) => { const l = g.last[i]; if (!l) return ''; const by = l.by === 'timeout' ? '⏰ 時間切れで引いた' : l.by === 'sub' ? '🤖 ' : ''; return l.type === 'play' ? `${by}${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}` : (l.by === 'timeout' ? by : `${by}引いた`); };
-  const opp = i => { const s = v.seats[i]; return `<div class="on-opp ${g.cur === i ? 'turn' : ''} ${g.winner === i ? 'win' : ''}"><span class="on-av">${avatar(s)}</span><div class="on-oi"><b>${esc(s.name)}</b>${s.ai ? '<em>AI★2</em>' : s.sub ? '<em class="sub">AIが代打ち</em>' : ''}<span class="small">手札 <b>${g.handN[i]}</b>枚・セット ${tot(i)}PP</span><span class="small muted">${lastTxt(i)}</span>${g.over && g.hands ? `<span class="on-reveal">${onCards(g.hands[i]).map(miniCard).join('')}</span>` : ''}</div></div>`; };
+  const opp = i => { const s = v.seats[i]; return `<div class="on-opp ${g.cur === i ? 'turn' : ''} ${g.winner === i ? 'win' : ''}"><span class="on-av">${avatar(s)}</span><div class="on-oi"><b>${esc(s.name)}</b>${s.ai ? `<em>AI★${s.lv || 2}</em>` : s.sub ? '<em class="sub">AIが代打ち</em>' : ''}<span class="small">手札 <b>${g.handN[i]}</b>枚・セット ${tot(i)}PP</span><span class="small muted">${lastTxt(i)}</span>${g.over && g.hands ? `<span class="on-reveal">${onCards(g.hands[i]).map(miniCard).join('')}</span>` : ''}</div></div>`; };
   const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
   const hand = onCards(g.hand), mySeat = v.seats[me] || {}, myTurn = v.phase === 'play' && g.cur === me && !mySeat.sub;
   const vals = onSelVals(), ok = myTurn && vals.length && KB.evalSelection(vals, f.v);
@@ -5706,7 +5798,7 @@ function onlineHTML() {
     const rows = [...Array(n).keys()].map(i => ({ i, pp: g.pp ? g.pp[i] : 0, tot: tot(i) })).sort((a, b) => (v.phase === 'done' ? a.tot - b.tot : a.pp - b.pp));
     res = `<div class="panel on-res"><h3 style="margin:0">${v.phase === 'done' ? '🏁 セット終了' : g.winner >= 0 ? `${esc(v.seats[g.winner].name)}が上がりました！` : 'ゲーム終了'}</h3>
       ${rows.map((r, k) => `<div class="on-rrow ${r.i === me ? 'me' : ''}"><b>${k + 1}</b><span>${esc(v.seats[r.i].name)}</span><span>${v.phase === 'done' ? `合計 ${r.tot}PP` : `${r.pp}PP（合計 ${r.tot}）`}</span></div>`).join('')}
-      ${v.phase === 'done' ? '<button class="btn primary" data-act="on-quit">ホームへ</button>' : ''}</div>`;
+      ${v.phase === 'done' ? (v.tour ? '<button class="btn primary" data-act="on-to-tour">大会の順位を見る</button>' : '<button class="btn primary" data-act="on-quit">ホームへ</button>') : ''}</div>`;
   }
   return top + `<div class="on-table">
     <div class="on-clock" id="on-clock"></div>
