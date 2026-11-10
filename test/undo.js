@@ -42,6 +42,8 @@ const path = require('path');
   for (let i = 0; i < 400; i++) { st = await step(); if (st === 'play' || st === 'draw' || st === 'win') break; await pg.waitForTimeout(20); }
   const d = await pg.evaluate(() => { const ds = KBAPP.S.decisions; return ds[ds.length - 1]; });
   ok(!d || (d.viewedHint && d.undo), 'やり直した手には印が付く');
+  await pg.waitForTimeout(100);
+  ok(!(await pg.evaluate(() => !!KBAPP.S.undoSnap || !!document.querySelector('[data-act="undo"]'))), 'やり直した手は、もう戻せない');
   // ② 上がられたあと（結果を見るの前）に戻す：成長記録とセットのPPも元に戻る
   let tried = 0, done = false;
   for (let i = 0; i < 20000 && !done; i++) {

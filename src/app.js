@@ -3480,7 +3480,7 @@ function recordDecision(move) {
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
   S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: near || (sutemi && sutemi.outOk) ? mine : best0, // 「ほぼ互角」で最善扱いにした手も、統計（3枚・引いた回数など）では自分の手を最善として数える
      mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.undoRetry || (S.hint && S.hint.key === key && S.hint.ev)), undo: S.undoRetry ? 1 : 0, evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
-  S.undoRetry = false; if (S.undoCur && S.undoCur.gameNo === S.gameNo) S.undoSnap = S.undoCur; // 「待った」で戻れるのは、選択肢のあった直前の自分の手
+  const wasRetry = S.undoRetry; S.undoRetry = false; if (!wasRetry && S.undoCur && S.undoCur.gameNo === S.gameNo) S.undoSnap = S.undoCur; // やり直した手は、もう戻せない // 「待った」で戻れるのは、選択肢のあった直前の自分の手
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -3801,7 +3801,7 @@ function undoTake() {
 function undoAsk() {
   if (!undoOk()) return;
   const u = S.undoSnap, g = S.game, n = rvName(), free = S.gameHinted || !badgeElig(S.T).game;
-  const head = g.over ? `上がられてもうたけど、第${u.round}巡の${n}の番まで巻き戻せるで。` : `第${u.round}巡の${n}の番まで巻き戻すで。`;
+  const head = (g.over ? `上がられてもうたけど、一手前（第${u.round}巡）の${n}の番まで巻き戻せるで。` : `一手前（第${u.round}巡）の${n}の番まで巻き戻すで。`) + 'やり直した手は、もういっぺん戻すことはできへんで。';
   const warn = free ? 'このゲームはもともとバッジの対象外やから、遠慮なくいこか。やり直した手は推定実力には入れへんで。' : '戻ったら、このゲームとこのセットの結果のバッジ（上がり・セット1位・ノーミスなど）はもらえんようになるし、やり直した手は推定実力にも入れへん。それでもええか？';
   modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(head + warn)}</div></div></div>
     <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn" data-act="undo-no">やめとく</button><button class="btn primary" data-act="undo-go">⏪ 巻き戻す</button></div>`);
@@ -3824,8 +3824,8 @@ function undoGo() {
     S.bigBanner = null; S.introUntil = 0; S.roundStart = 0; S.dealDur = 0; S.chimeKey = null; S.liveKey = null; S.newCard = null; S.newCards = null;
     S.reshuffleSeen = g.log.filter(e => e.type === 'reshuffle').length;
     const n = rvName();
-    S.cm = { who: 'masa', text: `第${g.round}巡、${n}の番まで戻したで！さっきとちゃう手、試してみ！`, prio: 5, kind: 'undo', mood: 'happy', at: Date.now() };
-    if (S.settings.commentary === 'root') S.cm = { who: 'root', text: `第${g.round}巡の${n}の番に戻しました。別の手を試してみましょう。`, prio: 5, kind: 'undo', mood: 'normal', at: Date.now() };
+    S.cm = { who: 'masa', text: `一手前、第${g.round}巡の${n}の番まで戻したで！さっきとちゃう手、試してみ！`, prio: 5, kind: 'undo', mood: 'happy', at: Date.now() };
+    if (S.settings.commentary === 'root') S.cm = { who: 'root', text: `一手前、第${g.round}巡の${n}の番に戻しました。別の手を試してみましょう。`, prio: 5, kind: 'undo', mood: 'normal', at: Date.now() };
     if (!S.settings.commentary || S.settings.commentary === 'off') S.cm = null;
     S.cmHoldUntil = Date.now() + 1200; S.flowHoldUntil = S.cmHoldUntil;
     saveSession(); renderGame(); loop();
