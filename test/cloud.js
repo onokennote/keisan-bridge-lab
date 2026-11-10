@@ -62,10 +62,10 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(await pa.evaluate(() => /総合/.test((document.querySelector('#pb-rank') || {}).textContent || '') && /AI込み/.test(document.querySelector('#pb-rank').textContent) && /人だけ/.test(document.querySelector('#pb-rank').textContent)), 'ホームのプロフィールに総合の順位（AI込み・人だけ）：' + await pa.evaluate(() => (document.querySelector('#pb-rank') || {}).textContent));
   await (await pa.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'pb_rank.png') });
   // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
-  ok(await pa.evaluate(() => ![...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'アバターを作っていない人はタイトルに並ばない');
+  ok(await pa.evaluate(() => { const r = [...document.querySelectorAll('.title .cast .cast-p')].map(b => +((b.title.match(/総合(\d+)位/) || [])[1] || 0)); return r.length >= 2 && r.every((v, i) => !i || v >= r[i - 1]) && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title)); }), 'タイトルの6人は人とAIを混ぜて総合の順位どおり');
   await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });
   await pa.evaluate(() => { KBAPP.S.homeRank = null; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
-  ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'BP上位でアバターを作った人がタイトルの6人に入る（全部で6人）');
+  ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'アバターを作った人も総合の順位どおりに入る（全部で6人）');
   await (await pa.$('.title')).screenshot({ path: path.join(__dirname, 'out', 'cast_top.png') });
   await pa.evaluate(() => [...document.querySelectorAll('.title .cast .cast-p')].find(b => !/AI研究員/.test(b.title)).click()); await pa.waitForTimeout(2500);
   ok(await pa.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'タイトルのアイコンを押すと成績カードと自己紹介');

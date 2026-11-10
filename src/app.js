@@ -2494,10 +2494,10 @@ async function migrateIn(t) {
 }
 
 // タイトルの6人：BPランキングの上位でアバターを作った人がいれば、その人たちを先に並べる（押すと成績カード）。残りはAIのキャラ
-// タイトルの6人：BPの上位（AI研究員も入れる。人はアバターを作った人だけ）。順位の数字は出さない
+// タイトルの6人：総合ランキング（AI研究員も入れる）の上位6人を順位どおりに。順位の数字は出さない
 function castHTML() {
-  const R = CLOUD_ON && S.homeRank && S.homeRank.bp, top = R ? R.list.filter(x => x.rid && (x.ai || x.avatar)).slice(0, 6) : [];
-  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}" data-me="${rankMe(x) ? 1 : ''}" title="${esc(x.name)}${x.ai ? '（AI研究員）' : ''}　${x.bp}BP" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button>`);
+  const R = CLOUD_ON && S.homeRank && (S.homeRank.total || S.homeRank.bp), top = R ? R.list.filter(x => x.rid).slice(0, 6) : [];
+  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}" data-me="${rankMe(x) ? 1 : ''}" title="総合${x.rank}位　${esc(x.name)}${x.ai ? '（AI研究員）' : ''}" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button>`);
   if (!S.castPool) S.castPool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6);
   const ai = S.castPool.slice(0, 6 - ppl.length).sort((a, b) => a.lv - b.lv).map((c, i) => KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }));
   return ppl.join('') + ai.join('');
