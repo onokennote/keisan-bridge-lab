@@ -636,6 +636,9 @@ try {
         else obTourStart($t, $now);
       } elseif ($act === 'ready') {
         if (empty($t['wait']) || !in_array('u:' . $u['uid'], $t['wait']['keys'], true)) $err = 'いまは準備の時間ではありません'; else { $t['ready']['u:' . $u['uid']] = 1; obTourTick($t, $now); }
+      } elseif ($act === 'remove') { // 終わった大会をアーカイブから消す（主催者だけ。取ったバッジ・称号は残る）
+        if ($t['host'] !== $u['uid'] || !in_array($t['phase'], ['done', 'cancel'], true)) $err = '終わった自分の大会だけ削除できます';
+        else { db()->prepare('DELETE FROM tours WHERE id = ?')->execute([$id]); db()->exec('COMMIT'); out(['ok' => true, 'removed' => true]); }
       } elseif ($act === 'delete') {
         if ($t['host'] !== $u['uid'] || $t['phase'] !== 'entry') $err = '始まる前の自分の大会だけ中止できます'; else { $t['phase'] = 'cancel'; $t['note'] = '主催者が中止しました'; }
       } else $err = '知らない操作です';

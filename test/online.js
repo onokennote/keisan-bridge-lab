@@ -48,9 +48,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   let subSeen = false, aTurns = 0, guard = 0, ON_SHOT = 0;
   // お手つき（出したあとに判定・3枚）：場にならない2枚を出すと、札は戻って3枚引き、番が終わる
   let foulOk = null;
-  for (let i = 0; i < 60 && foulOk == null; i++) {
+  for (let i = 0; i < 120 && foulOk == null; i++) {
     foulOk = await pa.evaluate(async () => { const v = KBAPP.ON.v; if (!v || v.phase !== 'play' || v.game.cur !== v.me) return null; const h = v.game.hand.map(c => c[0]), t = v.game.field[0];
-      for (let a = 0; a < h.length; a++) for (let b = a + 1; b < h.length; b++) if (!KB.evalSelection([h[a], h[b]], t)) { const n0 = h.length; KBAPP.ON.sel = [a, b]; KBAPP.act('on-play'); await new Promise(r => setTimeout(r, 800)); const w = KBAPP.ON.v; return w.game.hand.length === n0 + 3 && w.game.cur !== w.me && (w.game.log || []).some(e => e.foul && e.n === 3); }
+      for (let a = 0; a < h.length; a++) for (let b = a + 1; b < h.length; b++) if (!KB.evalSelection([h[a], h[b]], t)) { const n0 = h.length; KBAPP.ON.sel = [a, b]; KBAPP.act('on-play'); await new Promise(r => setTimeout(r, 900)); const w = KBAPP.ON.v; const f = (w.game.log || []).some(e => e.foul && e.n === 3 && e.p === w.me); if (!f) return 'skip'; return w.game.hand.length === n0 + 3 && w.game.cur !== w.me; } // 制限時間3秒のうちに間に合わなかったら、次の番でやり直す
       return 'skip'; });
     if (foulOk === 'skip') foulOk = null, await wait(400); else if (foulOk == null) await wait(400);
   }

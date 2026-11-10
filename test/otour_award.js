@@ -72,6 +72,12 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   await p.evaluate(() => { const r = [...document.querySelectorAll('.rk-row')].find(x => /テスト王/.test(x.innerText)); if (r) r.click(); }); await p.waitForTimeout(1500);
   ok(await p.evaluate(() => !!document.querySelector('#modal .pv-title.off') && document.querySelectorAll('#modal .pv-md').length >= 2), 'ランキングから開くと、名前の上に称号、公式・オンラインのメダルの数');
   await p.screenshot({ path: path.join(__dirname, 'out', 'ot_title.png') });
+  // 主催者はアーカイブから削除できる（ほかの人はできない）
+  const other = await call('register');
+  const ng = await call('on_tour_act', { token: other.token, id: small.id, act: 'remove' });
+  const okr = await call('on_tour_act', { token: me.token, id: small.id, act: 'remove' });
+  const arch2 = await call('on_tours_archive', { token: me.token });
+  ok(!ng.ok && okr.ok && !arch2.tours.some(t => t.id === small.id) && arch2.tours.some(t => t.id === tour.id), '主催者だけが、終わった大会をアーカイブから削除できる');
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill();
 })();

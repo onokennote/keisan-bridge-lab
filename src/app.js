@@ -5522,6 +5522,8 @@ function act(a, el) {
     case 'on-tour-new': onTourNewModal(); break;
     case 'on-arch': onArchiveOpen(); break;
     case 'title-open': titleModal(); break;
+    case 'on-tour-remove': modal(`<div class="stack"><h3 style="margin:0">大会を削除しますか？</h3><p class="small muted" style="margin:0">「${esc(ON.t.name)}」を過去の大会から消します。元には戻せません（取ったバッジと称号は残ります）。</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-remove-go">削除する</button></div></div>`); break;
+    case 'on-tour-remove-go': onReq('on_tour_act', { id: ON.t.id, act: 'remove' }).then(() => { closeModal(); clearInterval(ON.ttimer); ON.t = null; toast('削除しました'); onArchiveOpen(); }).catch(e => toast(e.message)); break;
     case 'title-set': store.set('title', el.dataset.id); closeModal(); try { cloudDirty('kb.p.' + PID + '.title'); } catch (e) { } toast(el.dataset.id ? '称号をつけました' : '称号を外しました'); render(); break;
     case 'on-tour-create': onTourCreate(); break;
     case 'on-tour-open': ON.ttab = null; onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
@@ -5790,6 +5792,7 @@ function otourHTML() {
       ${onStandHTML(t)}
       ${(t.phase === 'prelim' || t.phase === 'final') && !t.wait && (t.rooms || []).length ? `<div class="on-rooms"><b class="small">👀 観戦する卓を選ぶ</b>${t.rooms.map(r => `<button class="on-room" data-act="on-watch" data-id="${r.id}" ${r.id === t.myRoom ? 'disabled' : ''}><b>${esc(r.label)}</b><span class="small muted">${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}・${r.names.map(x => esc(onName({ name: x }))).join('・')}</span></button>`).join('')}</div>` : ''}`;
   } else if (t.phase === 'cancel') body = `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
+  if ((t.phase === 'done' || t.phase === 'cancel') && t.mine) body += '<div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="on-tour-remove">🗑 アーカイブから削除（主催者）</button></div>';
   return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
       <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
