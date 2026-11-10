@@ -2710,7 +2710,7 @@ function setupTourHTML() {
 ${suPresetHTML('tour')}
 <section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
   <div class="su-step big"><button class="su-pm" data-su="tsets" data-v="-1" ${c.sets <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="t-sets" type="number" min="1" max="8" value="${c.sets}" inputmode="numeric" aria-label="予選のセット数"><small>セット</small></span><button class="su-pm" data-su="tsets" data-v="1" ${c.sets >= 8 ? 'disabled' : ''} aria-label="増やす">＋</button></div>
-  <div class="est-box" id="t-est-wrap"><div class="su-bh sm"><b>この設定での決勝進出率の目安</b></div><div id="t-est" aria-live="polite"></div></div></section>
+  <details class="est-box est-tg" id="t-est-wrap" ${S.estOpen ? 'open' : ''}><summary><b>決勝進出率の目安</b><span class="est-hint">押すと開く</span></summary><div id="t-est" aria-live="polite"></div></details></section>
 ${suStartHTML('start-tour', '大会を開始')}
 ${suCustomHTML('tour', size)}
 <input type="hidden" id="t-mix" value="${c.mix}">
