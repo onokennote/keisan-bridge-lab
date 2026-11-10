@@ -9,6 +9,8 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   await pg.evaluate(() => localStorage.setItem('kb.testAskName', '1')); await pg.reload(); await pg.waitForTimeout(600);
   await pg.fill('#new-name', 'おのけん'); await pg.click('[data-act="create-profile"]'); await pg.waitForTimeout(3200);
   ok(!!(await pg.$('[data-act="tut-start"]')), '新規登録のあとはチュートリアルへ誘う');
+  await pg.click('#modal [data-act="tut-skip"]'); await pg.waitForTimeout(1500); // ルールは知っている → 博士・マサが送り出す
+  ok(/観戦/.test(await pg.evaluate(() => (document.querySelector('#modal') || {}).textContent || '')), '送り出しで博士が観戦を案内する');
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
   await pg.screenshot({ path: path.join(__dirname, 'out', 'watch_invite.png') });
   await pg.click('.watch-sm'); await pg.waitForTimeout(4000);
