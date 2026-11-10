@@ -28,7 +28,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(!!(await pa.$('.on-card')), 'テスト版のホームに「オンライン大会」のカード');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'on_home.png') });
   // A：卓をつくる（テストなので制限時間3秒）
-  await pa.evaluate(() => { KBAPP.S.onCfg = { n: 3, games: 1, limit: 3 }; KBAPP.act('on-create'); }); await pa.waitForTimeout(1200);
+  await pa.evaluate(() => { KBAPP.S.onCfg = { n: 3, games: 1, limit: 3, judge: 'after3' }; KBAPP.act('on-create'); }); await pa.waitForTimeout(1200);
   const code = await pa.evaluate(() => KBAPP.ON.v && KBAPP.ON.v.id);
   ok(/^[A-Z2-9]{6}$/.test(code || ''), '卓ができてコードが出る：' + code);
   // B：コードで入る
@@ -46,6 +46,26 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(va.phase === 'play' && va.game.hand.length === 7 && vb.game.hand.length === 7 && !va.game.hands && JSON.stringify(va.game.hand) !== JSON.stringify(vb.game.hand), '始まると7枚ずつ。ほかの人の手札は送られてこない');
   // A は自分の番に打つ（出せれば出す）。B は何もしない → 時間切れ3回でAIが代打ち
   let subSeen = false, aTurns = 0, guard = 0, ON_SHOT = 0;
+  // お手つき（出したあとに判定・3枚）：場にならない2枚を出すと、札は戻って3枚引き、番が終わる
+  let foulOk = null;
+  for (let i = 0; i < 60 && foulOk == null; i++) {
+    foulOk = await pa.evaluate(async () => { const v = KBAPP.ON.v; if (!v || v.phase !== 'play' || v.game.cur !== v.me) return null; const h = v.game.hand.map(c => c[0]), t = v.game.field[0];
+      for (let a = 0; a < h.length; a++) for (let b = a + 1; b < h.length; b++) if (!KB.evalSelection([h[a], h[b]], t)) { const n0 = h.length; KBAPP.ON.sel = [a, b]; KBAPP.act('on-play'); await new Promise(r => setTimeout(r, 800)); const w = KBAPP.ON.v; return w.game.hand.length === n0 + 3 && w.game.cur !== w.me && (w.game.log || []).some(e => e.foul && e.n === 3); }
+      return 'skip'; });
+    if (foulOk === 'skip') foulOk = null, await wait(400); else if (foulOk == null) await wait(400);
+  }
+  ok(foulOk === true, 'お手つき3枚の卓：場にならない札を出すと、戻して3枚引き、番が終わる');
+  // AIに任せる：推定実力がなければ★2。ここでは★4でも試す（サーバーの★4の読みも動くか）
+  await pb.evaluate(() => KBAPP.act('on-auto')); await pb.waitForTimeout(800);
+  const au = await pb.evaluate(() => { const s = KBAPP.ON.v.seats[KBAPP.ON.v.me]; return { sub: s.sub, auto: s.auto, lv: s.subLv, box: /AI★2に任せています/.test(document.body.innerText) }; });
+  ok(au.sub && au.auto && au.lv === 2 && au.box, '「AIに任せる」：推定実力がなければAI★2が代わりに打つ');
+  await pb.screenshot({ path: path.join(__dirname, 'out', 'on_auto.png') });
+  await pb.evaluate(async () => { const c = JSON.parse(localStorage.getItem('kb.cloud')); await fetch(KB_CLOUD_API + '?a=on_act', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token, id: KBAPP.ON.v.id, act: 'auto', lv: 4 }) }); });
+  await pb.waitForTimeout(4500);
+  const lv4 = await pb.evaluate(() => { const s = KBAPP.ON.v.seats[KBAPP.ON.v.me]; return s.subLv; });
+  ok(lv4 === 4 && !errs.length, 'AI★4に任せても対局が進む');
+  await pb.evaluate(() => KBAPP.act('on-back')); await pb.waitForTimeout(800);
+  ok(await pb.evaluate(() => !KBAPP.ON.v.seats[KBAPP.ON.v.me].sub), '「自分で打つ」で戻れる');
   while (guard++ < 400) {
     const st = await pa.evaluate(() => { const v = KBAPP.ON.v; if (!v || !v.game) return 'none'; if (v.phase !== 'play') return v.phase; if (v.game.cur !== v.me) return 'wait';
       const h = v.game.hand.map(c => c[0]), t = v.game.field[0], ms = KB.findMoves(KB.countsOf(h), t, 'all', 3);

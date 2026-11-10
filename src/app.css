@@ -2100,3 +2100,9 @@ body.rewinding #home-fab{display:none}
 .pd.p1 .pd-step{height:86px;background:linear-gradient(180deg,#e0b04a,#8a6a20)}.pd.p2 .pd-step{height:64px}.pd.p3 .pd-step{height:48px}
 .pd-step small{font-size:11px;color:#fff}
 .on-aw{text-align:center;font-weight:800;color:var(--accent);margin:6px 0}
+.on-tabs{display:flex;gap:4px;border-bottom:2px solid var(--trim-soft)}
+.on-tabs button{flex:1;font:inherit;font-weight:800;padding:8px;border:0;border-radius:10px 10px 0 0;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer}
+.on-tabs button.on{background:linear-gradient(180deg,#ffd166,#f2b632);color:#2a1c00}
+.on-stand.tf .on-sh,.on-stand.tf .on-sr{grid-template-columns:2.4em 1fr 5em}
+.on-stand.tf .on-sr span:nth-child(3),.on-stand.tf .on-sh span:nth-child(3){text-align:right}
+.on-sth{margin:6px 0 0;font:400 16px var(--f-display);color:var(--accent)}
