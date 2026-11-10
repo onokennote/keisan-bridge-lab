@@ -68,7 +68,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'アバターを作った人も総合の順位どおりに入る（全部で6人）');
   await (await pa.$('.title')).screenshot({ path: path.join(__dirname, 'out', 'cast_top.png') });
   await pa.evaluate(() => [...document.querySelectorAll('.title .cast .cast-p')].find(b => !/AI研究員/.test(b.title)).click()); await pa.waitForTimeout(2500);
-  ok(await pa.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'タイトルのアイコンを押すと成績カードと自己紹介');
+  ok(await pa.evaluate(() => !!document.querySelector('#modal .pv-head') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'タイトルのアイコンを押すと成績カードと自己紹介');
   await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // 端末B：NGワードの名前のプレイヤー
   const B = await b.newContext(); const pb = await B.newPage(); pb.on('pageerror', e => errs.push(e.message));
@@ -88,14 +88,15 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(names.some(n => /^研究員/.test(n)) && !names.some(n => /うんこ/.test(n)), '使われている名前に勝手に変えると「研究員○○」と表示：' + names.join(' / '));
   // ランキングでアイコンを押すと、その人の成績カードと自己紹介
   await pb.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)).querySelector('[data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
-  ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'ほかの人のアイコンを押すと成績カードと自己紹介が出る');
-  ok(await pb.evaluate(() => /ケン/.test((document.querySelector('#modal .rk-hero b') || {}).textContent || '') && !!document.querySelector('#modal .rk-hero svg')), '成績カードの上に、アイコンと名前が大きく出る');
-  await pb.waitForTimeout(1500); ok(await pb.evaluate(() => /AI込み\d+位/.test(((document.querySelector('#modal .rk-hero-rk') || {}).textContent || '').replace(/\s/g, '')) && /人だけ\d+位/.test(document.querySelector('#modal .rk-hero-rk').textContent.replace(/\s/g, ''))), '成績カードに総合の順位（AI込み・人だけ）：' + await pb.evaluate(() => (document.querySelector('#modal .rk-hero-rk') || {}).textContent));
+  ok(await pb.evaluate(() => !!document.querySelector('#modal .pv-head') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'ほかの人のアイコンを押すと成績カードと自己紹介が出る');
+  ok(await pb.evaluate(() => /ケン/.test((document.querySelector('#modal .pv-nm b') || {}).textContent || '') && !!document.querySelector('#modal .pv-av svg')), 'プロフィールの上に、アイコンと名前が大きく出る（X用画像とは別の表示）');
+  await pb.waitForTimeout(1500); ok(await pb.evaluate(() => /AI込み\d+位/.test(((document.querySelector('#modal #pv-rk') || {}).textContent || '').replace(/\s/g, '')) && /人だけ\d+位/.test(document.querySelector('#modal #pv-rk').textContent.replace(/\s/g, ''))), '成績カードに総合の順位（AI込み・人だけ）：' + await pb.evaluate(() => (document.querySelector('#modal #pv-rk') || {}).textContent));
   await pb.screenshot({ path: path.join(__dirname, 'out', 'rank_card.png') });
   await pb.screenshot({ path: path.join(__dirname, 'out', 'rank_card.png') });
+  { const vs = pb.viewportSize(); await pb.setViewportSize({ width: 390, height: 844 }); await pb.waitForTimeout(300); await pb.screenshot({ path: path.join(__dirname, 'out', 'rank_card_sp.png') }); await pb.setViewportSize(vs); }
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   await pb.evaluate(() => document.querySelector('.rk-row.me [data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
-  ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img')), '自分のアイコンを押すと自分の成績カードが出る');
+  ok(await pb.evaluate(() => !!document.querySelector('#modal .pv-head')), '自分のアイコンを押すと自分のプロフィールが出る');
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // 端末C：Aの引き継ぎコードで入ると、Aの記録が出る
   const C = await b.newContext(); const pc = await C.newPage(); pc.on('pageerror', e => errs.push(e.message));
