@@ -2124,7 +2124,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='93eb8a9cbe';
+window.KB_BUILD='e1e83cef73';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6430,6 +6430,9 @@ function badgeTalk(key, i) {
   else if (key === 'set_low') text += c ? `これまでのベストは1セットPP${100 - c}や！あと${Math.max(0, t - c)}点削ったら届くで！` : 'まずはPP20以下のセットを目指そか！でかい札から逃がすんやで！';
   else if (key === 'qualify_strong' || key === 'champion_strong') text += '大会の設定で、相手を「強豪ぞろい」にしたら銀、「全員達人」にしたら金や！腕試しにはもってこいやで！';
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
+  else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
+  else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
+  else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
   if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','toushi','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
