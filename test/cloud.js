@@ -61,6 +61,12 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(await pa.evaluate(() => [...document.querySelectorAll('.title .cast .cast-p')].some(b => /ゼロ/.test(b.title) && /AI研究員/.test(b.title)) && !document.querySelector('.title .cast .cast-p i')), 'タイトルの6人にはAI研究員も入る（順位の数字は出さない）');
   ok(await pa.evaluate(() => /総合/.test((document.querySelector('#pb-rank') || {}).textContent || '') && /AI込み/.test(document.querySelector('#pb-rank').textContent) && /人だけ/.test(document.querySelector('#pb-rank').textContent)), 'ホームのプロフィールに総合の順位（AI込み・人だけ）：' + await pa.evaluate(() => (document.querySelector('#pb-rank') || {}).textContent));
   await (await pa.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'pb_rank.png') });
+  // Xでシェアする画像にも総合の順位
+  await pa.evaluate(() => KBAPP.act('share-open')); await pa.waitForTimeout(3500);
+  const shareImg = await pa.evaluate(() => KBAPP.S.shareCanvas && KBAPP.S.shareCanvas.toDataURL('image/png'));
+  if (shareImg) require('fs').writeFileSync(path.join(__dirname, 'out', 'share_rank.png'), Buffer.from(shareImg.split(',')[1], 'base64'));
+  ok(!!shareImg, 'Xでシェアする画像ができる（総合の順位入り）');
+  await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
   ok(await pa.evaluate(() => { const r = [...document.querySelectorAll('.title .cast .cast-p')].map(b => +((b.title.match(/総合(\d+)位/) || [])[1] || 0)); return r.length >= 2 && r.every((v, i) => !i || v >= r[i - 1]) && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title)); }), 'タイトルの6人は人とAIを混ぜて総合の順位どおり');
   await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });
