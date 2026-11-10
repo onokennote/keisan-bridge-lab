@@ -39,19 +39,20 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await pa.evaluate(() => KBAPP.ON.v.seats.length === 3 && KBAPP.ON.v.seats[2].ai), 'ホストはAI★2を入れられる');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'on_lobby.png') });
   ok(!(await pb.$('[data-act="on-begin"]')), 'ホスト以外は「はじめる」を押せない');
-  await pa.click('[data-act="on-begin"]'); await pa.waitForTimeout(1600); await pb.waitForTimeout(1600);
+  await pa.click('[data-act="on-begin"]'); await pa.waitForTimeout(700); await pa.screenshot({ path: path.join(__dirname, 'out', 'on_open.png') }); await pa.waitForTimeout(900); await pb.waitForTimeout(1600);
+  await pa.waitForTimeout(1500); await pa.screenshot({ path: path.join(__dirname, 'out', 'on_play.png') });
   // 手札はそれぞれ自分の分だけ
   const va = await pa.evaluate(() => KBAPP.ON.v), vb = await pb.evaluate(() => KBAPP.ON.v);
   ok(va.phase === 'play' && va.game.hand.length === 7 && vb.game.hand.length === 7 && !va.game.hands && JSON.stringify(va.game.hand) !== JSON.stringify(vb.game.hand), '始まると7枚ずつ。ほかの人の手札は送られてこない');
   // A は自分の番に打つ（出せれば出す）。B は何もしない → 時間切れ3回でAIが代打ち
-  let subSeen = false, aTurns = 0, guard = 0;
+  let subSeen = false, aTurns = 0, guard = 0, ON_SHOT = 0;
   while (guard++ < 400) {
     const st = await pa.evaluate(() => { const v = KBAPP.ON.v; if (!v || !v.game) return 'none'; if (v.phase !== 'play') return v.phase; if (v.game.cur !== v.me) return 'wait';
       const h = v.game.hand.map(c => c[0]), t = v.game.field[0], ms = KB.findMoves(KB.countsOf(h), t, 'all', 3);
       if (ms.length) { KBAPP.ON.sel = []; const used = new Set(); for (const x of ms[0].vals) { const i = h.findIndex((y, k) => y === x && !used.has(k)); used.add(i); KBAPP.ON.sel.push(i); } KBAPP.act('on-play'); } else KBAPP.act('on-draw'); return 'acted'; });
     if (st === 'acted') aTurns++;
     if (!subSeen) subSeen = await pb.evaluate(() => !!(KBAPP.ON.v && KBAPP.ON.v.seats[KBAPP.ON.v.me].sub));
-    if (subSeen && !(await pb.$('.on-sub')) === false && guard % 5 === 0) await pb.screenshot({ path: path.join(__dirname, 'out', 'on_sub.png') });
+    if (subSeen && !ON_SHOT) { ON_SHOT = 1; await pb.waitForTimeout(600); await pb.screenshot({ path: path.join(__dirname, 'out', 'on_sub.png') }); }
     if (st === 'between' || st === 'done') break;
     await wait(500);
   }

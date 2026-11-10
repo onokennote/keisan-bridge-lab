@@ -63,6 +63,15 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   await p.evaluate(() => document.querySelector('.on-trow').click()); await p.waitForTimeout(1200);
   await p.screenshot({ path: path.join(__dirname, 'out', 'ot_award.png'), fullPage: true });
   ok(await p.evaluate(() => /上位3位にバッジ|バッジはなし/.test(document.body.innerText)), 'アーカイブから大会の結果とバッジの有無が見られる');
+  // テスト版の仮のユーザー（称号とバッジ）：ランキングから開くプロフィールに称号とメダルの数
+  await call('on_test_seed', {});
+  const rk = await call('rankings', {}); const tester = rk.rankings.bp.list.find(x => x.name === 'テスト王');
+  const card = tester && (await (await fetch(API + '?a=card&rid=' + tester.rid)).json()).card;
+  ok(card && card.titleShow && card.titleShow.official === 1 && /オノケン杯/.test(card.titleShow.text) && card.awards.length === 3, '仮のユーザーに称号（公式）と大会の実績：' + (card && card.titleShow && card.titleShow.text));
+  await p.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('ranking'); }); await p.waitForTimeout(1500);
+  await p.evaluate(() => { const r = [...document.querySelectorAll('.rk-row')].find(x => /テスト王/.test(x.innerText)); if (r) r.click(); }); await p.waitForTimeout(1500);
+  ok(await p.evaluate(() => !!document.querySelector('#modal .pv-title.off') && document.querySelectorAll('#modal .pv-md').length >= 2), 'ランキングから開くと、名前の上に称号、公式・オンラインのメダルの数');
+  await p.screenshot({ path: path.join(__dirname, 'out', 'ot_title.png') });
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill();
 })();

@@ -35,7 +35,7 @@ jobs:
           STAMP="$(git rev-parse --short HEAD) $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
           sed -i "s|<head>|<head><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"kb-version\" content=\"staging $STAMP\">|" dist/index.html
           # テスト用APIの設定：データベースは本番と別の場所（~/www/kb/stg/ から見て ~/kb_data_stg/）
-          printf "<?php\nreturn ['db' => __DIR__ . '/../../../kb_data_stg/kb.sqlite', 'origins' => ['https://%s']];\n" "$H" > stg-config.php
+          printf "<?php\nreturn ['db' => __DIR__ . '/../../../kb_data_stg/kb.sqlite', 'origins' => ['https://%s'], 'stg' => true];\n" "$H" > stg-config.php
           php -l stg-config.php
       - name: 送る（SFTP）
         if: steps.cfg.outputs.skip != '1'
@@ -58,4 +58,6 @@ jobs:
           # データベースが読めるか（テスト用は本番と別。中身が空ならランキングも空）
           rk=$(curl -fsS "https://$H/kb/stg/api.php?a=rankings"); echo "$rk" | head -c 200; echo
           echo "$rk" | grep -q '"ok":true' && echo "テスト用データベース：OK"
+          # 称号とバッジを持った仮のユーザー（テスト版だけ。何度入れても同じ）
+          curl -fsS -X POST "https://$H/kb/stg/api.php?a=on_test_seed" -H 'Content-Type: application/json' -d '{}' && echo
           echo "テスト版のURL：https://$H/kb/stg/"

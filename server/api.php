@@ -87,7 +87,8 @@ function safeCard($c): ?string {
   if (!is_array($c)) return null;
   $ach = array_values(array_slice(array_filter((array)($c['ach'] ?? []), fn($k) => is_string($k) && preg_match('/^[a-z0-9_]{1,40}:\d{1,3}$/i', $k)), 0, 400));
   $n = fn($k, $max) => max(0, min($max, (int)($c[$k] ?? 0)));
-  return json_encode(['ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000)], JSON_UNESCAPED_UNICODE);
+  $title = preg_replace('/[^0-9A-Z]/', '', (string)($c['title'] ?? ''));
+  return json_encode(['title' => substr($title, 0, 12), 'ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000)], JSON_UNESCAPED_UNICODE);
 }
 // 名前の重複：ほかのプレイヤー（別の端末・別の人）がもう使っている名前か（全角半角・大文字小文字・記号の違いは同じとみなす）
 function nameTaken(string $name, string $uid, string $pid): bool {
@@ -177,7 +178,7 @@ const OB_AI_NAMES = ['ロボ太', 'ピコ', 'メカ子', 'ボルト'];
 function obDeck(): array { $d = []; for ($s = 0; $s < 4; $s++) for ($v = 1; $v <= 13; $v++) $d[] = [$v, $s]; shuffle($d); return $d; }
 function obSortHand(array &$h): void { usort($h, fn($a, $b) => $a[0] <=> $b[0] ?: $a[1] <=> $b[1]); }
 function obDraw(array &$g): ?array {
-  if (!$g['deck']) { if (!$g['discard']) return null; $g['deck'] = $g['discard']; shuffle($g['deck']); $g['discard'] = []; $g['log'][] = ['type' => 'reshuffle', 'round' => $g['round']]; }
+  if (!$g['deck']) { if (!$g['discard']) return null; $g['deck'] = $g['discard']; shuffle($g['deck']); $g['discard'] = []; $g['log'][] = ['i' => $g['seq'] = ($g['seq'] ?? 0) + 1] + ['type' => 'reshuffle', 'round' => $g['round']]; }
   return array_pop($g['deck']);
 }
 function obNextRound(array &$g): void {
@@ -186,12 +187,12 @@ function obNextRound(array &$g): void {
   if ($g['round'] > 80) { obFinish($g, -1); return; }
   $f = obDraw($g); if (!$f) { obFinish($g, -1); return; }
   $g['field'] = $f; $g['pos'] = 0;
-  $g['log'][] = ['type' => 'field', 'round' => $g['round'], 'v' => $f[0], 's' => $f[1]];
+  $g['log'][] = ['i' => $g['seq'] = ($g['seq'] ?? 0) + 1] + ['type' => 'field', 'round' => $g['round'], 'v' => $f[0], 's' => $f[1]];
 }
 function obFinish(array &$g, int $w): void {
   $g['over'] = true; $g['winner'] = $w;
   $g['pp'] = array_map(fn($h, $i) => $i === $w ? 0 : array_sum(array_column($h, 0)), $g['hands'], array_keys($g['hands']));
-  $g['log'][] = ['type' => 'end', 'winner' => $w, 'pp' => $g['pp']];
+  $g['log'][] = ['i' => $g['seq'] = ($g['seq'] ?? 0) + 1] + ['type' => 'end', 'winner' => $w, 'pp' => $g['pp']];
 }
 function obNewGame(int $n, int $starter): array {
   $g = ['deck' => obDeck(), 'discard' => [], 'hands' => array_fill(0, $n, []), 'field' => null, 'round' => 0, 'pos' => 0, 'over' => false, 'winner' => -1, 'pp' => null, 'played' => array_fill(0, $n, []), 'last' => array_fill(0, $n, null), 'log' => []];
@@ -215,12 +216,12 @@ function obApply(array &$g, ?array $vals, string $by = ''): bool {
     $x = $e[$g['field'][0]];
     $g['played'][$p][] = ['cards' => $cards, 'expr' => $x, 't' => $g['field'][0], 'round' => $g['round']];
     $g['last'][$p] = ['type' => 'play', 'cards' => $cards, 'expr' => $x, 'by' => $by];
-    $g['log'][] = ['type' => 'play', 'round' => $g['round'], 'p' => $p, 'vals' => $vals, 'expr' => $x, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
+    $g['log'][] = ['i' => $g['seq'] = ($g['seq'] ?? 0) + 1] + ['type' => 'play', 'round' => $g['round'], 'p' => $p, 'vals' => $vals, 'expr' => $x, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
     if (!$h) { obFinish($g, $p); return true; }
   } else {
     $c = obDraw($g); if ($c) { $h[] = $c; obSortHand($h); }
     $g['last'][$p] = ['type' => 'draw', 'by' => $by];
-    $g['log'][] = ['type' => 'draw', 'round' => $g['round'], 'p' => $p, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
+    $g['log'][] = ['i' => $g['seq'] = ($g['seq'] ?? 0) + 1] + ['type' => 'draw', 'round' => $g['round'], 'p' => $p, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
   }
   unset($h);
   $g['pos']++; if ($g['pos'] >= count($g['hands'])) obNextRound($g);
@@ -268,7 +269,7 @@ function obView(array $st, string $uid, string $id, int $ver): array {
   if (isset($st['game'])) {
     $g = $st['game'];
     $v['game'] = ['field' => $g['field'], 'round' => $g['round'], 'pos' => $g['pos'], 'order' => $g['order'], 'cur' => obCur($g), 'over' => $g['over'], 'winner' => $g['winner'], 'pp' => $g['pp'],
-      'handN' => array_map('count', $g['hands']), 'deckN' => count($g['deck']), 'discardN' => count($g['discard']), 'played' => $g['played'], 'last' => $g['last'], 'log' => array_slice($g['log'], -20),
+      'handN' => array_map('count', $g['hands']), 'deckN' => count($g['deck']), 'discardN' => count($g['discard']), 'played' => $g['played'], 'last' => $g['last'], 'log' => array_slice($g['log'], -20), 'seq' => $g['seq'] ?? 0,
       'hand' => $me >= 0 ? $g['hands'][$me] : null, 'hands' => $g['over'] ? $g['hands'] : null, 'deadline' => $st['deadline'] ?? null, 'nextAt' => $st['nextAt'] ?? null];
   }
   return $v;
@@ -285,10 +286,10 @@ function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $
 }
 function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
-function obTourDeal(array &$t, array $keys, string $label, float $now): void {
+function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
   $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => $t['cfg']['games'], 'limit' => $t['cfg']['limit']];
-  foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) $seats[] = obPlayerSeat($byKey[$keys[$k++]]); $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
+  foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }
 function obTourStart(array &$t, float $now): void {
   $c = $t['cfg']; $ent = $t['entrants'];
@@ -304,6 +305,14 @@ function obTourTick(array &$t, float $now): bool {
   $ch = false;
   if ($t['phase'] === 'entry' && $now >= $t['cfg']['startAt']) { obTourStart($t, $now); return true; }
   if (!in_array($t['phase'], ['prelim', 'final'], true)) return false;
+  if (!empty($t['wait'])) { // 次のセットの前：出る人が全員「準備OK」を押すか、15分たったら始める（来ていない人はAIが代わりに打つ）
+    $w = $t['wait']; $humans = array_values(array_filter($w['keys'], fn($k) => str_starts_with($k, 'u:')));
+    $allReady = !array_diff($humans, array_keys($t['ready'] ?? []));
+    if (!$allReady && $now < $w['until']) return false;
+    $absent = array_values(array_diff($humans, array_keys($t['ready'] ?? [])));
+    unset($t['wait']); $t['ready'] = [];
+    obTourDeal($t, $w['keys'], $w['label'], $now + 3, $absent); return true;
+  }
   $all = true; $res = [];
   foreach ($t['rooms'] as $rid) {
     [$st, $ver] = obLoadRaw($rid); if (!$st) continue;
@@ -319,10 +328,10 @@ function obTourTick(array &$t, float $now): bool {
       foreach ($st['seats'] as $i => $s) { $rank = 1 + count(array_filter($tot, fn($x) => $x < $tot[$i])); $t['stand'][$s['key']]['pts'] += $pts[$rank - 1] ?? 0; $t['stand'][$s['key']]['pp'] += $tot[$i]; }
     }
     $t['hist'][] = ['set' => $t['set'], 'rooms' => $t['rooms']];
-    if ($t['set'] < $t['cfg']['sets']) { $t['set']++; obTourDeal($t, array_keys($t['stand']), '予選 第' . $t['set'] . 'セット', $now + 6); return true; }
+    if ($t['set'] < $t['cfg']['sets']) { $t['set']++; obTourWait($t, array_keys($t['stand']), '予選 第' . $t['set'] . 'セット', $now); return true; }
     $order = obTourOrder($t);
     $f = (int)$t['cfg']['finalists'];
-    if ($f >= 2 && count($order) > $f) { $t['phase'] = 'final'; $t['finalists'] = array_slice($order, 0, $f); obTourDeal($t, $t['finalists'], '決勝', $now + 6); return true; }
+    if ($f >= 2 && count($order) > $f) { $t['phase'] = 'final'; $t['finalists'] = array_slice($order, 0, $f); obTourWait($t, $t['finalists'], '決勝', $now); return true; }
     $t['phase'] = 'done'; $t['result'] = $order; obTourAward($t); return true;
   }
   // 決勝：その1セットのPPだけで順位
@@ -342,6 +351,11 @@ function obTourAward(array &$t): void {
     $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, !empty($t['cfg']['official']) ? 1 : 0, time()]);
     $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
   }
+}
+const OB_WAIT = 900; // 次のセットまで最大15分待つ
+function obTourWait(array &$t, array $keys, string $label, float $now): void {
+  $t['wait'] = ['keys' => $keys, 'label' => $label, 'until' => $now + OB_WAIT]; $t['ready'] = [];
+  foreach ($t['players'] as $p) if (!empty($p['ai'])) $t['ready'][$p['key']] = 1; // AIはいつでも準備OK
 }
 function obTourOrder(array $t): array { $k = array_keys($t['stand']); usort($k, fn($a, $b) => $t['stand'][$b]['pts'] <=> $t['stand'][$a]['pts'] ?: $t['stand'][$a]['pp'] <=> $t['stand'][$b]['pp']); return $k; }
 function obLoadRaw(string $id): array { $q = db()->prepare('SELECT st, ver FROM rooms WHERE id = ?'); $q->execute([$id]); $r = $q->fetch(); return $r ? [json_decode($r['st'], true), (int)$r['ver']] : [null, 0]; }
@@ -365,12 +379,12 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'now' => $now, 'note' => $t['note'] ?? null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
       $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
-      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'ai' => !empty($byKey[$k]['ai']), 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
+      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
       $v['myRoom'] = null; $v['rooms'] = [];
       foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name')]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
     }
@@ -525,8 +539,8 @@ try {
       $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
       foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card, ai FROM ranks WHERE shown = 1')->fetchAll() as $r) {
         if (rid($r['uid'], $r['pid']) !== $rid) continue;
-        $aq = db()->prepare('SELECT tname, place, official, at FROM awards WHERE uid = ? AND pid = ? ORDER BY place, at DESC LIMIT 30'); $aq->execute([$r['uid'], $r['pid']]); $GLOBALS['cardAwards'] = $aq->fetchAll();
-        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['awards' => $GLOBALS['cardAwards'] ?? []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
+        $aq = db()->prepare('SELECT tid, tname, place, official, at FROM awards WHERE uid = ? AND pid = ? ORDER BY place, at DESC LIMIT 30'); $aq->execute([$r['uid'], $r['pid']]); $GLOBALS['cardAwards'] = $aq->fetchAll(); $ct = $r['card'] ? (json_decode($r['card'], true)['title'] ?? '') : ''; $GLOBALS['cardTitle'] = null; foreach ($GLOBALS['cardAwards'] as $aw) if ($ct !== '' && ($aw['tid'] ?? '') === $ct) $GLOBALS['cardTitle'] = ['text' => $aw['tname'] . ' ' . ['', '優勝', '準優勝', '3位'][(int)$aw['place']], 'official' => (int)$aw['official'], 'place' => (int)$aw['place']];
+        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['awards' => $GLOBALS['cardAwards'] ?? [], 'titleShow' => $GLOBALS['cardTitle'] ?? null], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
       }
       fail('見つかりません', 404);
     }
@@ -555,6 +569,18 @@ try {
     case 'on_awards': { // 自分（このアカウント）のオンライン大会の上位3位
       $b = body(); $u = authUser($b); $q = db()->prepare('SELECT pid, tid, tname, place, official, at FROM awards WHERE uid = ? ORDER BY at DESC'); $q->execute([$u['uid']]);
       out(['ok' => true, 'awards' => $q->fetchAll()]);
+    }
+    case 'on_test_seed': { // テスト版だけ：称号とバッジを持った仮のユーザーを入れる（何度呼んでも同じ）
+      if (empty($CFG['stg']) && empty($CFG['test'])) fail('使えません', 403);
+      $fake = [['tester1', 'テスト王', [['TESTOFF1', 'オノケン杯（テスト）', 1, 1], ['TESTON01', '秋の研究所杯（テスト）', 1, 0], ['TESTON02', '週末オープン（テスト）', 2, 0]], 'TESTOFF1'],
+        ['tester2', 'テスト姫', [['TESTOFF1', 'オノケン杯（テスト）', 2, 1], ['TESTON01', '秋の研究所杯（テスト）', 3, 0]], 'TESTON01'], ['tester3', 'テスト丸', [['TESTOFF1', 'オノケン杯（テスト）', 3, 1]], '']];
+      $ach = []; foreach (['games:10', 'win:1', 'win:10', 'three:10', 'quick5:1'] as $k) $ach[] = $k;
+      foreach ($fake as $i => [$uid, $name, $aws, $title]) {
+        foreach ($aws as [$tid, $tname, $place, $off]) { db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$uid, 'p1', $tid, $tname, $place, $off, time() - 86400 * ($i + 1)]); $ach[] = ($off ? 'off_podium:' : 'on_podium:') . (4 - $place); }
+        $card = safeCard(['ach' => $ach, 'title' => $title, 'streak' => 12 + $i]);
+        db()->prepare('INSERT OR REPLACE INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, updated, bio, card, streak, ai) VALUES (?, ?, ?, 1, ?, ?, ?, 0, NULL, ?, ?, ?, ?, 0)')->execute([$uid, 'p1', $name, 3.5 - $i * 0.4, 12 - $i, 300 - $i * 50, time(), 'テスト用の仮のユーザーです（称号とバッジの表示を確かめるため）', $card, 12 + $i]);
+      }
+      out(['ok' => true, 'n' => count($fake)]);
     }
     case 'on_tour_new': { // 大会をひらく
       $b = body(); $u = authUser($b); rateLimit('tour', 10);
@@ -596,6 +622,8 @@ try {
         if ($t['host'] !== $u['uid']) $err = '主催者だけができます'; elseif (!$open) $err = '受付中だけできます';
         elseif (count($t['entrants']) < $c['min'] && empty($c['aiFill'])) $err = '最少人数に届いていません';
         else obTourStart($t, $now);
+      } elseif ($act === 'ready') {
+        if (empty($t['wait']) || !in_array('u:' . $u['uid'], $t['wait']['keys'], true)) $err = 'いまは準備の時間ではありません'; else { $t['ready']['u:' . $u['uid']] = 1; obTourTick($t, $now); }
       } elseif ($act === 'delete') {
         if ($t['host'] !== $u['uid'] || $t['phase'] !== 'entry') $err = '始まる前の自分の大会だけ中止できます'; else { $t['phase'] = 'cancel'; $t['note'] = '主催者が中止しました'; }
       } else $err = '知らない操作です';
@@ -651,7 +679,7 @@ try {
       } elseif ($act === 'start') {
         if (!$host || $st['phase'] !== 'lobby') $err = 'ホストだけが始められます';
         elseif (count($st['seats']) < 2) $err = '2人以上で始められます';
-        else { $n = count($st['seats']); $st['setPP'] = array_fill(0, $n, []); $st['game'] = obNewGame($n, random_int(0, $n - 1)); $st['gameNo'] = 1; $st['phase'] = 'play'; $st['turnAt'] = $now; $st['deadline'] = $now + $st['cfg']['limit'] + 3; }
+        else { $n = count($st['seats']); $st['setPP'] = array_fill(0, $n, []); $st['game'] = obNewGame($n, random_int(0, $n - 1)); $st['gameNo'] = 1; $st['phase'] = 'play'; $st['turnAt'] = $now; $st['deadline'] = $now + $st['cfg']['limit'] + 5; }
       } elseif ($act === 'back') {
         if ($me >= 0) $st['seats'][$me]['miss'] = 0;
       } elseif ($act === 'play' || $act === 'draw') {
