@@ -95,7 +95,8 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   await call('on_tour_act', { token: me.token, id: many.id, act: 'entry', name: 'ケン', pid: me.pid }); await call('on_tour_act', { token: me.token, id: many.id, act: 'startnow' });
   const mt = (await call('on_tour', { token: me.token, id: many.id })).tour;
   const nms = await p.evaluate(st => st.map(r => r.ai ? KBAPP.onName(r) : r.name), mt.stand);
-  ok(nms.length === 20 && new Set(nms).size === 20, 'AIが19人いても名前が重ならない：' + nms.slice(0, 6).join('・') + '…');
+  const lvs = mt.stand.filter(r => r.ai).map(r => r.lv);
+  ok(nms.length === 20 && new Set(nms).size === 20 && lvs.filter(x => x === 5).length === 15 && lvs.filter(x => x === 4).length === 4, 'AIが19人いても名前が重ならない（★5のキャラ15人を使い切ったら★4を混ぜる）：★5×' + lvs.filter(x => x === 5).length + '・★4×' + lvs.filter(x => x === 4).length);
   await call('on_tour_act', { token: me.token, id: many.id, act: 'delete' });
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill();

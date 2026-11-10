@@ -311,7 +311,10 @@ function obTourStart(array &$t, float $now): void {
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
   $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
-  for ($i = 0; count($players) < max(2, $c['min']); $i++) { $lv = isset($c['aiMix']) ? obMixLv($c['aiMix']) : (int)$c['aiLv']; $slot = $slots[$lv] = ($slots[$lv] ?? -1) + 1; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'slot' => $slot, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
+  $cap = OB_AI_CAP; $total = array_sum($cap);
+  for ($i = 0; count($players) < max(2, $c['min']); $i++) { $lv = isset($c['aiMix']) ? obMixLv($c['aiMix']) : (int)$c['aiLv'];
+    if ($i < $total && ($slots[$lv] ?? -1) + 1 >= $cap[$lv]) foreach ([-1, 1, -2, 2, -3, 3, -4, 4] as $d) { $l2 = $lv + $d; if (isset($cap[$l2]) && ($slots[$l2] ?? -1) + 1 < $cap[$l2]) { $lv = $l2; break; } } // その強さのキャラが足りなければ、近い強さのキャラを混ぜる
+    $slot = $slots[$lv] = ($slots[$lv] ?? -1) + 1; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'slot' => $slot, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
   $t['players'] = $players; $t['phase'] = 'prelim'; $t['set'] = 1; $t['stand'] = []; foreach ($players as $p) $t['stand'][$p['key']] = ['pts' => 0, 'pp' => 0];
   obTourDeal($t, array_column($players, 'key'), '予選 第1セット', $now);
 }
@@ -383,6 +386,7 @@ function obTourCfg(array $b, array $u): array {
 }
 const OB_MIX = ['random' => [1, 1, 1, 1, 1], 'casual' => [3, 3, 2, 1, 0.3], 'even' => [1, 1.5, 2, 1.5, 1], 'strong' => [0.2, 0.5, 1.5, 3, 3], 'master' => [0, 0, 0, 0, 1]]; // ふつうの大会の「相手の強さ」と同じ割合（★1〜5）
 function obMixLv(string $mix): int { $w = OB_MIX[$mix] ?? OB_MIX['even']; $x = mt_rand() / mt_getrandmax() * array_sum($w); foreach ($w as $i => $v) { $x -= $v; if ($x <= 0) return $i + 1; } return 5; }
+const OB_AI_CAP = [1 => 10, 2 => 11, 3 => 12, 4 => 11, 5 => 15]; // 倶楽部のキャラの人数（★ごと。chars.js と同じ。★5はゼロを除く）
 const OB_WAIT = 900; // 次のセットまで最大15分待つ
 function obTourWait(array &$t, array $keys, string $label, float $now): void {
   $t['wait'] = ['keys' => $keys, 'label' => $label, 'until' => $now + OB_WAIT]; $t['ready'] = [];
