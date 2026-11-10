@@ -1958,10 +1958,16 @@ body.rewinding #home-fab{display:none}
 .rk-hero-tx b{font:900 26px/1.2 var(--f-display);color:var(--ink);overflow-wrap:anywhere}
 .rk-hero-tx small{color:var(--trim);font-weight:800}
 .rk-hero-tx .ai-chip{align-self:flex-start}
+/* ホームのプロフィール：総合の順位（AI込み・人だけ） */
+.pb-rank{display:block;margin-top:3px}
+.pb-rank-b{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px;padding:0;border:0;background:none;color:var(--muted);font:inherit;cursor:pointer;text-align:left;line-height:1.45}
+.pb-rank-b .pbr-h{flex-basis:100%;font-size:11px}
+.pb-rank-b .pbr{white-space:nowrap;font-size:11px}
+.pb-rank-b b{color:var(--accent);font-size:15px;margin-left:3px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='8ea15ff364';
+window.KB_BUILD='621d647f88';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7976,21 +7982,32 @@ async function migrateIn(t) {
 }
 
 // タイトルの6人：BPランキングの上位でアバターを作った人がいれば、その人たちを先に並べる（押すと成績カード）。残りはAIのキャラ
+// タイトルの6人：BPの上位（AI研究員も入れる。人はアバターを作った人だけ）。順位の数字は出さない
 function castHTML() {
-  const R = CLOUD_ON && S.rank && S.rank.rankings && S.rank.rankings.bp, top = R ? R.list.filter(x => x.avatar && x.rid && !x.ai).slice(0, 6) : []; // タイトルには本物のプレイヤーだけ
-  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}" data-me="${rankMe(x) ? 1 : ''}" title="BP${x.rank}位　${esc(x.name)}（${x.bp}BP）" aria-label="BP${x.rank}位 ${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' })}<i>${x.rank}</i></button>`);
+  const R = CLOUD_ON && S.homeRank && S.homeRank.bp, top = R ? R.list.filter(x => x.rid && (x.ai || x.avatar)).slice(0, 6) : [];
+  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}" data-me="${rankMe(x) ? 1 : ''}" title="${esc(x.name)}${x.ai ? '（AI研究員）' : ''}　${x.bp}BP" aria-label="${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</button>`);
   if (!S.castPool) S.castPool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6);
   const ai = S.castPool.slice(0, 6 - ppl.length).sort((a, b) => a.lv - b.lv).map((c, i) => KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }));
   return ppl.join('') + ai.join('');
 }
+// プロフィールの順位：総合ランキングで、AI研究員を含めたときと、人だけのとき
+function pbRankHTML() {
+  const pick = rk => { const t = rk && rk.total; if (!t) return null; const x = [...(t.list || []), ...(t.mine || [])].find(rankMe); return x ? { r: x.rank, n: t.total } : null; };
+  const a = pick(S.homeRank), h = pick(S.rankHuman);
+  if (!a && !h) return '';
+  return `<button class="pb-rank-b" data-go="ranking" aria-label="ランキングを見る"><span class="pbr-h">🏆 総合</span>${a ? `<span class="pbr"><small>AI込み</small><b>${a.r}位</b></span>` : ''}${h ? `<span class="pbr"><small>人だけ</small><b>${h.r}位</b></span>` : ''}</button>`;
+}
 async function homeCastLoad() {
-  if (!CLOUD_ON || (S.rank && Date.now() - S.rank.at < 300000) || S.castLoading) return;
+  if (!CLOUD_ON || (S.homeRank && Date.now() - S.homeRankAt < 300000) || S.castLoading) return;
   S.castLoading = true;
   try {
-    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + encodeURIComponent((c && c.uid) || ''))).json();
-    if (j.ok && j.rankings && !(S.rank && !S.rank.home && S.rank.at > Date.now() - 300000)) S.rank = { rankings: j.rankings, at: Date.now(), home: true };
+    const c = raw.get('kb.cloud', null), u = encodeURIComponent((c && c.uid) || '');
+    const [j, h] = await Promise.all([fetch(CLOUD_API + '?a=rankings&uid=' + u).then(r => r.json()), fetch(CLOUD_API + '?a=rankings&ai=0&uid=' + u).then(r => r.json()).catch(() => null)]);
+    if (j.ok && j.rankings) { S.homeRank = j.rankings; S.homeRankAt = Date.now(); } // ホームの分は、ランキング画面（AIの切り替えあり）とは別に持つ
+    if (h && h.ok && h.rankings) S.rankHuman = h.rankings;
   } catch (e) { } finally { S.castLoading = false; }
   const el = S.view === 'home' && $('.title .cast'); if (el) { el.innerHTML = castHTML(); el.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+  const pr = S.view === 'home' && $('#pb-rank'); if (pr) { pr.innerHTML = pbRankHTML(); pr.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go)); }
 }
 // モードのカードのタグ：自分で決めた設定があるときだけ、その設定を出す（決まっている設定は出さない）
 function pracFacts() {
@@ -8021,7 +8038,7 @@ function homeHTML() {
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${castHTML()}</div>
 </section>
-${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span></span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
+${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
