@@ -52,7 +52,10 @@ jobs:
         env:
           H: ${{ secrets.SAKURA_HOST }}
         run: |
-          curl -fsS "https://$H/kb/stg/" | grep -q 'kb-version" content="staging' && echo "テスト版のページ：OK"
+          curl -fsS "https://$H/kb/stg/" -o stg.html && grep -q 'kb-version" content="staging' stg.html && echo "テスト版のページ：OK"
           got=$(curl -fsS "https://$H/kb/stg/api.php"); echo "$got"
           echo "$got" | grep -q '"ok":true' && echo "テスト用API：OK"
+          # データベースが読めるか（テスト用は本番と別。中身が空ならランキングも空）
+          rk=$(curl -fsS "https://$H/kb/stg/api.php?a=rankings"); echo "$rk" | head -c 200; echo
+          echo "$rk" | grep -q '"ok":true' && echo "テスト用データベース：OK"
           echo "テスト版のURL：https://$H/kb/stg/"
