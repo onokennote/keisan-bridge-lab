@@ -87,6 +87,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const view = (await pa.evaluate(() => KBAPP.S.view === 'otour')) ? pa : pb;
   await view.screenshot({ path: path.join(__dirname, 'out', 'ot_cer.png') }); await view.evaluate(() => document.querySelectorAll('.whistle-ov').forEach(e => e.remove())); await view.waitForTimeout(300);
   await view.screenshot({ path: path.join(__dirname, 'out', 'ot_result.png'), fullPage: true });
+  await view.waitForFunction(() => KBAPP.ON.t && KBAPP.ON.t.stand && KBAPP.ON.t.stand.length === 6 && /🥇/.test(document.body.innerText), null, { timeout: 8000 }).catch(() => { });
   ok(await view.evaluate(() => KBAPP.ON.t.stand.length === 6 && /🥇/.test(document.body.innerText)), '最終順位（6人・上位3人にメダル）');
   const st2 = await view.evaluate(() => [...document.querySelectorAll('.on-stand')].map(x => x.querySelectorAll('.on-sr').length));
   ok(st2.length === 2 && st2[0] === 3 && st2[1] === 6, '上に決勝（3人）、下に予選（6人）');
