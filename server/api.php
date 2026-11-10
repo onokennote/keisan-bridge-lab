@@ -38,6 +38,11 @@ function db(): PDO {
   if (!in_array('card', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN card TEXT');
   if (!in_array('streak', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN streak INTEGER DEFAULT 0');
   if (!in_array('ai', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN ai INTEGER DEFAULT 0'); // AI研究員（倶楽部のキャラ）
+  // プレイヤーごとの記録と引き継ぎコード（端末まるごとではなく、プレイヤー単位で別の端末に入れる）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS players (uid TEXT NOT NULL, pid TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, code TEXT NOT NULL, data TEXT, data_at INTEGER DEFAULT 0, PRIMARY KEY (uid, pid))');
+  // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（引き継ぎコードで別の端末に入れたプレイヤー用）
+  $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
+  if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS tours (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, start_at INTEGER NOT NULL, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン大会
   $pdo->exec('CREATE TABLE IF NOT EXISTS awards (uid TEXT NOT NULL, pid TEXT NOT NULL, tid TEXT NOT NULL, tname TEXT NOT NULL, place INTEGER NOT NULL, official INTEGER NOT NULL DEFAULT 0, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, tid))'); // オンライン大会の上位3位（人が10人以上の大会だけ）
@@ -51,9 +56,30 @@ function h(string $s): string { return hash('sha256', $s); }
 function body(): array { global $CFG; $raw = file_get_contents('php://input', false, null, 0, $CFG['max_data'] + 4096); $j = json_decode($raw ?: '{}', true); return is_array($j) ? $j : []; }
 function authUser(array $b): array {
   $t = (string)($b['token'] ?? ''); if (strlen($t) < 32) fail('ログインが必要です', 401);
-  $st = db()->prepare('SELECT u.* FROM tokens t JOIN users u ON u.uid = t.uid WHERE t.token_hash = ?'); $st->execute([h($t)]); $u = $st->fetch();
+  $st = db()->prepare('SELECT u.*, t.pid AS tpid FROM tokens t JOIN users u ON u.uid = t.uid WHERE t.token_hash = ?'); $st->execute([h($t)]); $u = $st->fetch();
   if (!$u) fail('ログインが切れました', 401);
+  $GLOBALS['tokenPid'] = (string)($u['tpid'] ?? ''); // プレイヤーの鍵なら、そのプレイヤーとしてだけ動く
   return $u;
+}
+function cleanPid($p): string { return substr(preg_replace('/[^a-z0-9]/i', '', (string)$p), 0, 24); }
+// 記録を読み書きするプレイヤー：プレイヤーの鍵ならそのプレイヤーだけ、端末の鍵ならその端末で作ったプレイヤー
+function playerPid(array $u, array $b): string {
+  $p = cleanPid($b['pid'] ?? ''); $tp = (string)($u['tpid'] ?? '');
+  if ($tp !== '') { if ($p !== '' && $p !== $tp) fail('このプレイヤーの鍵ではありません', 403); return $tp; }
+  if ($p === '') fail('プレイヤーがありません');
+  return $p;
+}
+// ランキングの行を書く（プレイヤー1人分）。ズルを厳密には防がないが、ありえない値ははじく
+function rankUpsert(PDO $d, string $uid, string $pid, array $s): void {
+  $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
+  $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0))); $streak = max(0, min(2000, (int)($s['streak'] ?? 0)));
+  $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
+  // 名前を新しく付ける・変えるときに、ほかの人がもう使っていれば「研究員○○」にする（前から同じ名前なら、そのまま）
+  $want = safeName((string)($s['name'] ?? ''), $uid, $pid);
+  $cs = $d->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $cs->execute([$uid, $pid]); $cur = $cs->fetch();
+  if ((!$cur || $cur['name'] !== $want) && strpos($want, '研究員') !== 0 && nameTaken($want, $uid, $pid)) $want = '研究員' . strtoupper(substr(h($uid . $pid), 0, 3));
+  $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, streak, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, streak=excluded.streak, updated=excluded.updated')
+    ->execute([$uid, $pid, $want, empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), $streak, time()]);
 }
 // 同じ場所からの新規作成が多すぎるときは止める（1時間に30件まで）
 function rateLimit(string $what, int $max): void {
@@ -434,7 +460,7 @@ function obLoad(string $id, bool $lock = false): array {
   return [json_decode($r['st'], true), (int)$r['ver']];
 }
 function obSave(string $id, array $st, int $ver): void { db()->prepare('UPDATE rooms SET st = ?, ver = ?, updated = ? WHERE id = ?')->execute([json_encode($st, JSON_UNESCAPED_UNICODE), $ver, time(), $id]); }
-function obSeatInfo(array $b): array { return ['pid' => substr(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($b['pid'] ?? '')), 0, 40), 'name' => trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['name'] ?? '')), 0, 10)) ?: 'プレイヤー', 'avatar' => is_array($b['avatar'] ?? null) ? array_slice($b['avatar'], 0, 20) : null]; }
+function obSeatInfo(array $b): array { $tp = (string)($GLOBALS['tokenPid'] ?? ''); return ['pid' => $tp !== '' ? $tp : substr(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($b['pid'] ?? '')), 0, 40), 'name' => trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['name'] ?? '')), 0, 10)) ?: 'プレイヤー', 'avatar' => is_array($b['avatar'] ?? null) ? array_slice($b['avatar'], 0, 20) : null]; }
 
 $a = $_GET['a'] ?? '';
 try {
@@ -460,8 +486,9 @@ try {
       $u = authUser(body());
       out(['ok' => true, 'data' => $u['data'] ? json_decode($u['data'], true) : null, 'at' => (int)$u['data_at']]);
     }
-    case 'save': { // 記録をまるごと保存し、ランキング用の数字（プレイヤーごと）も更新する
+    case 'save': { // （前の版）端末の記録をまるごと保存。いまの画面はプレイヤーごとの p_save を使う。古い画面のために残す
       $b = body(); $u = authUser($b);
+      if ((string)($u['tpid'] ?? '') !== '') fail('プレイヤーの鍵では、端末の記録は保存できません', 403);
       $data = $b['data'] ?? null; if (!is_array($data)) fail('データがありません');
       $json = json_encode($data, JSON_UNESCAPED_UNICODE); if (strlen($json) > $CFG['max_data']) fail('データが大きすぎます', 413);
       $at = (int)($b['at'] ?? time() * 1000);
@@ -470,24 +497,57 @@ try {
       if ((int)$u['data_at'] > $base && empty($b['force'])) out(['ok' => false, 'conflict' => true, 'at' => (int)$u['data_at'], 'error' => 'ほかの端末の記録のほうが新しいです'], 409);
       $d = db(); $d->beginTransaction();
       $d->prepare('UPDATE users SET data = ?, data_at = ?, seen = ? WHERE uid = ?')->execute([$json, $at, time(), $u['uid']]);
-      $pids = [];
-      foreach (array_slice((array)($b['stats'] ?? []), 0, 12) as $s) {
-        $pid = substr(preg_replace('/[^a-z0-9]/i', '', (string)($s['pid'] ?? '')), 0, 24); if ($pid === '') continue; $pids[] = $pid;
-        // ズルを厳密には防がないが、ありえない値ははじく
-        $rating = isset($s['rating']) && is_numeric($s['rating']) ? max(0, min(6, (float)$s['rating'])) : null;
-        $badges = max(0, min(500, (int)($s['badges'] ?? 0))); $bp = max(0, min(20000, (int)($s['bp'] ?? 0))); $atk = max(0, min(5000, (int)($s['atk'] ?? 0))); $streak = max(0, min(2000, (int)($s['streak'] ?? 0)));
-        $av = isset($s['avatar']) ? substr(json_encode($s['avatar'], JSON_UNESCAPED_UNICODE), 0, 1500) : null;
-        // 名前を新しく付ける・変えるときに、ほかの人がもう使っていれば「研究員○○」にする（前から同じ名前なら、そのまま）
-        $want = safeName((string)($s['name'] ?? ''), $u['uid'], $pid);
-        $cs = $d->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $cs->execute([$u['uid'], $pid]); $cur = $cs->fetch();
-        if ((!$cur || $cur['name'] !== $want) && strpos($want, '研究員') !== 0 && nameTaken($want, $u['uid'], $pid)) $want = '研究員' . strtoupper(substr(h($u['uid'] . $pid), 0, 3));
-        $d->prepare('INSERT INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, bio, card, streak, updated) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET name=excluded.name, shown=excluded.shown, rating=excluded.rating, badges=excluded.badges, bp=excluded.bp, atk=excluded.atk, avatar=excluded.avatar, bio=excluded.bio, card=excluded.card, streak=excluded.streak, updated=excluded.updated')
-          ->execute([$u['uid'], $pid, $want, empty($s['hide']) ? 1 : 0, $rating, $badges, $bp, $atk, $av, safeBio((string)($s['bio'] ?? '')), safeCard($s['card'] ?? null), $streak, time()]);
-      }
-      // 消したプレイヤーはランキングからも消す
-      if ($pids) { $q = implode(',', array_fill(0, count($pids), '?')); $d->prepare("DELETE FROM ranks WHERE uid = ? AND pid NOT IN ($q)")->execute(array_merge([$u['uid']], $pids)); }
+      foreach (array_slice((array)($b['stats'] ?? []), 0, 12) as $s) { $pid = cleanPid($s['pid'] ?? ''); if ($pid !== '') rankUpsert($d, $u['uid'], $pid, (array)$s); }
       $d->commit();
       out(['ok' => true, 'at' => $at]);
+    }
+    case 'p_save': { // プレイヤー1人の記録を保存し、ランキングの行も更新する。はじめて保存したときに、そのプレイヤーの引き継ぎコードを作る
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
+      $data = $b['data'] ?? null; if (!is_array($data)) fail('データがありません');
+      $json = json_encode($data, JSON_UNESCAPED_UNICODE); if (strlen($json) > $CFG['max_data']) fail('データが大きすぎます', 413);
+      $at = (int)($b['at'] ?? time() * 1000); $base = (int)($b['base'] ?? 0);
+      $d = db(); $d->beginTransaction();
+      $st = $d->prepare('SELECT data_at, code FROM players WHERE uid = ? AND pid = ?'); $st->execute([$u['uid'], $pid]); $row = $st->fetch();
+      // ほかの端末がこのプレイヤーのもっと新しい記録を保存していたら、上書きしない
+      if ($row && (int)$row['data_at'] > $base && empty($b['force'])) { $d->rollBack(); out(['ok' => false, 'conflict' => true, 'at' => (int)$row['data_at'], 'error' => 'ほかの端末の記録のほうが新しいです'], 409); }
+      if ($row) { $code = $row['code']; $d->prepare('UPDATE players SET data = ?, data_at = ? WHERE uid = ? AND pid = ?')->execute([$json, $at, $u['uid'], $pid]); }
+      else { $code = newCode(); $d->prepare('INSERT INTO players (uid, pid, code_hash, code, data, data_at) VALUES (?, ?, ?, ?, ?, ?)')->execute([$u['uid'], $pid, h($code), $code, $json, $at]); }
+      if (is_array($b['stats'] ?? null)) rankUpsert($d, $u['uid'], $pid, $b['stats']);
+      $d->prepare('UPDATE users SET seen = ? WHERE uid = ?')->execute([time(), $u['uid']]);
+      $d->commit();
+      out(['ok' => true, 'at' => $at, 'code' => $code]);
+    }
+    case 'p_load': { // プレイヤー1人の記録（まだなければ data は null）
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
+      $st = db()->prepare('SELECT data, data_at, code FROM players WHERE uid = ? AND pid = ?'); $st->execute([$u['uid'], $pid]); $r = $st->fetch();
+      out(['ok' => true, 'data' => $r && $r['data'] ? json_decode($r['data'], true) : null, 'at' => $r ? (int)$r['data_at'] : 0, 'code' => $r ? $r['code'] : null]);
+    }
+    case 'p_restore': { // プレイヤーの引き継ぎコードで、そのプレイヤーを別の端末に入れる（その端末用の、そのプレイヤーだけの鍵を出す）
+      rateLimit('restore', 20);
+      $b = body(); $code = normCode((string)($b['code'] ?? ''));
+      $st = db()->prepare('SELECT uid, pid, code, data, data_at FROM players WHERE code_hash = ?'); $st->execute([h($code)]); $r = $st->fetch();
+      if (!$r) { // 前の版の「端末まるごと」のコード：プレイヤーが1人だけなら、その人を入れる
+        $q = db()->prepare('SELECT uid FROM users WHERE code_hash = ?'); $q->execute([h($code)]); $old = $q->fetch();
+        if (!$old) fail('引き継ぎコードが見つかりません', 404);
+        $ps = db()->prepare('SELECT uid, pid, code, data, data_at FROM players WHERE uid = ?'); $ps->execute([$old['uid']]); $all = $ps->fetchAll();
+        if (count($all) !== 1) fail(count($all) ? 'このコードは前の版の「端末まるごと」のコードです。プレイヤーごとのコード（元の端末の「プレイヤー」に出ます）を入れてください' : 'このコードは前の版のコードです。元の端末でアプリを開くと、プレイヤーごとのコードが「プレイヤー」に出ます', 404);
+        $r = $all[0];
+      }
+      $token = bin2hex(random_bytes(24));
+      db()->prepare('INSERT INTO tokens (token_hash, uid, created, pid) VALUES (?, ?, ?, ?)')->execute([h($token), $r['uid'], time(), $r['pid']]);
+      $nm = db()->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $nm->execute([$r['uid'], $r['pid']]); $n = $nm->fetch();
+      out(['ok' => true, 'uid' => $r['uid'], 'pid' => $r['pid'], 'token' => $token, 'code' => $r['code'], 'name' => $n ? $n['name'] : null, 'data' => $r['data'] ? json_decode($r['data'], true) : null, 'at' => (int)$r['data_at']]);
+    }
+    case 'p_del': { // この端末で作ったプレイヤーを消す：ランキング・引き継ぎコード・ほかの端末に入れた鍵も消す（オンライン大会の実績は残す）
+      $b = body(); $u = authUser($b);
+      if ((string)($u['tpid'] ?? '') !== '') fail('このプレイヤーは、作った端末でだけ消せます', 403);
+      $pid = cleanPid($b['pid'] ?? ''); if ($pid === '') fail('プレイヤーがありません');
+      $d = db(); $d->beginTransaction();
+      $d->prepare('DELETE FROM ranks WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
+      $d->prepare('DELETE FROM players WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
+      $d->prepare('DELETE FROM tokens WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
+      $d->commit();
+      out(['ok' => true]);
     }
     case 'ranking': { // type = rating（推定実力）/ badges（バッジ数・BP）/ attack（バッジアタック自己ベスト）
       $type = $_GET['type'] ?? 'rating'; $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? ''));
@@ -602,7 +662,7 @@ try {
       out(['ok' => true, 'tours' => $out]);
     }
     case 'on_awards': { // 自分（このアカウント）のオンライン大会の上位3位
-      $b = body(); $u = authUser($b); $q = db()->prepare('SELECT pid, tid, tname, place, official, at FROM awards WHERE uid = ? ORDER BY at DESC'); $q->execute([$u['uid']]);
+      $b = body(); $u = authUser($b); $tp = (string)($u['tpid'] ?? ''); $q = db()->prepare('SELECT pid, tid, tname, place, official, at FROM awards WHERE uid = ?' . ($tp !== '' ? ' AND pid = ?' : '') . ' ORDER BY at DESC'); $q->execute($tp !== '' ? [$u['uid'], $tp] : [$u['uid']]);
       out(['ok' => true, 'awards' => $q->fetchAll()]);
     }
     case 'on_test_seed': { // テスト版だけ：称号とバッジを持った仮のユーザーを入れる（何度呼んでも同じ）
@@ -736,7 +796,7 @@ try {
       $ver++; obSave($id, $st, $ver); db()->exec('COMMIT');
       out(obView($st, $u['uid'], $id, $ver));
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 10]);
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 11]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

@@ -20,8 +20,9 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.goto('http://localhost:8124/'); await pa.waitForTimeout(700);
   await pa.fill('#new-name', 'ケン'); await pa.click('[data-act="create-profile"]'); await pa.waitForTimeout(1500);
   await pa.evaluate(() => document.querySelectorAll('#modal [data-act="tut-skip"],#modal [data-act="close"]').forEach(b => b.click()));
-  const c1 = await pa.evaluate(() => KBAPP.cloud());
-  ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code), '公開版は自動で匿名アカウントができ、引き継ぎコードが出る：' + (c1.c && c1.c.code));
+  await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pa.waitForTimeout(500);
+  const c1 = await pa.evaluate(() => KBAPP.cloud()); c1.c.code = c1.l && c1.l.code;
+  ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code || ''), '公開版は自動で匿名アカウントができ、プレイヤーの引き継ぎコードが出る：' + c1.c.code);
   // バッジと記録を作って保存
   await pa.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 60); KBAPP.testAch('streakMax', 7); localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.attackBest', JSON.stringify({ 15: { bp: 820, badges: 21 } })); });
   // 自己紹介を書く（プロフィールから）
@@ -104,15 +105,15 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pb.evaluate(() => document.querySelector('.rk-row.me .rk-av').click()); await pb.waitForTimeout(2500);
   ok(await pb.evaluate(() => !!document.querySelector('#modal .pv-head')), '自分のアイコンを押すと自分のプロフィールが出る');
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
-  // 端末C：Aの引き継ぎコードで入ると、Aの記録が出る
-  const C = await b.newContext(); const pc = await C.newPage(); pc.on('pageerror', e => errs.push(e.message));
-  await pc.goto('http://localhost:8124/'); await pc.waitForTimeout(1500);
-  await pc.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
-  await pc.evaluate(code => KBAPP.act('cloud-restore', null) || code, c1.c.code);
-  await pc.evaluate(() => { const i = document.createElement('input'); i.id = 'cl-in'; document.body.appendChild(i); });
-  await pc.fill('#cl-in', c1.c.code.toLowerCase()); await pc.evaluate(() => KBAPP.act('cloud-restore')); await pc.waitForTimeout(3500); await pc.waitForLoadState('load');
-  const st = await pc.evaluate(() => ({ prof: JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name), uid: KBAPP.cloud().c && KBAPP.cloud().c.uid }));
-  ok(st.prof.join() === 'ケン' && st.uid === c1.c.uid, '別の端末で引き継ぎコード（小文字・ハイフンなしでもOK）を入れると、同じ記録に入れる');
+  // 端末C：はじめの名前の画面で、Aのプレイヤー（ケン）の引き継ぎコードを入れて入る
+  const C = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const pc = await C.newPage(); pc.on('pageerror', e => errs.push(e.message));
+  await pc.goto('http://localhost:8124/'); await pc.waitForTimeout(1200);
+  await pc.click('#modal .an-code summary'); await pc.waitForTimeout(200);
+  await pc.fill('#an-code', c1.c.code.toLowerCase().replace(/-/g, ''));
+  await pc.screenshot({ path: path.join(__dirname, 'out', 'code_first.png') });
+  await pc.click('#modal [data-act="code-restore"]'); await pc.waitForTimeout(3500); await pc.waitForLoadState('load'); await pc.waitForTimeout(1500);
+  const st = await pc.evaluate(() => ({ prof: JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name), uid: KBAPP.cloud().l && KBAPP.cloud().l.uid, dev: KBAPP.cloud().c && KBAPP.cloud().c.uid, win: (JSON.parse(localStorage.getItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth')) || { cnt: {} }).cnt.win }));
+  ok(st.prof.join() === 'ケン' && st.uid === c1.c.uid && st.dev !== c1.c.uid && st.win === 12, 'はじめの名前の画面で引き継ぎコード（小文字・ハイフンなしでもOK）を入れると、そのプレイヤーの記録で入れる（端末の鍵は別）');
   // Cで記録を進めると、Aを開き直したときにクラウドの新しい記録になる（引き継ぎ後の自動の開き直し・保存が落ち着くのを待つ）
   const settle = async (pg, fn) => { for (let k = 0; k < 12; k++) { try { await pg.waitForLoadState('load'); return await pg.evaluate(fn); } catch (e) { await pg.waitForTimeout(800); } } return null; };
   await pa.waitForTimeout(6000); await pc.waitForTimeout(500);
@@ -123,6 +124,27 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   ok(await settle(pa, () => JSON.parse(localStorage.getItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth')).cnt.win === 50), '別の端末で進めた記録が、開き直すと反映される（端末に依存しない）');
   // 端末Aは鍵が切れずに使い続けられる
   await settle(pa, () => { KBAPP.testAch('three', 70); return KBAPP.cloudPush(); }); ok(await settle(pa, () => KBAPP.cloud().CLOUD.status === 'saved'), '引き継いだあとも、もとの端末で保存を続けられる');
+  // 端末D：自分のプレイヤー（ミカ）がいる端末に、プロフィールからケンを入れる → 2人とも残る。ミカの記録はAには入らない
+  const D2 = await b.newContext(); const pd2 = await D2.newPage(); pd2.on('pageerror', e => errs.push(e.message));
+  await pd2.goto('http://localhost:8124/'); await pd2.waitForTimeout(1000);
+  await pd2.fill('#new-name', 'ミカ'); await pd2.click('[data-act="create-profile"]'); await pd2.waitForTimeout(1500);
+  await pd2.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.testAch('win', 3); return KBAPP.cloudPush(false, true); }); await pd2.waitForTimeout(500);
+  await pd2.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pd2.click('.player-bar [data-act="profiles"]'); await pd2.waitForTimeout(300);
+  await pd2.evaluate(() => document.querySelector('#modal details:has(#cl-in)').open = true);
+  await pd2.screenshot({ path: path.join(__dirname, 'out', 'code_profile.png') });
+  await pd2.fill('#cl-in', c1.c.code); await pd2.click('#modal [data-act="cloud-restore"]'); await pd2.waitForTimeout(3000); await pd2.waitForLoadState('load'); await pd2.waitForTimeout(1500);
+  const sd = await settle(pd2, () => ({ prof: JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name).sort().join(), cur: KBAPP.S.settings.name }));
+  ok(sd && sd.prof === 'ケン,ミカ' && sd.cur === 'ケン', 'プロフィールから引き継ぎコードを入れると、その人が加わり、もとのプレイヤー（ミカ）も残る：' + JSON.stringify(sd));
+  await settle(pa, () => location.reload()); await pa.waitForTimeout(3000);
+  ok(await settle(pa, () => JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name).join() === 'ケン'), 'ほかの端末のプレイヤー（ミカ）は、ケンの元の端末には入らない');
+  // Dでケンを外しても、記録はクラウドに残る（Aでは消えない）
+  await settle(pd2, () => { const L = JSON.parse(localStorage.getItem('kb.profiles')); const k = L.find(p => p.name === 'ケン'); KBAPP.act('profiles'); document.querySelector(`#modal [data-pfdel="${k.id}"]`).click(); document.querySelector(`#modal [data-pfdel="${k.id}"]`).click(); });
+  await pd2.waitForTimeout(800);
+  ok(await settle(pd2, () => JSON.parse(localStorage.getItem('kb.profiles')).map(p => p.name).join() === 'ミカ'), 'ほかの端末から入れたプレイヤーは、外すとその端末からだけいなくなる');
+  await pd2.close().catch(() => { });
+  // 前の版の「端末まるごと」のコード：プレイヤーが1人ならそのまま使える
+  const oldCode = await settle(pa, () => KBAPP.cloud().c.code);
+  if (oldCode) { const r = await fetch('http://localhost:8099/api.php?a=p_restore', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: oldCode }) }).then(r => r.json()); ok(r.ok && r.pid, '前の版の端末のコードでも、プレイヤーが1人ならそのプレイヤーに入れる'); }
   // 同じ端末の2人目：ランキングの「あなた」は今プレイしているプレイヤーだけ
   await pc.close().catch(() => { }); // 端末Cはここで閉じる（あとから保存して、Aの記録を上書きしないように）
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); KBAPP.act('new-profile'); });
