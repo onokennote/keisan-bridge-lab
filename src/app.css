@@ -2085,7 +2085,7 @@ body.rewinding #home-fab{display:none}
 .on-cp{display:flex;flex-direction:column;align-items:center;gap:2px;animation:pop .4s ease-out both}
 .on-cp .on-av{width:52px;height:52px;border-radius:12px;border:2px solid var(--trim)}.on-cp small{font-size:11px;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .on-vs{font-family:var(--f-display);color:var(--accent);font-size:13px}
-.on-banner{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%);z-index:9000;display:flex;flex-direction:column;align-items:center;padding:14px 28px;border-radius:16px;background:rgba(10,25,20,.9);border:2px solid var(--trim);box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out;pointer-events:none}
+.on-banner{position:fixed;left:50%;top:38%;translate:-50% -50%;z-index:9000;display:flex;flex-direction:column;align-items:center;padding:14px 28px;border-radius:16px;background:rgba(10,25,20,.9);border:2px solid var(--trim);box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out;pointer-events:none}
 .on-banner b{font:400 34px var(--f-display);color:var(--accent)}.on-banner small{color:var(--ink)}
 .on-banner.out{opacity:0;transition:opacity .4s}
 .on-ready{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:12px;background:rgba(242,182,50,.1);border:2px solid var(--trim)}
@@ -2106,3 +2106,13 @@ body.rewinding #home-fab{display:none}
 .on-stand.tf .on-sh,.on-stand.tf .on-sr{grid-template-columns:2.4em 1fr 5em}
 .on-stand.tf .on-sr span:nth-child(3),.on-stand.tf .on-sh span:nth-child(3){text-align:right}
 .on-sth{margin:6px 0 0;font:400 16px var(--f-display);color:var(--accent)}
+/* オンライン：場に出た札・巡の切り替わり */
+.on-land{position:fixed;z-index:9300;translate:-50% -50%;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:12px;background:rgba(10,25,20,.88);border:2px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.5);pointer-events:none;animation:pop .25s ease-out}
+.on-land .ol-cards{display:flex;gap:3px}.on-land .mc{font-size:15px;padding:3px 6px}
+.on-land b{font-family:var(--f-mono);font-size:16px;color:var(--accent);white-space:nowrap}.on-land small{font-size:10.5px;color:var(--ink)}
+.on-land.out{opacity:0;translate:-50% -90%;transition:all .35s}
+.on-round{position:fixed;left:50%;top:40%;z-index:9300;translate:-50% -50%;display:flex;align-items:center;gap:14px;padding:14px 22px;border-radius:18px;background:rgba(10,25,20,.92);border:3px solid var(--accent);box-shadow:0 12px 34px rgba(0,0,0,.6);pointer-events:none;animation:pop .3s ease-out}
+.on-round>b{font:400 clamp(34px,10vw,52px) var(--f-display);color:var(--accent);white-space:nowrap;text-shadow:0 3px 0 #5a3d1e}
+.on-round .fieldcard{position:relative;width:74px;height:104px;animation:onflip .5s ease-out .15s both}
+@keyframes onflip{from{transform:rotateY(90deg)}to{transform:none}}
+.on-round.out{opacity:0;transition:opacity .35s}

@@ -28,7 +28,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(!!(await pa.$('.on-card')), 'テスト版のホームに「オンライン大会」のカード');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'on_home.png') });
   // A：卓をつくる（テストなので制限時間3秒）
-  await pa.evaluate(() => { KBAPP.S.onCfg = { n: 3, games: 1, limit: 3, judge: 'after3' }; KBAPP.act('on-create'); }); await pa.waitForTimeout(1200);
+  await pa.evaluate(() => { KBAPP.S.onCfg = { n: 3, games: 2, limit: 3, judge: 'after3' }; KBAPP.act('on-create'); }); await pa.waitForTimeout(1200);
   const code = await pa.evaluate(() => KBAPP.ON.v && KBAPP.ON.v.id);
   ok(/^[A-Z2-9]{6}$/.test(code || ''), '卓ができてコードが出る：' + code);
   // B：コードで入る
@@ -45,7 +45,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const va = await pa.evaluate(() => KBAPP.ON.v), vb = await pb.evaluate(() => KBAPP.ON.v);
   ok(va.phase === 'play' && va.game.hand.length === 7 && vb.game.hand.length === 7 && !va.game.hands && JSON.stringify(va.game.hand) !== JSON.stringify(vb.game.hand), '始まると7枚ずつ。ほかの人の手札は送られてこない');
   // A は自分の番に打つ（出せれば出す）。B は何もしない → 時間切れ3回でAIが代打ち
-  let subSeen = false, aTurns = 0, guard = 0, ON_SHOT = 0;
+  let subSeen = false, aTurns = 0, guard = 0, ON_SHOT = 0, RB = 0;
   // お手つき（出したあとに判定・3枚）：場にならない2枚を出すと、札は戻って3枚引き、番が終わる
   let foulOk = null;
   for (let i = 0; i < 120 && foulOk == null; i++) {
@@ -71,14 +71,19 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
       const h = v.game.hand.map(c => c[0]), t = v.game.field[0], ms = KB.findMoves(KB.countsOf(h), t, 'all', 3);
       if (ms.length) { KBAPP.ON.sel = []; const used = new Set(); for (const x of ms[0].vals) { const i = h.findIndex((y, k) => y === x && !used.has(k)); used.add(i); KBAPP.ON.sel.push(i); } KBAPP.act('on-play'); } else KBAPP.act('on-draw'); return 'acted'; });
     if (st === 'acted') aTurns++;
+    if (!RB && await pa.$('.on-round')) { RB = 1; await pa.screenshot({ path: path.join(__dirname, 'out', 'on_round.png') }); }
     if (!subSeen) subSeen = await pb.evaluate(() => !!(KBAPP.ON.v && KBAPP.ON.v.seats[KBAPP.ON.v.me].sub));
     if (subSeen && !ON_SHOT) { ON_SHOT = 1; await pb.waitForTimeout(600); await pb.screenshot({ path: path.join(__dirname, 'out', 'on_sub.png') }); }
-    if (st === 'between' || st === 'done') break;
+    if ((st === 'between' || st === 'done') && subSeen) break;
     await wait(500);
   }
   const pv = await pa.evaluate(() => ({ played: [...document.querySelectorAll('.seat .played')].filter(x => /出した札/.test(x.textContent)).length, fh: document.querySelectorAll('.on-tbl .fh-mini .mc').length, view: KBAPP.S.view, fields: (KBAPP.ON.v.game.fields || []).length }));
   ok(pv.played === 2 && pv.fh >= 1, 'ほかの人の出した札と、これまでの場札が見える：' + JSON.stringify(pv));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'on_played.png') });
+  // 巡の切り替わりと、場に出た札の演出（スクリーンショット）
+  let rb = false, ld = false;
+  for (let i = 0; i < 40 && !(rb && ld); i++) { if (!rb && await pa.$('.on-round')) { rb = true; await pa.screenshot({ path: path.join(__dirname, 'out', 'on_round.png') }); } if (!ld && await pa.$('.on-land')) { ld = true; await pa.screenshot({ path: path.join(__dirname, 'out', 'on_land.png') }); } await wait(150); }
+  ok(RB || rb, '巡が変わると「第N巡」と新しい場札が大きく出る');
   ok(aTurns >= 1, `自分の番に出す・引くができる（${aTurns}回）`);
   ok(subSeen, '時間切れが3回続くと、AI★2が代わりに打つ');
   await pa.waitForTimeout(1600);

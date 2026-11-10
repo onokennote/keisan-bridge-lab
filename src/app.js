@@ -5856,17 +5856,42 @@ function onApply(v) {
   render();
   if (fresh.length) setTimeout(() => onAnimate(v, fresh), 0);
 }
-// 新しい手の動き：出した札は場へ、引いた札は山札から席へ飛ぶ
+// 新しい手の動き：起きた順に1つずつ再生する。出した札は場へ飛んで、場札の上に式といっしょに少し残る。引いた札は山札から席へ。
+// 巡が変わったら、前の巡の手を見せ終わってから「第N巡」と新しい場札を大きく出す
 function onAnimate(v, fresh) {
-  const L = fresh.filter(e => e.type === 'play' || e.type === 'draw').slice(-4);
-  L.forEach((e, k) => {
-    const seat = document.querySelector(`[data-pi="${e.p}"]`), pile = document.querySelector('.on-tbl .pile'), deck = document.querySelector('.on-tbl .deck');
-    if (!seat) return; const from = seat.querySelector('.av') || seat;
+  const L = fresh.filter(e => e.type === 'play' || e.type === 'draw' || e.type === 'field').slice(-8);
+  let t = Math.max(0, (ON.animUntil || 0) - Date.now()); // 前の再生が終わってから続ける
+  L.forEach(e => {
+    const at = t;
+    if (e.type === 'field') { setTimeout(() => onRoundBanner(e), at); t += 1300; return; }
     setTimeout(() => {
-      if (e.type === 'play') { if (e.p !== v.me) KB.sfx(e.vals.length === 3 ? 'play3' : 'play', e.vals.length); e.vals.forEach((x, n) => flyCard(from, pile, `<span>${KB.vname(x)}</span>`, n * 90, 480, true)); ON.acted = e.p; seat.classList.add('acted'); setTimeout(() => { seat.classList.remove('acted'); if (ON.acted === e.p) ON.acted = null; }, 900); }
-      else { if (e.p !== v.me && !e.foul) KB.sfx('draw'); for (let q = 0; q < (e.foul ? e.n || 1 : 1); q++) flyCard(deck, seat, null, q * 160, 560, true); }
-    }, k * 380);
+      const seat = document.querySelector(`[data-pi="${e.p}"]`), pile = document.querySelector('.on-tbl .pile'), deck = document.querySelector('.on-tbl .deck');
+      if (!seat || !pile) return; const from = seat.querySelector('.av') || seat;
+      if (e.type === 'play') {
+        if (e.p !== v.me) KB.sfx(e.vals.length === 3 ? 'play3' : 'play', e.vals.length);
+        e.vals.forEach((x, n) => flyCard(from, pile, `<span>${KB.vname(x)}</span>`, n * 90, 460, true));
+        seat.classList.add('acted'); setTimeout(() => seat.classList.remove('acted'), 900);
+        setTimeout(() => onLand(e, v), 420 + e.vals.length * 90);
+      } else { if (e.p !== v.me && !e.foul) KB.sfx('draw'); for (let q = 0; q < (e.foul ? e.n || 1 : 1); q++) flyCard(deck, seat, null, q * 160, 520, true); }
+    }, at);
+    t += e.type === 'play' ? 900 : 450;
   });
+  ON.animUntil = Date.now() + t;
+}
+// 場札の上に、出した札と式を少しのあいだ重ねて見せる
+function onLand(e, v) {
+  const pile = document.querySelector('.on-tbl .pile'); if (!pile) return; // 画面が描き直されていても、いまの場札の位置に出す
+  const r = pile.getBoundingClientRect(), el = document.createElement('div'); el.className = 'on-land';
+  const who = e.p === v.me ? 'あなた' : onName(v.seats[e.p] || {});
+  el.innerHTML = `<span class="ol-cards">${e.vals.map(x => `<i class="mc">${KB.vname(x)}</i>`).join('')}</span><b>${esc(e.expr)} = ${e.t}</b><small>${esc(who)}</small>`;
+  el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = (r.top + r.height / 2) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.classList.add('out'), 900); setTimeout(() => el.remove(), 1250);
+}
+// 巡の切り替わり：「第N巡」と新しい場札を大きく
+function onRoundBanner(e) {
+  const el = document.createElement('div'); el.className = 'on-round';
+  el.innerHTML = `<b>第${e.round}巡</b><span class="fieldcard top ${e.s === 1 || e.s === 2 ? 'red' : ''}"><span class="tag">新しい場</span><span class="big">${KB.vname(e.v)}</span><span class="val">${KB.SUITS[e.s]} ${e.v}</span></span>`;
+  document.body.appendChild(el); KB.sfx('round'); setTimeout(() => el.classList.add('out'), 1050); setTimeout(() => el.remove(), 1400);
 }
 // 実況・解説（だれにでも見えることだけを話す：出した式・引いた・残りの枚数・上がり。手札の中身には触れない）
 const ON_LINES = {
@@ -6050,7 +6075,7 @@ function onTableHTML(v) {
     <div class="opps ring${n - 1}" style="--n:${n - 1}">${opp.join('')}</div>
     <div class="center">
       <div class="side deckside"><div class="deck" aria-label="山札 ${g.deckN}枚">${'<i></i>'.repeat(Math.min(5, Math.ceil(g.deckN / 6)))}<b class="tnum">${g.deckN}</b></div><span>山札</span><span>捨て札 ${g.discardN}</span></div>
-      <div class="pilecol"><div class="pile">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>${flipped && !g.over ? `<div class="round-pop">第${g.round}巡</div>` : ''}` : ''}</div>${onFieldsHTML(g, flipped)}</div>
+      <div class="pilecol"><div class="pile">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>` : ''}</div>${onFieldsHTML(g, flipped)}</div>
       ${cmHTML() || `<div class="side r"><span>手番</span><b>${g.over ? '終了' : esc(onName(v.seats[cur]))}</b></div>`}
     </div>
     ${strip}${win}${meBox}</div></div>${res}
