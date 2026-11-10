@@ -659,11 +659,12 @@ function G_save(g) { if (S.attack) return; if (g.games.length > 300) g.games = g
 // 直近 n ゲームの判断から推定実力を出す（お手つきは損失10ptの判断として数える）
 // 判断の質（最善率・平均損失）から出した実力から、お手つきの割合に応じて差し引く（お手つき1割で−0.5）
 // 実力の計算に使う1手の損失：最善扱いの幅（BEST_LOOSE：1巡目3.5pt・2巡目2.0pt）以内は最善と同じ。巡の記録がない前の記録は、序盤（1・2巡）2.5pt以内を最善と同じに。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
-const RATE_CAP = 0.10;
+const RATE_CAP = 0.10, RATE_N = 100;
 const rateLoss = d => { const L = d.r ? BEST_LOOSE[d.r] : ((d.c || []).includes('opening') ? { loss: 0.025 } : null); return Math.min(RATE_CAP, L && d.l <= L.loss ? 0 : d.l); };
 function ratingOf(games, n) {
-  const gs = games.slice(-(n || 20)); const ls = []; let fouls = 0;
-  gs.forEach(x => { x.ds.forEach(d => { if (!d.h) ls.push(rateLoss(d)); }); fouls += x.f || 0; }); // AIの読みを見た手は実力の計算から外す
+  // 直近の判断100回（RATE_N）。ゲーム数で区切ると1ゲームの判断は2〜3回なので手数が少なく、上下が大きすぎた
+  const N = n || RATE_N, ls = []; let fouls = 0;
+  for (let i = games.length - 1; i >= 0 && ls.length < N; i--) { const x = games[i]; for (let j = x.ds.length - 1; j >= 0 && ls.length < N; j--) { const d = x.ds[j]; if (!d.h) ls.push(rateLoss(d)); } fouls += x.f || 0; } // AIの読みを見た手は実力の計算から外す
   if (ls.length < 8) return { ok: false, need: 8 - ls.length, n: ls.length };
   const avg = ls.reduce((a, b) => a + b, 0) / ls.length * 100, best = ls.filter(l => l <= 0.015).length / ls.length;
   const base = Math.max(0.3, Math.min(5.5, (interp(RATE_LOSS, avg, true) + interp(RATE_BEST, best, false)) / 2));
@@ -834,7 +835,7 @@ function growthOnGame(g0) {
   // ミラクルセット・ベストペアは、その形で上がったときだけ数える
   if (g0.winner === me) { const lp = g0.played[me][g0.played[me].length - 1], k = lp ? lp.cards.map(c => c.v).sort((a, b) => a - b).join(',') : ''; if (k === '1,2,6') bump('miracle'); if (k === '2,6') bump('bestpair'); }
 }
-// レーティングの推移（各ゲーム時点の直近20ゲームで計算）
+// レーティングの推移（各ゲーム時点の直近の判断100回で計算）
 function ratingSeries(games) { const out = []; for (let i = 1; i <= games.length; i++) { const r = ratingOf(games.slice(0, i)); if (r.ok) out.push(r.r); } return out.slice(-40); }
 function sparkSVG(vals, w, h) {
   if (vals.length < 2) return '';
@@ -1581,7 +1582,7 @@ function growthHTML() {
     ${r.ok ? `<div class="gr-rate"><span class="gc-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><span>${rateLabel(r.r)}AI相当</span></div>
     <div class="gr-metrics"><span>判断の実力 <b>★${r.base.toFixed(1)}</b></span><span>お手つき <b>${r.fouls}回</b>${r.pen > 0.04 ? `（−${r.pen.toFixed(1)}）` : ''}</span><span>最善率 <b>${pct(r.best)}</b></span><span>平均損失 <b>${r.avg.toFixed(1)}pt</b></span></div>
     ${sparkSVG(series, 320, 110)}` : `<p style="margin:0">測定中です。あと${r.need}回の判断で、推定実力を表示します。</p>`}
-    <p class="small muted" style="margin:0">直近20ゲームの判断（最善率と平均損失）を、AIの★1〜5が同じ判定で打ったときの実測値と比べた「判断の実力」から、お手つきの割合に応じて差し引いています（判断10回につき1回のお手つきで−0.5）。</p>
+    <p class="small muted" style="margin:0">直近100回の判断（最善率と平均損失。AIの読みを見た手は除く）を、AIの★1〜5が同じ判定で打ったときの実測値と比べた「判断の実力」から、お手つきの割合に応じて差し引いています（判断10回につき1回のお手つきで−0.5）。</p>
   </div>
   <div class="panel stack">
     <div class="lbl">場面別の得意・苦手</div>
