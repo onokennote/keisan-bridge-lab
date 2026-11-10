@@ -2058,10 +2058,12 @@ body.rewinding #home-fab{display:none}
 .on-rooms{display:flex;flex-direction:column;gap:6px}
 .on-room{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid rgba(90,180,255,.4);background:rgba(90,180,255,.08);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
 .on-room:disabled{opacity:.45;cursor:default}
+.pv-aw{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(242,182,50,.08);border:1px solid var(--trim-soft)}
+.pv-aw>b{font-size:13px}.pv-aw span{font-size:13px}.pv-aw small{color:var(--muted);margin-left:6px;font-size:10.5px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='7e435afff9';
+window.KB_BUILD='3598243913';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6011,6 +6013,7 @@ function render() {
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
   else if (S.view === 'online') { app.innerHTML = onlineHTML(); setTimeout(onBind, 0); }
   else if (S.view === 'otour') { app.innerHTML = otourHTML(); setTimeout(onTourClock, 0); }
+  else if (S.view === 'oarch') app.innerHTML = oarchHTML();
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
@@ -6175,9 +6178,12 @@ const ACH = [
   ['zukan', '図鑑登録', [10, 50, 200], n => `式の図鑑に${n}式を登録`, ['式の見習い', '式の収集家', '式の博士']],
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
   ['chart', '早見表', [1, 10, 37], n => n >= 37 ? '早見表をすべて完成（37行）' : `早見表の行を${n}行完成（すべての待ちを自分の式で埋める）`, ['早見表の一行目', '早見表の職人', '早見表マスター']],
+  // オンライン大会（人が10人以上参加した大会の上位3位）。段階は3位以上（銅）・2位以上（銀）・優勝（金）。公式大会は別のバッジ
+  ['on_podium', 'オンライン大会 表彰台', [1, 2, 3], n => n >= 3 ? 'オンライン大会（人が10人以上）で優勝' : n >= 2 ? 'オンライン大会（人が10人以上）で2位以上' : 'オンライン大会（人が10人以上）で3位以上', ['表彰台', '準優勝', 'オンライン王者'], [0, 1, 2]],
+  ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -6305,7 +6311,7 @@ function badgeSVG(a, i, got, size) {
   return `<svg class="bdg" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,1 37,10 37,30 20,39 3,30 3,10" fill="${c2}"/><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="${c1}"/>${tier >= 1 && got ? '<circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' : ''}<text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" fill="${got ? '#2a1c00' : '#6b7672'}">${esc(ch)}</text></svg>`;
 }
 // カテゴリーをすべて集めると付く特別バッジ
-const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫' };
+const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証' };
 function catProgress(g, gi) { const [gn, ks] = ACH_GROUPS[gi]; const list = ks.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); return { gn, have, all, done: all > 0 && have >= all, name: CAT_SPECIAL[gn] || gn }; }
 function emblemSVG(gi, got, size) {
   const z = size || 48, id = 'em' + gi + (got ? 'g' : 'n') + z;
@@ -6938,6 +6944,7 @@ function profHTML(D, o) {
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
     <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
     <div class="pv-badges">${got.length ? got.map(b => badgeSVG(b.a, b.i, true, 26)).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
+    ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${+a.official ? '<em class="on-off">公式</em> ' : ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
 }
@@ -6947,7 +6954,7 @@ async function rankCardOpen(rid, me, el) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   try {
     let d;
-    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', '') });
+    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', ''), awards: (ON.myAwards || []).filter(a => a.pid === PID).sort((x, y) => x.place - y.place) });
     else {
       if (!rid) throw new Error('old');
       const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error);
@@ -11082,6 +11089,7 @@ function act(a, el) {
     case 'fab-home': fabHome(); break;
     case 'on-new': onNewModal(); break;
     case 'on-tour-new': onTourNewModal(); break;
+    case 'on-arch': onArchiveOpen(); break;
     case 'on-tour-create': onTourCreate(); break;
     case 'on-tour-open': onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
     case 'on-tour-home': clearInterval(ON.ttimer); ON.t = null; ON.toursAt = 0; go('home'); break;
@@ -11224,14 +11232,27 @@ function onlineHomeHTML() {
   const rows = L ? (L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '招待されています' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
   return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE（テスト中）</div><h2>オンライン大会</h2></div></div>
     <div class="on-tlist">${rows}</div>
-    <button class="btn primary" data-act="on-tour-new">大会をひらく</button>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
       <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
       <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
 }
+// 自分の上位3位をサーバーから読み、いまのプレイヤーのバッジに反映（公式と非公式は別のバッジ）
+async function onAwardsSync() {
+  try { const j = await onReq('on_awards'); ON.myAwards = j.awards || [];
+    const mine = ON.myAwards.filter(a => a.pid === PID), best = off => Math.max(0, ...mine.filter(a => !!+a.official === off).map(a => 4 - a.place));
+    const b1 = best(false), b2 = best(true); if (b1) setMax('on_podium', b1); if (b2) setMax('off_podium', b2);
+  } catch (e) { }
+}
+async function onArchiveOpen() { go('oarch'); try { const j = await onReq('on_tours_archive'); ON.arch = j.tours; } catch (e) { ON.arch = []; toast('読み込めませんでした'); } if (S.view === 'oarch') render(); }
+function oarchHTML() {
+  const L = ON.arch, fmt = t => { const d = new Date(t * 1000); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">🗂 過去のオンライン大会</div><div></div></div>
+    <div class="panel stack">${!L ? '<p class="small muted" style="margin:0">読み込み中…</p>' : L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b><em class="on-st">${v.phase === 'done' ? '終了' : '中止'}</em></span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.n}人${v.awards && v.awards.length ? '・🥇 ' + esc(v.awards[0].name) : ''}${v.entered ? '・<b class="on-in">出場</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">まだ終わった大会はありません</p>'}</div>`;
+}
 async function onToursLoad() {
   if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
-  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
   const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }
 // ---- 大会をひらく ----
@@ -11255,6 +11276,7 @@ function onTourNewModal() {
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
     ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
+    <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">ひらく</button></div></div>`);
   const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value; };
   document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
@@ -11304,10 +11326,10 @@ function otourHTML() {
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
       <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
       ${t.desc ? `<p style="margin:0;white-space:pre-wrap">${esc(t.desc)}</p>` : ''}
-      <div class="on-facts small muted">${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・${t.aiFill ? `足りなければAI★${t.aiLv}で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}</div>
+      <div class="on-facts small muted">${t.awardOk === true ? `🏅 人が${t.awardMin}人以上の大会なので、上位3位にバッジと称号（${t.official ? '公式大会のバッジ' : 'オンライン大会のバッジ'}）・` : t.awardOk === false ? `人が${t.awardMin}人未満だったので、バッジはなし・` : `🏅 人が${t.awardMin}人以上集まれば、上位3位にバッジと称号・`}${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・${t.aiFill ? `足りなければAI★${t.aiLv}で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}</div>
       ${body}</div>`;
 }
-function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar() }; }
+function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }
 async function onReq(a, extra) { const c = raw.get('kb.cloud', null); if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
 function onNewModal() {
   S.onCfg = S.onCfg || { n: 4, games: 3, limit: 30 };
@@ -11418,7 +11440,7 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>

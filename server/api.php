@@ -40,6 +40,7 @@ function db(): PDO {
   if (!in_array('ai', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN ai INTEGER DEFAULT 0'); // AI研究員（倶楽部のキャラ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS tours (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, start_at INTEGER NOT NULL, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン大会
+  $pdo->exec('CREATE TABLE IF NOT EXISTS awards (uid TEXT NOT NULL, pid TEXT NOT NULL, tid TEXT NOT NULL, tname TEXT NOT NULL, place INTEGER NOT NULL, official INTEGER NOT NULL DEFAULT 0, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, tid))'); // オンライン大会の上位3位（人が10人以上の大会だけ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS rooms (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン対局の卓（山札・手札はサーバーだけが持つ）
   return $pdo;
 }
@@ -322,13 +323,25 @@ function obTourTick(array &$t, float $now): bool {
     $order = obTourOrder($t);
     $f = (int)$t['cfg']['finalists'];
     if ($f >= 2 && count($order) > $f) { $t['phase'] = 'final'; $t['finalists'] = array_slice($order, 0, $f); obTourDeal($t, $t['finalists'], '決勝', $now + 6); return true; }
-    $t['phase'] = 'done'; $t['result'] = $order; return true;
+    $t['phase'] = 'done'; $t['result'] = $order; obTourAward($t); return true;
   }
   // 決勝：その1セットのPPだけで順位
   $st = $res[0]; $tot = array_map(fn($a) => array_sum($a), $st['setPP']); $keys = array_column($st['seats'], 'key');
   array_multisort($tot, SORT_ASC, $keys); $t['finalPP'] = array_combine($keys, $tot);
   $rest = array_values(array_diff(obTourOrder($t), $keys));
-  $t['phase'] = 'done'; $t['result'] = array_merge($keys, $rest); return true;
+  $t['phase'] = 'done'; $t['result'] = array_merge($keys, $rest); obTourAward($t); return true;
+}
+const OB_AWARD_MIN = 10; // バッジ・称号は、人が10人以上参加した大会だけ
+function obTourAward(array &$t): void {
+  if (!empty($t['awarded'])) return; $t['awarded'] = true;
+  $t['awardOk'] = count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
+  if (!$t['awardOk']) return;
+  $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
+  foreach (array_slice($t['result'], 0, 3) as $i => $k) {
+    if (!isset($ent[$k])) continue; // AIの順位にはバッジなし
+    $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, !empty($t['cfg']['official']) ? 1 : 0, time()]);
+    $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
+  }
 }
 function obTourOrder(array $t): array { $k = array_keys($t['stand']); usort($k, fn($a, $b) => $t['stand'][$b]['pts'] <=> $t['stand'][$a]['pts'] ?: $t['stand'][$a]['pp'] <=> $t['stand'][$b]['pp']); return $k; }
 function obLoadRaw(string $id): array { $q = db()->prepare('SELECT st, ver FROM rooms WHERE id = ?'); $q->execute([$id]); $r = $q->fetch(); return $r ? [json_decode($r['st'], true), (int)$r['ver']] : [null, 0]; }
@@ -352,7 +365,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'now' => $now, 'note' => $t['note'] ?? null];
+    'n' => count($t['entrants']), 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'now' => $now, 'note' => $t['note'] ?? null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
@@ -372,7 +385,7 @@ function obLoad(string $id, bool $lock = false): array {
   return [json_decode($r['st'], true), (int)$r['ver']];
 }
 function obSave(string $id, array $st, int $ver): void { db()->prepare('UPDATE rooms SET st = ?, ver = ?, updated = ? WHERE id = ?')->execute([json_encode($st, JSON_UNESCAPED_UNICODE), $ver, time(), $id]); }
-function obSeatInfo(array $b): array { return ['name' => trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['name'] ?? '')), 0, 10)) ?: 'プレイヤー', 'avatar' => is_array($b['avatar'] ?? null) ? array_slice($b['avatar'], 0, 20) : null]; }
+function obSeatInfo(array $b): array { return ['pid' => substr(preg_replace('/[^A-Za-z0-9_-]/', '', (string)($b['pid'] ?? '')), 0, 40), 'name' => trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['name'] ?? '')), 0, 10)) ?: 'プレイヤー', 'avatar' => is_array($b['avatar'] ?? null) ? array_slice($b['avatar'], 0, 20) : null]; }
 
 $a = $_GET['a'] ?? '';
 try {
@@ -512,7 +525,8 @@ try {
       $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
       foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card, ai FROM ranks WHERE shown = 1')->fetchAll() as $r) {
         if (rid($r['uid'], $r['pid']) !== $rid) continue;
-        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
+        $aq = db()->prepare('SELECT tname, place, official, at FROM awards WHERE uid = ? AND pid = ? ORDER BY place, at DESC LIMIT 30'); $aq->execute([$r['uid'], $r['pid']]); $GLOBALS['cardAwards'] = $aq->fetchAll();
+        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['awards' => $GLOBALS['cardAwards'] ?? []], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
       }
       fail('見つかりません', 404);
     }
@@ -520,14 +534,27 @@ try {
 
     case 'on_tours': { // 大会の一覧（受付前・受付中・開催中と、終わって1日以内）
       $b = body(); $u = authUser($b); $now = microtime(true); $out = [];
-      foreach (db()->query('SELECT id, st, ver FROM tours WHERE start_at > ' . (time() - 86400 * 2) . ' ORDER BY start_at')->fetchAll() as $r) {
+      foreach (db()->query("SELECT id, st, ver FROM tours WHERE st NOT LIKE '%\"phase\":\"done\"%' AND st NOT LIKE '%\"phase\":\"cancel\"%' ORDER BY start_at")->fetchAll() as $r) {
         $t = json_decode($r['st'], true); $ver = (int)$r['ver'];
         if (in_array($t['phase'], ['entry', 'prelim', 'final'], true)) { db()->exec('BEGIN IMMEDIATE'); [$t, $ver] = obTourLoad($r['id']); if (obTourTick($t, $now)) { $ver++; obTourSave($r['id'], $t, $ver); } db()->exec('COMMIT'); }
-        if (in_array($t['phase'], ['done', 'cancel'], true) && $t['cfg']['startAt'] < time() - 86400) continue;
+        if (in_array($t['phase'], ['done', 'cancel'], true)) continue; // 終わった大会はアーカイブ（on_tours_archive）へ
         $vw = obTourView($t, $u['uid'], $ver, false); if ($t['cfg']['entry'] === 'invite' && !$vw['invited'] && !$vw['entered']) continue; // 招待だけの大会は、招待された人にだけ見える
         $out[] = $vw;
       }
       out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid']]);
+    }
+    case 'on_tours_archive': { // 終わった大会（新しい順に50件）
+      $b = body(); $u = authUser($b); $out = [];
+      foreach (db()->query("SELECT id, st, ver FROM tours WHERE st LIKE '%\"phase\":\"done\"%' OR st LIKE '%\"phase\":\"cancel\"%' ORDER BY start_at DESC LIMIT 200")->fetchAll() as $r) {
+        $t = json_decode($r['st'], true); $vw = obTourView($t, $u['uid'], (int)$r['ver'], false);
+        if ($t['cfg']['entry'] === 'invite' && !$vw['invited'] && !$vw['entered']) continue;
+        $out[] = $vw; if (count($out) >= 50) break;
+      }
+      out(['ok' => true, 'tours' => $out]);
+    }
+    case 'on_awards': { // 自分（このアカウント）のオンライン大会の上位3位
+      $b = body(); $u = authUser($b); $q = db()->prepare('SELECT pid, tid, tname, place, official, at FROM awards WHERE uid = ? ORDER BY at DESC'); $q->execute([$u['uid']]);
+      out(['ok' => true, 'awards' => $q->fetchAll()]);
     }
     case 'on_tour_new': { // 大会をひらく
       $b = body(); $u = authUser($b); rateLimit('tour', 10);
