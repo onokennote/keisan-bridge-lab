@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="d9735ee 2026-11-10 08:31"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="027a493 2026-11-10 10:29"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1892,7 +1892,7 @@ body.spectate .me .hand .card{cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='ef03512363';
+window.KB_BUILD='bfc3ad5d8d';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5878,10 +5878,10 @@ async function showStats() {
 
 // ---------- 成長記録：実力レーティング・場面別の苦手分析・課題・称号 ----------
 // レーティングの基準：自分の席をAIに打たせて実測した「1判断あたりの平均損失pt」と「最善率」
-// 2026-11 測り直し（序盤の最善の幅・1手10ptの頭打ち・捨て身の差を残りゲーム数で変える、を入れて、各★のAIに約400手ずつ×2回の平均）
-// ★1 3.27pt/54%　★2 2.89pt/58%　★3 1.93pt/68%　★4 1.26pt/80%　★5 0.17pt/96.5%（★1と★2の最善率は誤差の範囲なので少し離して置く）
-const RATE_LOSS = [[5.5, 0.3], [3.27, 1], [2.89, 2], [1.93, 3], [1.26, 4], [0.17, 5], [0, 5.5]];
-const RATE_BEST = [[0.30, 0.3], [0.54, 1], [0.58, 2], [0.68, 3], [0.80, 4], [0.965, 5], [1, 5.5]];
+// 2026-11-10 測り直し（最善扱いの幅を1巡目3.5pt・2巡目2.0ptにして、1手10ptの頭打ちで、各★のAIに約400手ずつ）
+// ★1 3.45pt/50%　★2 2.86pt/55%　★3 2.24pt/63%　★4 1.23pt/79%　★5 0.34pt/93%
+const RATE_LOSS = [[5.5, 0.3], [3.45, 1], [2.86, 2], [2.24, 3], [1.23, 4], [0.34, 5], [0, 5.5]];
+const RATE_BEST = [[0.28, 0.3], [0.50, 1], [0.55, 2], [0.63, 3], [0.79, 4], [0.93, 5], [1, 5.5]];
 function interp(tbl, x, desc) {
   for (let i = 0; i < tbl.length - 1; i++) {
     const [x0, y0] = tbl[i], [x1, y1] = tbl[i + 1];
@@ -6050,9 +6050,9 @@ function G_() {
 function G_save(g) { if (S.attack) return; if (g.games.length > 300) g.games = g.games.slice(-300); store.set('growth', g); }
 // 直近 n ゲームの判断から推定実力を出す（お手つきは損失10ptの判断として数える）
 // 判断の質（最善率・平均損失）から出した実力から、お手つきの割合に応じて差し引く（お手つき1割で−0.5）
-// 実力の計算に使う1手の損失：序盤（1・2巡）で差2.5%以内は最善と同じ（最善の幅を広げる前の記録にも当てる）。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
+// 実力の計算に使う1手の損失：最善扱いの幅（BEST_LOOSE：1巡目3.5pt・2巡目2.0pt）以内は最善と同じ。巡の記録がない前の記録は、序盤（1・2巡）2.5pt以内を最善と同じに。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
 const RATE_CAP = 0.10;
-const rateLoss = d => Math.min(RATE_CAP, (d.l <= 0.025 && (d.c || []).includes('opening')) ? 0 : d.l);
+const rateLoss = d => { const L = d.r ? BEST_LOOSE[d.r] : ((d.c || []).includes('opening') ? { loss: 0.025 } : null); return Math.min(RATE_CAP, L && d.l <= L.loss ? 0 : d.l); };
 function ratingOf(games, n) {
   const gs = games.slice(-(n || 20)); const ls = []; let fouls = 0;
   gs.forEach(x => { x.ds.forEach(d => { if (!d.h) ls.push(rateLoss(d)); }); fouls += x.f || 0; }); // AIの読みを見た手は実力の計算から外す
@@ -6205,7 +6205,7 @@ function growthOnDecision(d) {
 function growthOnGame(g0) {
   if (S.tiebreak) return;
   const me = g0.players.findIndex(p => p.human), g = G_();
-  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0 }));
+  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0, r: d.round }));
   const threes = g0.played[me].filter(x => x.cards.length === 3).length;
   g.games.push({ at: Date.now(), k: S.T.cfg.kind, ds, f: (S.fouls || []).length, won: g0.winner === me, pp: g0.pp[me], n: g0.n });
   G_save(g);
@@ -8856,7 +8856,7 @@ function rerenderAsk(where) { if (where === 'hint') renderHint(); else { const e
 // ---------- 自分の手 ----------
 const mlabel = e => e && e.m ? e.m.expr : 'あえて引く';
 const sameMove = (e, move) => move ? (e.m && e.m.key === move.key) : e.m === null;
-const BEST_LOOSE = { 1: { loss: 0.04, pp: 1.0, cap: 0.08 }, 2: { loss: 0.025 } };
+const BEST_LOOSE = { 1: { loss: 0.035 }, 2: { loss: 0.02 } }; // 1巡目3.5pt・2巡目2.0pt以内は最善扱い
 function recordDecision(move) {
   const g = S.game; const me = g.current();
   const counts = g.counts(me), t = g.field.v;
@@ -8887,7 +8887,7 @@ function recordDecision(move) {
   // 表示される数字（目的・上がる確率・期待PP）で最善手が上回っていなければ、端数の差は同じ扱い＝最善とする
   if (loss > 0 && visTie(best, mine)) loss = 0;
   // 序盤は読みのばらつきが手の差と同じくらい大きい（1巡目は2回読むと最善手が3割入れ替わる）ので、最善の幅を広げる。
-  // 1巡目：差4%以内、または期待PPの差1.0以内（差8%まで）／2巡目：差2.5%以内。最善と同じ扱いにして、その手は「ほぼ互角」として残す
+  // 1巡目：差3.5pt以内／2巡目：差2.0pt以内。最善と同じ扱いにして、その手は「ほぼ互角」として残す
   let near = null;
   if (loss > 0 && !(sutemi && isOutEv(mine))) { const L = BEST_LOOSE[g.round]; if (L && (loss <= L.loss || (L.pp && mine.pp - best.pp <= L.pp && loss <= L.cap))) { near = mlabel(best); loss = 0; } }
   // 捨て身（あえて上がらない）が最善の場面で上がった：上がりは最善として扱う（疑問手にしない）。
@@ -9430,7 +9430,7 @@ function whyHTML(d) {
   const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
   // 自分の手が6位より下でも、その順位で最後に足して見せる（枠の強調は自分の手）
   const rows = evs.map((e, i) => [e, i]); if (!evs.some(isMine)) { const k = allEv.findIndex(isMine); if (k >= 6) rows.push([allEv[k], k]); }
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は3.5pt以内' : d.round === 2 ? '2巡目は2.0pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);
