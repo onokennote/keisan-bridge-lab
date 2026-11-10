@@ -119,6 +119,8 @@ const SFX = {
   // 決定系のボタン（開始・次へなど）
   confirm: t => { tone(660, t, 0.08, { type: 'triangle', vol: 0.2 }); tone(990, t + 0.07, 0.14, { type: 'triangle', vol: 0.2 }); },
   // 戻る・閉じる・中断
+  // 巻き戻し：テープを逆回しするように、上がっていくキュルキュル音
+  rewind: t => { for (let k = 0; k < 14; k++) { const u = t + k * 0.065; tone(500 + k * 70, u, 0.06, { type: 'square', vol: 0.05, to: 900 + k * 110 }); } noise(t, 0.95, { f: 2600, q: 0.6, vol: 0.12 }); tone(220, t + 0.98, 0.12, { type: 'triangle', vol: 0.22, to: 110 }); },
   back: t => { tone(700, t, 0.06, { type: 'triangle', vol: 0.18 }); tone(470, t + 0.06, 0.1, { type: 'triangle', vol: 0.16 }); }
 };
 KB.sfx = function (name, arg) {

@@ -2740,7 +2740,7 @@ function startGame() {
   const starter = S.tiebreak ? (Math.random() * ids.length) | 0 : starterFor(ids, T.game);
   S.game = new KB.Game(players, starter);
   KB.kanataRoll(S.game);
-  S.gameHinted = false;
+  S.gameHinted = false; S.undoSnap = S.undoCur = null; S.undoRetry = false;
   if (!S.tiebreak) T.live = null;
   S.gameNo = (S.gameNo || 0) + 1;
   S.sel = []; S.hint = null; S.decisions = []; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = null; S.fouls = [];
@@ -2910,7 +2910,7 @@ function restoreLive() {
   const T = S.T, L = T.live;
   const g = Object.assign(Object.create(KB.Game.prototype), L.g);
   g.players = L.g.playerIds.map(id => P(id)); delete g.playerIds;
-  S.game = g;
+  S.game = g; S.undoSnap = S.undoCur = null; S.undoRetry = false;
   S.gameNo = (S.gameNo || 0) + 1;
   S.sel = []; S.hint = null; S.decisions = L.decisions || []; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = g.field; S.fouls = L.fouls || []; S.bestStreak = L.bestStreak || 0; S.gameHinted = !!L.gameHinted;
   S.qual = (T.cfg.kind === 'tournament' && T.phase === 'prelim') ? qualifyTable(T) : null;
@@ -2968,7 +2968,7 @@ function loop() {
   { const he = holdEnd(); if (he && Date.now() < he) { S.timer = pt(loop, he - Date.now()); return; } }
   if (S.holdTurn != null) { S.holdTurn = null; S.roundHeld = false; renderGame(); }
   if (pl.human && !S.spectate) {
-    const tk = S.gameNo + ':' + g.round + ':' + g.pos; if (S.chimeKey !== tk) { S.chimeKey = tk; S.turnStart = Date.now(); KB.sfx('myturn'); }
+    const tk = S.gameNo + ':' + g.round + ':' + g.pos; if (S.chimeKey !== tk) { S.chimeKey = tk; S.turnStart = Date.now(); KB.sfx('myturn'); if (undoAllowed()) try { S.undoCur = undoTake(); } catch (e) { S.undoCur = null; } }
     if (Math.random() < 0.08 && (!S.cm || Date.now() - S.cm.at > 5000)) { say('tip', {}); renderGame(); }
     if (S.settings.autoHint && !S.hint) S.timer = setTimeout(() => computeHint(), 50);
     return;
@@ -3213,6 +3213,7 @@ function renderGame0() {
         <button class="btn felt-btn" data-act="draw" ${myTurn ? '' : 'disabled'}>引く</button>
         ${S.attack ? '' : `<button class="btn felt-btn" data-act="hint" ${myTurn ? '' : 'disabled'}>AIの読み</button>`}
         ${S.sel.length ? `<button class="btn felt-btn sm" data-act="clear">選択解除</button>` : ''}
+        ${undoOk() ? `<button class="btn felt-btn sm undo-btn" data-act="undo" title="直前の自分の手まで巻き戻す">⏪ 待った</button>` : ''}
       </div>
     </div></div>`;
   if (oldCm) { const nc = document.querySelector('#tablewrap .commentary'); if (nc && nc.dataset.key === oldCm.dataset.key) { oldCm.classList.remove('fresh'); nc.replaceWith(oldCm); } }
@@ -3477,7 +3478,8 @@ function recordDecision(move) {
   if (sutemi) sutemi.chose = mine === best;
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
   S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: near || (sutemi && sutemi.outOk) ? mine : best0, // 「ほぼ互角」で最善扱いにした手も、統計（3枚・引いた回数など）では自分の手を最善として数える
-     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.hint && S.hint.key === key && S.hint.ev), evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.undoRetry || (S.hint && S.hint.key === key && S.hint.ev)), undo: S.undoRetry ? 1 : 0, evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+  S.undoRetry = false; if (S.undoCur && S.undoCur.gameNo === S.gameNo) S.undoSnap = S.undoCur; // 「待った」で戻れるのは、選択肢のあった直前の自分の手
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
 function facesOf(c) { const m = KB.reachMask(c); let k = 0; for (let t = 1; t <= 13; t++) if (m & (1 << t)) k++; return k; }
@@ -3786,6 +3788,59 @@ function summaryText() {
   if (!S.tiebreak && S.T) lines.push('セット累計PP：' + g.players.map(p => `${nm(p)} ${setTotal(S.T, p.id)}`).join('、'));
   return lines.join('\n');
 }
+// ---------- 待った（練習だけ）：直前の自分の手（選択肢のあった手）まで巻き戻す ----------
+// 自分の番が来たときに、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
+// 上がられたあと（「結果を見る」の前）でも戻れる。戻したゲーム・セットは結果のバッジの対象外、やり直した手は推定実力に入れない
+const undoAllowed = () => !!(S.T && S.T.cfg.kind === 'practice' && !S.attack && !S.spectate && !S.tiebreak);
+const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
+function undoTake() {
+  const g = S.game, o = {}; for (const k in g) if (k !== 'players') o[k] = g[k];
+  return { gameNo: S.gameNo, round: g.round, g: JSON.stringify(o), ids: g.players.map(p => p.id), T: JSON.stringify(S.T), growth: JSON.stringify(store.get('growth', null)), dec: JSON.stringify(S.decisions || []), fouls: JSON.stringify(S.fouls || []), bestStreak: S.bestStreak || 0 };
+}
+function undoAsk() {
+  if (!undoOk()) return;
+  const u = S.undoSnap, g = S.game, n = rvName(), free = S.gameHinted || !badgeElig(S.T).game;
+  const head = g.over ? `上がられてもうたけど、第${u.round}巡の${n}の番まで巻き戻せるで。` : `第${u.round}巡の${n}の番まで巻き戻すで。`;
+  const warn = free ? 'このゲームはもともとバッジの対象外やから、遠慮なくいこか。やり直した手は推定実力には入れへんで。' : '戻ったら、このゲームとこのセットの結果のバッジ（上がり・セット1位・ノーミスなど）はもらえんようになるし、やり直した手は推定実力にも入れへん。それでもええか？';
+  modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(head + warn)}</div></div></div>
+    <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn" data-act="undo-no">やめとく</button><button class="btn primary" data-act="undo-go">⏪ 巻き戻す</button></div>`);
+  pauseGame(); // modal() は前のモーダルを閉じて再開させるので、開いたあとで止める
+}
+function undoGo() {
+  const u = S.undoSnap; if (!u || !undoOk()) { closeModal(); return; }
+  S.resumeFn = null; closeModal(); // 止めていた続き（AIの手など）は動かさない
+  clearTimeout(S.timer); S.paused = 0; S.resumeFn = null; S.undoSnap = S.undoCur = null;
+  document.querySelectorAll('.confetti,.cutin,.whistle-ov').forEach(e => e.remove());
+  rewindFx(() => {
+    S.T = JSON.parse(u.T);
+    if (u.growth !== 'null') store.set('growth', JSON.parse(u.growth));
+    const g = Object.assign(Object.create(KB.Game.prototype), JSON.parse(u.g)); g.players = u.ids.map(id => P(id));
+    S.game = g; S.gameNo = (S.gameNo || 0) + 1; // 古いタイマー（セリフ・演出）は gameNo で止まる
+    S.decisions = JSON.parse(u.dec); S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak;
+    S.gameHinted = true; S.T.setHinted = true; S.T.tourHinted = true; S.undoRetry = true;
+    S.sel = []; S.hint = null; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = g.field;
+    S.bigBanner = null; S.introUntil = 0; S.roundStart = 0; S.dealDur = 0; S.chimeKey = null; S.liveKey = null; S.newCard = null; S.newCards = null;
+    S.reshuffleSeen = g.log.filter(e => e.type === 'reshuffle').length;
+    const n = rvName();
+    S.cm = { who: 'masa', text: `第${g.round}巡、${n}の番まで戻したで！さっきとちゃう手、試してみ！`, prio: 5, kind: 'undo', mood: 'happy', at: Date.now() };
+    if (S.settings.commentary === 'root') S.cm = { who: 'root', text: `第${g.round}巡の${n}の番に戻しました。別の手を試してみましょう。`, prio: 5, kind: 'undo', mood: 'normal', at: Date.now() };
+    if (!S.settings.commentary || S.settings.commentary === 'off') S.cm = null;
+    S.cmHoldUntil = Date.now() + 1200; S.flowHoldUntil = S.cmHoldUntil;
+    saveSession(); renderGame(); loop();
+  });
+}
+// 巻き戻しの演出：画面が青く揺らぎ、時計の針が逆回り、「◀◀ 巻き戻し中」
+function rewindFx(then) {
+  const fast = S.settings.speed === 'instant' || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (fast) { then(); return; }
+  KB.sfx('rewind');
+  const el = document.createElement('div'); el.className = 'rewind-fx';
+  el.innerHTML = `<div class="rw-scan"></div><div class="rw-rew">◀◀ REW</div><div class="rw-clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/>${[...Array(12)].map((_, i) => `<line x1="50" y1="9" x2="50" y2="16" transform="rotate(${i * 30} 50 50)"/>`).join('')}<line class="rw-h" x1="50" y1="50" x2="50" y2="28"/><line class="rw-m" x1="50" y1="50" x2="50" y2="15"/><circle cx="50" cy="50" r="3" class="rw-c"/></svg></div><div class="rw-t">巻き戻し中…</div>`;
+  document.body.appendChild(el); document.body.classList.add('rewinding');
+  setTimeout(() => { then(); }, 1100);
+  setTimeout(() => { el.classList.add('out'); document.body.classList.remove('rewinding'); }, 1250);
+  setTimeout(() => el.remove(), 1650);
+}
 function onGameOver() {
   const g = S.game, T = S.T;
   if (S.tiebreak) { finishTiebreakGame(); return; }
@@ -3847,7 +3902,7 @@ function winStripHTML(g, me) {
   return `<div class="win-strip" role="status">
     <div class="ws-main"><div class="ws-title">${wp ? esc(w === me ? 'あなた' : nm(wp)) + 'が上がりました！' : '規定の巡数で終了しました'}</div>
     ${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(miniCard).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
-    <button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button></div>`;
+    <div class="ws-btns">${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}<button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button></div></div>`;
 }
 // カードが飛ぶ演出（山札→人、人→場）
 function flyCard(fromEl, toEl, html, delay, dur) {
@@ -3961,7 +4016,7 @@ function showGameSummary(keep) {
   else if (avgLoss < 0.02) comment = resultGood ? `判断はほぼAIの最善手どおりで、結果もついてきました（${ds.length}回中${nBest}回が最善）。` : `判断はほぼAIの最善手どおりでした（${ds.length}回中${nBest}回が最善）。結果は振るいませんでしたが、確率的には正しい打ち方です。`;
   else if (avgLoss < 0.06) comment = `おおむね良い判断です（${ds.length}回中${nBest}回が最善）。差がついた場面を表で確認しましょう。`;
   else comment = `改善の余地があります（${ds.length}回中${nBest}回が最善）。「損失」が大きい巡を見直すのがおすすめです。`;
-  { const nh = dsAll.filter(d => d.viewedHint).length; if (nh) comment += ` AIの読みを見た手（${nh}回）は評価に入れていません。このゲームは結果のバッジの対象外です。`; else if (S.gameHinted) comment += ' AIの読みを見たので、このゲームは結果のバッジの対象外です。'; }
+  { const nh = dsAll.filter(d => d.viewedHint).length; if (nh) comment += ` AIの読みを見た手・待ったでやり直した手（${nh}回）は評価に入れていません。このゲームは結果のバッジの対象外です。`; else if (S.gameHinted) comment += ' AIの読みを見たので、このゲームは結果のバッジの対象外です。'; }
   if (fouls.length) comment += ` お手つきが${fouls.length}回ありました（ペナルティで計${fouls.reduce((a, f) => a + (f.n || 0), 0)}枚）。`;
   const drew = ds.filter(d => d.drew);
   if (drew.length) comment += ` 出せる場面で${drew.length}回あえて引きました（うち最善判定 ${drew.filter(d => d.loss <= 0.015).length}回）。`;
@@ -5307,6 +5362,9 @@ function act(a, el) {
     case 'attack-abort': attackFinish(true); break;
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
     case 'next-game': nextGame(); break;
+    case 'undo': undoAsk(); break;
+    case 'undo-go': undoGo(); break;
+    case 'undo-no': closeModal(); break;
     case 'win-ok': { const w = S.winShow; S.winShow = null; S.bubbles = {}; renderGame(); if (w) w.then(); break; }
     case 'next-set': S.T.set++; startSet(); break;
     case 'to-final': toFinal(); break;
