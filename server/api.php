@@ -39,6 +39,7 @@ function db(): PDO {
   if (!in_array('streak', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN streak INTEGER DEFAULT 0');
   if (!in_array('ai', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN ai INTEGER DEFAULT 0'); // AI研究員（倶楽部のキャラ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS rooms (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン対局の卓（山札・手札はサーバーだけが持つ）
   return $pdo;
 }
 const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // 見まちがえやすい I・O・0・1 は使わない
@@ -103,6 +104,178 @@ function safeName(string $s, string $uid, string $pid): string {
   $s = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', $s), 0, 10));
   return ($s !== '' && nameOk($s)) ? $s : '研究員' . strtoupper(substr(h($uid . $pid), 0, 3));
 }
+
+
+// ================= オンライン対局（サーバーがカードを管理する。各自には自分の手札だけを送る） =================
+// 式の判定：1〜3枚を四則（＋かっこ）で組み合わせ、場の数（1〜13）にできるか。割り算は割り切れるときだけ。アプリの engine.js と同じ決まり
+function obComb(array $x, array $y, string $op): ?array {
+  if ($op === '+') $v = $x[0] + $y[0]; elseif ($op === '-') $v = $x[0] - $y[0]; elseif ($op === '*') $v = $x[0] * $y[0];
+  else { if ($y[0] === 0 || $x[0] % $y[0] !== 0) return null; $v = intdiv($x[0], $y[0]); }
+  $p = ($op === '+' || $op === '-') ? 1 : 2;
+  $ls = $x[2] < $p ? '(' . $x[1] . ')' : $x[1];
+  $rs = ($y[2] < $p || ($y[2] === $p && ($op === '-' || $op === '/'))) ? '(' . $y[1] . ')' : $y[1];
+  $sym = ['+' => '+', '-' => '−', '*' => '×', '/' => '÷'][$op];
+  return [$v, $ls . ' ' . $sym . ' ' . $rs, $p];
+}
+function obAll(array $nodes): array {
+  if (count($nodes) === 1) return [$nodes[0]];
+  $out = []; $n = count($nodes);
+  for ($i = 0; $i < $n; $i++) for ($j = 0; $j < $n; $j++) {
+    if ($i === $j) continue;
+    $rest = []; for ($k = 0; $k < $n; $k++) if ($k !== $i && $k !== $j) $rest[] = $nodes[$k];
+    foreach (['+', '-', '*', '/'] as $op) {
+      if (($op === '+' || $op === '*') && $i > $j) continue;
+      $c = obComb($nodes[$i], $nodes[$j], $op); if (!$c) continue;
+      foreach (obAll(array_merge([$c], $rest)) as $r) $out[] = $r;
+    }
+  }
+  return $out;
+}
+// vals（札の数の並び）で作れる場の数ごとの、いちばん短い式
+function obExprs(array $vals): array {
+  static $memo = []; sort($vals); $key = implode(',', $vals);
+  if (isset($memo[$key])) return $memo[$key];
+  $best = [];
+  foreach (obAll(array_map(fn($v) => [$v, (string)$v, 3], $vals)) as $r) { if ($r[0] < 1 || $r[0] > 13) continue; if (!isset($best[$r[0]]) || strlen($r[1]) < strlen($best[$r[0]])) $best[$r[0]] = $r[1]; }
+  return $memo[$key] = $best;
+}
+// 手札から場 t を作れる手の一覧（同じ数の組は1つにまとめる）
+function obMoves(array $handVals, int $t): array {
+  $n = count($handVals); $seen = []; $out = [];
+  $try = function (array $vals) use (&$seen, &$out, $t) {
+    sort($vals); $k = implode(',', $vals); if (isset($seen[$k])) return; $seen[$k] = 1;
+    $e = obExprs($vals); if (!isset($e[$t])) return;
+    $x = $e[$t]; $cls = preg_match('/[()]/', $x) ? 4 : (str_contains($x, '÷') ? 3 : (str_contains($x, '×') ? 2 : (count($vals) === 3 ? 1 : 0)));
+    $out[] = ['vals' => $vals, 'expr' => $x, 'n' => count($vals), 'sum' => array_sum($vals), 'cls' => $cls];
+  };
+  for ($i = 0; $i < $n; $i++) { $try([$handVals[$i]]); for ($j = $i + 1; $j < $n; $j++) { $try([$handVals[$i], $handVals[$j]]); for ($k = $j + 1; $k < $n; $k++) $try([$handVals[$i], $handVals[$j], $handVals[$k]]); } }
+  return $out;
+}
+function obGauss(): float { $u = 0; $v = 0; while (!$u) $u = mt_rand() / mt_getrandmax(); while (!$v) $v = mt_rand() / mt_getrandmax(); return sqrt(-2 * log($u)) * cos(2 * M_PI * $v); }
+// AI★2（初級）：アプリの★2と同じ考え方。気づく組み合わせに限りがあり、たまに見逃す。点の高い3手から選ぶ
+function obAi2(array $handVals, int $t): ?array {
+  $see = [1, 0.85, 0.7, 0.5, 0.45]; $r = fn() => mt_rand() / mt_getrandmax();
+  $ms = array_values(array_filter(obMoves($handVals, $t), fn($m) => $r() < $see[$m['cls']]));
+  if (!$ms || $r() < 0.04) return null;
+  foreach ($ms as $m) if ($m['n'] === count($handVals)) return $m;
+  $sc = [];
+  foreach ($ms as $m) {
+    $rest = $handVals; foreach ($m['vals'] as $v) { $i = array_search($v, $rest, true); array_splice($rest, $i, 1); }
+    $small = count(array_filter($rest, fn($v) => $v <= 3)); $high = count(array_filter($m['vals'], fn($v) => $v >= 11));
+    $sc[] = [$m, 14 * $m['n'] + 1.2 * $m['sum'] + 1.6 * min($small, 3) + 0.6 * $high + obGauss() * 0.3 * 3];
+  }
+  usort($sc, fn($a, $b) => $b[1] <=> $a[1]);
+  return $sc[mt_rand(0, min(3, count($sc)) - 1)][0];
+}
+const OB_LIMITS = [60, 30, 15, 10];
+const OB_AI_NAMES = ['ロボ太', 'ピコ', 'メカ子', 'ボルト'];
+function obDeck(): array { $d = []; for ($s = 0; $s < 4; $s++) for ($v = 1; $v <= 13; $v++) $d[] = [$v, $s]; shuffle($d); return $d; }
+function obSortHand(array &$h): void { usort($h, fn($a, $b) => $a[0] <=> $b[0] ?: $a[1] <=> $b[1]); }
+function obDraw(array &$g): ?array {
+  if (!$g['deck']) { if (!$g['discard']) return null; $g['deck'] = $g['discard']; shuffle($g['deck']); $g['discard'] = []; $g['log'][] = ['type' => 'reshuffle', 'round' => $g['round']]; }
+  return array_pop($g['deck']);
+}
+function obNextRound(array &$g): void {
+  if ($g['field']) $g['discard'][] = $g['field'];
+  $g['round']++;
+  if ($g['round'] > 80) { obFinish($g, -1); return; }
+  $f = obDraw($g); if (!$f) { obFinish($g, -1); return; }
+  $g['field'] = $f; $g['pos'] = 0;
+  $g['log'][] = ['type' => 'field', 'round' => $g['round'], 'v' => $f[0], 's' => $f[1]];
+}
+function obFinish(array &$g, int $w): void {
+  $g['over'] = true; $g['winner'] = $w;
+  $g['pp'] = array_map(fn($h, $i) => $i === $w ? 0 : array_sum(array_column($h, 0)), $g['hands'], array_keys($g['hands']));
+  $g['log'][] = ['type' => 'end', 'winner' => $w, 'pp' => $g['pp']];
+}
+function obNewGame(int $n, int $starter): array {
+  $g = ['deck' => obDeck(), 'discard' => [], 'hands' => array_fill(0, $n, []), 'field' => null, 'round' => 0, 'pos' => 0, 'over' => false, 'winner' => -1, 'pp' => null, 'played' => array_fill(0, $n, []), 'last' => array_fill(0, $n, null), 'log' => []];
+  for ($k = 0; $k < 7; $k++) for ($p = 0; $p < $n; $p++) $g['hands'][$p][] = array_pop($g['deck']);
+  foreach ($g['hands'] as &$h) obSortHand($h); unset($h);
+  $g['order'] = []; for ($i = 0; $i < $n; $i++) $g['order'][] = ($starter + $i) % $n;
+  obNextRound($g);
+  return $g;
+}
+function obCur(array $g): int { return $g['over'] ? -1 : $g['order'][$g['pos']]; }
+// 手を進める：$vals が null なら引く。正しくない手は false
+function obApply(array &$g, ?array $vals, string $by = ''): bool {
+  $p = obCur($g); if ($p < 0) return false;
+  $h = &$g['hands'][$p];
+  if ($vals !== null) {
+    $vals = array_map('intval', $vals); if (!$vals || count($vals) > 3) return false;
+    $e = obExprs($vals); if (!isset($e[$g['field'][0]])) return false;
+    $tmp = $h; $cards = [];
+    foreach ($vals as $v) { $i = -1; foreach ($tmp as $k => $c) if ($c[0] === $v) { $i = $k; break; } if ($i < 0) return false; $cards[] = $tmp[$i]; array_splice($tmp, $i, 1); }
+    $h = $tmp; foreach ($cards as $c) $g['discard'][] = $c;
+    $x = $e[$g['field'][0]];
+    $g['played'][$p][] = ['cards' => $cards, 'expr' => $x, 't' => $g['field'][0], 'round' => $g['round']];
+    $g['last'][$p] = ['type' => 'play', 'cards' => $cards, 'expr' => $x, 'by' => $by];
+    $g['log'][] = ['type' => 'play', 'round' => $g['round'], 'p' => $p, 'vals' => $vals, 'expr' => $x, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
+    if (!$h) { obFinish($g, $p); return true; }
+  } else {
+    $c = obDraw($g); if ($c) { $h[] = $c; obSortHand($h); }
+    $g['last'][$p] = ['type' => 'draw', 'by' => $by];
+    $g['log'][] = ['type' => 'draw', 'round' => $g['round'], 'p' => $p, 't' => $g['field'][0], 'left' => count($h), 'by' => $by];
+  }
+  unset($h);
+  $g['pos']++; if ($g['pos'] >= count($g['hands'])) obNextRound($g);
+  if (count($g['log']) > 60) $g['log'] = array_slice($g['log'], -60);
+  return true;
+}
+// 時間を進める：時間切れは自動で引く（3回続くとAI★2が代わりに打つ）。AIの席は少し間をおいて打つ。ゲームの合間は8秒で次へ
+function obTick(array &$st, float $now): bool {
+  $ch = false; $guard = 0;
+  while ($guard++ < 200) {
+    if ($st['phase'] === 'between') {
+      if ($now < $st['nextAt']) break;
+      if ($st['gameNo'] >= $st['cfg']['games']) { $st['phase'] = 'done'; $ch = true; break; }
+      $pp = $st['game']['pp']; $mx = max($pp); $cand = array_keys($pp, $mx); $starter = $cand[array_rand($cand)]; // 前のゲームでPPが一番多かった人が親
+      $st['game'] = obNewGame(count($st['seats']), $starter); $st['gameNo']++; $st['phase'] = 'play';
+      $st['turnAt'] = $st['nextAt']; $st['deadline'] = $st['turnAt'] + $st['cfg']['limit'] + 3; $ch = true; continue;
+    }
+    if ($st['phase'] !== 'play') break;
+    $g = &$st['game']; $p = obCur($g);
+    if ($p < 0) { unset($g); break; }
+    $seat = &$st['seats'][$p];
+    $auto = !empty($seat['ai']) || ($seat['miss'] ?? 0) >= 3;
+    if ($auto) {
+      if ($now < $st['turnAt'] + 1.3) { unset($g, $seat); break; }
+      $hv = array_column($g['hands'][$p], 0); $m = obAi2($hv, $g['field'][0]);
+      obApply($g, $m ? $m['vals'] : null, !empty($seat['ai']) ? 'ai' : 'sub');
+      $st['turnAt'] += 1.3;
+    } else {
+      if ($now < $st['deadline']) { unset($g, $seat); break; }
+      obApply($g, null, 'timeout'); $seat['miss'] = ($seat['miss'] ?? 0) + 1;
+      $st['turnAt'] = $st['deadline'];
+    }
+    unset($seat);
+    $st['deadline'] = $st['turnAt'] + $st['cfg']['limit'] + ($g['pos'] === 0 ? 3 : 0); // 新しい巡は場をめくる時間を少し足す
+    if ($g['over']) { foreach ($g['pp'] as $i => $v) $st['setPP'][$i][] = $v; $st['phase'] = 'between'; $st['nextAt'] = $st['turnAt'] + 8; }
+    unset($g); $ch = true;
+  }
+  return $ch;
+}
+// 各自に送る形（自分の手札だけ。ほかの人は枚数だけ）
+function obView(array $st, string $uid, string $id, int $ver): array {
+  $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $uid) $me = $i;
+  $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'sub' => empty($s['ai']) && ($s['miss'] ?? 0) >= 3, 'miss' => $s['miss'] ?? 0], $st['seats']);
+  $v = ['ok' => true, 'id' => $id, 'ver' => $ver, 'phase' => $st['phase'], 'cfg' => $st['cfg'], 'seats' => $seats, 'me' => $me, 'host' => ($st['seats'][0]['uid'] ?? '') === $uid, 'gameNo' => $st['gameNo'], 'setPP' => $st['setPP'], 'now' => microtime(true)];
+  if (isset($st['game'])) {
+    $g = $st['game'];
+    $v['game'] = ['field' => $g['field'], 'round' => $g['round'], 'pos' => $g['pos'], 'order' => $g['order'], 'cur' => obCur($g), 'over' => $g['over'], 'winner' => $g['winner'], 'pp' => $g['pp'],
+      'handN' => array_map('count', $g['hands']), 'deckN' => count($g['deck']), 'discardN' => count($g['discard']), 'played' => $g['played'], 'last' => $g['last'], 'log' => array_slice($g['log'], -20),
+      'hand' => $me >= 0 ? $g['hands'][$me] : null, 'hands' => $g['over'] ? $g['hands'] : null, 'deadline' => $st['deadline'] ?? null, 'nextAt' => $st['nextAt'] ?? null];
+  }
+  return $v;
+}
+function obLoad(string $id, bool $lock = false): array {
+  $d = db(); if ($lock) $d->exec('BEGIN IMMEDIATE');
+  $q = $d->prepare('SELECT * FROM rooms WHERE id = ?'); $q->execute([$id]); $r = $q->fetch();
+  if (!$r) { if ($lock) $d->exec('ROLLBACK'); fail('その卓は見つかりません', 404); }
+  return [json_decode($r['st'], true), (int)$r['ver']];
+}
+function obSave(string $id, array $st, int $ver): void { db()->prepare('UPDATE rooms SET st = ?, ver = ?, updated = ? WHERE id = ?')->execute([json_encode($st, JSON_UNESCAPED_UNICODE), $ver, time(), $id]); }
+function obSeatInfo(array $b): array { return ['name' => trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['name'] ?? '')), 0, 10)) ?: 'プレイヤー', 'avatar' => is_array($b['avatar'] ?? null) ? array_slice($b['avatar'], 0, 20) : null]; }
 
 $a = $_GET['a'] ?? '';
 try {
@@ -246,7 +419,76 @@ try {
       }
       fail('見つかりません', 404);
     }
-    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 9]);
+
+    // ---- オンライン対局 ----
+    case 'on_create': { // 卓を作る（作った人が席0・ホスト）
+      $b = body(); $u = authUser($b); rateLimit('room', 30);
+      $lim = (int)($b['limit'] ?? 30); if (!in_array($lim, OB_LIMITS, true) && !($lim === 3 && !empty($CFG['test']))) $lim = 30;
+      $cfg = ['n' => max(2, min(5, (int)($b['n'] ?? 4))), 'games' => max(1, min(10, (int)($b['games'] ?? 3))), 'limit' => $lim];
+      $st = ['phase' => 'lobby', 'cfg' => $cfg, 'seats' => [array_merge(obSeatInfo($b), ['uid' => $u['uid'], 'miss' => 0])], 'gameNo' => 0, 'setPP' => []];
+      $d = db(); db()->prepare('DELETE FROM rooms WHERE updated < ?')->execute([time() - 86400]); // 1日たった卓は片づける
+      for ($i = 0; $i < 20; $i++) { $id = ''; for ($k = 0; $k < 6; $k++) $id .= CODE_CHARS[random_int(0, strlen(CODE_CHARS) - 1)]; $q = $d->prepare('SELECT 1 FROM rooms WHERE id = ?'); $q->execute([$id]); if (!$q->fetch()) break; }
+      $d->prepare('INSERT INTO rooms (id, host, st, ver, updated, created) VALUES (?, ?, ?, 1, ?, ?)')->execute([$id, $u['uid'], json_encode($st, JSON_UNESCAPED_UNICODE), time(), time()]);
+      out(obView($st, $u['uid'], $id, 1));
+    }
+    case 'on_join': { // 卓に入る（はじまる前だけ。すでに入っていれば、そのまま）
+      $b = body(); $u = authUser($b); $id = strtoupper(preg_replace('/[^0-9A-Za-z]/', '', (string)($b['id'] ?? '')));
+      [$st, $ver] = obLoad($id, true);
+      $in = false; foreach ($st['seats'] as $s) if (($s['uid'] ?? '') === $u['uid']) $in = true;
+      if (!$in) {
+        if ($st['phase'] !== 'lobby') { db()->exec('ROLLBACK'); fail('この卓はもう始まっています'); }
+        if (count($st['seats']) >= $st['cfg']['n']) { db()->exec('ROLLBACK'); fail('この卓は満員です'); }
+        $st['seats'][] = array_merge(obSeatInfo($b), ['uid' => $u['uid'], 'miss' => 0]); $ver++; obSave($id, $st, $ver);
+      }
+      db()->exec('COMMIT'); out(obView($st, $u['uid'], $id, $ver));
+    }
+    case 'on_state': { // いまの様子（1〜2秒ごとに読む）。時間切れ・AIの手はここで進める
+      $b = body(); $u = authUser($b); $id = strtoupper(preg_replace('/[^0-9A-Za-z]/', '', (string)($b['id'] ?? '')));
+      [$st, $ver] = obLoad($id, true);
+      if (obTick($st, microtime(true))) { $ver++; obSave($id, $st, $ver); }
+      db()->exec('COMMIT');
+      if ((int)($b['ver'] ?? 0) === $ver) out(['ok' => true, 'same' => true, 'ver' => $ver, 'now' => microtime(true)]);
+      out(obView($st, $u['uid'], $id, $ver));
+    }
+    case 'on_act': { // 自分の手：play（vals）/ draw / back（AIの代打ちから戻る）/ addai・kick・start（ホスト）/ leave
+      $b = body(); $u = authUser($b); $id = strtoupper(preg_replace('/[^0-9A-Za-z]/', '', (string)($b['id'] ?? ''))); $act = (string)($b['act'] ?? '');
+      [$st, $ver] = obLoad($id, true); $now = microtime(true); obTick($st, $now);
+      $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $u['uid']) $me = $i;
+      $host = $me === 0; $err = null;
+      if ($act === 'addai') {
+        if (!$host || $st['phase'] !== 'lobby') $err = 'ホストだけが、始まる前に追加できます';
+        elseif (count($st['seats']) >= $st['cfg']['n']) $err = '満員です';
+        else { $k = count(array_filter($st['seats'], fn($s) => !empty($s['ai']))); $st['seats'][] = ['name' => OB_AI_NAMES[$k % 4] . '（AI★2）', 'ai' => true, 'miss' => 0]; }
+      } elseif ($act === 'kick') {
+        $i = (int)($b['seat'] ?? -1);
+        if (!$host || $st['phase'] !== 'lobby' || $i <= 0 || $i >= count($st['seats'])) $err = 'できません'; else array_splice($st['seats'], $i, 1);
+      } elseif ($act === 'leave') {
+        if ($st['phase'] === 'lobby' && $me > 0) array_splice($st['seats'], $me, 1);
+        elseif ($me >= 0 && $st['phase'] === 'play') $st['seats'][$me]['miss'] = 3; // 対局中に抜けたら、AIが代わりに打つ
+      } elseif ($act === 'start') {
+        if (!$host || $st['phase'] !== 'lobby') $err = 'ホストだけが始められます';
+        elseif (count($st['seats']) < 2) $err = '2人以上で始められます';
+        else { $n = count($st['seats']); $st['setPP'] = array_fill(0, $n, []); $st['game'] = obNewGame($n, random_int(0, $n - 1)); $st['gameNo'] = 1; $st['phase'] = 'play'; $st['turnAt'] = $now; $st['deadline'] = $now + $st['cfg']['limit'] + 3; }
+      } elseif ($act === 'back') {
+        if ($me >= 0) $st['seats'][$me]['miss'] = 0;
+      } elseif ($act === 'play' || $act === 'draw') {
+        if ($st['phase'] !== 'play' || $me < 0 || obCur($st['game']) !== $me) $err = 'あなたの番ではありません';
+        elseif (($st['seats'][$me]['miss'] ?? 0) >= 3) $err = 'AIが代わりに打っています（「自分で打つ」で戻れます）';
+        else {
+          $ok = obApply($st['game'], $act === 'play' ? (array)($b['vals'] ?? []) : null, 'me');
+          if (!$ok) $err = 'その札では場の数になりません';
+          else {
+            $st['seats'][$me]['miss'] = 0; $st['turnAt'] = $now; $st['deadline'] = $now + $st['cfg']['limit'] + ($st['game']['pos'] === 0 ? 3 : 0);
+            if ($st['game']['over']) { foreach ($st['game']['pp'] as $i => $v) $st['setPP'][$i][] = $v; $st['phase'] = 'between'; $st['nextAt'] = $now + 8; }
+            obTick($st, $now);
+          }
+        }
+      } else $err = '知らない操作です';
+      if ($err) { db()->exec('ROLLBACK'); fail($err); }
+      $ver++; obSave($id, $st, $ver); db()->exec('COMMIT');
+      out(obView($st, $u['uid'], $id, $ver));
+    }
+    default: out(['ok' => true, 'app' => 'keisan-bridge', 'api' => 10]);
   }
 } catch (Throwable $e) {
   if (db()->inTransaction()) db()->rollBack();

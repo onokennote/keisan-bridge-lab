@@ -17,6 +17,8 @@
 - 新しい機能はブランチ `staging` で作る。`staging` に push すると GitHub Actions（`.github/workflows/staging.yml`）が組み立てて、さくらの `~/www/kb/stg/` に置く
   - テスト版のURL：https://onoken-web.sakura.ne.jp/kb/stg/ （検索に出さない。画面の上に「🧪 テスト版」の帯 `KB_STAGING`）
   - APIもテスト用（`/kb/stg/api.php`）。データベースは本番と別（`~/kb_data_stg/`）なので、テストの記録・ランキングは本番に混ざらない
+- オンライン大会（テスト版だけ。`ON_ENABLED`＝クラウド版かつ `KB_STAGING`）。段階：①オンライン対局の土台（済）②大会（立てる設定・ホームの一覧・エントリー・複数卓・決勝・AIの補充）③観戦（手札は見えない）④上位3位のバッジ（公式・非公式で別）・称号・プロフィールの表示。名前は「オンライン大会」「大会をひらく」
+  - 段階1：卓（2〜5人。コード6文字で入る。ホストはAI★2を入れられる）。山札・手札・式の判定はサーバー（`api.php` の `on_create`・`on_join`・`on_state`・`on_act`、PHPの `obApply`・`obTick`・`obAi2`）。画面は1.5秒ごとに読む（`onPoll`）。自分の手札だけが届き、ほかの人は枚数だけ（終わったら全員の手札）。1手の制限時間は1分・30秒・15秒・10秒。時間切れは自動で引き、3回続くとAI★2が代打ち（「自分で打つ」で戻る）。ゲームの合間は8秒、次の親は前のゲームでPPが一番多かった人。記録・バッジにはまだ入れない。テストは `node online.js`
 - 安定したら `staging` を作業ブランチ（`claude/lucid-curie-k2el7s`）にまとめて、いつもどおり `./publish.sh` で本番へ。作業ブランチ側の直し（毎朝のAI総評の改善など）は、ときどき `staging` にも取り込む
 
 ## テスト（Playwright。`./build.sh` のあと `test/` で実行）

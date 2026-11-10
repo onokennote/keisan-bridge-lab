@@ -383,7 +383,7 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
 // テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
-function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版（記録は本番と別です）'; document.body.appendChild(b); }
+function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です'; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
@@ -419,6 +419,7 @@ function render() {
   else if (S.view === 'attack-result') app.innerHTML = attackResultHTML();
   else if (S.view === 'zukan') app.innerHTML = zukanHTML();
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
+  else if (S.view === 'online') { app.innerHTML = onlineHTML(); setTimeout(onBind, 0); }
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
@@ -2592,6 +2593,7 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
 ${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
+${onlineHomeHTML()}
 <div class="mode-grid">
   <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
@@ -5487,6 +5489,17 @@ function act(a, el) {
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
     case 'next-game': nextGame(); break;
     case 'fab-home': fabHome(); break;
+    case 'on-new': onNewModal(); break;
+    case 'on-create': onEnter('on_create', S.onCfg); break;
+    case 'on-join': { const c = ($('#on-code') || {}).value || ''; if (c.trim().length < 6) { toast('6文字のコードを入れてください'); break; } onEnter('on_join', { id: c.trim() }); break; }
+    case 'on-quit': onStop(); if (ON.v && ON.v.phase === 'lobby') onReq('on_act', { id: ON.v.id, act: 'leave' }).catch(() => { }); ON.v = null; go('home'); break;
+    case 'on-addai': onAct('addai'); break;
+    case 'on-kick': onAct('kick', { seat: +el.dataset.seat }); break;
+    case 'on-begin': onAct('start'); break;
+    case 'on-back': onAct('back'); break;
+    case 'on-draw': onAct('draw'); break;
+    case 'on-play': { const vals = onSelVals(); if (vals.length) onAct('play', { vals }); break; }
+    case 'on-copy': try { navigator.clipboard.writeText(ON.v.id); toast('コピーしました'); } catch (e) { } break;
     case 'fab-home-go': S.resumeFn = null; closeModal(); act('quit'); break;
     case 'undo': undoAsk(); break;
     case 'undo-go': undoGo(); break;
@@ -5598,6 +5611,125 @@ function aiMini(kind, lv, formAdj) {
   }
   return null;
 }
-window.KBAPP = { S, act, aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+
+// ================= オンライン対局（テスト版で試し中。段階1：1卓2〜5人） =================
+// 山札と手札はサーバー（api.php の on_*）が持つ。画面は1.5秒ごとに様子を読み、自分の手札だけを受け取る。
+// 時間切れは自動で「引く」。3回続くとAI★2が代わりに打つ（「自分で打つ」で戻れる）
+const ON_ENABLED = () => CLOUD_ON && !!window.KB_STAGING;
+const ON = { v: null, ver: 0, timer: null, tick: null, sel: [], busy: false, lastCur: null, lastLog: 0, err: '' };
+function onlineHomeHTML() {
+  if (!ON_ENABLED()) return '';
+  const last = store.get('onRoom', null);
+  return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE（テスト中）</div><h2>オンライン大会</h2></div></div>
+    <p class="small muted" style="margin:0">いまは段階1：卓をつくって、コードを知らせた人と対局できます（2〜5人。AI★2も入れられます）。</p>
+    <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
+    <button class="btn primary" data-act="on-new">大会をひらく（卓をつくる）</button></div>`;
+}
+function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar() }; }
+async function onReq(a, extra) { const c = raw.get('kb.cloud', null); if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
+function onNewModal() {
+  S.onCfg = S.onCfg || { n: 4, games: 3, limit: 30 };
+  const c = S.onCfg;
+  modal(`<div class="stack"><h3 style="margin:0">🌐 卓をつくる</h3>
+    <div class="su-row col"><b>人数（自分を入れて）</b>${suSeg('on-n', [[2, '2人'], [3, '3人'], [4, '4人'], [5, '5人']], c.n)}</div>
+    <div class="su-row col"><b>ゲーム数</b>${suSeg('on-games', [[1, '1'], [3, '3'], [5, '5']], c.games)}</div>
+    <div class="su-row col"><b>1手の制限時間</b>${suSeg('on-limit', [[60, '1分'], [30, '30秒'], [15, '15秒'], [10, '10秒']], c.limit)}<small class="muted">時間切れは自動で「引く」。3回続くと、AI★2が代わりに打ちます</small></div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-create">卓をつくる</button></div></div>`);
+  document.querySelectorAll('#modal [data-su]').forEach(b => b.onclick = () => { const k = b.dataset.su.slice(3); S.onCfg[k] = +b.dataset.v; onNewModal(); });
+}
+async function onEnter(a, extra) {
+  try { const v = await onReq(a, Object.assign(onMe(), extra)); closeModal(); store.set('onRoom', v.id); onStart(v); }
+  catch (e) { toast(e.message || '入れませんでした'); }
+}
+function onStart(v) { ON.v = v; ON.ver = v.ver; ON.sel = []; ON.lastCur = null; ON.lastLog = 0; go('online'); onPollStart(); }
+function onPollStart() {
+  clearInterval(ON.timer); clearInterval(ON.tick);
+  ON.timer = setInterval(onPoll, 1500); ON.tick = setInterval(onClock, 250);
+}
+function onStop() { clearInterval(ON.timer); clearInterval(ON.tick); ON.timer = ON.tick = null; }
+async function onPoll() {
+  if (S.view !== 'online' || !ON.v) { onStop(); return; }
+  if (ON.busy) return; ON.busy = true;
+  try { const v = await onReq('on_state', { id: ON.v.id, ver: ON.ver }); ON.skew = Date.now() / 1000 - v.now; if (!v.same) onApply(v); ON.err = ''; }
+  catch (e) { ON.err = e.message || '通信エラー'; const el = $('#on-err'); if (el) el.textContent = '⚠ ' + ON.err; }
+  finally { ON.busy = false; }
+}
+function onApply(v) {
+  const prev = ON.v; ON.v = v; ON.ver = v.ver;
+  const g = v.game;
+  if (g) {
+    const mine = g.cur === v.me && v.phase === 'play' && !(v.seats[v.me] || {}).sub;
+    if (mine && ON.lastCur !== `${v.gameNo}:${g.round}:${g.pos}`) { ON.lastCur = `${v.gameNo}:${g.round}:${g.pos}`; KB.sfx('myturn'); }
+    // 新しく出た手の音（自分以外）
+    const lg = g.log || [], n = lg.length;
+    if (prev && prev.game && prev.gameNo === v.gameNo) { lg.slice(Math.max(0, n - (v.ver - (prev.ver || v.ver)) * 3)).forEach(e => { if (e.p !== v.me && e.type === 'play') KB.sfx(e.vals.length === 3 ? 'play3' : 'play', e.vals.length); }); }
+    if (!mine) ON.sel = [];
+    if (prev && prev.phase === 'play' && v.phase === 'between' && g.winner === v.me) { KB.sfx('win'); confetti(); }
+  }
+  render();
+}
+function onClock() {
+  const v = ON.v, el = $('#on-clock'); if (!v || !el) return;
+  const now = Date.now() / 1000 - (ON.skew || 0);
+  const cs = v.game && v.seats[v.game.cur];
+  if (v.phase === 'play' && cs && (cs.ai || cs.sub)) { el.innerHTML = `<b>🤖 ${esc(cs.name)}の番（AIが打っています）</b>`; el.classList.remove('low'); }
+  else if (v.phase === 'play' && v.game && v.game.deadline) {
+    const left = Math.max(0, v.game.deadline - now), lim = v.cfg.limit;
+    el.innerHTML = `<i style="width:${Math.min(100, left / lim * 100)}%"></i><b>${Math.ceil(left)}秒</b>`; el.classList.toggle('low', left <= 5);
+  } else if (v.phase === 'between' && v.game && v.game.nextAt) { el.innerHTML = `<b>次のゲームまで ${Math.max(0, Math.ceil(v.game.nextAt - now))}秒</b>`; el.classList.remove('low'); }
+  else el.innerHTML = '';
+}
+const onCards = h => (h || []).map((c, i) => ({ v: c[0], s: c[1], id: i }));
+function onSelVals() { const v = ON.v, h = onCards(v.game && v.game.hand); return ON.sel.map(i => h[i] && h[i].v).filter(x => x != null); }
+function onlineHTML() {
+  const v = ON.v; if (!v) return '<div class="panel">読み込み中…</div>';
+  const top = `<div class="topbar"><button class="btn ghost sm" data-act="on-quit">← ホーム</button><div class="where">🌐 卓 <b class="mono">${esc(v.id)}</b></div><div class="small muted">${v.phase === 'lobby' ? '受付中' : v.phase === 'done' ? '終了' : `第${v.gameNo}/${v.cfg.games}ゲーム`}</div></div>`;
+  const tot = i => (v.setPP[i] || []).reduce((a, b) => a + b, 0);
+  const avatar = (s, mood) => KB.avatarSVG(Object.assign({}, s.avatar || AVATAR_DEF, { name: s.name }), { mood: mood || 'normal' });
+  if (v.phase === 'lobby') {
+    return top + `<div class="panel stack on-lobby"><div class="on-code-big">卓のコード <b class="mono">${esc(v.id)}</b><button class="btn sm" data-act="on-copy">コピー</button></div>
+      <p class="small muted" style="margin:0">このコードを知らせると、ほかの人が「オンライン大会」の「入る」から参加できます。${v.cfg.n}人まで・${v.cfg.games}ゲーム・1手${v.cfg.limit >= 60 ? '1分' : v.cfg.limit + '秒'}</p>
+      <div class="on-seats">${v.seats.map((s, i) => `<div class="on-seat"><span class="on-av">${avatar(s, 'happy')}</span><b>${esc(s.name)}</b>${i === 0 ? '<em>ホスト</em>' : ''}${i === v.me ? '<em class="me">あなた</em>' : ''}${v.host && i > 0 ? `<button class="btn sm ghost" data-act="on-kick" data-seat="${i}">外す</button>` : ''}</div>`).join('')}
+        ${[...Array(Math.max(0, v.cfg.n - v.seats.length))].map(() => '<div class="on-seat empty">空席</div>').join('')}</div>
+      ${v.host ? `<div class="row" style="gap:8px;flex-wrap:wrap">${v.seats.length < v.cfg.n ? '<button class="btn" data-act="on-addai">＋ AI★2を入れる</button>' : ''}<button class="btn primary" data-act="on-begin" ${v.seats.length < 2 ? 'disabled' : ''}>対局をはじめる</button></div>` : '<p class="small" style="margin:0">ホストが始めるのを待っています…</p>'}
+      <p class="small muted" id="on-err" style="margin:0"></p></div>`;
+  }
+  const g = v.game, me = v.me, n = v.seats.length;
+  const seatOrder = [...Array(n).keys()].map(k => (Math.max(0, me) + k) % n).filter(i => i !== me);
+  const lastTxt = (i) => { const l = g.last[i]; if (!l) return ''; const by = l.by === 'timeout' ? '⏰ 時間切れで引いた' : l.by === 'sub' ? '🤖 ' : ''; return l.type === 'play' ? `${by}${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}` : (l.by === 'timeout' ? by : `${by}引いた`); };
+  const opp = i => { const s = v.seats[i]; return `<div class="on-opp ${g.cur === i ? 'turn' : ''} ${g.winner === i ? 'win' : ''}"><span class="on-av">${avatar(s)}</span><div class="on-oi"><b>${esc(s.name)}</b>${s.ai ? '<em>AI★2</em>' : s.sub ? '<em class="sub">AIが代打ち</em>' : ''}<span class="small">手札 <b>${g.handN[i]}</b>枚・セット ${tot(i)}PP</span><span class="small muted">${lastTxt(i)}</span>${g.over && g.hands ? `<span class="on-reveal">${onCards(g.hands[i]).map(miniCard).join('')}</span>` : ''}</div></div>`; };
+  const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
+  const hand = onCards(g.hand), mySeat = v.seats[me] || {}, myTurn = v.phase === 'play' && g.cur === me && !mySeat.sub;
+  const vals = onSelVals(), ok = myTurn && vals.length && KB.evalSelection(vals, f.v);
+  let res = '';
+  if (v.phase === 'between' || v.phase === 'done') {
+    const rows = [...Array(n).keys()].map(i => ({ i, pp: g.pp ? g.pp[i] : 0, tot: tot(i) })).sort((a, b) => (v.phase === 'done' ? a.tot - b.tot : a.pp - b.pp));
+    res = `<div class="panel on-res"><h3 style="margin:0">${v.phase === 'done' ? '🏁 セット終了' : g.winner >= 0 ? `${esc(v.seats[g.winner].name)}が上がりました！` : 'ゲーム終了'}</h3>
+      ${rows.map((r, k) => `<div class="on-rrow ${r.i === me ? 'me' : ''}"><b>${k + 1}</b><span>${esc(v.seats[r.i].name)}</span><span>${v.phase === 'done' ? `合計 ${r.tot}PP` : `${r.pp}PP（合計 ${r.tot}）`}</span></div>`).join('')}
+      ${v.phase === 'done' ? '<button class="btn primary" data-act="on-quit">ホームへ</button>' : ''}</div>`;
+  }
+  return top + `<div class="on-table">
+    <div class="on-clock" id="on-clock"></div>
+    <div class="on-opps">${seatOrder.map(opp).join('')}</div>
+    <div class="on-mid">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>` : ''}<div class="small muted">山札 ${g.deckN}・捨て札 ${g.discardN}</div></div>
+    ${res}
+    ${me >= 0 ? `<div class="on-me ${myTurn ? 'turn' : ''}"><div class="on-mh"><span class="on-av">${avatar(mySeat, 'happy')}</span><b>${esc(mySeat.name)}</b><span class="small">手札 ${hand.length}枚・合計 ${hand.reduce((a, c) => a + c.v, 0)}・セット ${tot(me)}PP</span></div>
+      ${mySeat.sub ? '<div class="on-sub">🤖 時間切れが3回続いたので、AI★2が代わりに打っています <button class="btn sm primary" data-act="on-back">自分で打つ</button></div>' : ''}
+      <div class="hand">${hand.map(c => cardHTML(c, { cls: ON.sel.includes(c.id) ? 'sel' : '', extra: `data-oncard="${c.id}" ${myTurn ? '' : 'disabled'}` })).join('')}</div>
+      <div class="on-prev">${myTurn ? (vals.length ? (ok ? `<b class="mono">${esc(ok.expr)} = ${f.v}</b>` : '<span class="muted">この組み合わせでは場の数になりません</span>') : 'カードを選んで「出す」。出せなければ「引く」') : (v.phase === 'play' ? `${esc(v.seats[g.cur] ? v.seats[g.cur].name : '')}の番です` : '')}</div>
+      ${v.phase === 'play' ? `<div class="actions"><button class="btn primary" data-act="on-play" ${ok ? '' : 'disabled'}>出す</button><button class="btn felt-btn" data-act="on-draw" ${myTurn ? '' : 'disabled'}>引く</button></div>` : ''}</div>` : '<p class="small muted">観戦中</p>'}
+    <p class="small muted" id="on-err" style="margin:0">${ON.err ? '⚠ ' + esc(ON.err) : ''}</p></div>`;
+}
+function onBind() {
+  document.querySelectorAll('[data-oncard]').forEach(b => b.onclick = () => { const id = +b.dataset.oncard; ON.sel = ON.sel.includes(id) ? ON.sel.filter(x => x !== id) : ON.sel.length < 3 ? [...ON.sel, id] : ON.sel; KB.sfx('select'); render(); });
+  onClock();
+}
+async function onAct(act, extra) {
+  if (!ON.v) return;
+  try { const v = await onReq('on_act', Object.assign({ id: ON.v.id, act }, extra || {})); if (act === 'play') KB.sfx(extra.vals.length === 3 ? 'play3' : 'play', extra.vals.length); else if (act === 'draw') KB.sfx('draw'); ON.sel = []; onApply(v); }
+  catch (e) { toast(e.message || 'できませんでした'); }
+}
+
+window.KBAPP = { S, act, ON, aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
