@@ -2124,7 +2124,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='61e17eb134';
+window.KB_BUILD='53deb87d44';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6882,8 +6882,28 @@ const MIGRATE_ON = true;
 const CLOUD_API = (typeof window !== 'undefined' && window.KB_CLOUD_API) || '';
 const CLOUD_ON = !IS_ARTIFACT && !!CLOUD_API;
 const CLOUD_KEEP = { 'kb.cloud': 1, 'kb.cloudAt': 1, 'kb.migDone': 1 }; // 同期しない・消さないもの
-const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false };
-function cloudDirty(k) { if (!CLOUD_ON || !k || CLOUD_KEEP[k] || k === 'kb.recentLines' || !k.startsWith('kb.')) return; CLOUD.dirty = true; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudPush, 4000); }
+const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false, dirtyP: new Set() };
+// 記録はプレイヤーごとにクラウドへ保存する（引き継ぎコードもプレイヤーごと）。端末の鍵（kb.cloud）は、この端末で作ったプレイヤーの保存に使う。
+// 引き継ぎコードで別の端末から入れたプレイヤーは、そのプレイヤーだけの鍵（kb.p.<pid>.link の token）で保存する
+const PL_LOCAL = { link: 1, cloudAt: 1 }; // プレイヤーの鍵と、最後にクラウドとそろえた時刻（クラウドには送らない）
+const plKey = (pid, k) => 'kb.p.' + pid + '.' + k;
+const plOf = k => { const m = /^kb\.p\.([a-z0-9]+)\.(.+)$/i.exec(k || ''); return m ? { pid: m[1], k: m[2] } : null; };
+function plLink(pid) {
+  const l = raw.get(plKey(pid, 'link'), null) || {};
+  if (l.token) return l; // 別の端末から入れたプレイヤー
+  if (l.dead) return null; // 鍵が使えなくなった（作った端末で消された）
+  const c = raw.get('kb.cloud', null); return c && c.token ? Object.assign({}, l, { uid: c.uid, token: c.token, own: 1 }) : null;
+}
+const plAt = pid => raw.get(plKey(pid, 'cloudAt'), null);
+function plSetLocal(pid, k, v) { try { localStorage.setItem(plKey(pid, k), JSON.stringify(v)); } catch (e) { } } // 同期しない控え（cloudDirty を通さない）
+function cloudDirty(k) {
+  if (!CLOUD_ON || !k || CLOUD_KEEP[k] || k === 'kb.recentLines' || !k.startsWith('kb.')) return;
+  const p = plOf(k);
+  if (p) { if (PL_LOCAL[p.k]) return; CLOUD.dirtyP.add(p.pid); }
+  else if (k === 'kb.profiles') { if (PID) CLOUD.dirtyP.add(PID); profiles().forEach(x => { if (plAt(x.id) == null) CLOUD.dirtyP.add(x.id); }); } // 名前の変更・新しいプレイヤー
+  else return; // 端末の設定（効果音など）は端末ごと
+  CLOUD.dirty = true; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudPush, 4000);
+}
 async function cloudReq(a, body, keep) {
   const r = await fetch(CLOUD_API + '?a=' + a, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), keepalive: !!keep });
   const j = await r.json().catch(() => ({ ok: false, error: '通信エラー' }));
@@ -6891,69 +6911,115 @@ async function cloudReq(a, body, keep) {
   return j;
 }
 function cloudData() { const d = migCollect(); for (const k in CLOUD_KEEP) delete d[k]; return d; }
-// ランキング用の数字（プレイヤーごと）：推定実力・バッジ数とBP・バッジアタックの自己ベスト
-function cloudStats() {
-  return profiles().map(p => {
-    const g = raw.get('kb.p.' + p.id + '.growth', null) || { games: [], ach: {} }, r = g.games ? ratingOf(g.games) : { ok: false };
-    const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
-    const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
-    const avr = raw.get('kb.p.' + p.id + '.avatar', null);
-    return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, streak: (g.cnt && g.cnt.streakMax) || 0, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, bio: raw.get('kb.p.' + p.id + '.bio', '') || '', card: cardBrief(cardDataOf(p.id, p.name)) };
-  });
+// プレイヤー1人分の記録（kb.p.<pid>.* と名前）
+function plData(pid) {
+  const keys = {}, pre = 'kb.p.' + pid + '.';
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(pre) && !PL_LOCAL[k.slice(pre.length)]) keys[k.slice(pre.length)] = localStorage.getItem(k); } } catch (e) { }
+  const pr = profiles().find(x => x.id === pid) || {};
+  return { v: 1, name: pr.name || '', created: pr.at || 0, keys };
 }
-// 変更があったときだけ送る（force は新規登録の直後など）
-async function cloudPush(keep, force) {
-  const c = raw.get('kb.cloud', null); if (!CLOUD_ON || !c || !c.token || CLOUD.busy || (!CLOUD.dirty && !force)) return;
-  CLOUD.dirty = false;
-  CLOUD.busy = true;
-  try { const at = Date.now(), base = raw.get('kb.cloudAt', 0) || 0; await cloudReq('save', { token: c.token, data: cloudData(), at, base, stats: cloudStats() }, keep); try { localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { } CLOUD.status = 'saved'; CLOUD.err = ''; }
-  catch (e) {
-    if (!e.conflict) CLOUD.dirty = true; // 送れなかった変更は次に送る
-    if (e.conflict) { CLOUD.busy = false; return keep ? null : cloudPull(); } // ほかの端末のほうが新しい：そちらを読み込む（閉じるときは何もしない）
-    CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } }
-  }
-  CLOUD.busy = false;
-}
-// クラウドの新しい記録を読み込む。対局中なら、ホームに戻ったときに読み込む
-async function cloudPull() {
-  const c = raw.get('kb.cloud', null); if (!c) return;
-  if (S.view === 'game' || S.view === 'hunt' || S.view === 'drill') { CLOUD.pendingPull = true; return; }
-  try { const j = await cloudReq('load', { token: c.token }); if (j.data && cloudApply(j.data, j.at)) { toast('ほかの端末の新しい記録を読み込みました'); setTimeout(() => location.reload(), 800); } } catch (e) { }
-}
-function cloudApply(data, at) {
-  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.') && !CLOUD_KEEP[k]) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); for (const k in data) if (k.startsWith('kb.') && !CLOUD_KEEP[k]) localStorage.setItem(k, data[k]); localStorage.setItem('kb.cloudAt', JSON.stringify(at)); } catch (e) { return false; }
+// クラウドの記録でプレイヤー1人分を置きかえる（いなければ、この端末に加える）
+function plApply(pid, data, at) {
+  try {
+    const pre = 'kb.p.' + pid + '.', ks = [];
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(pre) && !PL_LOCAL[k.slice(pre.length)]) ks.push(k); }
+    ks.forEach(k => localStorage.removeItem(k));
+    for (const k in (data.keys || {})) if (!PL_LOCAL[k]) localStorage.setItem(pre + k, data.keys[k]);
+    const L = profiles(), pr = L.find(x => x.id === pid);
+    if (pr) { if (data.name) pr.name = data.name; } else L.push({ id: pid, name: data.name || 'プレイヤー', at: data.created || Date.now() });
+    localStorage.setItem('kb.profiles', JSON.stringify(L));
+    if (pid === PID && data.name) { const st = raw.get(keyOf('settings'), {}) || {}; st.name = data.name; localStorage.setItem(keyOf('settings'), JSON.stringify(st)); }
+    plSetLocal(pid, 'cloudAt', at);
+  } catch (e) { return false; }
   return true;
 }
+// ランキング用の数字（プレイヤーごと）：推定実力・バッジ数とBP・バッジアタックの自己ベスト
+function statsOf(p) {
+  const g = raw.get('kb.p.' + p.id + '.growth', null) || { games: [], ach: {} }, r = g.games ? ratingOf(g.games) : { ok: false };
+  const ach = g.ach || {}, badges = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0);
+  const ab = raw.get('kb.p.' + p.id + '.attackBest', null) || {}, atk = ab.bp != null ? ab.bp : (ab[15] || ab[45] || {}).bp || 0;
+  const avr = raw.get('kb.p.' + p.id + '.avatar', null);
+  return { pid: p.id, name: p.name, hide: !!raw.get('kb.p.' + p.id + '.rankHide', false), rating: r.ok ? Math.round(r.r * 100) / 100 : null, badges, bp: Math.round(bpTotal({ ach })), atk, streak: (g.cnt && g.cnt.streakMax) || 0, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, bio: raw.get('kb.p.' + p.id + '.bio', '') || '', card: cardBrief(cardDataOf(p.id, p.name)) };
+}
+function cloudStats() { return profiles().map(statsOf); }
+// プレイヤー1人を保存する。ほかの端末のほうが新しければ、そちらを読み込む
+async function plPush(pid, keep) {
+  const l = plLink(pid), pr = profiles().find(x => x.id === pid); if (!l || !pr) return;
+  const at = Date.now(), base = plAt(pid) || 0;
+  try {
+    const j = await cloudReq('p_save', { token: l.token, pid, data: plData(pid), at, base, stats: statsOf(pr) }, keep);
+    plSetLocal(pid, 'cloudAt', at);
+    if (j.code && l.code !== j.code) { const s0 = raw.get(plKey(pid, 'link'), null) || {}; s0.code = j.code; plSetLocal(pid, 'link', s0); }
+    CLOUD.status = 'saved'; CLOUD.err = '';
+  } catch (e) {
+    if (e.conflict) { if (!keep) await plPull(pid); return; }
+    CLOUD.dirtyP.add(pid); CLOUD.dirty = true; // 送れなかった変更は次に送る
+    if (e.status === 401) { if (l.own) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } } else { const s0 = raw.get(plKey(pid, 'link'), null) || {}; plSetLocal(pid, 'link', { dead: 1, code: s0.code }); CLOUD.dirtyP.delete(pid); } }
+    CLOUD.status = 'error'; CLOUD.err = e.message;
+  }
+}
+// 変更があったプレイヤーだけ送る（force はすべてのプレイヤー）
+async function cloudPush(keep, force) {
+  const c = raw.get('kb.cloud', null); if (!CLOUD_ON || CLOUD.busy) return;
+  if (force) profiles().forEach(p => CLOUD.dirtyP.add(p.id));
+  if (!CLOUD.dirtyP.size || (!c && !profiles().some(p => (raw.get(plKey(p.id, 'link'), null) || {}).token))) return;
+  const ids = [...CLOUD.dirtyP]; CLOUD.dirtyP.clear(); CLOUD.dirty = false;
+  CLOUD.busy = true;
+  try { for (const pid of ids) await plPush(pid, keep); } finally { CLOUD.busy = false; }
+}
+// クラウドのほうが新しいプレイヤーを読み込む。対局中なら、ホームに戻ったときに読み込む
+async function plPull(pid) {
+  if (S.view === 'game' || S.view === 'hunt' || S.view === 'drill') { CLOUD.pendingPull = true; return; }
+  const l = plLink(pid); if (!l) return;
+  try { const j = await cloudReq('p_load', { token: l.token, pid }); if (j.data && j.at > (plAt(pid) || 0) && plApply(pid, j.data, j.at)) { toast('ほかの端末の新しい記録を読み込みました'); setTimeout(() => location.reload(), 800); } } catch (e) { }
+}
+async function cloudPull() { for (const p of profiles()) await plPull(p.id); }
 async function cloudInit() {
   if (!CLOUD_ON) return;
   try {
     let c = raw.get('kb.cloud', null);
-    if (!c || !c.token) { const j = await cloudReq('register'); c = { uid: j.uid, token: j.token, code: j.code }; try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { } await cloudPush(false, true); return; }
-    const j = await cloudReq('load', { token: c.token }), localAt = raw.get('kb.cloudAt', 0) || 0;
-    if (j.data && j.at > localAt) { // クラウドのほうが新しい：クラウドの記録で開き直す（1回だけ）
-      let once = false; try { once = sessionStorage.getItem('kb.cloudReload') === String(j.at); sessionStorage.setItem('kb.cloudReload', String(j.at)); } catch (e) { }
-      if (!once && cloudApply(j.data, j.at)) { location.reload(); return; }
-    } else if (localAt > j.at || !j.data) await cloudPush(false, true); // 端末のほうが新しい（引っ越し直後など）ときだけ送る
-    CLOUD.status = 'saved';
+    if (!c || !c.token) { const j = await cloudReq('register'); c = { uid: j.uid, token: j.token, code: j.code }; try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { } }
+    // プレイヤーごとに、クラウドと端末の新しいほうにそろえる
+    const oldAt = raw.get('kb.cloudAt', 0) || 0; let changed = false;
+    for (const p of profiles()) {
+      const l = plLink(p.id); if (!l) continue;
+      try {
+        const j = await cloudReq('p_load', { token: l.token, pid: p.id });
+        let loc = plAt(p.id); if (loc == null) loc = l.own ? oldAt : 0; // 前の版（端末まるごと）から移るときは、端末の保存時刻
+        if (j.code && l.code !== j.code) { const s0 = raw.get(plKey(p.id, 'link'), null) || {}; s0.code = j.code; plSetLocal(p.id, 'link', s0); }
+        if (j.data && j.at > loc) { if (plApply(p.id, j.data, j.at)) changed = true; }
+        else { if (plAt(p.id) == null) plSetLocal(p.id, 'cloudAt', j.at || 0); if (!j.data || loc > j.at) CLOUD.dirtyP.add(p.id); }
+      } catch (e) { if (e.status === 401 && !l.own) { const s0 = raw.get(plKey(p.id, 'link'), null) || {}; plSetLocal(p.id, 'link', { dead: 1, code: s0.code }); } else throw e; }
+    }
+    if (changed) { // クラウドのほうが新しい：開き直す（1回だけ）
+      let once = false; const sig = String(profiles().map(p => plAt(p.id)).join()); try { once = sessionStorage.getItem('kb.cloudReload') === sig; sessionStorage.setItem('kb.cloudReload', sig); } catch (e) { }
+      if (!once) { location.reload(); return; }
+    }
+    if (CLOUD.dirtyP.size) { CLOUD.dirty = true; await cloudPush(); }
+    CLOUD.status = CLOUD.status === 'error' ? 'error' : 'saved';
   } catch (e) { CLOUD.status = 'error'; CLOUD.err = e.message; if (e.status === 401) { try { localStorage.removeItem('kb.cloud'); } catch (x) { } } }
 }
+// プレイヤーの引き継ぎコードで、そのプレイヤーをこの端末に加える（この端末のほかのプレイヤーはそのまま）
 async function cloudRestore(code) {
   try {
-    const j = await cloudReq('restore', { code }); const c = { uid: j.uid, token: j.token, code: j.code };
-    const d = await cloudReq('load', { token: j.token });
-    try { localStorage.setItem('kb.cloud', JSON.stringify(c)); } catch (e) { }
-    if (d.data) cloudApply(d.data, d.at || Date.now());
-    toast('引き継ぎました'); setTimeout(() => location.reload(), 600);
-  } catch (e) { toast(e.message || '引き継げませんでした'); }
+    const j = await cloudReq('p_restore', { code });
+    const mine = raw.get('kb.cloud', null), own = mine && mine.uid === j.uid; // この端末で作ったプレイヤーなら端末の鍵のまま
+    plSetLocal(j.pid, 'link', own ? { code: j.code } : { uid: j.uid, token: j.token, code: j.code });
+    const data = j.data || { name: j.name || 'プレイヤー', keys: {} }; if (j.name) data.name = j.name;
+    PID = j.pid; try { localStorage.setItem('kb.profile', JSON.stringify(j.pid)); } catch (e) { }
+    plApply(j.pid, data, j.at || 0); // いまのプレイヤーにして、名前もそろえる
+    toast(`「${data.name}」をこの端末に入れました`); setTimeout(() => location.reload(), 700);
+    return true;
+  } catch (e) { toast(e.message || '引き継げませんでした'); return false; }
 }
 if (CLOUD_ON && typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(CLOUD.timer); cloudPush(true); } });
 function cloudPanelHTML() {
   if (!CLOUD_ON) return '';
-  const c = raw.get('kb.cloud', null);
-  return `<div class="lbl">クラウド保存（引き継ぎコード）</div>
-    <p class="small" style="margin:0">記録はクラウドに保存されます。別の端末で続けるときは、この<b>引き継ぎコード</b>を入れてください。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
-    ${c && c.code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(c.code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、あなたの記録に入れます。</p>` : '<p class="small muted" style="margin:0">準備中…（通信できるようになると、コードが発行されます）</p>'}
-    <details class="small"><summary>別の端末の記録を引き継ぐ</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">引き継ぐ</button></div><p class="small muted" style="margin:4px 0 0">いまこの端末にある記録は、引き継いだ記録に置きかわります。</p></details>`;
+  const l = PID ? plLink(PID) : null, code = l && l.code;
+  return `<div class="lbl">引き継ぎコード（${esc(S.settings.name)}）</div>
+    <p class="small" style="margin:0">記録はプレイヤーごとにクラウドに保存されます。別の端末で${esc(san(S.settings.name))}の記録を使うときは、その端末で<b>このコード</b>を入れてください。どちらの端末で遊んでも、同じ記録に保存されます（この端末のほかのプレイヤーは入りません）。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
+    ${code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、このプレイヤーの記録に入れます。</p>` : `<p class="small muted" style="margin:0">${l && !l.token && l.dead ? 'このプレイヤーは、作った端末で消されたため保存できません。' : 'はじめて保存したあとに、ここにコードが出ます。'}</p>`}
+    <details class="small"><summary>別の端末のプレイヤーを、この端末に入れる</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">入れる</button></div><p class="small muted" style="margin:4px 0 0">そのプレイヤーが、この端末のプレイヤーに加わります。いまこの端末にいるプレイヤーの記録は、そのまま残ります。</p></details>`;
 }
 // ---------- ランキング ----------
 // 4つのランキングを並べて全部見せる（各上位20人＋20位より下の自分）
@@ -6975,7 +7041,7 @@ function rankingHTML() {
 }
 const rankWithAi = () => raw.get('kb.rankAI', true) !== false; // 見る人ごとの設定（はじめはON）
 async function rankingLoad() {
-  const c = raw.get('kb.cloud', null);
+  const c = (PID && plLink(PID)) || raw.get('kb.cloud', null);
   const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
   bindHide();
   if (S.rank && !S.rank.home && S.rank.ai === rankWithAi() && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
@@ -7718,7 +7784,7 @@ async function nameCheck(name, exceptPid) {
   if (profiles().some(p => p.id !== exceptPid && norm(p.name) === norm(name))) return 'この端末に、同じ名前のプレイヤーがもういます';
   if (!CLOUD_ON) return null;
   try {
-    const c = raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''))).json();
+    const c = (exceptPid && plLink(exceptPid)) || raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''))).json();
     if (j.ok && !j.free) return j.why === 'ng' ? 'その名前は使えません。ほかの名前にしてください' : 'その名前は、ほかのプレイヤーがもう使っています';
   } catch (e) { } // つながらないときは止めない（サーバー側でも重複は「研究員○○」になる）
   return null;
@@ -7730,6 +7796,7 @@ function askName(again) {
     <input id="new-name" class="name-input" maxlength="10" placeholder="名前" value="${again ? '' : esc(S.settings.name !== 'あなた' ? S.settings.name : '')}">
     <p class="small name-err" id="name-err" hidden></p>
     <button class="btn primary upd-go" data-act="create-profile">はじめる</button>
+    ${CLOUD_ON ? `<details class="an-code"><summary>${again ? '別の端末のプレイヤーを入れる（引き継ぎコード）' : '別の端末で遊んでいた人は（引き継ぎコード）'}</summary><p class="small" style="margin:4px 0">別の端末の「プレイヤー」に出ている引き継ぎコードを入れると、そのプレイヤーの記録でこの端末でも遊べます。</p><div class="row" style="gap:6px;flex-wrap:wrap;justify-content:center"><input id="an-code" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px" autocomplete="off"><button class="btn" data-act="code-restore">入る</button></div></details>` : ''}
     ${again ? '<button class="btn ghost sm" data-act="close">やめる</button>' : ''}</div>`);
   setTimeout(() => { const i = $('#new-name'); if (i) { i.focus(); i.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) act('create-profile'); }; } }, 50);
 }
@@ -7742,9 +7809,13 @@ function switchProfile(id) {
 // プレイヤーの削除：その人の成長記録・続きからも消す（プレイ中の人を消したら、残っている人に切り替える）
 function deleteProfile(id) {
   const L = profiles(), pr = L.find(x => x.id === id); if (!pr || L.length < 2) return;
-  for (const k in PROFILE_KEYS) raw.del('kb.p.' + id + '.' + k);
+  // クラウド：この端末で作ったプレイヤーはランキング・引き継ぎコードも消す。別の端末から入れたプレイヤーは、この端末から外すだけ（記録はクラウドに残る）
+  const l = CLOUD_ON ? plLink(id) : null, own = l && l.own;
+  if (own) cloudReq('p_del', { token: l.token, pid: id }).catch(() => { });
+  CLOUD.dirtyP.delete(id);
+  try { const ks = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith('kb.p.' + id + '.')) ks.push(k); } ks.forEach(k => localStorage.removeItem(k)); } catch (e) { }
   raw.set('kb.profiles', L.filter(x => x.id !== id));
-  toast(`「${pr.name}」を削除しました`);
+  toast(l && !own ? `「${pr.name}」をこの端末から外しました（記録はクラウドに残っています）` : `「${pr.name}」を削除しました`);
   if (id === PID) switchProfile(profiles()[0].id); else { profileModal(); render(); setTimeout(profileModal, 0); }
 }
 function profileModal() {
@@ -8234,7 +8305,7 @@ function pbRankHTML() {
 }
 // 総合の順位用に、AI込みと人だけのランキングを読む（ランキング画面のAIの切り替えとは別に持つ）
 async function homeRankFetch() {
-  const c = raw.get('kb.cloud', null), u = encodeURIComponent((c && c.uid) || '');
+  const c = (PID && plLink(PID)) || raw.get('kb.cloud', null), u = encodeURIComponent((c && c.uid) || '');
   const [j, h] = await Promise.all([fetch(CLOUD_API + '?a=rankings&uid=' + u).then(r => r.json()), fetch(CLOUD_API + '?a=rankings&ai=0&uid=' + u).then(r => r.json()).catch(() => null)]);
   if (j.ok && j.rankings) { S.homeRank = j.rankings; S.homeRankAt = Date.now(); }
   if (h && h.ok && h.rankings) S.rankHuman = h.rankings;
@@ -11139,7 +11210,7 @@ function act(a, el) {
     case 'chart-open': chartIntro(); break;
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
     case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
-    case 'cloud-restore': { const v = (($('#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } cloudRestore(v); break; }
+    case 'cloud-restore': case 'code-restore': { const v = (($(a === 'code-restore' ? '#an-code' : '#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } if (S.restBusy) break; S.restBusy = true; cloudRestore(v).finally(() => { S.restBusy = false; }); break; }
     case 'watch-start': { closeModal(); const first = !store.get('watched', false); store.set('watched', true); watchStart(first); break; } // 初めての観戦は、強さも性格もそろった決まった顔ぶれ
     case 'watch-first': closeModal(); watchStart(true); break;
     case 'tut-start': tutStart(); break;
@@ -11468,7 +11539,7 @@ function otourHTML() {
       ${body}</div>`;
 }
 function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }
-async function onReq(a, extra) { const c = raw.get('kb.cloud', null); if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
+async function onReq(a, extra) { const c = PID ? plLink(PID) : null; if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
 function onNewModal() {
   S.onCfg = S.onCfg || { n: 4, games: 3, limit: 30, judge: 'after3' };
   const c = S.onCfg;
@@ -11769,7 +11840,7 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>
