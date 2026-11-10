@@ -2116,3 +2116,5 @@ body.rewinding #home-fab{display:none}
 .on-round .fieldcard{position:relative;width:74px;height:104px;animation:onflip .5s ease-out .15s both}
 @keyframes onflip{from{transform:rotateY(90deg)}to{transform:none}}
 .on-round.out{opacity:0;transition:opacity .35s}
+/* PC（マウスで操作する広い画面）はホームボタンを1.5倍に */
+@media (min-width:900px) and (hover:hover){#home-fab{width:81px;height:81px;right:24px;bottom:24px}#home-fab span{font-size:30px}#home-fab small{font-size:13px}body.has-fab #app{padding-bottom:110px}}
