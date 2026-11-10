@@ -1945,10 +1945,17 @@ body.rewinding #app{animation:rw-jit .12s steps(2) infinite;filter:hue-rotate(16
 .su-ptspre .su-seg{flex-wrap:nowrap}
 .su-ptspre .su-seg button{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px}
 .su-ptspre .su-seg button small{font-size:9.5px;white-space:nowrap;letter-spacing:-.3px}
+/* どの画面でも右下の 🏠 */
+#home-fab{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:45;width:54px;height:54px;border-radius:50%;border:1.5px solid var(--trim);background:rgba(12,25,22,.88);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 4px 14px rgba(0,0,0,.5);cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#home-fab span{font-size:20px;line-height:1.05;display:block;margin-top:2px}
+#home-fab small{font-size:9px;color:var(--trim);font-weight:800;line-height:1;margin-top:3px;display:block}
+#home-fab:active{transform:scale(.94)}
+body.has-fab #app{padding-bottom:76px}
+body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='1d9cf99e8d';
+window.KB_BUILD='3337f65c5a';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5858,8 +5865,27 @@ function ctxFor(pIdx) {
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+// どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
+function syncFab() {
+  let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
+  if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
+  if (!b) { b = document.createElement('button'); b.id = 'home-fab'; b.type = 'button'; b.title = 'ホームへ'; b.setAttribute('aria-label', 'ホームへ'); b.innerHTML = '<span>🏠</span><small>ホーム</small>'; b.onclick = e => { e.stopPropagation(); KB.sfx('click'); fabHome(); }; document.body.appendChild(b); }
+  document.body.classList.add('has-fab');
+}
+function fabHome() {
+  if (S.view === 'game' && S.game) {
+    if (S.spectate) { act('watch-quit'); return; }
+    if (S.attack) { act('quit'); return; } // バッジアタックは今までどおり「中止しますか？」
+    const resume = S.T && !S.tiebreak && !S.game.over;
+    modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${resume ? 'いったんホームに戻るで。続きは、ホームの「続きから」でいつでも再開できるからな！' : 'ホームに戻るで。ええか？'}</div></div></div>
+      <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="fab-home-go">🏠 ホームへ</button></div>`);
+    pauseGame(); return;
+  }
+  if (S.view === 'hunt') { const q = document.querySelector('[data-act="hunt-quit"]'); if (q && S.hunt && S.hunt.started && !S.hunt.over) { q.click(); return; } }
+  go('home');
+}
 function render() {
-  const app = $('#app');
+  const app = $('#app'); syncFab();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
@@ -10885,6 +10911,8 @@ function act(a, el) {
     case 'attack-abort': attackFinish(true); break;
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
     case 'next-game': nextGame(); break;
+    case 'fab-home': fabHome(); break;
+    case 'fab-home-go': S.resumeFn = null; closeModal(); act('quit'); break;
     case 'undo': undoAsk(); break;
     case 'undo-go': undoGo(); break;
     case 'undo-no': closeModal(); break;

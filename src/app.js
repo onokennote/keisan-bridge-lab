@@ -381,8 +381,27 @@ function ctxFor(pIdx) {
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+// どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
+function syncFab() {
+  let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
+  if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
+  if (!b) { b = document.createElement('button'); b.id = 'home-fab'; b.type = 'button'; b.title = 'ホームへ'; b.setAttribute('aria-label', 'ホームへ'); b.innerHTML = '<span>🏠</span><small>ホーム</small>'; b.onclick = e => { e.stopPropagation(); KB.sfx('click'); fabHome(); }; document.body.appendChild(b); }
+  document.body.classList.add('has-fab');
+}
+function fabHome() {
+  if (S.view === 'game' && S.game) {
+    if (S.spectate) { act('watch-quit'); return; }
+    if (S.attack) { act('quit'); return; } // バッジアタックは今までどおり「中止しますか？」
+    const resume = S.T && !S.tiebreak && !S.game.over;
+    modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${resume ? 'いったんホームに戻るで。続きは、ホームの「続きから」でいつでも再開できるからな！' : 'ホームに戻るで。ええか？'}</div></div></div>
+      <div class="row" style="justify-content:flex-end;gap:8px;margin-top:10px"><button class="btn" data-act="close">続ける</button><button class="btn primary" data-act="fab-home-go">🏠 ホームへ</button></div>`);
+    pauseGame(); return;
+  }
+  if (S.view === 'hunt') { const q = document.querySelector('[data-act="hunt-quit"]'); if (q && S.hunt && S.hunt.started && !S.hunt.over) { q.click(); return; } }
+  go('home');
+}
 function render() {
-  const app = $('#app');
+  const app = $('#app'); syncFab();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
@@ -5408,6 +5427,8 @@ function act(a, el) {
     case 'attack-abort': attackFinish(true); break;
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
     case 'next-game': nextGame(); break;
+    case 'fab-home': fabHome(); break;
+    case 'fab-home-go': S.resumeFn = null; closeModal(); act('quit'); break;
     case 'undo': undoAsk(); break;
     case 'undo-go': undoGo(); break;
     case 'undo-no': closeModal(); break;
