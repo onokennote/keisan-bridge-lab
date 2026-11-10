@@ -1947,3 +1947,11 @@ body.rewinding #app{animation:rw-jit .12s steps(2) infinite;filter:hue-rotate(16
 #home-fab:active{transform:scale(.94)}
 body.has-fab #app{padding-bottom:76px}
 body.rewinding #home-fab{display:none}
+/* ランキングの成績カード：上にアイコンと名前を大きく */
+.rk-hero{display:flex;align-items:center;gap:14px;padding:2px 4px 0}
+.rk-hero-av{width:84px;height:84px;flex:none;border-radius:20px;overflow:hidden;border:2px solid var(--trim);box-shadow:0 4px 14px rgba(0,0,0,.45);background:var(--surface)}
+.rk-hero-av svg{width:100%;height:100%;display:block}
+.rk-hero-tx{display:flex;flex-direction:column;gap:4px;min-width:0}
+.rk-hero-tx b{font:900 26px/1.2 var(--f-display);color:var(--ink);overflow-wrap:anywhere}
+.rk-hero-tx small{color:var(--trim);font-weight:800}
+.rk-hero-tx .ai-chip{align-self:flex-start}

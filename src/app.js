@@ -1321,8 +1321,12 @@ async function rankingLoad() {
   if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); bindHide(); }
 }
 // ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
-async function rankCardOpen(rid, me) {
-  modal(`<div class="stack share-modal rk-card"><div class="share-prev"><span class="small muted">成績カードを読み込んでいます…</span></div><div class="rk-bio-box"></div>
+async function rankCardOpen(rid, me, el) {
+  // 上にアイコンと名前を大きく（押したアイコンをそのまま使う）
+  const row = el && el.closest('.rk-row'), nmEl = row && row.querySelector('.rk-nm'), svg = el && el.querySelector('svg');
+  const nm0 = nmEl ? (nmEl.childNodes[0] && nmEl.childNodes[0].textContent || '').trim() : (el && el.dataset.name) || (me ? S.settings.name : '');
+  const hero = svg ? `<div class="rk-hero"><div class="rk-hero-av">${svg.outerHTML}</div><div class="rk-hero-tx"><b>${esc(nm0)}</b>${row && row.querySelector('.ai-chip') ? '<em class="ai-chip">AI研究員</em>' : ''}${me ? '<small>あなた</small>' : ''}</div></div>` : '';
+  modal(`<div class="stack share-modal rk-card">${hero}<div class="share-prev"><span class="small muted">成績カードを読み込んでいます…</span></div><div class="rk-bio-box"></div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   const put = (html, bio, name) => { const b = $('#modal .share-prev'); if (b) b.innerHTML = html; const q = $('#modal .rk-bio-box'); if (q) q.innerHTML = bio ? `<div class="rk-bio"><small>${esc(name)}の${S.rankCardAi ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(bio).replace(/\n/g, '<br>')}</div>` : `<p class="small muted" style="margin:0">${esc(name)}の自己紹介はまだありません。</p>`; };
   try {
@@ -2484,7 +2488,7 @@ async function migrateIn(t) {
 // タイトルの6人：BPランキングの上位でアバターを作った人がいれば、その人たちを先に並べる（押すと成績カード）。残りはAIのキャラ
 function castHTML() {
   const R = CLOUD_ON && S.rank && S.rank.rankings && S.rank.rankings.bp, top = R ? R.list.filter(x => x.avatar && x.rid && !x.ai).slice(0, 6) : []; // タイトルには本物のプレイヤーだけ
-  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-me="${rankMe(x) ? 1 : ''}" title="BP${x.rank}位　${esc(x.name)}（${x.bp}BP）" aria-label="BP${x.rank}位 ${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' })}<i>${x.rank}</i></button>`);
+  const ppl = top.map(x => `<button class="cast-p" data-act="rank-card" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}" data-me="${rankMe(x) ? 1 : ''}" title="BP${x.rank}位　${esc(x.name)}（${x.bp}BP）" aria-label="BP${x.rank}位 ${esc(x.name)}の成績カードを見る">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar), { mood: 'happy' })}<i>${x.rank}</i></button>`);
   if (!S.castPool) S.castPool = KB.shuffle(KB.ROSTER.slice()).slice(0, 6);
   const ai = S.castPool.slice(0, 6 - ppl.length).sort((a, b) => a.lv - b.lv).map((c, i) => KB.avatarSVG(KB.charToCh(c), { mood: ['happy', 'normal', 'smug', 'worried', 'normal', 'happy'][i], level: c.lv, style: c.st }));
   return ppl.join('') + ai.join('');
@@ -5418,7 +5422,7 @@ function act(a, el) {
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
-    case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me); break;
+    case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'bio-edit': bioEdit(el.dataset.from); break;
     case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;

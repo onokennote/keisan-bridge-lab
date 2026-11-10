@@ -86,6 +86,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   // ランキングでアイコンを押すと、その人の成績カードと自己紹介
   await pb.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)).querySelector('[data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
   ok(await pb.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'ほかの人のアイコンを押すと成績カードと自己紹介が出る');
+  ok(await pb.evaluate(() => /ケン/.test((document.querySelector('#modal .rk-hero b') || {}).textContent || '') && !!document.querySelector('#modal .rk-hero svg')), '成績カードの上に、アイコンと名前が大きく出る');
   await pb.screenshot({ path: path.join(__dirname, 'out', 'rank_card.png') });
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   await pb.evaluate(() => document.querySelector('.rk-row.me [data-act="rank-card"]').click()); await pb.waitForTimeout(2500);
