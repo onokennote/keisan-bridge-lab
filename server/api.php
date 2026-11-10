@@ -305,7 +305,7 @@ function obTick(array &$st, float $now): bool {
 function obView(array $st, string $uid, string $id, int $ver): array {
   $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $uid) $me = $i;
   $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'lv' => (int)($s['lv'] ?? 2), 'slot' => $s['slot'] ?? null, 'sub' => empty($s['ai']) && (($s['miss'] ?? 0) >= 3 || !empty($s['auto'])), 'subLv' => ($s['miss'] ?? 0) < 3 && !empty($s['auto']) ? (int)($s['subLv'] ?? 2) : 2, 'auto' => !empty($s['auto']), 'miss' => $s['miss'] ?? 0], $st['seats']);
-  $v = ['ok' => true, 'id' => $id, 'ver' => $ver, 'phase' => $st['phase'], 'cfg' => $st['cfg'], 'seats' => $seats, 'me' => $me, 'host' => empty($st['tour']) && ($st['seats'][0]['uid'] ?? '') === $uid, 'tour' => $st['tour'] ?? null, 'label' => $st['label'] ?? null, 'gameNo' => $st['gameNo'], 'setPP' => $st['setPP'], 'now' => microtime(true)];
+  $v = ['ok' => true, 'id' => $id, 'ver' => $ver, 'phase' => $st['phase'], 'cfg' => $st['cfg'], 'seats' => $seats, 'me' => $me, 'host' => empty($st['tour']) && ($st['seats'][0]['uid'] ?? '') === $uid, 'tour' => $st['tour'] ?? null, 'label' => $st['label'] ?? null, 'chat' => array_slice($st['chat'] ?? [], -12), 'gameNo' => $st['gameNo'], 'setPP' => $st['setPP'], 'now' => microtime(true)];
   if (isset($st['game'])) {
     $g = $st['game'];
     $v['game'] = ['field' => $g['field'], 'round' => $g['round'], 'pos' => $g['pos'], 'order' => $g['order'], 'cur' => obCur($g), 'over' => $g['over'], 'winner' => $g['winner'], 'pp' => $g['pp'],
@@ -781,7 +781,7 @@ try {
       if ((int)($b['ver'] ?? 0) === $ver) out(['ok' => true, 'same' => true, 'ver' => $ver, 'now' => microtime(true)]);
       out(obView($st, $u['uid'], $id, $ver));
     }
-    case 'on_act': { // 自分の手：play（vals）/ draw / back（AIの代打ちから戻る）/ addai・kick・start（ホスト）/ leave
+    case 'on_act': { // 自分の手：play（vals）/ draw / back（AIの代打ちから戻る）/ chat（ひとこと）/ addai・kick・start（ホスト）/ leave
       $b = body(); $u = authUser($b); $id = strtoupper(preg_replace('/[^0-9A-Za-z]/', '', (string)($b['id'] ?? ''))); $act = (string)($b['act'] ?? '');
       [$st, $ver] = obLoad($id, true); $now = microtime(true); obTick($st, $now);
       $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $u['uid']) $me = $i;
@@ -804,6 +804,13 @@ try {
         if ($me < 0 || $st['phase'] === 'lobby') $err = '対局中だけ任せられます'; else { $st['seats'][$me]['auto'] = true; $st['seats'][$me]['subLv'] = max(2, min(4, (int)($b['lv'] ?? 2))); if (obCur($st['game'] ?? ['over' => true]) === $me) $st['turnAt'] = $now - 0.5; }
       } elseif ($act === 'back') {
         if ($me >= 0) { $st['seats'][$me]['miss'] = 0; unset($st['seats'][$me]['auto']); }
+      } elseif ($act === 'chat') { // 短いひとこと（30文字まで。ふさわしくない言葉・URL・連絡先ははじく。席の人だけ・2.5秒に1回）
+        $t = trim(mb_substr(preg_replace('/[\x00-\x1F\x7F<>]/u', '', (string)($b['text'] ?? '')), 0, 30));
+        if ($me < 0) $err = '席についている人だけが送れます';
+        elseif ($t === '') $err = 'ひとことを入れてください';
+        elseif (!nameOk($t)) $err = 'その言葉は使えません。ほかの言い方にしてください';
+        elseif ($now - (float)($st['seats'][$me]['chatAt'] ?? 0) < 2.5) $err = '少し待ってから送ってください';
+        else { $st['seats'][$me]['chatAt'] = $now; $cid = (int)($st['chatN'] ?? 0) + 1; $st['chatN'] = $cid; $st['chat'][] = ['id' => $cid, 'p' => $me, 't' => $t, 'at' => (int)$now]; $st['chat'] = array_slice($st['chat'], -20); }
       } elseif ($act === 'play' || $act === 'draw') {
         if ($st['phase'] !== 'play' || $me < 0 || obCur($st['game']) !== $me) $err = 'あなたの番ではありません';
         elseif (($st['seats'][$me]['miss'] ?? 0) >= 3 || !empty($st['seats'][$me]['auto'])) $err = 'AIが代わりに打っています（「自分で打つ」で戻れます）';
