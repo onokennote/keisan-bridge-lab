@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="3fd5650 2026-11-10 15:27"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="38c0f9e 2026-11-10 19:00"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2003,11 +2003,126 @@ body.rewinding #home-fab{display:none}
 .pv-badges svg{width:26px;height:26px}
 .rk-row[data-act]{cursor:pointer}.rk-row[data-act]:active{filter:brightness(1.15)}
 /* テスト版の帯 */
-#stg-band{position:fixed;top:0;left:50%;transform:translateX(-50%);z-index:9500;padding:2px 12px;border-radius:0 0 10px 10px;background:#7b2ff2;color:#fff;font-size:11px;font-weight:800;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+#stg-band{position:fixed;top:0;right:8px;z-index:9500;padding:2px 12px;border-radius:0 0 8px 8px;background:#7b2ff2;color:#fff;font-size:10px;opacity:.9;font-weight:800;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.4)}
+/* オンライン対局（テスト中） */
+.on-card{border-color:#7b2ff2}
+.on-join{display:flex;gap:6px}.on-join input{flex:1;text-transform:uppercase;letter-spacing:3px;font-family:var(--f-mono)}
+.on-code-big{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}.on-code-big b{font-size:28px;letter-spacing:4px;color:var(--accent)}
+.on-seats{display:flex;flex-direction:column;gap:6px}
+.on-seat{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(255,255,255,.05)}
+.on-seat.empty{color:var(--muted);justify-content:center;border:1px dashed var(--line)}
+.on-seat em{font-style:normal;font-size:10px;padding:1px 6px;border-radius:999px;background:var(--trim-soft)}.on-seat em.me{background:var(--accent);color:#2a1c00}
+.on-seat .btn{margin-left:auto}
+.on-av{width:40px;height:40px;flex:none;border-radius:10px;overflow:hidden;display:inline-block}.on-av svg{width:100%;height:100%;display:block}
+.on-table{display:flex;flex-direction:column;gap:10px}
+.on-clock{position:relative;height:20px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
+.on-clock i{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,#3fae6a,#f2b632);transition:width .25s linear}
+.on-clock.low i{background:#ff6b6b}
+.on-clock b{position:relative;display:block;text-align:center;font-size:12px;line-height:20px}
+.on-opps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.on-opp{display:flex;gap:6px;padding:6px;border-radius:12px;background:rgba(0,0,0,.25);border:2px solid transparent;min-width:0}
+.on-opp.turn{border-color:var(--accent)}.on-opp.win{border-color:var(--good)}
+.on-oi{display:flex;flex-direction:column;min-width:0}.on-oi b{font-size:13px}.on-oi em{font-style:normal;font-size:10px;color:var(--info)}.on-oi em.sub{color:var(--warn)}
+.on-oi .small{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.on-reveal{display:flex;flex-wrap:wrap;gap:2px}
+.on-mid{display:flex;flex-direction:column;align-items:center;gap:4px}
+.on-me{padding:10px;border-radius:14px;background:rgba(0,0,0,.25);border:2px solid transparent}
+.on-me.turn{border-color:var(--accent);box-shadow:0 0 16px rgba(242,182,50,.35)}
+.on-mh{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.on-sub{padding:8px;border-radius:10px;background:rgba(255,159,67,.15);color:var(--warn);font-size:12.5px;margin-bottom:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.on-prev{min-height:22px;font-size:13px;margin:6px 0}
+.on-res .on-rrow{display:grid;grid-template-columns:2em 1fr auto;gap:8px;padding:4px 0;border-bottom:1px solid var(--line)}
+.on-res .on-rrow.me{color:var(--accent)}
+.on-tlist{display:flex;flex-direction:column;gap:6px}
+.on-trow{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);font:inherit;cursor:pointer}
+.on-tn{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.on-tn b{font-size:15px}
+.on-st{font-style:normal;font-size:10px;padding:1px 7px;border-radius:999px;background:rgba(255,255,255,.12);color:var(--muted)}
+.on-st.open{background:rgba(91,209,122,.2);color:var(--good)}.on-st.live{background:rgba(255,107,107,.2);color:var(--bad)}
+.on-off{font-style:normal;font-size:10px;padding:1px 7px;border-radius:999px;background:var(--accent);color:#2a1c00;font-weight:800}
+.on-in{color:var(--good)}
+.on-free summary{cursor:pointer;font-size:12px;color:var(--muted)}.on-free[open]{display:flex;flex-direction:column;gap:6px}
+.on-new textarea{width:100%;box-sizing:border-box;font:inherit;background:#08131b;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px}
+.on-th{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.on-ent{display:flex;flex-wrap:wrap;gap:6px}.on-e{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:2px 8px 2px 2px;border-radius:999px;background:rgba(255,255,255,.06)}.on-e .on-av{width:26px;height:26px;border-radius:50%}
+.on-stand{display:flex;flex-direction:column;font-size:13px}
+.on-sh,.on-sr{display:grid;grid-template-columns:2.4em 1fr 4.5em 4em;gap:6px;padding:5px 4px;border-bottom:1px solid var(--line);align-items:center}
+.on-sh{font-size:11px;color:var(--muted)}.on-sr.me{color:var(--accent);font-weight:800}.on-sr em{font-style:normal;font-size:10px;margin-left:4px;color:var(--info)}
+.on-sr span:nth-child(3),.on-sr span:nth-child(4),.on-sh span:nth-child(3),.on-sh span:nth-child(4){text-align:right}
+/* 観戦 */
+.on-watch{padding:6px 10px;border-radius:10px;background:rgba(90,180,255,.12);color:var(--info);font-size:12px}
+.on-opp[data-onpov]{cursor:pointer}
+.on-backs .card.back{width:40px;height:56px;border-radius:6px;background:repeating-linear-gradient(45deg,#c3272b 0 4px,#e8e2d0 4px 8px);border:2px solid #fffaf0;display:inline-block}
+.on-tag{font-style:normal;font-size:10px;color:var(--info)}.on-tag.sub{color:var(--warn)}
+.on-rooms{display:flex;flex-direction:column;gap:6px}
+.on-room{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid rgba(90,180,255,.4);background:rgba(90,180,255,.08);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.on-room:disabled{opacity:.45;cursor:default}
+.pv-aw{display:flex;flex-direction:column;gap:4px;padding:8px 10px;border-radius:10px;background:rgba(242,182,50,.08);border:1px solid var(--trim-soft)}
+.pv-aw>b{font-size:13px}.pv-aw span{font-size:13px}.pv-aw small{color:var(--muted);margin-left:6px;font-size:10.5px}
+/* 称号とメダル */
+.pv-title{align-self:flex-start;font-size:12px;font-weight:800;padding:2px 10px;border-radius:999px;background:rgba(242,182,50,.15);color:var(--accent);border:1px solid var(--trim-soft)}
+.pv-title.off{background:linear-gradient(90deg,#f7d774,#e0a820);color:#2a1c00;border-color:#fff3c0;box-shadow:0 0 10px rgba(255,210,90,.5)}
+.pv-title em{font-style:normal;font-size:10px;margin-right:4px;padding:0 5px;border-radius:999px;background:#2a1c00;color:#ffe08a}
+.pv-pods{display:flex;flex-direction:column;gap:4px}
+.pv-pod{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.05)}
+.pv-pod.off{background:rgba(242,182,50,.12);border:1px solid var(--trim-soft)}
+.pv-pod b{font-size:12px;min-width:7em}
+.pv-md{font-size:22px;display:inline-flex;align-items:baseline;gap:1px}.pv-md small{font-size:12px;font-weight:800;color:var(--ink)}
+.pb-title{align-self:flex-start;margin:4px 0;font:inherit;font-size:12px;font-weight:800;padding:3px 12px;border-radius:999px;border:1px solid var(--trim);background:rgba(242,182,50,.12);color:var(--accent);cursor:pointer}
+.ttl-list{display:flex;flex-direction:column;gap:6px}
+.ttl{text-align:left;font:inherit;padding:8px 12px;border-radius:10px;border:1px solid var(--line);background:rgba(255,255,255,.04);color:var(--ink);cursor:pointer}
+.ttl.on{border-color:var(--accent);background:rgba(242,182,50,.15)}.ttl.off em{font-style:normal;font-size:10px;margin-right:4px;padding:0 5px;border-radius:999px;background:var(--accent);color:#2a1c00}
+/* オンライン大会の設定は、ほかの設定画面と同じ黄色系 */
+.on-new .su-seg,#modal .su-seg.on-y{background:rgba(0,0,0,.3);border-color:var(--trim-soft)}
+.on-new .su-seg button{color:var(--muted)}
+.on-new .su-seg button.on{background:linear-gradient(180deg,#ffd166,#f2b632);color:#2a1c00;box-shadow:0 2px 8px rgba(242,182,50,.35)}
+.on-new .su-in,.on-new textarea{border-color:var(--trim-soft)}
+/* オンライン対局の演出 */
+.on-top .game-prog{flex-wrap:wrap}
+.on-clock{margin:0 0 6px}
+.on-clock.mine i{background:linear-gradient(90deg,#f2b632,#ffd166)}.on-clock.mine.low i{background:#ff6b6b;animation:onpulse .5s ease-in-out infinite alternate}
+@keyframes onpulse{from{opacity:.65}to{opacity:1}}
+.on-subchip{background:rgba(255,159,67,.25);color:var(--warn)}.on-humanchip{background:rgba(90,180,255,.18);color:var(--info)}
+.on-tbl .card.back,.on-backs .card.back{width:40px;height:56px;border-radius:6px;background:repeating-linear-gradient(45deg,#c3272b 0 4px,#e8e2d0 4px 8px);border:2px solid #fffaf0;display:inline-block}
+.on-open .wh-box,.on-cer .wh-box{max-width:420px}
+.on-cast{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;margin:12px 0}
+.on-cp{display:flex;flex-direction:column;align-items:center;gap:2px;animation:pop .4s ease-out both}
+.on-cp .on-av{width:52px;height:52px;border-radius:12px;border:2px solid var(--trim)}.on-cp small{font-size:11px;max-width:5.5em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.on-vs{font-family:var(--f-display);color:var(--accent);font-size:13px}
+.on-banner{position:fixed;left:50%;top:38%;translate:-50% -50%;z-index:9000;display:flex;flex-direction:column;align-items:center;padding:14px 28px;border-radius:16px;background:rgba(10,25,20,.9);border:2px solid var(--trim);box-shadow:0 10px 30px rgba(0,0,0,.6);animation:pop .3s ease-out;pointer-events:none}
+.on-banner b{font:400 34px var(--f-display);color:var(--accent)}.on-banner small{color:var(--ink)}
+.on-banner.out{opacity:0;transition:opacity .4s}
+.on-ready{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:12px;background:rgba(242,182,50,.1);border:2px solid var(--trim)}
+.on-ready b{font:400 18px var(--f-display);color:var(--accent)}
+.on-ready-btn{font-size:18px;padding:12px}
+.on-pod{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:14px 0 6px}
+.pd{display:flex;flex-direction:column;align-items:center;gap:3px;animation:pop .5s ease-out both}
+.pd.p1{animation-delay:.6s}.pd.p2{animation-delay:.3s}.pd.p3{animation-delay:.1s}
+.pd .on-av{width:56px;height:56px;border-radius:14px;border:2px solid var(--trim)}.pd.p1 .on-av{width:70px;height:70px;border-color:#ffd166;box-shadow:0 0 18px rgba(255,210,100,.7)}
+.pd b{font-size:12px;max-width:6em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pd-step{width:84px;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#3a6a55,#1e3d31);border:1px solid var(--trim-soft);font-size:26px}
+.pd.p1 .pd-step{height:86px;background:linear-gradient(180deg,#e0b04a,#8a6a20)}.pd.p2 .pd-step{height:64px}.pd.p3 .pd-step{height:48px}
+.pd-step small{font-size:11px;color:#fff}
+.on-aw{text-align:center;font-weight:800;color:var(--accent);margin:6px 0}
+.on-tabs{display:flex;gap:4px;border-bottom:2px solid var(--trim-soft)}
+.on-tabs button{flex:1;font:inherit;font-weight:800;padding:8px;border:0;border-radius:10px 10px 0 0;background:rgba(255,255,255,.05);color:var(--muted);cursor:pointer}
+.on-tabs button.on{background:linear-gradient(180deg,#ffd166,#f2b632);color:#2a1c00}
+.on-stand.tf .on-sh,.on-stand.tf .on-sr{grid-template-columns:2.4em 1fr 5em}
+.on-stand.tf .on-sr span:nth-child(3),.on-stand.tf .on-sh span:nth-child(3){text-align:right}
+.on-sth{margin:6px 0 0;font:400 16px var(--f-display);color:var(--accent)}
+/* オンライン：場に出た札・巡の切り替わり */
+.on-land{position:fixed;z-index:9300;translate:-50% -50%;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 10px;border-radius:12px;background:rgba(10,25,20,.88);border:2px solid var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.5);pointer-events:none;animation:pop .25s ease-out}
+.on-land .ol-cards{display:flex;gap:3px}.on-land .mc{font-size:15px;padding:3px 6px}
+.on-land b{font-family:var(--f-mono);font-size:16px;color:var(--accent);white-space:nowrap}.on-land small{font-size:10.5px;color:var(--ink)}
+.on-land.out{opacity:0;translate:-50% -90%;transition:all .35s}
+.on-round{position:fixed;left:50%;top:40%;z-index:9300;translate:-50% -50%;display:flex;align-items:center;gap:14px;padding:14px 22px;border-radius:18px;background:rgba(10,25,20,.92);border:3px solid var(--accent);box-shadow:0 12px 34px rgba(0,0,0,.6);pointer-events:none;animation:pop .3s ease-out}
+.on-round>b{font:400 clamp(34px,10vw,52px) var(--f-display);color:var(--accent);white-space:nowrap;text-shadow:0 3px 0 #5a3d1e}
+.on-round .fieldcard{position:relative;width:74px;height:104px;animation:onflip .5s ease-out .15s both}
+@keyframes onflip{from{transform:rotateY(90deg)}to{transform:none}}
+.on-round.out{opacity:0;transition:opacity .35s}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='f63c6080fb';
+window.KB_BUILD='faa3c106b4';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5919,7 +6034,7 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
 // テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
-function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版（記録は本番と別です）'; document.body.appendChild(b); }
+function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です'; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
@@ -5941,7 +6056,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -5955,6 +6070,9 @@ function render() {
   else if (S.view === 'attack-result') app.innerHTML = attackResultHTML();
   else if (S.view === 'zukan') app.innerHTML = zukanHTML();
   else if (S.view === 'hunt') app.innerHTML = huntHTML();
+  else if (S.view === 'online') { app.innerHTML = onlineHTML(); setTimeout(onBind, 0); }
+  else if (S.view === 'otour') { app.innerHTML = otourHTML(); setTimeout(() => { onTourClock(); onCeremony(ON.t); }, 0); }
+  else if (S.view === 'oarch') app.innerHTML = oarchHTML();
   else if (S.view === 'hunt-result') app.innerHTML = huntResultHTML();
   else if (S.view === 'rules') app.innerHTML = rulesHTML();
   else if (S.view === 'story') app.innerHTML = storyHTML();
@@ -6119,9 +6237,12 @@ const ACH = [
   ['zukan', '図鑑登録', [10, 50, 200], n => `式の図鑑に${n}式を登録`, ['式の見習い', '式の収集家', '式の博士']],
   ['zukan_cat', '図鑑の場', [1, 3, 13], n => n >= 13 ? '図鑑のA〜Kすべての場をコンプリート' : `図鑑の場を${n}つコンプリート（その場の式をすべて登録）`, ['ひと場制覇', '三場制覇', '全場制覇']],
   ['chart', '早見表', [1, 10, 37], n => n >= 37 ? '早見表をすべて完成（37行）' : `早見表の行を${n}行完成（すべての待ちを自分の式で埋める）`, ['早見表の一行目', '早見表の職人', '早見表マスター']],
+  // オンライン大会（人が10人以上参加した大会の上位3位）。段階は3位以上（銅）・2位以上（銀）・優勝（金）。公式大会は別のバッジ
+  ['on_podium', 'オンライン大会 表彰台', [1, 2, 3], n => n >= 3 ? 'オンライン大会（人が10人以上）で優勝' : n >= 2 ? 'オンライン大会（人が10人以上）で2位以上' : 'オンライン大会（人が10人以上）で3位以上', ['表彰台', '準優勝', 'オンライン王者'], [0, 1, 2]],
+  ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -6249,7 +6370,7 @@ function badgeSVG(a, i, got, size) {
   return `<svg class="bdg" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,1 37,10 37,30 20,39 3,30 3,10" fill="${c2}"/><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="${c1}"/>${tier >= 1 && got ? '<circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' : ''}<text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" fill="${got ? '#2a1c00' : '#6b7672'}">${esc(ch)}</text></svg>`;
 }
 // カテゴリーをすべて集めると付く特別バッジ
-const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫' };
+const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証' };
 function catProgress(g, gi) { const [gn, ks] = ACH_GROUPS[gi]; const list = ks.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); return { gn, have, all, done: all > 0 && have >= all, name: CAT_SPECIAL[gn] || gn }; }
 function emblemSVG(gi, got, size) {
   const z = size || 48, id = 'em' + gi + (got ? 'g' : 'n') + z;
@@ -6861,6 +6982,27 @@ async function rankingLoad() {
 // ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
 // ランキング・タイトルのアイコンを押したときのプロフィール（スマホで見やすい独自の表示。X用の画像とは別）
 // 上にアイコンと名前を大きく＋推定実力・総合の順位（AI込み・人だけ）、その下に成績のタイル・カテゴリーの紋章・バッジ・自己紹介
+// 称号（自分で選んだオンライン大会の成績）：プロフィールの名前の上に出す
+const placeJa = p => ['', '優勝', '準優勝', '3位'][p] || '';
+function pvTitle(D) {
+  let t = D.titleShow; if (!t && D.title && D.awards) { const a = D.awards.find(x => x.tid === D.title); if (a) t = { text: `${a.tname} ${placeJa(+a.place)}`, official: +a.official, place: +a.place }; }
+  return t ? `<div class="pv-title ${t.official ? 'off' : ''} p${t.place}">${t.place === 1 ? '👑' : t.place === 2 ? '🥈' : '🥉'} ${t.official ? '<em>公式</em>' : ''}${esc(t.text)}</div>` : '';
+}
+// 大会のメダルの数（公式・オンラインで別々）
+function podiumHTML(aw) {
+  if (!aw || !aw.length) return '';
+  const row = off => { const L = aw.filter(a => !!+a.official === off); if (!L.length) return ''; const c = [1, 2, 3].map(p => L.filter(a => +a.place === p).length);
+    return `<div class="pv-pod ${off ? 'off' : ''}"><b>${off ? '公式大会' : 'オンライン大会'}</b>${c.map((n, i) => n ? `<span class="pv-md m${i + 1}" title="${placeJa(i + 1)}">${['🥇', '🥈', '🥉'][i]}<small>×${n}</small></span>` : '').join('')}</div>`; };
+  return `<div class="pv-pods">${row(true)}${row(false)}</div>`;
+}
+// 称号を選ぶ（自分のプロフィールから。いまのプレイヤーが取ったオンライン大会の成績から1つ）
+function titleModal() {
+  const L = (ON.myAwards || []).filter(a => a.pid === PID).sort((a, b) => (+b.official) - (+a.official) || a.place - b.place), cur = store.get('title', '');
+  modal(`<div class="stack"><h3 style="margin:0">👑 称号を選ぶ</h3><p class="small muted" style="margin:0">ランキングから開くプロフィールで、名前の上に出ます。</p>
+    <div class="ttl-list"><button class="ttl ${!cur ? 'on' : ''}" data-act="title-set" data-id="">つけない</button>${L.map(a => `<button class="ttl ${cur === a.tid ? 'on' : ''} ${+a.official ? 'off' : ''}" data-act="title-set" data-id="${esc(a.tid)}">${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '<em>公式</em>' : ''}${esc(a.tname)} ${placeJa(+a.place)}</button>`).join('')}</div>
+    ${L.length ? '' : '<p class="small muted" style="margin:0">オンライン大会（人が10人以上）で3位以内に入ると、称号が選べるようになります。</p>'}
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
+}
 function profHTML(D, o) {
   const g = { ach: D.ach || {} }, NAME = D.name || 'プレイヤー', r = D.rating;
   const stars = r != null ? [...Array(5)].map((_, i) => `<i class="${i < Math.floor(r + 1e-9) ? 'on' : (i === Math.floor(r) && r % 1 >= 0.5) ? 'half' : ''}">★</i>`).join('') : '';
@@ -6875,13 +7017,15 @@ function profHTML(D, o) {
   const got = all.filter(b => b.got);
   return `<div class="pv">
     <div class="pv-head"><div class="pv-av">${KB.avatarSVG(Object.assign({}, D.avatar || AVATAR_DEF, { name: NAME }), { mood: 'happy' })}</div>
-      <div class="pv-tx"><div class="pv-nm"><b>${esc(NAME)}</b>${o.ai ? '<em class="ai-chip">AI研究員</em>' : ''}${o.me ? '<small class="pv-me">あなた</small>' : ''}</div>
+      <div class="pv-tx">${pvTitle(D)}<div class="pv-nm"><b>${esc(NAME)}</b>${o.ai ? '<em class="ai-chip">AI研究員</em>' : ''}${o.me ? '<small class="pv-me">あなた</small>' : ''}</div>
         ${r != null ? `<div class="pv-rt"><span class="pv-st">${stars}</span><b>${r.toFixed(1)}</b><small>推定実力 ${rateLabel(r)}相当</small></div>` : '<div class="pv-rt"><small>推定実力はまだ出ていません</small></div>'}
         <div class="pv-rk" id="pv-rk"></div></div></div>
     <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
     <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
     <div class="pv-badges">${got.length ? got.map(b => badgeSVG(b.a, b.i, true, 26)).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
+    ${podiumHTML(D.awards)}
+    ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${+a.official ? '<em class="on-off">公式</em> ' : ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
 }
@@ -6891,7 +7035,7 @@ async function rankCardOpen(rid, me, el) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   try {
     let d;
-    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', '') });
+    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', ''), awards: (ON.myAwards || []).filter(a => a.pid === PID).sort((x, y) => x.place - y.place) });
     else {
       if (!rid) throw new Error('old');
       const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error);
@@ -6956,10 +7100,10 @@ function cardDataOf(pid, name) {
   const ab0 = P('attackBest') || {}, ab = ab0.bp != null ? ab0 : (ab0[15] || null), hb = P('huntBest'), avr = P('avatar');
   return { name, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, rating: r.ok ? Math.round(r.r * 100) / 100 : null, ach: Object.assign({}, g.ach || {}),
     champion: c.champion || 0, qualify: c.qualify || 0, atk: ab ? ab.bp : 0, atkBadges: ab ? ab.badges || 0 : 0, hunt: hb && hb.regs || 0,
-    zukan: zukanCount(P('zukan') || {}), streak: c.streakMax || 0, outs5: c.outs5 || 0, bio: P('bio') || '' };
+    zukan: zukanCount(P('zukan') || {}), streak: c.streakMax || 0, outs5: c.outs5 || 0, bio: P('bio') || '', title: P('title') || '' };
 }
 // サーバーに送るカード：バッジは取ったものの名前だけ
-function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5 }; }
+function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5, title: d.title || '' }; }
 async function shareCard(data, opt) {
   const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
@@ -8123,11 +8267,13 @@ function homeHTML() {
   <div class="cast">${castHTML()}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
+    ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '公式・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
 ${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
+${onlineHomeHTML()}
 <div class="mode-grid">
   <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${modeBadgeRows(MB_PRAC, true)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
@@ -11023,6 +11169,34 @@ function act(a, el) {
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
     case 'next-game': nextGame(); break;
     case 'fab-home': fabHome(); break;
+    case 'on-new': onNewModal(); break;
+    case 'on-tour-new': S.onTourEdit = null; S.onTour = null; onTourNewModal(); break;
+    case 'on-tour-edit': { const t = ON.t, d = new Date(t.startAt * 1000), loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); const pk = (PTS_PRE.find(x => x[2].join() === (t.points || []).join()) || PTS_PRE[0])[0];
+      S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, pts: pk };
+      S.onTourEdit = t.id; onTourNewModal(); break; }
+    case 'on-arch': onArchiveOpen(); break;
+    case 'title-open': titleModal(); break;
+    case 'on-tour-remove': modal(`<div class="stack"><h3 style="margin:0">大会を削除しますか？</h3><p class="small muted" style="margin:0">「${esc(ON.t.name)}」を過去の大会から消します。元には戻せません（取ったバッジと称号は残ります）。</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-remove-go">削除する</button></div></div>`); break;
+    case 'on-tour-remove-go': onReq('on_tour_act', { id: ON.t.id, act: 'remove' }).then(() => { closeModal(); clearInterval(ON.ttimer); ON.t = null; toast('削除しました'); onArchiveOpen(); }).catch(e => toast(e.message)); break;
+    case 'title-set': store.set('title', el.dataset.id); closeModal(); try { cloudDirty('kb.p.' + PID + '.title'); } catch (e) { } toast(el.dataset.id ? '称号をつけました' : '称号を外しました'); render(); break;
+    case 'on-tour-create': onTourCreate(); break;
+    case 'on-tour-open': ON.ttab = null; onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
+    case 'on-tour-home': clearInterval(ON.ttimer); ON.t = null; ON.toursAt = 0; go('home'); break;
+    case 'on-tour-entry': case 'on-tour-cancel': case 'on-tour-startnow': case 'on-tour-delete': case 'on-tour-ready': onReq('on_tour_act', Object.assign(onMe(), { id: ON.t.id, act: a.slice(8) })).then(j => { ON.t = j.tour; if (j.tour.myRoom) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); } else render(); }).catch(e => toast(e.message)); break;
+    case 'on-room-open': S.onAutoRoom = el.dataset.id; onRoomOpen(el.dataset.id); break;
+    case 'on-watch': ON.pov = 0; onRoomOpen(el.dataset.id); break;
+    case 'on-to-tour': onStop(); onReq('on_tour', { id: ON.v.tour }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
+    case 'on-create': onEnter('on_create', S.onCfg); break;
+    case 'on-join': { const c = ($('#on-code') || {}).value || ''; if (c.trim().length < 6) { toast('6文字のコードを入れてください'); break; } onEnter('on_join', { id: c.trim() }); break; }
+    case 'on-quit': onStop(); if (ON.v && ON.v.phase === 'lobby') onReq('on_act', { id: ON.v.id, act: 'leave' }).catch(() => { }); ON.v = null; go('home'); break;
+    case 'on-addai': onAct('addai'); break;
+    case 'on-kick': onAct('kick', { seat: +el.dataset.seat }); break;
+    case 'on-begin': onAct('start'); break;
+    case 'on-back': onAct('back'); break;
+    case 'on-auto': { const r = ratingOf(G_().games), lv = r.ok ? Math.max(2, Math.min(4, Math.floor(r.r - 1))) : 2; onAct('auto', { lv }); toast(`AI★${lv}に任せました（「自分で打つ」でいつでも戻れます）`); break; }
+    case 'on-draw': onAct('draw'); break;
+    case 'on-play': { const vals = onSelVals(); if (vals.length) onAct('play', { vals }); break; }
+    case 'on-copy': try { navigator.clipboard.writeText(ON.v.id); toast('コピーしました'); } catch (e) { } break;
     case 'fab-home-go': S.resumeFn = null; closeModal(); act('quit'); break;
     case 'undo': undoAsk(); break;
     case 'undo-go': undoGo(); break;
@@ -11134,7 +11308,443 @@ function aiMini(kind, lv, formAdj) {
   }
   return null;
 }
-window.KBAPP = { S, act, aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+
+// ================= オンライン対局（テスト版で試し中。段階1：1卓2〜5人） =================
+// 山札と手札はサーバー（api.php の on_*）が持つ。画面は1.5秒ごとに様子を読み、自分の手札だけを受け取る。
+// 時間切れは自動で「引く」。3回続くとAI★2が代わりに打つ（「自分で打つ」で戻れる）
+const ON_ENABLED = () => CLOUD_ON; // オンライン大会：クラウド版（本番・テスト版）で使える
+const ON = { v: null, ver: 0, timer: null, tick: null, sel: [], busy: false, lastCur: null, lastLog: 0, err: '', opened: {}, bub: {}, cer: {} };
+function onlineHomeHTML() {
+  if (!ON_ENABLED()) return '';
+  const last = store.get('onRoom', null), L = ON.tours;
+  const fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const stat = v => v.phase === 'entry' ? (v.now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'done' ? '<em class="on-st">終了</em>' : '<em class="on-st">中止</em>';
+  const rows = L ? (L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '招待されています' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
+  return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
+    <div class="on-tlist">${rows}</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
+    <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
+      <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
+      <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
+}
+// 自分の上位3位をサーバーから読み、いまのプレイヤーのバッジに反映（公式と非公式は別のバッジ）
+async function onAwardsSync() {
+  try { const j = await onReq('on_awards'); ON.myAwards = j.awards || [];
+    const mine = ON.myAwards.filter(a => a.pid === PID), best = off => Math.max(0, ...mine.filter(a => !!+a.official === off).map(a => 4 - a.place));
+    const b1 = best(false), b2 = best(true); if (b1) setMax('on_podium', b1); if (b2) setMax('off_podium', b2);
+  } catch (e) { }
+}
+async function onArchiveOpen() { go('oarch'); try { const j = await onReq('on_tours_archive'); ON.arch = j.tours; } catch (e) { ON.arch = []; toast('読み込めませんでした'); } if (S.view === 'oarch') render(); }
+function oarchHTML() {
+  const L = ON.arch, fmt = t => { const d = new Date(t * 1000); return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`; };
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">🗂 過去のオンライン大会</div><div></div></div>
+    <div class="panel stack">${!L ? '<p class="small muted" style="margin:0">読み込み中…</p>' : L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b><em class="on-st">${v.phase === 'done' ? '終了' : '中止'}</em></span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.n}人${v.awards && v.awards.length ? '・🥇 ' + esc(v.awards[0].name) : ''}${v.entered ? '・<b class="on-in">出場</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">まだ終わった大会はありません</p>'}</div>`;
+}
+async function onToursLoad() {
+  if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
+  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
+// ---- 大会をひらく ----
+function onTourNewModal() {
+  const d0 = new Date(Date.now() + 20 * 60000); d0.setMinutes(Math.ceil(d0.getMinutes() / 5) * 5, 0, 0);
+  const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', min: 4, max: 15, aiFill: true, aiLv: 2, aiMix: 'even', entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, pts: 'std' };
+  const seg = (k, opts) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(c[k]) === String(v) ? 'on' : ''}" data-ot="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
+  const num = (k, mn, mx) => `<div class="su-step"><button class="su-pm" data-otn="${k}" data-v="-1" ${c[k] <= mn ? 'disabled' : ''}>−</button><b class="tnum">${c[k]}</b><button class="su-pm" data-otn="${k}" data-v="1" ${c[k] >= mx ? 'disabled' : ''}>＋</button></div>`;
+  modal(`<div class="stack on-new"><h3 style="margin:0">🌐 ${S.onTourEdit ? '大会を編集' : '大会をひらく'}</h3>
+    <label class="su-row col"><b>大会の名前</b><input id="ot-name" class="su-in" maxlength="30" value="${esc(c.name)}"></label>
+    <label class="su-row col"><b>大会の説明</b><textarea id="ot-desc" rows="2" maxlength="300" placeholder="例）初心者歓迎！ 3セットの予選のあと、上位5人で決勝">${esc(c.desc)}</textarea></label>
+    <label class="su-row col"><b>開始日時</b><input id="ot-start" type="datetime-local" class="su-in" value="${esc(c.start)}"><small class="muted">開始の15分前からエントリーできます</small></label>
+    <div class="su-row col"><b>1手の制限時間</b>${seg('limit', [[60, '1分'], [30, '30秒'], [15, '15秒'], [10, '10秒']])}</div>
+    <div class="su-row col"><b>式の判定</b>${seg('judge', [['before', '式を先に確認'], ['after3', 'お手つき3枚'], ['after2', 'お手つき2枚']])}<small class="muted">お手つき：出したあとに判定し、場の数にならなければ札を戻してペナルティで引く</small></div>
+    <div class="su-row"><b>最少人数</b>${num('min', 2, 40)}</div><div class="su-row"><b>最大人数</b>${num('max', 2, 40)}</div>
+    <div class="su-row col"><b>最少人数に足りないとき</b>${seg('aiFill', [['true', 'AIを入れて開催'], ['false', '中止']])}</div>
+    ${c.aiFill ? `<div class="su-row col"><b>入れるAIの強さ</b>${seg('aiMix', Object.entries(MIX).map(([k, m]) => [k, m.label]))}<small class="muted">ふつうの大会の「相手の強さ」と同じ割合で★1〜5のAIが入ります</small></div>` : ''}
+    <div class="su-row col"><b>エントリーできる人</b>${seg('entry', [['open', '誰でも'], ['invite', '招待した人だけ']])}</div>
+    ${c.entry === 'invite' ? `<label class="su-row col"><b>招待する人の名前</b><textarea id="ot-inv" rows="2" placeholder="ランキングの名前を、改行か「、」で区切って">${esc(c.invites)}</textarea></label>` : ''}
+    <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
+    <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
+    <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
+    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
+    <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
+  const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value; };
+  document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
+  document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; onTourNewModal(); });
+}
+async function onTourCreate() {
+  const c = S.onTour; c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value;
+  const startAt = Math.round(new Date(c.start).getTime() / 1000);
+  if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
+  if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
+  try {
+    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    closeModal(); S.onTour = null; if (S.onTourEdit) toast('変更しました'); S.onTourEdit = null; onTourShow(j.tour);
+  } catch (e) { toast(e.message || 'ひらけませんでした'); }
+}
+// ---- 大会の画面（詳細・エントリー・進み具合・順位）----
+function onTourShow(t) { ON.t = t; go('otour'); onTourPollStart(); }
+function onTourPollStart() { clearInterval(ON.ttimer); ON.ttimer = setInterval(onTourPoll, 3000); }
+async function onTourPoll() {
+  if (S.view !== 'otour' || !ON.t) { clearInterval(ON.ttimer); return; }
+  try { const j = await onReq('on_tour', { id: ON.t.id }); const prev = ON.t; ON.t = j.tour;
+    if (j.tour.myRoom && (!prev || prev.myRoom !== j.tour.myRoom || S.onAutoRoom !== j.tour.myRoom)) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); return; }
+    if (j.tour.wait && j.tour.wait.need && !j.tour.wait.ready && !(prev && prev.wait)) KB.sfx('myturn');
+    if (j.tour.phase === 'done' && prev && prev.phase !== 'done') onAwardsSync();
+    if (!prev || prev.ver !== j.tour.ver) render(); else onTourClock();
+  } catch (e) { }
+}
+async function onRoomOpen(id) { try { const v = await onReq('on_state', { id }); clearInterval(ON.ttimer); onStart(v); } catch (e) { toast(e.message || '卓を開けませんでした'); } }
+function onTourClock() {
+  const wt = $('#ot-wait'); if (wt) { const l = Math.max(0, Math.round(+wt.dataset.until - Date.now() / 1000)); wt.textContent = `あと${Math.floor(l / 60)}分${l % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）`; } const el = $('#ot-clock'), t = ON.t; if (!el || !t) return; const left = Math.max(0, Math.round(t.startAt - Date.now() / 1000)); el.textContent = t.phase === 'entry' ? (left > 0 ? `開始まで ${left >= 3600 ? Math.floor(left / 3600) + '時間' : ''}${Math.floor(left % 3600 / 60)}分${left < 600 ? (left % 60) + '秒' : ''}` : 'まもなく開始') : ''; }
+// 大会の表彰（終わった大会を最初に開いたときだけ。上位3人が表彰台に上がる。数秒で閉じる）
+function onCeremony(t) {
+  if (!t || t.phase !== 'done' || !t.stand || ON.cer[t.id]) return; ON.cer[t.id] = 1;
+  if (Date.now() / 1000 - t.now > 120 && !t.entered) return;
+  const top = t.stand.slice(0, 3), avOf = r => r.ai ? onAv({ name: r.name, ai: true }, 'happy') : KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
+  const me = t.stand.findIndex(r => r.me);
+  const el = document.createElement('div'); el.className = 'whistle-ov on-cer';
+  const pod = [1, 0, 2].map(i => top[i] ? `<div class="pd p${i + 1}"><span class="on-av">${avOf(top[i])}</span><b>${esc(top[i].ai ? onName({ name: top[i].name, ai: true }) : top[i].name)}</b><div class="pd-step">${['🥇', '🥈', '🥉'][i]}<small>${i + 1}位</small></div></div>` : '').join('');
+  const award = t.awardOk ? (t.awards.some(a => a.place - 1 === me) ? `🏅 ${['優勝', '準優勝', '3位'][me]}のバッジと称号を獲得！` : '') : '';
+  el.innerHTML = `<div class="wh-box"><div class="wh-title">${t.official ? '公式 ' : ''}表彰式</div><div class="wh-sub">${esc(t.name)}</div><div class="on-pod">${pod}</div>${award ? `<div class="on-aw">${award}</div>` : ''}
+    <div class="wh-say"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><span><small>実況・ナニワのマサ</small>${esc(me === 0 ? 'おめでとう！ 優勝や！ 今日の主役はあんたや！' : me > 0 && me < 3 ? '表彰台や！ ようやったで！' : `${top[0] ? (top[0].ai ? onName({ name: top[0].name, ai: true }) : top[0].name) : ''}が優勝や！ ナイスゲームやったで！`)}</span></div>
+    <div class="row" style="justify-content:center;margin-top:10px"><button class="btn primary" data-x="ok">順位を見る</button></div></div>`;
+  document.body.appendChild(el); KB.sfx('horn', 2); setTimeout(confetti, 300); if (me >= 0 && me < 3) setTimeout(() => KB.sfx('win'), 600);
+  const close = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 300); };
+  el.querySelector('[data-x="ok"]').onclick = close; setTimeout(close, 9000);
+}
+// 順位の表：決勝があるときは、上に決勝（決勝PPの少ない順）、下に予選（得点→累計PP）
+function onStandHTML(t) {
+  const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
+  const nm = r => esc(r.ai ? onName({ name: r.name, ai: true }) : r.name);
+  const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
+  let fin = '';
+  if (hasFin) {
+    const F = t.stand.filter(r => r.fin); if (!isDone) F.sort((a, b) => b.pts - a.pts || a.pp - b.pp);
+    fin = `<h3 class="on-sth">🏆 決勝${isDone ? '' : '（対局中）'}</h3><div class="on-stand tf"><div class="on-sh"><span>順位</span><span>名前</span><span>決勝PP</span></div>${F.map((r, k) => `<div class="on-sr ${r.me ? 'me' : ''}"><b>${isDone ? medal(k, true) : '—'}</b><span>${nm(r)}</span><span>${r.fpp != null ? r.fpp + 'PP' : '対局中'}</span></div>`).join('')}</div>`;
+  }
+  const P = t.stand.slice().sort((a, b) => b.pts - a.pts || a.pp - b.pp);
+  const pre = `${hasFin ? '<h3 class="on-sth">予選</h3>' : ''}<div class="on-stand"><div class="on-sh"><span>順位</span><span>名前</span><span>得点</span><span>累計PP</span></div>${P.map((r, k) => `<div class="on-sr ${r.me ? 'me' : ''}"><b>${medal(k, isDone && !hasFin)}</b><span>${nm(r)}${r.fin ? '<em>決勝進出</em>' : ''}</span><span>${r.pts}点</span><span>${r.pp}</span></div>`).join('')}</div>`;
+  return fin + pre;
+}
+function otourHTML() {
+  const t = ON.t; if (!t) return '';
+  const d = new Date(t.startAt * 1000), when = `${d.getMonth() + 1}月${d.getDate()}日（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+  const now = Date.now() / 1000, open = t.phase === 'entry' && now >= t.entryAt;
+  const ph = { entry: open ? '受付中' : '受付前', prelim: `予選 第${t.set}/${t.sets}セット`, final: '決勝', done: '終了', cancel: '中止' }[t.phase];
+  const av = e => KB.avatarSVG(Object.assign({}, e.avatar || AVATAR_DEF, { name: e.name }), { mood: 'happy' });
+  let body = '';
+  if (t.phase === 'entry') {
+    body = `<div class="on-ent">${t.entrants.map(e => `<span class="on-e"><span class="on-av">${av(e)}</span>${esc(e.name)}</span>`).join('') || '<span class="small muted">まだエントリーした人はいません</span>'}</div>
+      <div class="row" style="gap:8px;flex-wrap:wrap">${open ? (t.entered ? '<button class="btn" data-act="on-tour-cancel">エントリーを取り消す</button>' : t.invited ? `<button class="btn primary" data-act="on-tour-entry" ${t.n >= t.max ? 'disabled' : ''}>エントリーする</button>` : '<span class="small">招待された人だけが出られます</span>') : `<span class="small muted">エントリーは ${new Date(t.entryAt * 1000).getHours()}:${String(new Date(t.entryAt * 1000).getMinutes()).padStart(2, '0')} から（開始の15分前）</span>`}
+      ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine && !open ? '<button class="btn sm" data-act="on-tour-edit">✏️ 編集</button><button class="btn ghost sm" data-act="on-tour-delete">🗑 削除</button>' : t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
+  } else if (t.stand) {
+    const isDone = t.phase === 'done';
+    const W = t.wait, wLeft = W ? Math.max(0, Math.round(W.until - Date.now() / 1000)) : 0;
+    body = `${W ? `<div class="on-ready"><b>次は ${esc(W.label)}</b><span class="small">${W.need ? (W.ready ? `準備OK！ ほかの人を待っています（${W.nReady}/${W.n}人）` : 'そろったら始まります。準備ができたら押してください') : `出場する人の準備を待っています（${W.nReady}/${W.n}人）`}</span>${W.need && !W.ready ? '<button class="btn primary on-ready-btn" data-act="on-tour-ready">✋ 準備OK</button>' : ''}<span class="small muted" id="ot-wait" data-until="${W.until}">あと${Math.floor(wLeft / 60)}分${wLeft % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）</span></div>` : ''}${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.entered && !W && (t.phase === 'prelim' || t.phase === 'final') ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
+      ${onStandHTML(t)}
+      ${(t.phase === 'prelim' || t.phase === 'final') && !t.wait && (t.rooms || []).length ? `<div class="on-rooms"><b class="small">👀 観戦する卓を選ぶ</b>${t.rooms.map(r => `<button class="on-room" data-act="on-watch" data-id="${r.id}" ${r.id === t.myRoom ? 'disabled' : ''}><b>${esc(r.label)}</b><span class="small muted">${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}・${r.names.map(x => esc(onName({ name: x }))).join('・')}</span></button>`).join('')}</div>` : ''}`;
+  } else if (t.phase === 'cancel') body = `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
+  if ((t.phase === 'done' || t.phase === 'cancel') && t.mine) body += '<div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="on-tour-remove">🗑 アーカイブから削除（主催者）</button></div>';
+  return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
+    <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
+      <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
+      ${t.desc ? `<p style="margin:0;white-space:pre-wrap">${esc(t.desc)}</p>` : ''}
+      <div class="on-facts small muted">${t.awardOk === true ? `🏅 人が${t.awardMin}人以上の大会なので、上位3位にバッジと称号（${t.official ? '公式大会のバッジ' : 'オンライン大会のバッジ'}）・` : t.awardOk === false ? `人が${t.awardMin}人未満だったので、バッジはなし・` : `🏅 人が${t.awardMin}人以上集まれば、上位3位にバッジと称号・`}${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・${{ before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚'}・${t.aiFill ? `足りなければAI（${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}）で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}</div>
+      ${body}</div>`;
+}
+function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }
+async function onReq(a, extra) { const c = raw.get('kb.cloud', null); if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
+function onNewModal() {
+  S.onCfg = S.onCfg || { n: 4, games: 3, limit: 30, judge: 'after3' };
+  const c = S.onCfg;
+  modal(`<div class="stack on-new"><h3 style="margin:0">🌐 卓をつくる</h3>
+    <div class="su-row col"><b>人数（自分を入れて）</b>${suSeg('on-n', [[2, '2人'], [3, '3人'], [4, '4人'], [5, '5人']], c.n)}</div>
+    <div class="su-row col"><b>ゲーム数</b>${suSeg('on-games', [[1, '1'], [3, '3'], [5, '5']], c.games)}</div>
+    <div class="su-row col"><b>1手の制限時間</b>${suSeg('on-limit', [[60, '1分'], [30, '30秒'], [15, '15秒'], [10, '10秒']], c.limit)}<small class="muted">時間切れは自動で「引く」。3回続くと、AI★2が代わりに打ちます</small></div>
+    <div class="su-row col"><b>式の判定</b>${suSeg('on-judge', [['before', '式を先に確認'], ['after3', 'お手つき3枚'], ['after2', 'お手つき2枚']], c.judge)}</div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-create">卓をつくる</button></div></div>`);
+  document.querySelectorAll('#modal [data-su]').forEach(b => b.onclick = () => { const k = b.dataset.su.slice(3), v = b.dataset.v; S.onCfg[k] = isNaN(+v) ? v : +v; onNewModal(); });
+}
+async function onEnter(a, extra) {
+  try { const v = await onReq(a, Object.assign(onMe(), extra)); closeModal(); store.set('onRoom', v.id); onStart(v); }
+  catch (e) { toast(e.message || '入れませんでした'); }
+}
+function onStart(v) { ON.v = v; ON.ver = v.ver; ON.sel = []; ON.lastCur = null; ON.lastLog = 0; go('online'); onPollStart(); }
+function onPollStart() {
+  clearInterval(ON.timer); clearInterval(ON.tick);
+  ON.timer = setInterval(onPoll, 1500); ON.tick = setInterval(onClock, 250);
+}
+function onStop() { clearInterval(ON.timer); clearInterval(ON.tick); ON.timer = ON.tick = null; }
+async function onPoll() {
+  if (S.view !== 'online' || !ON.v) { onStop(); return; }
+  if (ON.busy) return; ON.busy = true;
+  try { const v = await onReq('on_state', { id: ON.v.id, ver: ON.ver }); ON.skew = Date.now() / 1000 - v.now; if (!v.same) onApply(v); ON.err = ''; }
+  catch (e) { ON.err = e.message || '通信エラー'; const el = $('#on-err'); if (el) el.textContent = '⚠ ' + ON.err; }
+  finally { ON.busy = false; }
+}
+function onApply(v) {
+  const prev = ON.v; ON.v = v; ON.ver = v.ver;
+  const g = v.game;
+  let fresh = [];
+  if (g) {
+    const same = prev && prev.id === v.id && prev.game && prev.gameNo === v.gameNo;
+    fresh = same ? (g.log || []).filter(e => e.i > (prev.game.seq || 0)) : [];
+    const mine = g.cur === v.me && v.phase === 'play' && !(v.seats[v.me] || {}).sub;
+    if (mine && ON.lastCur !== `${v.id}:${v.gameNo}:${g.round}:${g.pos}`) { ON.lastCur = `${v.id}:${v.gameNo}:${g.round}:${g.pos}`; setTimeout(() => KB.sfx('myturn'), fresh.length ? 500 : 0); }
+    if (!mine) ON.sel = [];
+    // 新しく引いた札を光らせる
+    if (same && prev.game.hand && g.hand && g.hand.length > prev.game.hand.length) { const old = prev.game.hand.map(c => c.join(',')); ON.newIds = g.hand.map((c, k) => old.includes(c.join(',')) ? -1 : k).filter(k => k >= 0); } else ON.newIds = [];
+    // 開始・ゲームの区切りの演出
+    if (v.phase === 'play' && (!prev || prev.id !== v.id || prev.phase === 'lobby') && v.gameNo === 1 && g.round <= 1 && !ON.opened[v.id]) { ON.opened[v.id] = 1; onOpening(v); }
+    else if (prev && prev.id === v.id && prev.gameNo !== v.gameNo && v.phase === 'play') onGameBanner(v);
+    onComment(v, prev, fresh);
+    if (prev && prev.id === v.id && prev.phase === 'play' && v.phase !== 'play' && g.over) { KB.sfx(g.winner === v.me ? 'win' : g.winner >= 0 ? 'otherWin' : 'round'); if (g.winner === v.me) confetti(); }
+    if (prev && prev.id === v.id && prev.phase !== 'done' && v.phase === 'done') setTimeout(() => KB.sfx('banner'), 900);
+    if (v.tour && v.phase === 'done' && prev && prev.phase !== 'done') setTimeout(() => { if (S.view === 'online' && ON.v && ON.v.id === v.id) act('on-to-tour'); }, 6000); // 大会の卓が終わったら、大会の画面へ
+  }
+  render();
+  if (fresh.length) setTimeout(() => onAnimate(v, fresh), 0);
+}
+// 新しい手の動き：起きた順に1つずつ再生する。出した札は場へ飛んで、場札の上に式といっしょに少し残る。引いた札は山札から席へ。
+// 巡が変わったら、前の巡の手を見せ終わってから「第N巡」と新しい場札を大きく出す
+function onAnimate(v, fresh) {
+  const L = fresh.filter(e => e.type === 'play' || e.type === 'draw' || e.type === 'field').slice(-8);
+  let t = Math.max(0, (ON.animUntil || 0) - Date.now()); // 前の再生が終わってから続ける
+  L.forEach(e => {
+    const at = t;
+    if (e.type === 'field') { setTimeout(() => onRoundBanner(e), at); t += 1300; return; }
+    setTimeout(() => {
+      const seat = document.querySelector(`[data-pi="${e.p}"]`), pile = document.querySelector('.on-tbl .pile'), deck = document.querySelector('.on-tbl .deck');
+      if (!seat || !pile) return; const from = seat.querySelector('.av') || seat;
+      if (e.type === 'play') {
+        if (e.p !== v.me) KB.sfx(e.vals.length === 3 ? 'play3' : 'play', e.vals.length);
+        e.vals.forEach((x, n) => flyCard(from, pile, `<span>${KB.vname(x)}</span>`, n * 90, 460, true));
+        seat.classList.add('acted'); setTimeout(() => seat.classList.remove('acted'), 900);
+        setTimeout(() => onLand(e, v), 420 + e.vals.length * 90);
+      } else { if (e.p !== v.me && !e.foul) KB.sfx('draw'); for (let q = 0; q < (e.foul ? e.n || 1 : 1); q++) flyCard(deck, seat, null, q * 160, 520, true); }
+    }, at);
+    t += e.type === 'play' ? 900 : 450;
+  });
+  ON.animUntil = Date.now() + t;
+}
+// 場札の上に、出した札と式を少しのあいだ重ねて見せる
+function onLand(e, v) {
+  const pile = document.querySelector('.on-tbl .pile'); if (!pile) return; // 画面が描き直されていても、いまの場札の位置に出す
+  const r = pile.getBoundingClientRect(), el = document.createElement('div'); el.className = 'on-land';
+  const who = e.p === v.me ? 'あなた' : onName(v.seats[e.p] || {});
+  el.innerHTML = `<span class="ol-cards">${e.vals.map(x => `<i class="mc">${KB.vname(x)}</i>`).join('')}</span><b>${esc(e.expr)} = ${e.t}</b><small>${esc(who)}</small>`;
+  el.style.left = (r.left + r.width / 2) + 'px'; el.style.top = (r.top + r.height / 2) + 'px';
+  document.body.appendChild(el); setTimeout(() => el.classList.add('out'), 900); setTimeout(() => el.remove(), 1250);
+}
+// 巡の切り替わり：「第N巡」と新しい場札を大きく
+function onRoundBanner(e) {
+  const el = document.createElement('div'); el.className = 'on-round';
+  el.innerHTML = `<b>第${e.round}巡</b><span class="fieldcard top ${e.s === 1 || e.s === 2 ? 'red' : ''}"><span class="tag">新しい場</span><span class="big">${KB.vname(e.v)}</span><span class="val">${KB.SUITS[e.s]} ${e.v}</span></span>`;
+  document.body.appendChild(el); KB.sfx('round'); setTimeout(() => el.classList.add('out'), 1050); setTimeout(() => el.remove(), 1400);
+}
+// 実況・解説（だれにでも見えることだけを話す：出した式・引いた・残りの枚数・上がり。手札の中身には触れない）
+const ON_LINES = {
+  three: [['masa', n => `${n}、3枚出し！一気に軽くしたで！`], ['masa', n => `${n}の3枚出しや！ハットトリック級やな！`], ['root', (n, e) => `${n}、3枚で「${e}」。手札を大きく減らしました。`]],
+  divp: [['root', (n, e) => `${n}の「${e}」。かっこ付きの割り算、見事な計算です。`], ['masa', (n, e) => `「${e}」や！ノールックパスみたいな計算やな！`]],
+  div: [['root', (n, e) => `割り算の「${e}」。大きい数を上手に使いました。`]],
+  big: [['root', (n, e, b) => `${n}、${b}を処分。上がられたときの失点を減らす手です。`], ['masa', (n, e, b) => `${n}、${b}をベンチに下げたで！守りも大事や！`]],
+  play: [['masa', (n, e) => `${n}、「${e}」でつないだ！`], ['masa', n => `ええパス回しや、${n}！`], ['root', (n, e) => `${n}は「${e}」。`]],
+  left1: [['masa', n => `${n}、残り1枚！リーチや！ゴール前やで！`], ['masa', n => `……あかん、黙っとられへん！${n}、残り1枚や！`], ['masa', n => `${n}が残り1枚！ポーカーで言うたらオールインの構えや！`]],
+  left2: [['masa', n => `${n}、残り2枚！詰めてきとるで！`], ['root', n => `${n}が残り2枚。次の場で上がる可能性があります。`]],
+  draw: [['masa', n => `${n}はここで1枚引いた。`], ['masa', n => `${n}、ここは我慢のドローや。`], ['root', n => `${n}は山札から1枚。`]],
+  timeout: [['masa', n => `時間切れや！${n}は自動で1枚引くで。`]],
+  foul: [['masa', (n, e, b) => `お手つきや〜！${n}は${b}枚引くで！`], ['root', (n, e, b) => `お手つきです。${n}は札を戻して、${b}枚引きます。`]],
+  sub: [['root', n => `${n}は時間切れが3回続いたので、AIが代わりに打ちます。`]],
+  auto: [['root', (n, e, lv) => `${n}は、ここからAI★${lv}に任せるようです。`], ['masa', n => `${n}、AIに任せたで！ベンチから見守る作戦や！`]],
+  back: [['masa', n => `${n}、戻ってきたで！ここから自分で打つで！`]],
+  reshuffle: [['root', () => '山札がなくなったので、捨て札を切り直しました。']],
+  win: [['masa', n => `${n}が上がりや！ゴラッソ！`], ['masa', n => `${n}、上がった！ゴール決まったで！`], ['root', (n, e, b, r) => `${n}が第${r}巡で上がりました。`]],
+  none: [['root', () => '規定の巡数で終了です。']],
+  start: [['masa', (n, e, b, r, k) => `第${k}ゲーム、キックオフや！親は${n}！`], ['root', (n, e, b, r, k) => `第${k}ゲームです。親は${n}。`]]
+};
+function onSay(kind, args, prio) {
+  const cmSet = S.settings.commentary; if (!cmSet || cmSet === 'off') return;
+  let L = ON_LINES[kind] || []; const only = cmSet === 'root' ? 'root' : cmSet === 'masa' || cmSet === 'tetsu' ? 'masa' : null;
+  if (only) { const f = L.filter(x => x[0] === only); if (f.length) L = f; else return; }
+  if (!L.length) return;
+  if (S.cm && S.cm.online && Date.now() - S.cm.at < 1800 && (S.cm.prio || 0) > prio) return; // 読んでいる途中の大事な実況は残す
+  if (ON.v && ON.v.tour && prio < 3 && Math.random() < 0.85) return; // 大会では口数をひかえめに（ときどき我慢できずにしゃべる）
+  const [who, fn] = L[(Math.random() * L.length) | 0];
+  S.cm = { who, text: fn(...args), prio, mood: kind === 'win' || kind === 'three' ? 'happy' : kind === 'timeout' ? 'worried' : 'normal', at: Date.now(), online: true };
+}
+function onComment(v, prev, fresh) {
+  const g = v.game, nm = i => i === v.me ? 'あなた' : san(onName(v.seats[i]));
+  if (prev && prev.id === v.id && prev.gameNo !== v.gameNo && v.phase === 'play') { onSay('start', [nm(g.order[0]), '', '', g.round, v.gameNo], 4); return; }
+  if (prev && prev.id === v.id) v.seats.forEach((s, i) => { const p0 = prev.seats[i] || {}; if (s.sub && !p0.sub) onSay(s.auto ? 'auto' : 'sub', [nm(i), '', s.subLv], 5); if (!s.sub && p0.sub) onSay('back', [nm(i)], 5); });
+  let best = null;
+  for (const e of fresh) {
+    let k = null, pr = 0, extra = [];
+    if (e.type === 'play') {
+      const big = e.vals.filter(x => x >= 11);
+      if (e.left === 1) { k = 'left1'; pr = 6; } else if (e.left === 2) { k = 'left2'; pr = 5; }
+      else if (/÷/.test(e.expr) && /\(/.test(e.expr)) { k = 'divp'; pr = 4; } else if (e.vals.length === 3) { k = 'three'; pr = 3; }
+      else if (big.length) { k = 'big'; pr = 2; extra = [big.map(KB.vname).join('・')]; } else if (/÷/.test(e.expr)) { k = 'div'; pr = 2; } else { k = 'play'; pr = 1; }
+      if (Math.random() < 0.35 && v.seats[e.p] && (v.seats[e.p].ai || v.seats[e.p].sub)) ON.bub[e.p] = { text: ['よし！', 'これでどうや', '計算どおり', 'ふふん', 'いけっ'][(Math.random() * 5) | 0], at: Date.now() };
+    } else if (e.type === 'draw' && e.foul) { k = 'foul'; pr = 5; extra = [e.n]; if (e.p !== v.me) KB.sfx('foul'); }
+    else if (e.type === 'draw') { if (e.by === 'timeout') { k = 'timeout'; pr = 4; ON.bub[e.p] = { text: '⏰', at: Date.now() }; } else { k = 'draw'; pr = 0.5; if (Math.random() < 0.3 && v.seats[e.p] && v.seats[e.p].ai) ON.bub[e.p] = { text: ['うーん…', 'ここは引く', 'しまった'][(Math.random() * 3) | 0], at: Date.now() }; } }
+    else if (e.type === 'reshuffle') { k = 'reshuffle'; pr = 3; }
+    else if (e.type === 'end') { k = e.winner >= 0 ? 'win' : 'none'; pr = 9; if (e.winner >= 0) ON.bub[e.winner] = { text: 'やった！', at: Date.now() }; }
+    if (k && (!best || pr >= best.pr)) best = { k, pr, args: [e.p != null ? nm(e.p) : (e.winner >= 0 ? nm(e.winner) : ''), e.expr || '', extra[0] || '', e.round || g.round, v.gameNo] };
+  }
+  if (best) onSay(best.k, best.args, best.pr);
+}
+// 開始の演出：卓の名前と顔ぶれ、ホイッスル（2秒ちょっとで自動で消える。押しても消える）
+function onOpening(v) {
+  const el = document.createElement('div'); el.className = 'whistle-ov on-open';
+  const label = v.tour ? (v.label || '大会') : 'オンライン対局';
+  el.innerHTML = `<div class="wh-box"><div class="wh-title">${esc(label)}</div><div class="wh-sub">対局開始！ ${v.cfg.games}ゲーム・1手${v.cfg.limit >= 60 ? '1分' : v.cfg.limit + '秒'}</div>
+    <div class="on-cast">${v.seats.map((s, i) => `<span class="on-cp" style="animation-delay:${0.15 + i * 0.12}s"><span class="on-av">${onAv(s, 'happy')}</span><small>${esc(i === v.me ? 'あなた' : onName(s))}</small></span>`).join('<b class="on-vs">vs</b>')}</div>
+    ${v.tour ? `<div class="wh-say"><span class="cm-av">${KB.casterSVG('root', 'normal')}</span><span><small>解説・ルート博士</small>公平のため、実況と解説はだれにでも見えることだけにします。</span></div>` : ''}
+    <div class="wh-say"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><span><small>実況・ナニワのマサ</small>${esc(v.tour ? (/決勝/.test(v.label || '') ? '決勝や！泣いても笑ってもこの1セット！ 大会やから、あんま口出しせぇへんで！（できるかいな…）' : '大会やから、あんま口出しせぇへんで！（できるかいな…）') : 'ほな、キックオフや！ええ勝負見せてや！')}</span></div></div>`;
+  document.body.appendChild(el); KB.sfx('whistle', 1);
+  const close = () => { if (!el.isConnected) return; el.classList.add('out'); setTimeout(() => el.remove(), 300); };
+  el.onclick = close; setTimeout(close, 2600);
+  onSay('start', [v.game.order[0] === v.me ? 'あなた' : san(onName(v.seats[v.game.order[0]])), '', '', 1, 1], 4);
+}
+function onGameBanner(v) {
+  const el = document.createElement('div'); el.className = 'on-banner';
+  const d = v.game.order[0];
+  el.innerHTML = `<b>第${v.gameNo}ゲーム</b><small>親：${esc(d === v.me ? 'あなた' : onName(v.seats[d]))}</small>`;
+  document.body.appendChild(el); KB.sfx('banner'); setTimeout(() => el.classList.add('out'), 1300); setTimeout(() => el.remove(), 1700);
+}
+function onClock() {
+  const v = ON.v, el = $('#on-clock'); if (!v || !el) return;
+  const now = Date.now() / 1000 - (ON.skew || 0);
+  const cs = v.game && v.seats[v.game.cur];
+  if (v.phase === 'play' && cs && (cs.ai || cs.sub)) { el.innerHTML = `<b>🤖 ${esc(onName(cs))}の番（AIが打っています）</b>`; el.classList.remove('low'); }
+  else if (v.phase === 'play' && v.game && v.game.deadline) {
+    const left = Math.max(0, v.game.deadline - now), lim = v.cfg.limit;
+    const mineT = v.game.cur === v.me; el.innerHTML = `<i style="width:${Math.min(100, left / lim * 100)}%"></i><b>${mineT ? 'あなたの番・' : esc(onName(cs)) + 'の番・'}残り${Math.ceil(left)}秒</b>`; el.classList.toggle('low', left <= 5); el.classList.toggle('mine', mineT);
+    const sec = Math.ceil(left); if (mineT && sec <= 5 && sec > 0 && ON.tickSec !== sec) { ON.tickSec = sec; KB.sfx('click'); }
+    const nx = $('#on-next'); if (nx) nx.textContent = '';
+  } else if (v.phase === 'between' && v.game && v.game.nextAt) { const t = Math.max(0, Math.ceil(v.game.nextAt - now)); el.innerHTML = `<b>次のゲームまで ${t}秒</b>`; el.classList.remove('low'); const nx = $('#on-next'); if (nx) nx.textContent = `次のゲームまで ${t}秒`; }
+  else el.innerHTML = '';
+}
+const onCards = h => (h || []).map((c, i) => ({ v: c[0], s: c[1], id: i }));
+function onSelVals() { const v = ON.v, h = onCards(v.game && v.game.hand); return ON.sel.map(i => h[i] && h[i].v).filter(x => x != null); }
+function onlineHTML() {
+  const v = ON.v; if (!v) return '<div class="panel">読み込み中…</div>';
+  const top = `<div class="topbar">${v.tour ? '<button class="btn ghost sm" data-act="on-to-tour">← 大会</button>' : '<button class="btn ghost sm" data-act="on-quit">← ホーム</button>'}<div class="where">🌐 ${v.tour ? esc(v.label || '大会') : `卓 <b class="mono">${esc(v.id)}</b>`}</div><div class="small muted">${v.phase === 'lobby' ? '受付中' : v.phase === 'done' ? '終了' : `第${v.gameNo}/${v.cfg.games}ゲーム`}</div></div>`;
+  const tot = i => (v.setPP[i] || []).reduce((a, b) => a + b, 0);
+  const avatar = (s, mood) => KB.avatarSVG(Object.assign({}, s.avatar || AVATAR_DEF, { name: s.name }), { mood: mood || 'normal' });
+  if (v.phase === 'lobby') {
+    return top + `<div class="panel stack on-lobby"><div class="on-code-big">卓のコード <b class="mono">${esc(v.id)}</b><button class="btn sm" data-act="on-copy">コピー</button></div>
+      <p class="small muted" style="margin:0">このコードを知らせると、ほかの人が「オンライン大会」の「入る」から参加できます。${v.cfg.n}人まで・${v.cfg.games}ゲーム・1手${v.cfg.limit >= 60 ? '1分' : v.cfg.limit + '秒'}・${{ before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[v.cfg.judge] || '式を先に確認'}</p>
+      <div class="on-seats">${v.seats.map((s, i) => `<div class="on-seat"><span class="on-av">${avatar(s, 'happy')}</span><b>${esc(s.name)}</b>${i === 0 ? '<em>ホスト</em>' : ''}${i === v.me ? '<em class="me">あなた</em>' : ''}${v.host && i > 0 ? `<button class="btn sm ghost" data-act="on-kick" data-seat="${i}">外す</button>` : ''}</div>`).join('')}
+        ${[...Array(Math.max(0, v.cfg.n - v.seats.length))].map(() => '<div class="on-seat empty">空席</div>').join('')}</div>
+      ${v.host ? `<div class="row" style="gap:8px;flex-wrap:wrap">${v.seats.length < v.cfg.n ? '<button class="btn" data-act="on-addai">＋ AI★2を入れる</button>' : ''}<button class="btn primary" data-act="on-begin" ${v.seats.length < 2 ? 'disabled' : ''}>対局をはじめる</button></div>` : '<p class="small" style="margin:0">ホストが始めるのを待っています…</p>'}
+      <p class="small muted" id="on-err" style="margin:0"></p></div>`;
+  }
+  return onTableHTML(v);
+}
+// ---------- オンライン対局の画面（ふつうの対局画面と同じ作り：席・場札・山札・実況・手札）----------
+// AIの席は、倶楽部のキャラの顔を借りる（名前に「AI★n」が付いている席。同じ名前なら同じキャラ）
+const ON_AI_BASE = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
+function onAiChar(name) { // サーバーのAIの名前（ロボ太・ピコ…＋番号）ごとに、同じ強さのキャラを重ならないように割り当てる
+  const lv = +((String(name).match(/AI★(\d)/) || [])[1] || 2), pool = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero');
+  const base = String(name).replace(/（AI★\d）$/, ''), m = base.match(/^(.*?)(\d*)$/), bi = ON_AI_BASE.indexOf(m[1]);
+  let idx; if (bi >= 0) idx = bi + (m[2] ? +m[2] : 0); else { idx = 0; for (const ch of base) idx = (idx * 31 + ch.charCodeAt(0)) >>> 0; }
+  return pool[idx % pool.length] || KB.ROSTER[0];
+}
+function onName(s) { if (!s) return ''; if (!s.ai && !/（AI★\d）$/.test(s.name || '')) return s.name; const c = onAiChar(s.name); return c.name; }
+function onAv(s, mood) { if (s.ai || /（AI★\d）$/.test(s.name || '')) { const c = onAiChar(s.name); return KB.avatarSVG(KB.charToCh(c), { mood: mood || 'normal', level: c.lv }); } return KB.avatarSVG(Object.assign({}, s.avatar || AVATAR_DEF, { name: s.name }), { mood: mood || 'normal' }); }
+// 出した札（だれにでも見える。切り直しで山札に戻った札はうすく）と、これまでの場札
+function onPlayedHTML(g, i, bare) {
+  const ps = g.played[i] || [];
+  const inner = ps.length ? ps.map(pl => `<span class="pg ${pl.ret ? 'ret' : ''}" title="第${pl.round}巡 場${pl.t}：${esc(pl.expr)}${pl.ret ? '（切り直しで山札に戻った札）' : ''}">${pl.cards.map(c => miniCard({ v: c[0], s: c[1] })).join('')}</span>`).join('') : '<span class="none">まだ出していません</span>';
+  return bare ? `<span class="played">${inner}</span>` : `<div class="played"><span class="pl-l">出した札</span>${inner}</div>`;
+}
+function onFieldsHTML(g, flipped) {
+  const L = (g.fields || []).map(f => ({ v: f[0], s: f[1] })); if (!L.length) return '';
+  return `<div class="fh-mini" title="${g.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${g.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${L.map((f, k) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && k === L.length - 1 ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
+}
+function onTableHTML(v) {
+  const g = v.game, me = v.me, n = v.seats.length, spec = me < 0, pov = spec ? (ON.pov || 0) % n : me;
+  const tot = i => (v.setPP[i] || []).reduce((a, b) => a + b, 0);
+  const now = Date.now() / 1000 - (ON.skew || 0);
+  const label = v.tour ? (v.label || '大会') : '卓 ' + v.id;
+  const pips = [...Array(v.cfg.games)].map((_, i) => `<i class="${i + 1 < v.gameNo || (v.phase !== 'play' && i + 1 === v.gameNo) ? 'done' : i + 1 === v.gameNo ? 'cur' : ''}"></i>`).join('');
+  const top = `<div class="topbar on-top">${v.tour ? '<button class="btn ghost sm" data-act="on-to-tour">← 大会</button>' : '<button class="btn ghost sm" data-act="on-quit">← ホーム</button>'}
+    <div class="where"><div class="game-prog"><span class="gp-set">🌐 ${esc(label)}</span><b class="gp-no">第${v.gameNo}ゲーム</b><span class="gp-pips">${pips}</span></div></div>
+    <div class="row"><button class="btn sm ghost snd-btn ic-btn" data-act="sound" title="${esc(sndLabel())}" aria-label="${esc(sndLabel())}">${sndIcon()}</button></div></div>`;
+  const order = g.order, myPos = order.indexOf(pov), cur = g.cur, ordIn = i => order.indexOf(i) + 1;
+  const bub = ON.bub || {};
+  const seat = i => {
+    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b = bub[i] && Date.now() - bub[i].at < 2600 ? bub[i] : null;
+    let act;
+    if (cur === i && v.phase === 'play') act = `<div class="act thinking">${s.ai || s.sub ? 'AIが考え中' : '考え中'}<span class="dots"><i></i><i></i><i></i></span></div>`;
+    else if (l && l.type === 'play') act = `<div class="act">${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}</div>`;
+    else if (l && l.type === 'draw') act = `<div class="act draw">${l.foul ? `❌ お手つきで${l.n}枚引いた` : l.by === 'timeout' ? '⏰ 時間切れで1枚引いた' : '山札から1枚引いた'}</div>`;
+    else act = `<div class="act draw idle">${order.indexOf(i) < g.pos || g.over ? '' : 'この巡はこれから'}</div>`;
+    const mood = g.over ? (g.winner === i ? 'happy' : (g.pp && g.pp[i] >= 25 ? 'worried' : 'normal')) : n2 <= 2 ? 'smug' : 'normal';
+    return `<div data-pi="${i}" ${spec ? `data-onpov="${i}" role="button" title="${esc(onName(s))}の席から見る"` : ''} class="seat ${i === order[0] ? 'dealer' : ''} ${cur === i && v.phase === 'play' ? 'turn' : ''} ${ON.acted === i ? 'acted' : ''} ${g.over ? (g.winner === i ? 'out winner' : 'loser') : ''}">${i === order[0] ? dealerChip('dbtn seat-chip') : ''}
+      <div class="av">${onAv(s, mood)}${b ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''}${g.over && g.winner === i ? confettiHTML() : ''}</div>
+      <div class="nm"><span>${esc(onName(s))}</span><span class="ord">${ordIn(i)}番手</span></div>
+      <div class="meta">${s.ai ? `<span class="chip lvchip">AI★${s.lv || 2}</span>` : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
+      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
+      ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}${onPlayedHTML(g, i)}</div>`;
+  };
+  const opp = []; for (let k = 1; k < n; k++) opp.push(seat(order[(myPos + k) % n]));
+  const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
+  const flipped = ON.lastRound !== `${v.gameNo}:${g.round}`; ON.lastRound = `${v.gameNo}:${g.round}`;
+  const strip = `<div class="order-strip" aria-label="手番の順"><span class="cw">時計回り</span>${order.map((i, k) => `${k ? '<span class="arr">→</span>' : ''}<span class="os ${cur === i && v.phase === 'play' ? 'now' : g.over || k < g.pos ? 'done' : ''} ${i === me ? 'meos' : ''}">${k === 0 ? dealerChip('dbtn inline') : ''}${esc(i === me ? 'あなた' : onName(v.seats[i]))}</span>`).join('')}</div>`;
+  let win = '';
+  if (g.over) {
+    const w = g.winner, lp = w >= 0 && g.played[w].length ? g.played[w][g.played[w].length - 1] : null;
+    const left = v.phase === 'between' && v.game.nextAt ? Math.max(0, Math.ceil(v.game.nextAt - now)) : null;
+    win = `<div class="win-strip" role="status"><div class="ws-main"><div class="ws-title">${w >= 0 ? esc(w === me ? 'あなた' : onName(v.seats[w])) + 'が上がりました！' : '規定の巡数で終了しました'}</div>${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(c => miniCard({ v: c[0], s: c[1] })).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
+      <div class="ws-btns">${v.phase === 'done' ? (v.tour ? '<button class="btn primary" data-act="on-to-tour">大会の順位へ</button>' : '<button class="btn primary" data-act="on-quit">ホームへ</button>') : `<span class="small" id="on-next">次のゲームまで ${left != null ? left : ''}秒</span>`}</div></div>`;
+  }
+  // 手元（自分。観戦なら選んだ席の人。手札は見えない）
+  const ps = v.seats[pov] || {}, hand = spec ? [] : onCards(g.hand), mySub = !spec && ps.sub, myTurn = !spec && v.phase === 'play' && cur === me && !mySub;
+  const after = (v.cfg.judge || 'before') !== 'before', vals = onSelVals(), ok = myTurn && vals.length && (after ? { expr: '' } : KB.evalSelection(vals, f.v));
+  let prev = '';
+  if (myTurn && after && vals.length) prev = `<span class="mono">${vals.map(KB.vname).join('・')}</span><span class="small" style="color:var(--felt-muted)">で ${f.v} を作って出す（成り立つかは出してから判定・お手つきは${v.cfg.judge === 'after2' ? 2 : 3}枚）</span>`;
+  else if (myTurn) prev = !vals.length ? '<span class="muted" style="color:var(--felt-muted)">カードを1〜3枚選ぶと式を自動で探します</span>' : ok ? `<span class="ok">${esc(ok.expr)} = ${f.v}</span><span class="small" style="color:var(--felt-muted)">出せます</span>` : `<span class="ng">${vals.map(KB.vname).join('・')} では ${f.v} を作れません</span>`;
+  const myPlayed = g.played[pov] || [];
+  const handHTML = spec ? (g.over && g.hands ? onCards(g.hands[pov]).map(c => cardHTML(c, { extra: 'disabled' })).join('') : [...Array(g.handN[pov])].map(() => '<span class="card back"></span>').join(''))
+    : hand.map(c => cardHTML(c, { cls: (ON.sel.includes(c.id) ? 'sel ' : '') + ((ON.newIds || []).includes(c.id) ? 'new' : ''), extra: `data-oncard="${c.id}" ${myTurn ? '' : 'disabled'} aria-pressed="${ON.sel.includes(c.id)}"` })).join('');
+  const meBox = `<div data-pi="${pov}" class="me ${cur === pov && v.phase === 'play' ? 'turn' : ''} ${g.over && g.winner === pov ? 'winner' : ''}">
+      ${pov === order[0] ? dealerChip('dbtn seat-chip') : ''}${g.over && g.winner === pov ? confettiHTML() : ''}
+      <div class="head"><span class="me-id"><span class="av me-av">${onAv(ps, g.over ? (g.winner === pov ? 'happy' : 'normal') : (g.handN[pov] <= 2 ? 'smug' : 'normal'))}</span><b>${esc(spec ? onName(ps) : ps.name)}</b><span class="me-info">手札 <b class="tnum">${g.handN[pov]}</b>枚${spec ? '' : `・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b>`}</span></span><span class="me-pp">セットPP <b class="tnum">${tot(pov)}</b></span></div>
+      ${spec ? '<div class="on-watch">👀 観戦中（手札は見えません）・ほかの席を押すと、その人の席から見られます</div>' : ''}
+      ${mySub ? `<div class="on-sub">🤖 ${ps.auto ? `AI★${ps.subLv}に任せています（推定実力−1）` : '時間切れが3回続いたので、AI★2が代わりに打っています'} <button class="btn sm primary" data-act="on-back">自分で打つ</button></div>` : ''}
+      ${myPlayed.length ? `<div class="mine-played"><span>出した札</span>${onPlayedHTML(g, pov, true)}</div>` : ''}
+      <div class="hand ${spec ? 'on-backs' : ''}">${handHTML}</div>
+      ${prev ? `<div class="preview">${prev}</div>` : ''}
+      ${!spec && v.phase === 'play' ? `<div class="actions"><button class="btn primary" data-act="on-play" ${ok ? '' : 'disabled'}>出す</button><button class="btn felt-btn" data-act="on-draw" ${myTurn ? '' : 'disabled'}>引く</button>${mySub ? '' : `<button class="btn felt-btn sm" data-act="on-auto" title="いまの推定実力−1の強さ（最低★2）のAIが代わりに打ちます">🤖 AIに任せる</button>`}</div>` : ''}
+    </div>`;
+  const res = v.phase === 'done' ? (() => { const rows = [...Array(n).keys()].map(i => ({ i, t: tot(i) })).sort((a, b) => a.t - b.t); return `<div class="panel on-res"><h3 style="margin:0">🏁 セット終了</h3>${rows.map((r, k) => `<div class="on-rrow ${r.i === me ? 'me' : ''}"><b>${['🥇', '🥈', '🥉'][k] || k + 1}</b><span>${esc(onName(v.seats[r.i]))}</span><span>合計 ${r.t}PP</span></div>`).join('')}</div>`; })() : '';
+  return top + `<div class="on-clock" id="on-clock"></div><div id="tablewrap"><div class="table ${cmHTML() ? 'has-cm' : ''} on-tbl">
+    <div class="opps ring${n - 1}" style="--n:${n - 1}">${opp.join('')}</div>
+    <div class="center">
+      <div class="side deckside"><div class="deck" aria-label="山札 ${g.deckN}枚">${'<i></i>'.repeat(Math.min(5, Math.ceil(g.deckN / 6)))}<b class="tnum">${g.deckN}</b></div><span>山札</span><span>捨て札 ${g.discardN}</span></div>
+      <div class="pilecol"><div class="pile">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>` : ''}</div>${onFieldsHTML(g, flipped)}</div>
+      ${cmHTML() || `<div class="side r"><span>手番</span><b>${g.over ? '終了' : esc(onName(v.seats[cur]))}</b></div>`}
+    </div>
+    ${strip}${win}${meBox}</div></div>${res}
+    <p class="small muted" id="on-err" style="margin:0">${ON.err ? '⚠ ' + esc(ON.err) : ''}</p>`;
+}
+
+function onBind() {
+  document.querySelectorAll('[data-onpov]').forEach(b => b.onclick = () => { ON.pov = +b.dataset.onpov; KB.sfx('select'); render(); });
+  document.querySelectorAll('[data-oncard]').forEach(b => b.onclick = () => { const id = +b.dataset.oncard; ON.sel = ON.sel.includes(id) ? ON.sel.filter(x => x !== id) : ON.sel.length < 3 ? [...ON.sel, id] : ON.sel; KB.sfx('select'); render(); });
+  onClock();
+}
+async function onAct(act, extra) {
+  if (!ON.v) return;
+  try { const v = await onReq('on_act', Object.assign({ id: ON.v.id, act }, extra || {})); const lg = v.game && v.game.log || [], lastMine = [...lg].reverse().find(e => e.p === v.me && (e.type === 'play' || e.type === 'draw')); if (act === 'play' && lastMine && lastMine.foul) { KB.sfx('foul'); toast(`お手つき！ ${lastMine.n}枚引きました`); } else if (act === 'play') KB.sfx(extra.vals.length === 3 ? 'play3' : 'play', extra.vals.length); else if (act === 'draw') KB.sfx('draw'); ON.sel = []; onApply(v); }
+  catch (e) { toast(e.message || 'できませんでした'); }
+}
+
+window.KBAPP = { S, act, ON, onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null) }), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>
