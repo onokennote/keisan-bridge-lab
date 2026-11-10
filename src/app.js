@@ -1159,7 +1159,7 @@ function huntResultHTML() {
   ${H.regs.length ? `<div class="panel stack"><div class="lbl">捕獲した式（図鑑に登録）</div><div class="zk-grid">${H.regs.map(r => `<div class="zk-cell got"><span class="mono">${esc(r.s)}</span><i>= ${r.t}</i></div>`).join('')}</div></div>` : ''}
   ${miss.length ? `<div class="panel stack"><div class="lbl">逃した獲物</div><p class="small muted" style="margin:0">見送った標的や最後の標的で、手札から作れた未登録の式です。</p><div class="zk-grid">${miss.map(r => `<div class="zk-cell"><span class="mono">${esc(r.s)}</span><i>= ${r.t}</i></div>`).join('')}</div></div>` : ''}
   ${H.made.length ? `<div class="panel stack"><div class="lbl">作った式</div><div class="hunt-made">${H.made.map(m => `<span class="${m.isNew ? 'new' : ''}">${esc(m.s)} = ${m.t}<i>+${m.pts}</i></span>`).join('')}</div></div>` : ''}
-  <div class="row" style="justify-content:center"><button class="btn primary" data-act="hunt-start">もう一度狩りに出る</button><button class="btn" data-go="zukan">図鑑を見る</button><button class="btn" data-go="home">ホームへ</button></div>`;
+  <div class="row" style="justify-content:center"><button class="btn primary" data-act="hunt-start">もう一度狩りに出る</button><button class="btn" data-go="zukan">図鑑を見る</button></div>`;
 }
 function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
@@ -1632,7 +1632,7 @@ function drillDoneHTML(D) {
     <div class="dq-steps">${Array.from({ length: DRILL_N }, (_, k) => { const r = D.results[k]; return `<span class="${r ? (r.ok ? 'ok' : 'ng') : ''}"><b>${k + 1}</b><small>${'★'.repeat(k + 1)}</small><i>${r ? (r.ok ? (r.hint ? 'ヒント' : '正解') : '×') : '—'}</i></span>`; }).join('')}</div>
     <p style="margin:0">${clean ? 'ヒントなしで成功です！' : clear ? 'ヒントを使った問題がありました。次はヒントなしで成功を目指しましょう。' : '全部出てしまった数字に注意して、もう一度1問目から挑戦しましょう。'}</p>
     <p class="small muted" style="margin:0">これまでの最高：${g.drill && g.drill.best ? (g.drill.best >= DRILL_N ? '全問クリア' : `${g.drill.best}問目までクリア`) : '—'}・ヒントなしの成功 ${g.cnt.outs5 || 0}回</p>
-    <div class="row"><button class="btn primary" data-act="drill">${clear ? 'もう一度挑戦' : 'リトライ'}</button><button class="btn" data-go="home">ホームへ</button></div>
+    <div class="row"><button class="btn primary" data-act="drill">${clear ? 'もう一度挑戦' : 'リトライ'}</button></div>
   </div>`;
 }
 function drillSubmit() {
@@ -1976,7 +1976,7 @@ function attackResultHTML() {
     <p style="margin:0">${R.isBest ? '<b class="ok">自己ベスト更新！</b>' : `自己ベストは ${R.prev ? R.prev.bp : 0} BP`}</p>
   </div>
   <div class="panel stack"><div class="lbl">このアタックで取ったバッジ</div><div class="bdg-grid">${cats}${list || '<p class="small muted">バッジはありませんでした</p>'}</div></div>
-  <div class="row" style="justify-content:center"><button class="btn primary" data-act="attack-start">もう一度挑戦</button><button class="btn" data-go="home">ホームへ</button></div>`;
+  <div class="row" style="justify-content:center"><button class="btn primary" data-act="attack-start">もう一度挑戦</button></div>`;
 }
 
 // ---------- プレイヤー（名前ごとに記録を分ける）・書き出しと読み込み ----------
@@ -4821,7 +4821,7 @@ function setEndHTML() {
   });
   const mine = h.res.find(r => r.id === 0) || null;
   let title, btn;
-  if (T.cfg.kind === 'practice') { title = `セット ${mine.rank}位（${mine.pts}点）`; btn = '<button class="btn primary" data-act="practice-again">同じ設定でもう1セット</button><button class="btn" data-go="home">ホームへ</button>'; T.done = true; store.del('session'); }
+  if (T.cfg.kind === 'practice') { title = `セット ${mine.rank}位（${mine.pts}点）`; btn = '<button class="btn primary" data-act="practice-again">同じ設定でもう1セット</button>'; T.done = true; store.del('session'); }
   else if (T.phase === 'final') { title = '決勝 終了'; btn = '<button class="btn primary" data-act="final-result">最終結果へ</button>'; }
   else { title = `第${T.set}セット ${mine.rank}位（+${mine.pts}点）`; btn = T.set < T.cfg.sets ? '<button class="btn primary" data-act="next-set">次のセットへ（席替え）</button>' : '<button class="btn primary" data-act="to-final">予選結果と決勝進出者へ</button>'; }
   return `<div class="topbar"><div class="where">${esc(title)}</div><div></div></div>
@@ -5027,7 +5027,7 @@ function resultHTML() {
   <div class="podium">${slot(1, 'p2')}${slot(0, 'p1')}${slot(2, 'p3')}</div>
   ${rest ? `<div class="result-cast" style="margin-top:12px">${rest}</div>` : ''}${cm}</div>
   ${standingsHTML(T)}
-  <div class="row" style="justify-content:flex-end"><button class="btn" data-go="home">ホームへ</button><button class="btn primary" data-act="tour-again">同じ設定でもう一度</button></div></div>`;
+  <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="tour-again">同じ設定でもう一度</button></div></div>`;
 }
 
 // ---------- 戦略データ ----------
@@ -5174,7 +5174,7 @@ function numbersHTML() {
   </div>
   <p class="small muted" style="margin:0;padding:0 6px">※ 平均や確率は、このアプリのAIどうしの対戦と、その結果から作ったモデルで計算した見込みです。実際の大会の結果ではありません。</p>
   <div class="op-lines story-cast">${[['root', '勘で打っていたところに、数字の裏づけがあると、迷いが減ります。'], ['masa', '数字は裏切らへん！でも1ゲームは運も大きいで。そこがおもろいんや！']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button><button class="btn primary" data-go="home">ホームへ</button></div></div>`;
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn" data-go="story">このアプリができるまで</button></div></div>`;
 }
 function storyHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">このアプリができるまで</div><div></div></div>
@@ -5182,7 +5182,7 @@ function storyHTML() {
   <div class="story-text">${STORY.map((t, i) => `<p style="animation-delay:${0.15 + i * 0.25}s">${esc(t)}</p>`).join('')}</div>
   <p class="small muted story-note">「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、キャラクターはすべてオリジナルです。</p>
   <div class="op-lines story-cast">${[['masa', '要するに、負けず嫌いが止まらんかったっちゅうことや！'], ['root', 'くやしさは、いちばん強い学びの入り口です。']].map(([who, txt]) => `<div class="op-line ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div class="op-bubble"><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(txt)}</div></div>`).join('')}</div>
-  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button><button class="btn" data-go="home">ホームへ</button></div></div>`;
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div></div>`;
 }
 function rulesHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ルールと前提</div><div></div></div>
