@@ -631,9 +631,9 @@ function G_() {
 function G_save(g) { if (S.attack) return; if (g.games.length > 300) g.games = g.games.slice(-300); store.set('growth', g); }
 // 直近 n ゲームの判断から推定実力を出す（お手つきは損失10ptの判断として数える）
 // 判断の質（最善率・平均損失）から出した実力から、お手つきの割合に応じて差し引く（お手つき1割で−0.5）
-// 実力の計算に使う1手の損失：序盤（1・2巡）で差2.5%以内は最善と同じ（最善の幅を広げる前の記録にも当てる）。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
+// 実力の計算に使う1手の損失：最善扱いの幅（BEST_LOOSE：1巡目3.5pt・2巡目2.0pt）以内は最善と同じ。巡の記録がない前の記録は、序盤（1・2巡）2.5pt以内を最善と同じに。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
 const RATE_CAP = 0.10;
-const rateLoss = d => Math.min(RATE_CAP, (d.l <= 0.025 && (d.c || []).includes('opening')) ? 0 : d.l);
+const rateLoss = d => { const L = d.r ? BEST_LOOSE[d.r] : ((d.c || []).includes('opening') ? { loss: 0.025 } : null); return Math.min(RATE_CAP, L && d.l <= L.loss ? 0 : d.l); };
 function ratingOf(games, n) {
   const gs = games.slice(-(n || 20)); const ls = []; let fouls = 0;
   gs.forEach(x => { x.ds.forEach(d => { if (!d.h) ls.push(rateLoss(d)); }); fouls += x.f || 0; }); // AIの読みを見た手は実力の計算から外す
@@ -786,7 +786,7 @@ function growthOnDecision(d) {
 function growthOnGame(g0) {
   if (S.tiebreak) return;
   const me = g0.players.findIndex(p => p.human), g = G_();
-  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0 }));
+  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0, r: d.round }));
   const threes = g0.played[me].filter(x => x.cards.length === 3).length;
   g.games.push({ at: Date.now(), k: S.T.cfg.kind, ds, f: (S.fouls || []).length, won: g0.winner === me, pp: g0.pp[me], n: g0.n });
   G_save(g);
@@ -3437,7 +3437,7 @@ function rerenderAsk(where) { if (where === 'hint') renderHint(); else { const e
 // ---------- 自分の手 ----------
 const mlabel = e => e && e.m ? e.m.expr : 'あえて引く';
 const sameMove = (e, move) => move ? (e.m && e.m.key === move.key) : e.m === null;
-const BEST_LOOSE = { 1: { loss: 0.04, pp: 1.0, cap: 0.08 }, 2: { loss: 0.025 } };
+const BEST_LOOSE = { 1: { loss: 0.035 }, 2: { loss: 0.02 } }; // 1巡目3.5pt・2巡目2.0pt以内は最善扱い
 function recordDecision(move) {
   const g = S.game; const me = g.current();
   const counts = g.counts(me), t = g.field.v;
@@ -3468,7 +3468,7 @@ function recordDecision(move) {
   // 表示される数字（目的・上がる確率・期待PP）で最善手が上回っていなければ、端数の差は同じ扱い＝最善とする
   if (loss > 0 && visTie(best, mine)) loss = 0;
   // 序盤は読みのばらつきが手の差と同じくらい大きい（1巡目は2回読むと最善手が3割入れ替わる）ので、最善の幅を広げる。
-  // 1巡目：差4%以内、または期待PPの差1.0以内（差8%まで）／2巡目：差2.5%以内。最善と同じ扱いにして、その手は「ほぼ互角」として残す
+  // 1巡目：差3.5pt以内／2巡目：差2.0pt以内。最善と同じ扱いにして、その手は「ほぼ互角」として残す
   let near = null;
   if (loss > 0 && !(sutemi && isOutEv(mine))) { const L = BEST_LOOSE[g.round]; if (L && (loss <= L.loss || (L.pp && mine.pp - best.pp <= L.pp && loss <= L.cap))) { near = mlabel(best); loss = 0; } }
   // 捨て身（あえて上がらない）が最善の場面で上がった：上がりは最善として扱う（疑問手にしない）。
@@ -4011,7 +4011,7 @@ function whyHTML(d) {
   const gL = d.goalLbl || null, gTxt = e => gL && e.goal != null ? `${gL} ${d.goalPct ? pct(e.goal) : fx1(e.goal) + '点'}・` : '';
   // 自分の手が6位より下でも、その順位で最後に足して見せる（枠の強調は自分の手）
   const rows = evs.map((e, i) => [e, i]); if (!evs.some(isMine)) { const k = allEv.findIndex(isMine); if (k >= 6) rows.push([allEv[k], k]); }
-  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は4pt以内、または期待PPの差1.0以内で8ptまで' : d.round === 2 ? '2巡目は2.5pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
+  const cands = evs.length ? `<div class="cand-list"><div class="lbl">AIが考えた手（総合評価の高い順）</div><div class="small muted" style="margin:-2px 0 4px">総合＝${gPart ? gPart + ' ＋ ' : ''}上がり（%）×0.06 − 期待PP×0.2${gNote}。「最善扱い」＝最善との差が誤差の範囲（${d.round === 1 ? '1巡目は3.5pt以内' : d.round === 2 ? '2巡目は2.0pt以内' : '1.5pt以内'}）</div>${rows.map(([e, i]) => `${i >= 6 ? '<div class="cl-gap">⋮</div>' : ''}<div class="cl-row ${isMine(e) ? 'mine' : ''}"><span class="cl-rk">${i + 1}</span><span class="cl-ex mono">${e.m ? esc(e.m.expr) : 'あえて引く'}</span><span class="cl-tags">${tagOf(e, i)}${isMine(e) ? '<em class="t-mine">あなた</em>' : ''}</span><span class="cl-st cl-mx">${mx(e, i)}</span></div>`).join('')}</div>` : '';
   if (d.loss <= 0.015) return `<div class="why"><p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger || '')}</p>${(d.facts || insights(d).map(x => x.root)).map(f => `<p class="small" style="margin:0">・${esc(f)}</p>`).join('')}${cands}</div>`;
   const diffs = [];
   if (best.goal != null && mine.goal != null && best.goal - mine.goal > 0.004) diffs.push(`${goalLabel()}が ${fmtGoal(best.goal - mine.goal)} 高い`);
