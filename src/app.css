@@ -1941,7 +1941,7 @@ body.rewinding #app{animation:rw-jit .12s steps(2) infinite;filter:hue-rotate(16
 .su-ptspre .su-seg button{flex:1 1 0;min-width:0;padding-left:4px;padding-right:4px}
 .su-ptspre .su-seg button small{font-size:9.5px;white-space:nowrap;letter-spacing:-.3px}
 /* どの画面でも右下の 🏠 */
-#home-fab{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:45;width:54px;height:54px;border-radius:50%;border:1.5px solid var(--trim);background:rgba(12,25,22,.88);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 4px 14px rgba(0,0,0,.5);cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+#home-fab{position:fixed;right:max(14px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:45;width:54px;height:54px;border-radius:50%;border:3px solid var(--trim);background:rgba(12,25,22,.88);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;box-shadow:0 4px 14px rgba(0,0,0,.5);cursor:pointer;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
 #home-fab span{font-size:20px;line-height:1.05;display:block;margin-top:2px}
 #home-fab small{font-size:9px;color:var(--trim);font-weight:800;line-height:1;margin-top:3px;display:block}
 #home-fab:active{transform:scale(.94)}
@@ -2117,4 +2117,4 @@ body.rewinding #home-fab{display:none}
 @keyframes onflip{from{transform:rotateY(90deg)}to{transform:none}}
 .on-round.out{opacity:0;transition:opacity .35s}
 /* PC（マウスで操作する広い画面）はホームボタンを1.5倍に */
-@media (min-width:900px) and (hover:hover){#home-fab{width:81px;height:81px;right:24px;bottom:24px}#home-fab span{font-size:30px}#home-fab small{font-size:13px}body.has-fab #app{padding-bottom:110px}}
+@media (min-width:900px) and (hover:hover){#home-fab{width:81px;height:81px;right:24px;bottom:24px;border-width:4px}#home-fab span{font-size:30px}#home-fab small{font-size:13px}body.has-fab #app{padding-bottom:110px}}
