@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="dbff7e1 2026-11-11 04:23"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="82ab05a 2026-11-11 05:55"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2121,10 +2121,23 @@ body.rewinding #home-fab{display:none}
 .on-round.out{opacity:0;transition:opacity .35s}
 /* PC（マウスで操作する広い画面）はホームボタンを1.5倍に */
 @media (min-width:900px) and (hover:hover){#home-fab{width:81px;height:81px;right:24px;bottom:24px;border-width:4px}#home-fab span{font-size:30px}#home-fab small{font-size:13px}body.has-fab #app{padding-bottom:110px}}
+/* 大会：招待する人を選ぶ */
+.inv-box .inv-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;align-items:center}
+.inv-chip{display:inline-flex;align-items:center;gap:4px;background:var(--trim);color:#2a1c05;font-weight:800;font-size:13px;border-radius:999px;padding:3px 4px 3px 10px}
+.inv-chip button{border:0;background:rgba(0,0,0,.18);color:#2a1c05;width:22px;height:22px;border-radius:50%;font-weight:900;cursor:pointer;line-height:1;padding:0}
+.inv-res{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow-y:auto}
+.inv-p{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;padding:5px 8px;color:var(--ink);cursor:pointer;font:inherit}
+.inv-p.on{border-color:var(--trim);background:rgba(240,190,60,.14)}
+.inv-av{width:30px;height:30px;border-radius:50%;overflow:hidden;flex:0 0 30px;background:#24323a}
+.inv-av svg{width:100%;height:100%;display:block}
+.inv-nm{flex:1;display:flex;flex-direction:column;font-weight:700;min-width:0}
+.inv-nm small{font-weight:400;color:var(--muted);font-size:11px}
+.inv-add{font-weight:800;color:var(--trim);white-space:nowrap}
+.inv-p.raw{border-style:dashed}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='a2ac9778b5';
+window.KB_BUILD='ea26503a23';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11254,9 +11267,9 @@ function act(a, el) {
     case 'next-game': nextGame(); break;
     case 'fab-home': fabHome(); break;
     case 'on-new': onNewModal(); break;
-    case 'on-tour-new': S.onTourEdit = null; S.onTour = null; onTourNewModal(); break;
+    case 'on-tour-new': S.onTourEdit = null; S.onTour = null; S.inv = null; onTourNewModal(); break;
     case 'on-tour-edit': { const t = ON.t, d = new Date(t.startAt * 1000), loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); const pk = (PTS_PRE.find(x => x[2].join() === (t.points || []).join()) || PTS_PRE[0])[0];
-      S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, pts: pk };
+      S.inv = null; S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, pts: pk };
       S.onTourEdit = t.id; onTourNewModal(); break; }
     case 'on-arch': onArchiveOpen(); break;
     case 'title-open': titleModal(); break;
@@ -11446,19 +11459,49 @@ function onTourNewModal() {
     <div class="su-row col"><b>最少人数に足りないとき</b>${seg('aiFill', [['true', 'AIを入れて開催'], ['false', '中止']])}</div>
     ${c.aiFill ? `<div class="su-row col"><b>入れるAIの強さ</b>${seg('aiMix', Object.entries(MIX).map(([k, m]) => [k, m.label]))}<small class="muted">ふつうの大会の「相手の強さ」と同じ割合で★1〜5のAIが入ります</small></div>` : ''}
     <div class="su-row col"><b>エントリーできる人</b>${seg('entry', [['open', '誰でも'], ['invite', '招待した人だけ']])}</div>
-    ${c.entry === 'invite' ? `<label class="su-row col"><b>招待する人の名前</b><textarea id="ot-inv" rows="2" placeholder="ランキングの名前を、改行か「、」で区切って">${esc(c.invites)}</textarea></label>` : ''}
+    ${c.entry === 'invite' ? `<div class="su-row col inv-box"><b>招待する人 <small class="muted" id="ot-inv-n"></small></b><div class="inv-chips" id="ot-inv-chips"></div><input id="ot-inv-q" class="su-in" placeholder="🔍 名前でさがす（ランキングの名前）" autocomplete="off" maxlength="10"><div class="inv-res" id="ot-inv-res"></div></div>` : ''}
     <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
     ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
     <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
-  const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value; };
+  const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; };
+  if (c.entry === 'invite') invInit(c);
   document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
   document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; onTourNewModal(); });
 }
+// 招待する人を選ぶ：選んだ人はチップ（×で外す）。名前でさがす／最近の大会でいっしょだった人・前に招待した人から押して加える
+const invNorm = x => String(x).normalize('NFKC').toLowerCase().replace(/[\s・._\-ー]/g, '');
+const invList = c => String(c.invites || '').split(/[\n、,]+/).map(x => x.trim()).filter(Boolean);
+function invToggle(c, name) { const L = invList(c), i = L.findIndex(x => invNorm(x) === invNorm(name)); if (i >= 0) L.splice(i, 1); else if (L.length < 40) L.push(name); else { toast('招待できるのは40人までです'); return; } c.invites = L.join('\n'); KB.sfx('select'); invPaint(c); }
+function invRow(c, p, sel) { return `<button class="inv-p ${sel ? 'on' : ''}" data-inv="${esc(p.name)}"><span class="inv-av">${KB.avatarSVG(Object.assign({ name: p.name }, p.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="inv-nm">${esc(p.name)}${p.why ? `<small>${p.why === 'played' ? '大会でいっしょ' : '前に招待'}</small>` : ''}</span><span class="inv-add">${sel ? '✓ 招待' : '＋'}</span></button>`; }
+function invPaint(c) {
+  const L = invList(c), has = n => L.some(x => invNorm(x) === invNorm(n));
+  const ch = $('#ot-inv-chips'); if (!ch) return;
+  ch.innerHTML = L.length ? L.map(n => `<span class="inv-chip">${esc(n)}<button data-inv="${esc(n)}" aria-label="${esc(n)}を外す">×</button></span>`).join('') : '<small class="muted">まだだれも選んでいません。下から押して加えてください</small>';
+  const nn = $('#ot-inv-n'); if (nn) nn.textContent = L.length ? `（${L.length}人）` : '';
+  const q = (($('#ot-inv-q') || {}).value || '').trim(), R = $('#ot-inv-res'), I = S.inv || {};
+  let html;
+  if (q) {
+    const list = I.q === q ? I.found : null;
+    html = !list ? '<small class="muted">さがしています…</small>' : (list.length ? list.map(p => invRow(c, p, has(p.name))).join('') : '<small class="muted">ランキングに見つかりませんでした。</small>')
+      + (list && !list.some(p => invNorm(p.name) === invNorm(q)) ? `<button class="inv-p raw ${has(q) ? 'on' : ''}" data-inv="${esc(q)}"><span class="inv-nm">「${esc(q)}」をそのまま招待<small>ランキングに載せていない人も、名前がそのとおりなら招待できます</small></span><span class="inv-add">${has(q) ? '✓ 招待' : '＋'}</span></button>` : '');
+  } else html = I.recent ? (I.recent.length ? `<small class="muted">最近の大会でいっしょだった人・前に招待した人</small>${I.recent.map(p => invRow(c, p, has(p.name))).join('')}` : '<small class="muted">名前を入れると、ランキングの人からさがせます。</small>') : '<small class="muted">読み込み中…</small>';
+  R.innerHTML = html;
+  document.querySelectorAll('#modal [data-inv]').forEach(b => b.onclick = e => { e.preventDefault(); invToggle(c, b.dataset.inv); });
+}
+function invInit(c) {
+  S.inv = S.inv || {}; invPaint(c);
+  if (!S.inv.recent) onReq('on_people', {}).then(j => { S.inv.recent = j.list || []; invPaint(c); }).catch(() => { S.inv.recent = []; invPaint(c); });
+  const qi = $('#ot-inv-q'); if (!qi) return; if (S.inv.qv) qi.value = S.inv.qv;
+  qi.oninput = () => { S.inv.qv = qi.value; clearTimeout(S.inv.timer); const q = qi.value.trim(); invPaint(c); if (!q) return;
+    S.inv.timer = setTimeout(() => onReq('on_people', { q }).then(j => { S.inv.q = q; S.inv.found = j.list || []; if ((($('#ot-inv-q') || {}).value || '').trim() === q) invPaint(c); }).catch(() => { S.inv.q = q; S.inv.found = []; invPaint(c); }), 300); };
+  qi.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); const q = qi.value.trim(); if (q && !invList(c).some(x => invNorm(x) === invNorm(q))) invToggle(c, q); qi.value = ''; S.inv.qv = ''; invPaint(c); } };
+}
 async function onTourCreate() {
-  const c = S.onTour; c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value;
+  const c = S.onTour; c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value;
+  if (c.entry === 'invite' && !invList(c).length) { toast('招待する人を選んでください'); return; }
   const startAt = Math.round(new Date(c.start).getTime() / 1000);
   if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
   if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
