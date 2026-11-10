@@ -2968,7 +2968,7 @@ function loop() {
   { const he = holdEnd(); if (he && Date.now() < he) { S.timer = pt(loop, he - Date.now()); return; } }
   if (S.holdTurn != null) { S.holdTurn = null; S.roundHeld = false; renderGame(); }
   if (pl.human && !S.spectate) {
-    const tk = S.gameNo + ':' + g.round + ':' + g.pos; if (S.chimeKey !== tk) { S.chimeKey = tk; S.turnStart = Date.now(); KB.sfx('myturn'); if (undoAllowed()) try { S.undoCur = undoTake(); } catch (e) { S.undoCur = null; } }
+    const tk = S.gameNo + ':' + g.round + ':' + g.pos; if (S.chimeKey !== tk) { S.chimeKey = tk; S.turnStart = Date.now(); KB.sfx('myturn'); }
     if (Math.random() < 0.08 && (!S.cm || Date.now() - S.cm.at > 5000)) { say('tip', {}); renderGame(); }
     if (S.settings.autoHint && !S.hint) S.timer = setTimeout(() => computeHint(), 50);
     return;
@@ -3440,6 +3440,7 @@ const mlabel = e => e && e.m ? e.m.expr : 'あえて引く';
 const sameMove = (e, move) => move ? (e.m && e.m.key === move.key) : e.m === null;
 const BEST_LOOSE = { 1: { loss: 0.035 }, 2: { loss: 0.02 } }; // 1巡目3.5pt・2巡目2.0pt以内は最善扱い
 function recordDecision(move) {
+  if (undoAllowed()) try { S.undoCur = undoTake(); } catch (e) { S.undoCur = null; } // 待ったの戻り先：手を打つ直前の状態（番の合図より前に打っても控える）
   const g = S.game; const me = g.current();
   const counts = g.counts(me), t = g.field.v;
   const all = KB.findMoves(counts, t, 'all', 3);
@@ -3789,7 +3790,7 @@ function summaryText() {
   return lines.join('\n');
 }
 // ---------- 待った（練習だけ）：直前の自分の手（選択肢のあった手）まで巻き戻す ----------
-// 自分の番が来たときに、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
+// 選択肢のある手を打つ直前に、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
 // 上がられたあと（「結果を見る」の前）でも戻れる。戻したゲーム・セットは結果のバッジの対象外、やり直した手は推定実力に入れない
 const undoAllowed = () => !!(S.T && S.T.cfg.kind === 'practice' && !S.attack && !S.spectate && !S.tiebreak);
 const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
@@ -3811,6 +3812,7 @@ function undoGo() {
   S.resumeFn = null; closeModal(); // 止めていた続き（AIの手など）は動かさない
   clearTimeout(S.timer); S.paused = 0; S.resumeFn = null; S.undoSnap = S.undoCur = null;
   document.querySelectorAll('.confetti,.cutin,.whistle-ov').forEach(e => e.remove());
+  const L0 = JSON.parse(u.g).log.length, steps = S.game.log.map((e, i) => ({ e, i })).slice(L0).reverse();
   rewindFx(() => {
     S.T = JSON.parse(u.T);
     if (u.growth !== 'null') store.set('growth', JSON.parse(u.growth));
@@ -3827,19 +3829,50 @@ function undoGo() {
     if (!S.settings.commentary || S.settings.commentary === 'off') S.cm = null;
     S.cmHoldUntil = Date.now() + 1200; S.flowHoldUntil = S.cmHoldUntil;
     saveSession(); renderGame(); loop();
-  });
+  }, steps);
 }
-// 巻き戻しの演出：画面が青く揺らぎ、時計の針が逆回り、「◀◀ 巻き戻し中」
-function rewindFx(then) {
+// 巻き戻しの演出：画面が青く揺らぎ、時計の針が逆回り。そのあいだに、戻す手を新しい順に1手ずつさかのぼって見せる
+// （出した札は出した人の手元へ、引いた札は裏向きで山札へ飛んで戻り、手札の枚数と場札も前の状態に変わる）
+function rewindFx(then, steps) {
   const fast = S.settings.speed === 'instant' || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   if (fast) { then(); return; }
+  steps = (steps || []).filter(x => ['play', 'draw', 'field'].includes(x.e.type));
+  const g = S.game, me = me0(), nPlay = steps.filter(x => x.e.type !== 'field').length;
+  // 1手の間隔：はじめはゆっくり、だんだん速く。全部で2秒以内
+  const iv = k => { const base = Math.min(240, 1700 / Math.max(1, nPlay)); return Math.max(60, base * (1.25 - 0.6 * k / Math.max(1, steps.length))); };
   KB.sfx('rewind');
+  document.querySelectorAll('.win-strip').forEach(e => e.remove());
   const el = document.createElement('div'); el.className = 'rewind-fx';
-  el.innerHTML = `<div class="rw-scan"></div><div class="rw-rew">◀◀ REW</div><div class="rw-clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/>${[...Array(12)].map((_, i) => `<line x1="50" y1="9" x2="50" y2="16" transform="rotate(${i * 30} 50 50)"/>`).join('')}<line class="rw-h" x1="50" y1="50" x2="50" y2="28"/><line class="rw-m" x1="50" y1="50" x2="50" y2="15"/><circle cx="50" cy="50" r="3" class="rw-c"/></svg></div><div class="rw-t">巻き戻し中…</div>`;
+  el.innerHTML = `<div class="rw-scan"></div><div class="rw-rew">◀◀ REW</div><div class="rw-top"><div class="rw-clock"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44"/>${[...Array(12)].map((_, i) => `<line x1="50" y1="9" x2="50" y2="16" transform="rotate(${i * 30} 50 50)"/>`).join('')}<line class="rw-h" x1="50" y1="50" x2="50" y2="28"/><line class="rw-m" x1="50" y1="50" x2="50" y2="15"/><circle cx="50" cy="50" r="3" class="rw-c"/></svg></div><div class="rw-t">巻き戻し中…</div></div>`;
   document.body.appendChild(el); document.body.classList.add('rewinding');
-  setTimeout(() => { then(); }, 1100);
-  setTimeout(() => { el.classList.add('out'); document.body.classList.remove('rewinding'); }, 1250);
-  setTimeout(() => el.remove(), 1650);
+  const seat = p => document.querySelector(`[data-pi="${p}"]`);
+  const cnt = p => { const s = seat(p); return s && (p === me ? s.querySelector('.me-info b') : s.querySelector('.handcount b')); };
+  const bump = (p, d) => { const c = cnt(p); if (c) { c.textContent = Math.max(0, (+c.textContent || 0) + d); c.classList.remove('rw-pop'); void c.offsetWidth; c.classList.add('rw-pop'); } };
+  const bubble = (p, txt) => { const s = seat(p); if (!s) return; const a = (s.querySelector('.av') || s).getBoundingClientRect(); const b = document.createElement('div'); b.className = 'rw-bubble'; b.textContent = txt; b.style.left = Math.max(6, Math.min(innerWidth - 150, a.left + a.width / 2 - 40)) + 'px'; b.style.top = Math.max(6, a.top - 26) + 'px'; document.body.appendChild(b); setTimeout(() => b.remove(), 650); };
+  const used = {}; // 席ごとに、戻した「出した札」のまとまりの数
+  let t = 250;
+  steps.forEach(({ e, i }, k) => {
+    setTimeout(() => {
+      if (!el.isConnected) return;
+      if (e.type === 'play') {
+        const s = seat(e.p); if (!s) return; const gs = [...s.querySelectorAll('.pg:not(.ret)')]; used[e.p] = (used[e.p] || 0) + 1; const grp = gs[gs.length - used[e.p]];
+        const to = s.querySelector('.av') || s;
+        if (grp) { e.vals.forEach((v, n) => flyCard(grp, to, `<span>${KB.vname(v)}</span>`, n * 40, 300)); setTimeout(() => { grp.style.visibility = 'hidden'; }, 60); }
+        bump(e.p, e.vals.length); bubble(e.p, '↩ ' + e.expr); KB.sfx('unselect');
+      } else if (e.type === 'draw') {
+        const n = e.foul ? (e.n || 1) : 1; for (let q = 0; q < n; q++) flyCard(seat(e.p), document.querySelector('.deck'), null, q * 40, 300);
+        bump(e.p, -n); KB.sfx('select');
+      } else if (e.type === 'field') { // 場札を1つ前に戻す
+        const prev = g.log.slice(0, i).reverse().find(x => x.type === 'field'), fc = document.querySelector('.fieldcard.top');
+        if (prev && fc) { const big = fc.querySelector('.big'), val = fc.querySelector('.val'), tag = fc.querySelector('.tag'); if (big) big.textContent = KB.vname(prev.v); if (val) val.textContent = `${KB.SUITS[prev.s]} ${prev.v}`; if (tag) tag.textContent = `場 ・ 第${prev.round}巡`; fc.classList.toggle('red', prev.s === 1 || prev.s === 2); fc.classList.remove('rw-flip'); void fc.offsetWidth; fc.classList.add('rw-flip'); }
+      }
+    }, t);
+    t += e.type === 'field' ? 80 : iv(k);
+  });
+  const end = Math.max(1100, t + 250);
+  setTimeout(() => { then(); }, end);
+  setTimeout(() => { el.classList.add('out'); document.body.classList.remove('rewinding'); }, end + 120);
+  setTimeout(() => el.remove(), end + 520);
 }
 function onGameOver() {
   const g = S.game, T = S.T;
