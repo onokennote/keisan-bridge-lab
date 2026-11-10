@@ -2050,10 +2050,18 @@ body.rewinding #home-fab{display:none}
 .on-sh,.on-sr{display:grid;grid-template-columns:2.4em 1fr 4.5em 4em;gap:6px;padding:5px 4px;border-bottom:1px solid var(--line);align-items:center}
 .on-sh{font-size:11px;color:var(--muted)}.on-sr.me{color:var(--accent);font-weight:800}.on-sr em{font-style:normal;font-size:10px;margin-left:4px;color:var(--info)}
 .on-sr span:nth-child(3),.on-sr span:nth-child(4),.on-sh span:nth-child(3),.on-sh span:nth-child(4){text-align:right}
+/* 観戦 */
+.on-watch{padding:6px 10px;border-radius:10px;background:rgba(90,180,255,.12);color:var(--info);font-size:12px}
+.on-opp[data-onpov]{cursor:pointer}
+.on-backs .card.back{width:40px;height:56px;border-radius:6px;background:repeating-linear-gradient(45deg,#c3272b 0 4px,#e8e2d0 4px 8px);border:2px solid #fffaf0;display:inline-block}
+.on-tag{font-style:normal;font-size:10px;color:var(--info)}.on-tag.sub{color:var(--warn)}
+.on-rooms{display:flex;flex-direction:column;gap:6px}
+.on-room{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:8px 10px;border-radius:10px;border:1px solid rgba(90,180,255,.4);background:rgba(90,180,255,.08);color:var(--ink);font:inherit;cursor:pointer;text-align:left}
+.on-room:disabled{opacity:.45;cursor:default}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='db25bd8c12';
+window.KB_BUILD='7e435afff9';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11079,6 +11087,7 @@ function act(a, el) {
     case 'on-tour-home': clearInterval(ON.ttimer); ON.t = null; ON.toursAt = 0; go('home'); break;
     case 'on-tour-entry': case 'on-tour-cancel': case 'on-tour-startnow': case 'on-tour-delete': onReq('on_tour_act', Object.assign(onMe(), { id: ON.t.id, act: a.slice(8) })).then(j => { ON.t = j.tour; if (j.tour.myRoom) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); } else render(); }).catch(e => toast(e.message)); break;
     case 'on-room-open': S.onAutoRoom = el.dataset.id; onRoomOpen(el.dataset.id); break;
+    case 'on-watch': ON.pov = 0; onRoomOpen(el.dataset.id); break;
     case 'on-to-tour': onStop(); onReq('on_tour', { id: ON.v.tour }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
     case 'on-create': onEnter('on_create', S.onCfg); break;
     case 'on-join': { const c = ($('#on-code') || {}).value || ''; if (c.trim().length < 6) { toast('6文字のコードを入れてください'); break; } onEnter('on_join', { id: c.trim() }); break; }
@@ -11286,10 +11295,10 @@ function otourHTML() {
       ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
   } else if (t.stand) {
     const isDone = t.phase === 'done';
-    body = `${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.phase === 'prelim' || t.phase === 'final' ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
+    body = `${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.entered && (t.phase === 'prelim' || t.phase === 'final') ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
       <div class="on-stand"><div class="on-sh"><span>順位</span><span>名前</span><span>${isDone && t.finalists ? '決勝PP' : '得点'}</span><span>累計PP</span></div>
       ${t.stand.map((r, i) => `<div class="on-sr ${r.me ? 'me' : ''} ${isDone && i < 3 ? 'top' + (i + 1) : ''}"><b>${isDone && i < 3 ? ['🥇', '🥈', '🥉'][i] : i + 1}</b><span>${esc(r.name)}${r.fin ? '<em>決勝</em>' : ''}</span><span>${isDone && r.fpp != null ? r.fpp + 'PP' : r.pts + '点'}</span><span>${r.pp}</span></div>`).join('')}</div>
-      ${(t.rooms || []).length > 1 ? `<div class="small muted">${t.rooms.map(r => `${esc(r.label)}：${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}`).join('　')}</div>` : ''}`;
+      ${(t.phase === 'prelim' || t.phase === 'final') && (t.rooms || []).length ? `<div class="on-rooms"><b class="small">👀 観戦する卓を選ぶ</b>${t.rooms.map(r => `<button class="on-room" data-act="on-watch" data-id="${r.id}" ${r.id === t.myRoom ? 'disabled' : ''}><b>${esc(r.label)}</b><span class="small muted">${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}・${r.names.map(esc).join('・')}</span></button>`).join('')}</div>` : ''}`;
   } else if (t.phase === 'cancel') body = `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
   return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
@@ -11369,9 +11378,10 @@ function onlineHTML() {
       <p class="small muted" id="on-err" style="margin:0"></p></div>`;
   }
   const g = v.game, me = v.me, n = v.seats.length;
-  const seatOrder = [...Array(n).keys()].map(k => (Math.max(0, me) + k) % n).filter(i => i !== me);
+  const spec = me < 0, pov = spec ? (ON.pov || 0) % n : me; // 観戦：はじめは最初の席の人が手元。ほかの席を押すと手元を替えられる（手札は見えない）
+  const seatOrder = [...Array(n).keys()].map(k => (pov + k) % n).filter(i => i !== pov);
   const lastTxt = (i) => { const l = g.last[i]; if (!l) return ''; const by = l.by === 'timeout' ? '⏰ 時間切れで引いた' : l.by === 'sub' ? '🤖 ' : ''; return l.type === 'play' ? `${by}${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}` : (l.by === 'timeout' ? by : `${by}引いた`); };
-  const opp = i => { const s = v.seats[i]; return `<div class="on-opp ${g.cur === i ? 'turn' : ''} ${g.winner === i ? 'win' : ''}"><span class="on-av">${avatar(s)}</span><div class="on-oi"><b>${esc(s.name)}</b>${s.ai ? `<em>AI★${s.lv || 2}</em>` : s.sub ? '<em class="sub">AIが代打ち</em>' : ''}<span class="small">手札 <b>${g.handN[i]}</b>枚・セット ${tot(i)}PP</span><span class="small muted">${lastTxt(i)}</span>${g.over && g.hands ? `<span class="on-reveal">${onCards(g.hands[i]).map(miniCard).join('')}</span>` : ''}</div></div>`; };
+  const opp = i => { const s = v.seats[i]; return `<div ${spec ? `data-onpov="${i}" role="button" title="${esc(s.name)}の席から見る"` : ''} class="on-opp ${g.cur === i ? 'turn' : ''} ${g.winner === i ? 'win' : ''}"><span class="on-av">${avatar(s)}</span><div class="on-oi"><b>${esc(s.name)}</b>${s.ai ? `<em>AI★${s.lv || 2}</em>` : s.sub ? '<em class="sub">AIが代打ち</em>' : ''}<span class="small">手札 <b>${g.handN[i]}</b>枚・セット ${tot(i)}PP</span><span class="small muted">${lastTxt(i)}</span>${g.over && g.hands ? `<span class="on-reveal">${onCards(g.hands[i]).map(miniCard).join('')}</span>` : ''}</div></div>`; };
   const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
   const hand = onCards(g.hand), mySeat = v.seats[me] || {}, myTurn = v.phase === 'play' && g.cur === me && !mySeat.sub;
   const vals = onSelVals(), ok = myTurn && vals.length && KB.evalSelection(vals, f.v);
@@ -11387,14 +11397,18 @@ function onlineHTML() {
     <div class="on-opps">${seatOrder.map(opp).join('')}</div>
     <div class="on-mid">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>` : ''}<div class="small muted">山札 ${g.deckN}・捨て札 ${g.discardN}</div></div>
     ${res}
+    ${spec ? (() => { const ps = v.seats[pov]; return `<div class="on-watch">👀 観戦中（手札は見えません）・ほかの席を押すと、その人の席から見られます</div><div class="on-me ${g.cur === pov && v.phase === 'play' ? 'turn' : ''}"><div class="on-mh"><span class="on-av">${avatar(ps, 'normal')}</span><b>${esc(ps.name)}</b>${ps.ai ? `<em class="on-tag">AI★${ps.lv || 2}</em>` : ps.sub ? '<em class="on-tag sub">AIが代打ち</em>' : ''}<span class="small">手札 ${g.handN[pov]}枚・セット ${tot(pov)}PP</span></div>
+      <div class="hand on-backs">${g.over && g.hands ? onCards(g.hands[pov]).map(c => cardHTML(c, { extra: 'disabled' })).join('') : [...Array(g.handN[pov])].map(() => '<span class="card back"></span>').join('')}</div>
+      <div class="on-prev small muted">${lastTxt(pov) || (v.phase === 'play' ? `${esc(v.seats[g.cur] ? v.seats[g.cur].name : '')}の番です` : '')}</div></div>`; })() : ''}
     ${me >= 0 ? `<div class="on-me ${myTurn ? 'turn' : ''}"><div class="on-mh"><span class="on-av">${avatar(mySeat, 'happy')}</span><b>${esc(mySeat.name)}</b><span class="small">手札 ${hand.length}枚・合計 ${hand.reduce((a, c) => a + c.v, 0)}・セット ${tot(me)}PP</span></div>
       ${mySeat.sub ? '<div class="on-sub">🤖 時間切れが3回続いたので、AI★2が代わりに打っています <button class="btn sm primary" data-act="on-back">自分で打つ</button></div>' : ''}
       <div class="hand">${hand.map(c => cardHTML(c, { cls: ON.sel.includes(c.id) ? 'sel' : '', extra: `data-oncard="${c.id}" ${myTurn ? '' : 'disabled'}` })).join('')}</div>
       <div class="on-prev">${myTurn ? (vals.length ? (ok ? `<b class="mono">${esc(ok.expr)} = ${f.v}</b>` : '<span class="muted">この組み合わせでは場の数になりません</span>') : 'カードを選んで「出す」。出せなければ「引く」') : (v.phase === 'play' ? `${esc(v.seats[g.cur] ? v.seats[g.cur].name : '')}の番です` : '')}</div>
-      ${v.phase === 'play' ? `<div class="actions"><button class="btn primary" data-act="on-play" ${ok ? '' : 'disabled'}>出す</button><button class="btn felt-btn" data-act="on-draw" ${myTurn ? '' : 'disabled'}>引く</button></div>` : ''}</div>` : '<p class="small muted">観戦中</p>'}
+      ${v.phase === 'play' ? `<div class="actions"><button class="btn primary" data-act="on-play" ${ok ? '' : 'disabled'}>出す</button><button class="btn felt-btn" data-act="on-draw" ${myTurn ? '' : 'disabled'}>引く</button></div>` : ''}</div>` : ''}
     <p class="small muted" id="on-err" style="margin:0">${ON.err ? '⚠ ' + esc(ON.err) : ''}</p></div>`;
 }
 function onBind() {
+  document.querySelectorAll('[data-onpov]').forEach(b => b.onclick = () => { ON.pov = +b.dataset.onpov; KB.sfx('select'); render(); });
   document.querySelectorAll('[data-oncard]').forEach(b => b.onclick = () => { const id = +b.dataset.oncard; ON.sel = ON.sel.includes(id) ? ON.sel.filter(x => x !== id) : ON.sel.length < 3 ? [...ON.sel, id] : ON.sel; KB.sfx('select'); render(); });
   onClock();
 }

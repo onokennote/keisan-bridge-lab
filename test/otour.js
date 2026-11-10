@@ -53,6 +53,20 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pb.waitForTimeout(3500);
   ok(await pb.evaluate(() => KBAPP.S.view === 'online' && KBAPP.ON.v && KBAPP.ON.v.tour), 'ほかの参加者も自動で自分の卓に入る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_room.png') });
+  // C（出ていない人）：大会の画面から卓を選んで観戦（手札は届かない・席を押すと手元が替わる）
+  await pc.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pc.waitForTimeout(1200);
+  await pc.evaluate(() => [...document.querySelectorAll('.on-trow')].find(b => /テスト杯/.test(b.innerText)).click()); await pc.waitForTimeout(1200);
+  ok(await pc.evaluate(() => document.querySelectorAll('[data-act="on-watch"]').length === 2), '開催中の大会の画面に、観戦する卓（2卓）が並ぶ');
+  await pc.screenshot({ path: path.join(__dirname, 'out', 'ot_rooms.png') });
+  await pc.click('[data-act="on-watch"]'); await pc.waitForTimeout(1500);
+  const w = await pc.evaluate(() => { const v = KBAPP.ON.v; return { me: v.me, hand: v.game.hand, hands: v.game.hands, backs: document.querySelectorAll('.on-backs .card.back').length, banner: !!document.querySelector('.on-watch'), actions: !!document.querySelector('[data-act="on-play"]') }; });
+  ok(w.me === -1 && w.hand === null && w.hands === null && w.backs > 0 && w.banner && !w.actions, '観戦では手札が届かず、手元の人の札は裏向き。出す・引くはない');
+  await pc.screenshot({ path: path.join(__dirname, 'out', 'ot_watch.png') });
+  const pov0 = await pc.evaluate(() => document.querySelector('.on-me .on-mh b').textContent);
+  await pc.click('[data-onpov]'); await pc.waitForTimeout(400);
+  const pov1 = await pc.evaluate(() => document.querySelector('.on-me .on-mh b').textContent);
+  ok(pov0 !== pov1, `ほかの席を押すと、その人の席から見られる（${pov0}→${pov1}）`);
+  await pc.evaluate(() => KBAPP.act('on-to-tour')); await pc.waitForTimeout(800);
   // 2人とも自分の番が来たら打つ。大会の画面に戻ったら待つ。決勝・結果まで
   const step = p => p.evaluate(() => { const S = KBAPP.S, v = KBAPP.ON.v; if (S.view === 'otour') return 'tour:' + (KBAPP.ON.t && KBAPP.ON.t.phase); if (S.view !== 'online' || !v || !v.game || v.phase !== 'play' || v.game.cur !== v.me || v.seats[v.me].sub) return 'wait';
     const h = v.game.hand.map(c => c[0]), ms = KB.findMoves(KB.countsOf(h), v.game.field[0], 'all', 3);
