@@ -1922,7 +1922,7 @@ body.rewinding #app{animation:rw-jit .12s steps(2) infinite;filter:hue-rotate(16
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='b15d7b7890';
+window.KB_BUILD='b949de5692';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8663,7 +8663,6 @@ function renderGame0() {
         <button class="btn primary" data-act="play" ${valid ? '' : 'disabled'}>出す</button>
         <button class="btn felt-btn" data-act="draw" ${myTurn ? '' : 'disabled'}>引く</button>
         ${S.attack ? '' : `<button class="btn felt-btn" data-act="hint" ${myTurn ? '' : 'disabled'}>AIの読み</button>`}
-        ${S.sel.length ? `<button class="btn felt-btn sm" data-act="clear">選択解除</button>` : ''}
         ${undoOk() ? `<button class="btn felt-btn sm undo-btn" data-act="undo" title="直前の自分の手まで巻き戻す">⏪ 待った</button>` : ''}
       </div>
     </div></div>`;
@@ -9247,7 +9246,7 @@ const undoAllowed = () => !!(S.T && ['practice', 'tournament'].includes(S.T.cfg.
 const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
 function undoTake() {
   const g = S.game, o = {}; for (const k in g) if (k !== 'players') o[k] = g[k];
-  return { gameNo: S.gameNo, round: g.round, g: JSON.stringify(o), ids: g.players.map(p => p.id), T: JSON.stringify(S.T), growth: JSON.stringify(store.get('growth', null)), dec: JSON.stringify(S.decisions || []), fouls: JSON.stringify(S.fouls || []), bestStreak: S.bestStreak || 0 };
+  return { gameNo: S.gameNo, round: g.round, g: JSON.stringify(o), ids: g.players.map(p => p.id), T: JSON.stringify(S.T), growth: JSON.stringify(store.get('growth', null)), dec: JSON.stringify(S.decisions || []), fouls: JSON.stringify(S.fouls || []), bestStreak: S.bestStreak || 0, foulCount: S.foulCount || 0 };
 }
 function undoAsk() {
   if (!undoOk()) return;
@@ -9270,7 +9269,7 @@ function undoGo() {
     if (u.growth !== 'null') store.set('growth', JSON.parse(u.growth));
     const g = Object.assign(Object.create(KB.Game.prototype), JSON.parse(u.g)); g.players = u.ids.map(id => P(id));
     S.game = g; S.gameNo = (S.gameNo || 0) + 1; // 古いタイマー（セリフ・演出）は gameNo で止まる
-    S.decisions = JSON.parse(u.dec); S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak;
+    S.decisions = JSON.parse(u.dec); S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak; S.foulCount = u.foulCount;
     S.gameHinted = true; S.T.setHinted = true; S.T.tourHinted = true; S.undoRetry = true;
     S.qual = (S.T.cfg.kind === 'tournament' && S.T.phase === 'prelim') ? qualifyTable(S.T) : null;
     S.sel = []; S.hint = null; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = g.field;
