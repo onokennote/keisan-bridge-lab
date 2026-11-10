@@ -1961,3 +1961,7 @@ body.rewinding #home-fab{display:none}
 .pb-rank-b .pbr-h{flex-basis:100%;font-size:11px}
 .pb-rank-b .pbr{white-space:nowrap;font-size:11px}
 .pb-rank-b b{color:var(--accent);font-size:15px;margin-left:3px}
+.rk-hero-rk{display:flex;flex-wrap:wrap;gap:2px 12px;align-items:baseline;font-size:12px;color:var(--muted)}
+.rk-hero-rk:empty{display:none}
+.rk-hero-rk span{white-space:nowrap}
+.rk-hero-rk b{color:var(--accent);font-size:17px;margin-left:4px}

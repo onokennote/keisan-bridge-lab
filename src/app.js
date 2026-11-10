@@ -1325,7 +1325,15 @@ async function rankCardOpen(rid, me, el) {
   // 上にアイコンと名前を大きく（押したアイコンをそのまま使う）
   const row = el && el.closest('.rk-row'), nmEl = row && row.querySelector('.rk-nm'), svg = el && el.querySelector('svg');
   const nm0 = nmEl ? (nmEl.childNodes[0] && nmEl.childNodes[0].textContent || '').trim() : (el && el.dataset.name) || (me ? S.settings.name : '');
-  const hero = svg ? `<div class="rk-hero"><div class="rk-hero-av">${svg.outerHTML}</div><div class="rk-hero-tx"><b>${esc(nm0)}</b>${row && row.querySelector('.ai-chip') ? '<em class="ai-chip">AI研究員</em>' : ''}${me ? '<small>あなた</small>' : ''}</div></div>` : '';
+  const isAi = !!((row && row.querySelector('.ai-chip')) || (el && /AI研究員/.test(el.title || '')));
+  const hero = svg ? `<div class="rk-hero"><div class="rk-hero-av">${svg.outerHTML}</div><div class="rk-hero-tx"><b>${esc(nm0)}</b>${isAi ? '<em class="ai-chip">AI研究員</em>' : ''}${me ? '<small>あなた</small>' : ''}<span class="rk-hero-rk"></span></div></div>` : '';
+  // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
+  (async () => {
+    await new Promise(r => setTimeout(r, 0)); // 下の modal() を先に出す
+    try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await homeRankFetch(); } catch (e) { }
+    const a = totalRankOf(S.homeRank, rid, me), h = isAi ? null : totalRankOf(S.rankHuman, rid, me), box = $('#modal .rk-hero-rk');
+    if (box && (a || h)) box.innerHTML = `🏆 総合${a ? `<span>AI込み<b>${a}位</b></span>` : ''}${h ? `<span>人だけ<b>${h}位</b></span>` : ''}`;
+  })();
   modal(`<div class="stack share-modal rk-card">${hero}<div class="share-prev"><span class="small muted">成績カードを読み込んでいます…</span></div><div class="rk-bio-box"></div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   const put = (html, bio, name) => { const b = $('#modal .share-prev'); if (b) b.innerHTML = html; const q = $('#modal .rk-bio-box'); if (q) q.innerHTML = bio ? `<div class="rk-bio"><small>${esc(name)}の${S.rankCardAi ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(bio).replace(/\n/g, '<br>')}</div>` : `<p class="small muted" style="margin:0">${esc(name)}の自己紹介はまだありません。</p>`; };
@@ -2496,20 +2504,24 @@ function castHTML() {
 }
 // プロフィールの順位：総合ランキングで、AI研究員を含めたときと、人だけのとき
 function pbRankHTML() {
-  const pick = rk => { const t = rk && rk.total; if (!t) return null; const x = [...(t.list || []), ...(t.mine || [])].find(rankMe); return x ? { r: x.rank, n: t.total } : null; };
+  const pick = rk => { const r = totalRankOf(rk, null, true); return r ? { r } : null; };
   const a = pick(S.homeRank), h = pick(S.rankHuman);
   if (!a && !h) return '';
   return `<button class="pb-rank-b" data-go="ranking" aria-label="ランキングを見る"><span class="pbr-h">🏆 総合</span>${a ? `<span class="pbr"><small>AI込み</small><b>${a.r}位</b></span>` : ''}${h ? `<span class="pbr"><small>人だけ</small><b>${h.r}位</b></span>` : ''}</button>`;
 }
+// 総合の順位用に、AI込みと人だけのランキングを読む（ランキング画面のAIの切り替えとは別に持つ）
+async function homeRankFetch() {
+  const c = raw.get('kb.cloud', null), u = encodeURIComponent((c && c.uid) || '');
+  const [j, h] = await Promise.all([fetch(CLOUD_API + '?a=rankings&uid=' + u).then(r => r.json()), fetch(CLOUD_API + '?a=rankings&ai=0&uid=' + u).then(r => r.json()).catch(() => null)]);
+  if (j.ok && j.rankings) { S.homeRank = j.rankings; S.homeRankAt = Date.now(); }
+  if (h && h.ok && h.rankings) S.rankHuman = h.rankings;
+}
+// ある人の総合の順位（rid で探す。自分は rankMe）
+function totalRankOf(rk, rid, me) { const t = rk && rk.total; if (!t) return null; const x = [...(t.list || []), ...(t.mine || [])].find(x => me ? rankMe(x) : x.rid === rid); return x ? x.rank : null; }
 async function homeCastLoad() {
   if (!CLOUD_ON || (S.homeRank && Date.now() - S.homeRankAt < 300000) || S.castLoading) return;
   S.castLoading = true;
-  try {
-    const c = raw.get('kb.cloud', null), u = encodeURIComponent((c && c.uid) || '');
-    const [j, h] = await Promise.all([fetch(CLOUD_API + '?a=rankings&uid=' + u).then(r => r.json()), fetch(CLOUD_API + '?a=rankings&ai=0&uid=' + u).then(r => r.json()).catch(() => null)]);
-    if (j.ok && j.rankings) { S.homeRank = j.rankings; S.homeRankAt = Date.now(); } // ホームの分は、ランキング画面（AIの切り替えあり）とは別に持つ
-    if (h && h.ok && h.rankings) S.rankHuman = h.rankings;
-  } catch (e) { } finally { S.castLoading = false; }
+  try { await homeRankFetch(); } catch (e) { } finally { S.castLoading = false; }
   const el = S.view === 'home' && $('.title .cast'); if (el) { el.innerHTML = castHTML(); el.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
   const pr = S.view === 'home' && $('#pb-rank'); if (pr) { pr.innerHTML = pbRankHTML(); pr.querySelectorAll('[data-go]').forEach(b => b.onclick = () => go(b.dataset.go)); }
 }
