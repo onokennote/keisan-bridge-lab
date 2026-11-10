@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="9e56a05 2026-11-10 21:05"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="ba66468 2026-11-10 21:12"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2124,7 +2124,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='2a4a5197e2';
+window.KB_BUILD='61e17eb134';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6313,16 +6313,21 @@ function G_save(g) { if (S.attack) return; if (g.games.length > 300) g.games = g
 // 判断の質（最善率・平均損失）から出した実力から、お手つきの割合に応じて差し引く（お手つき1割で−0.5）
 // 実力の計算に使う1手の損失：最善扱いの幅（BEST_LOOSE：1巡目3.5pt・2巡目2.0pt）以内は最善と同じ。巡の記録がない前の記録は、序盤（1・2巡）2.5pt以内を最善と同じに。1手の損失は10ptで頭打ち（1回の大きなミスで実力が大きく動かないように）
 const RATE_CAP = 0.10, RATE_N = 100;
+// AIの読みを見た手の重さ：候補の損失の平均は実測で約4.2pt（でたらめに近い打ち方）。×0.65で約2.7pt＝★2の平均損失くらい、最善は★1〜2くらいの0.5回分
+const HINT_W = 0.65, HINT_B = 0.5;
 const rateLoss = d => { const L = d.r ? BEST_LOOSE[d.r] : ((d.c || []).includes('opening') ? { loss: 0.025 } : null); return Math.min(RATE_CAP, L && d.l <= L.loss ? 0 : d.l); };
 function ratingOf(games, n) {
   // 直近の判断100回（RATE_N）。ゲーム数で区切ると1ゲームの判断は2〜3回なので手数が少なく、上下が大きすぎた
-  const N = n || RATE_N, ls = []; let fouls = 0;
-  for (let i = games.length - 1; i >= 0 && ls.length < N; i--) { const x = games[i]; for (let j = x.ds.length - 1; j >= 0 && ls.length < N; j--) { const d = x.ds[j]; if (!d.h) ls.push(rateLoss(d)); } fouls += x.f || 0; } // AIの読みを見た手は実力の計算から外す
+  const N = n || RATE_N, ls = []; let fouls = 0, hinted = 0;
+  // AIの読みを見た手（待ったでやり直した手も）：その場面の難しさ（候補の損失の平均 hm）×HINT_W の損失、最善は HINT_B 回分として数える（★2くらいの扱い）。
+  // 外すだけだと、迷った場面でだけ見れば実力が高く出てしまうため。難しさの記録がない前の手は、今までどおり外す
+  const bs = [];
+  for (let i = games.length - 1; i >= 0 && ls.length < N; i--) { const x = games[i]; for (let j = x.ds.length - 1; j >= 0 && ls.length < N; j--) { const d = x.ds[j]; if (!d.h) { const l = rateLoss(d); ls.push(l); bs.push(l <= 0.015 ? 1 : 0); } else if (d.hm != null) { ls.push(Math.min(RATE_CAP, d.hm * HINT_W)); bs.push(HINT_B); hinted++; } } fouls += x.f || 0; }
   if (ls.length < 8) return { ok: false, need: 8 - ls.length, n: ls.length };
-  const avg = ls.reduce((a, b) => a + b, 0) / ls.length * 100, best = ls.filter(l => l <= 0.015).length / ls.length;
+  const avg = ls.reduce((a, b) => a + b, 0) / ls.length * 100, best = bs.reduce((a, b) => a + b, 0) / bs.length;
   const base = Math.max(0.3, Math.min(5.5, (interp(RATE_LOSS, avg, true) + interp(RATE_BEST, best, false)) / 2));
   const foulRate = fouls / (ls.length + fouls), pen = Math.min(1.5, foulRate * 5);
-  return { ok: true, r: Math.max(0.3, base - pen), base, pen, fouls, foulRate, avg, best, n: ls.length };
+  return { ok: true, r: Math.max(0.3, base - pen), base, pen, fouls, foulRate, avg, best, n: ls.length, hinted };
 }
 const rateLabel = r => r >= 4.5 ? '達人級' : r >= 3.5 ? '上級' : r >= 2.5 ? '中級' : r >= 1.5 ? '初級' : '入門';
 const stars = r => '★'.repeat(Math.max(0, Math.min(5, Math.floor(r + 1e-9)))) + (r % 1 >= 0.5 && r < 5 ? '<span class="half">★</span>' : '');
@@ -6470,7 +6475,7 @@ function growthOnDecision(d) {
 function growthOnGame(g0) {
   if (S.tiebreak) return;
   const me = g0.players.findIndex(p => p.human), g = G_();
-  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0, r: d.round }));
+  const ds = S.decisions.map(d => ({ l: Math.round(d.loss * 1000) / 1000, c: d.cats || catsOf(d), h: d.viewedHint ? 1 : 0, r: d.round, ...(d.viewedHint && d.hm != null ? { hm: Math.round(d.hm * 1000) / 1000 } : {}) }));
   const threes = g0.played[me].filter(x => x.cards.length === 3).length;
   g.games.push({ at: Date.now(), k: S.T.cfg.kind, ds, f: (S.fouls || []).length, won: g0.winner === me, pp: g0.pp[me], n: g0.n });
   G_save(g);
@@ -7233,9 +7238,9 @@ function growthHTML() {
   <div class="panel stack">
     <div class="lbl">推定実力</div>
     ${r.ok ? `<div class="gr-rate"><span class="gc-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><span>${rateLabel(r.r)}AI相当</span></div>
-    <div class="gr-metrics"><span>判断の実力 <b>★${r.base.toFixed(1)}</b></span><span>お手つき <b>${r.fouls}回</b>${r.pen > 0.04 ? `（−${r.pen.toFixed(1)}）` : ''}</span><span>最善率 <b>${pct(r.best)}</b></span><span>平均損失 <b>${r.avg.toFixed(1)}pt</b></span></div>
+    <div class="gr-metrics"><span>判断の実力 <b>★${r.base.toFixed(1)}</b></span><span>お手つき <b>${r.fouls}回</b>${r.pen > 0.04 ? `（−${r.pen.toFixed(1)}）` : ''}</span><span>最善率 <b>${pct(r.best)}</b></span>${r.hinted ? `<span>AIを見た手 <b>${r.hinted}回</b></span>` : ''}<span>平均損失 <b>${r.avg.toFixed(1)}pt</b></span></div>
     ${sparkSVG(series, 320, 110)}` : `<p style="margin:0">測定中です。あと${r.need}回の判断で、推定実力を表示します。</p>`}
-    <p class="small muted" style="margin:0">直近100回の判断（最善率と平均損失。AIの読みを見た手は除く）を、AIの★1〜5が同じ判定で打ったときの実測値と比べた「判断の実力」から、お手つきの割合に応じて差し引いています（判断10回につき1回のお手つきで−0.5）。</p>
+    <p class="small muted" style="margin:0">直近100回の判断（最善率と平均損失。AIの読みを見た手は、その場面の難しさに応じて★2くらいの手として数える）を、AIの★1〜5が同じ判定で打ったときの実測値と比べた「判断の実力」から、お手つきの割合に応じて差し引いています（判断10回につき1回のお手つきで−0.5）。</p>
   </div>
   <div class="panel stack">
     <div class="lbl">場面別の得意・苦手</div>
@@ -9253,9 +9258,11 @@ function recordDecision(move) {
   // ただし「攻めるなら捨て身もあった」ことは、あとで博士・マサがひと言そえる（sutemi.outOk）
   if (sutemi && isOutEv(mine)) { loss = 0; sutemi.outOk = true; }
   if (sutemi) sutemi.chose = mine === best;
+  // 場面の難しさ：選べた手（候補）の損失の平均（実力の計算と同じく、最善扱いの幅は0・1手10ptで頭打ち）。AIの読みを見た手の損失に使う
+  const hm = ev.reduce((a, e) => a + rateLoss({ r: g.round, l: Math.max(0, best.score - e.score) }), 0) / ev.length;
   const best0 = best; // 表示・記録の「最善」：上がったときは上がりを最善として残す
   S.decisions.push({ round: g.round, t, hand: g.hands[me].map(c => c.v), mine: mlabel(mine), drew: !move, best: near ? mlabel(mine) : mlabel(sutemi && sutemi.outOk ? mine : best0), near, bestStats: near || (sutemi && sutemi.outOk) ? mine : best0, // 「ほぼ互角」で最善扱いにした手も、統計（3枚・引いた回数など）では自分の手を最善として数える
-     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.undoRetry || (S.hint && S.hint.key === key && S.hint.ev)), undo: S.undoRetry ? 1 : 0, evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
+     mineStats: mine, loss, ppLoss: near || (sutemi && sutemi.outOk) ? 0 : mine.pp - best0.pp, viewedHint: !!(S.undoRetry || (S.hint && S.hint.key === key && S.hint.ev)), hm, undo: S.undoRetry ? 1 : 0, evs: ev.map(e => ({ m: e.m, win: e.win, pp: e.pp, score: e.score, goal: e.goal })), sutemi, goalLbl: S.T ? goalLabel() : null, goalPct: S.T ? goalIsProb() : false, opps: g.players.map((p, i) => i === me ? null : { n: nm(p), h: g.hands[i].length }).filter(Boolean), counts, unseen: g.unseenCounts(me), top: ev.slice(0, 3), goalMax, danger: g.players.map((p, i) => i === me ? null : `${nm(p)} ${g.hands[i].length}枚`).filter(Boolean).join('・') });
   const wasRetry = S.undoRetry; S.undoRetry = false; if (!wasRetry && S.undoCur && S.undoCur.gameNo === S.gameNo) S.undoSnap = S.undoCur; // やり直した手は、もう戻せない // 「待った」で戻れるのは、選択肢のあった直前の自分の手
 }
 // ---------- 戦略的な解説（計算した事実から組み立てる。矛盾が起きないよう、数字で確かめた事だけを言う） ----------
