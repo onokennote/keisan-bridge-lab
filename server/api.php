@@ -278,7 +278,7 @@ function obTick(array &$st, float $now): bool {
 // 各自に送る形（自分の手札だけ。ほかの人は枚数だけ）
 function obView(array $st, string $uid, string $id, int $ver): array {
   $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $uid) $me = $i;
-  $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'lv' => (int)($s['lv'] ?? 2), 'sub' => empty($s['ai']) && (($s['miss'] ?? 0) >= 3 || !empty($s['auto'])), 'subLv' => ($s['miss'] ?? 0) < 3 && !empty($s['auto']) ? (int)($s['subLv'] ?? 2) : 2, 'auto' => !empty($s['auto']), 'miss' => $s['miss'] ?? 0], $st['seats']);
+  $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'lv' => (int)($s['lv'] ?? 2), 'slot' => $s['slot'] ?? null, 'sub' => empty($s['ai']) && (($s['miss'] ?? 0) >= 3 || !empty($s['auto'])), 'subLv' => ($s['miss'] ?? 0) < 3 && !empty($s['auto']) ? (int)($s['subLv'] ?? 2) : 2, 'auto' => !empty($s['auto']), 'miss' => $s['miss'] ?? 0], $st['seats']);
   $v = ['ok' => true, 'id' => $id, 'ver' => $ver, 'phase' => $st['phase'], 'cfg' => $st['cfg'], 'seats' => $seats, 'me' => $me, 'host' => empty($st['tour']) && ($st['seats'][0]['uid'] ?? '') === $uid, 'tour' => $st['tour'] ?? null, 'label' => $st['label'] ?? null, 'gameNo' => $st['gameNo'], 'setPP' => $st['setPP'], 'now' => microtime(true)];
   if (isset($st['game'])) {
     $g = $st['game'];
@@ -298,7 +298,7 @@ function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $
   $d->prepare('INSERT INTO rooms (id, host, st, ver, updated, created) VALUES (?, ?, ?, 1, ?, ?)')->execute([$id, 'tour:' . $tid, json_encode($st, JSON_UNESCAPED_UNICODE), time(), time()]);
   return $id;
 }
-function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
+function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'slot' => $p['slot'] ?? null, 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
@@ -310,7 +310,8 @@ function obTourStart(array &$t, float $now): void {
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
-  for ($i = 0; count($players) < max(2, $c['min']); $i++) { $lv = isset($c['aiMix']) ? obMixLv($c['aiMix']) : (int)$c['aiLv']; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
+  $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
+  for ($i = 0; count($players) < max(2, $c['min']); $i++) { $lv = isset($c['aiMix']) ? obMixLv($c['aiMix']) : (int)$c['aiLv']; $slot = $slots[$lv] = ($slots[$lv] ?? -1) + 1; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'slot' => $slot, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
   $t['players'] = $players; $t['phase'] = 'prelim'; $t['set'] = 1; $t['stand'] = []; foreach ($players as $p) $t['stand'][$p['key']] = ['pts' => 0, 'pp' => 0];
   obTourDeal($t, array_column($players, 'key'), '予選 第1セット', $now);
 }
@@ -414,9 +415,9 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
       $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
-      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
+      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'lv' => $byKey[$k]['lv'] ?? null, 'slot' => $byKey[$k]['slot'] ?? null, 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
       $v['myRoom'] = null; $v['rooms'] = [];
-      foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name')]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
+      foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name'), 'seats' => array_map(fn($x) => ['name' => $x['name'], 'ai' => !empty($x['ai']), 'lv' => $x['lv'] ?? null, 'slot' => $x['slot'] ?? null], $st['seats'])]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
     }
   }
   return $v;
@@ -697,7 +698,7 @@ try {
       if ($act === 'addai') {
         if (!$host || $st['phase'] !== 'lobby') $err = 'ホストだけが、始まる前に追加できます';
         elseif (count($st['seats']) >= $st['cfg']['n']) $err = '満員です';
-        else { $k = count(array_filter($st['seats'], fn($s) => !empty($s['ai']))); $st['seats'][] = ['name' => OB_AI_NAMES[$k % 4] . '（AI★2）', 'ai' => true, 'miss' => 0]; }
+        else { $k = count(array_filter($st['seats'], fn($s) => !empty($s['ai']))); $st['seats'][] = ['name' => OB_AI_NAMES[$k % 4] . '（AI★2）', 'ai' => true, 'lv' => 2, 'slot' => $k, 'miss' => 0]; }
       } elseif ($act === 'kick') {
         $i = (int)($b['seat'] ?? -1);
         if (!$host || $st['phase'] !== 'lobby' || $i <= 0 || $i >= count($st['seats'])) $err = 'できません'; else array_splice($st['seats'], $i, 1);

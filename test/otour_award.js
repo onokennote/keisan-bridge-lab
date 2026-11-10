@@ -90,6 +90,13 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   ok(!ed2.ok, '始まった（終わった）大会は編集できない');
   await p.evaluate(() => KBAPP.act('on-tour-delete')); await p.waitForTimeout(800);
   ok((await call('on_tour', { token: me.token, id: later.id })).tour.phase === 'cancel', '受付前の大会を削除（中止）できる');
+  // AIが大勢でも名前（キャラ）が重ならない：全員達人で20人に補充（AI★5が19人）
+  const many = (await call('on_tour_new', { token: me.token, name: 'ケン', tname: '大人数杯', startAt: Math.round(Date.now() / 1000) + 600, min: 20, max: 30, aiFill: true, aiMix: 'master', sets: 1, games: 1, finalists: 0, limit: 3 })).tour;
+  await call('on_tour_act', { token: me.token, id: many.id, act: 'entry', name: 'ケン', pid: me.pid }); await call('on_tour_act', { token: me.token, id: many.id, act: 'startnow' });
+  const mt = (await call('on_tour', { token: me.token, id: many.id })).tour;
+  const nms = await p.evaluate(st => st.map(r => r.ai ? KBAPP.onName(r) : r.name), mt.stand);
+  ok(nms.length === 20 && new Set(nms).size === 20, 'AIが19人いても名前が重ならない：' + nms.slice(0, 6).join('・') + '…');
+  await call('on_tour_act', { token: me.token, id: many.id, act: 'delete' });
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill();
 })();
