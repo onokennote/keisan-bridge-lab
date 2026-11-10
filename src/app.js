@@ -55,7 +55,7 @@ const MIX = {
   strong: { label: '強豪ぞろい', w: [0.2, 0.5, 1.5, 3, 3] },
   master: { label: '全員達人', w: [0, 0, 0, 0, 1] }
 };
-const KANATA_MIX = { strong: 1, master: 1 };
+const KANATA_MIX = { master: 1 }; // シード（★6カナタ）は「全員達人」の大会だけ
 function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; for (let i = 0; i < w.length; i++) { x -= w[i]; if (x <= 0) return i; } return w.length - 1; }
 
 // ---------- 参加者 ----------
@@ -2641,7 +2641,7 @@ const suT = () => { if (!S.suT) { S.suT = JSON.parse(JSON.stringify(store.get('c
 function suMasa(kind) {
   const c = kind === 'tour' ? suT() : suP(), lv = kind === 'tour' ? [] : c.opps.slice(0, c.n - 1).map(o => o.level);
   if (c.preset === 'master') return kind === 'tour' ? '全員達人の大会か！ええ度胸や！謎のシード選手も出てくるかもしれへんで！' : '全員達人か！ええ度胸や！ワールドカップの決勝に乗り込むようなもんやで！';
-  if (c.preset === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！シード選手が出てくることもあるで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
+  if (c.preset === 'strong') return kind === 'tour' ? '強豪ぞろいの大会やな！腕が鳴るで！' : '強豪ぞろいやな！腕だめしにはちょうどええ！';
   if (kind === 'practice' && c.n === 2) return 'サシの勝負や！ポーカーのヘッズアップみたいなもんやで！';
   if (c.preset === 'first') return '肩慣らしにちょうどええな！まずは楽しんでいこか！';
   if (kind === 'practice' && c.games >= 7) return `${c.games}ゲームの長丁場や！スタミナ勝負やで！`;
