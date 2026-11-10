@@ -2114,7 +2114,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='3a226ec0e4';
+window.KB_BUILD='163b76ce77';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11162,7 +11162,10 @@ function act(a, el) {
     case 'next-game': nextGame(); break;
     case 'fab-home': fabHome(); break;
     case 'on-new': onNewModal(); break;
-    case 'on-tour-new': onTourNewModal(); break;
+    case 'on-tour-new': S.onTourEdit = null; S.onTour = null; onTourNewModal(); break;
+    case 'on-tour-edit': { const t = ON.t, d = new Date(t.startAt * 1000), loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); const pk = (PTS_PRE.find(x => x[2].join() === (t.points || []).join()) || PTS_PRE[0])[0];
+      S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, pts: pk };
+      S.onTourEdit = t.id; onTourNewModal(); break; }
     case 'on-arch': onArchiveOpen(); break;
     case 'title-open': titleModal(); break;
     case 'on-tour-remove': modal(`<div class="stack"><h3 style="margin:0">大会を削除しますか？</h3><p class="small muted" style="margin:0">「${esc(ON.t.name)}」を過去の大会から消します。元には戻せません（取ったバッジと称号は残ります）。</p><div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-remove-go">削除する</button></div></div>`); break;
@@ -11341,7 +11344,7 @@ function onTourNewModal() {
   const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', min: 4, max: 15, aiFill: true, aiLv: 2, entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, pts: 'std' };
   const seg = (k, opts) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(c[k]) === String(v) ? 'on' : ''}" data-ot="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
   const num = (k, mn, mx) => `<div class="su-step"><button class="su-pm" data-otn="${k}" data-v="-1" ${c[k] <= mn ? 'disabled' : ''}>−</button><b class="tnum">${c[k]}</b><button class="su-pm" data-otn="${k}" data-v="1" ${c[k] >= mx ? 'disabled' : ''}>＋</button></div>`;
-  modal(`<div class="stack on-new"><h3 style="margin:0">🌐 大会をひらく</h3>
+  modal(`<div class="stack on-new"><h3 style="margin:0">🌐 ${S.onTourEdit ? '大会を編集' : '大会をひらく'}</h3>
     <label class="su-row col"><b>大会の名前</b><input id="ot-name" class="su-in" maxlength="30" value="${esc(c.name)}"></label>
     <label class="su-row col"><b>大会の説明</b><textarea id="ot-desc" rows="2" maxlength="300" placeholder="例）初心者歓迎！ 3セットの予選のあと、上位5人で決勝">${esc(c.desc)}</textarea></label>
     <label class="su-row col"><b>開始日時</b><input id="ot-start" type="datetime-local" class="su-in" value="${esc(c.start)}"><small class="muted">開始の15分前からエントリーできます</small></label>
@@ -11357,7 +11360,7 @@ function onTourNewModal() {
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
     ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
     <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
-    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">ひらく</button></div></div>`);
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
   const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; const iv = $('#ot-inv'); if (iv) c.invites = iv.value; };
   document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
   document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; onTourNewModal(); });
@@ -11368,8 +11371,8 @@ async function onTourCreate() {
   if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
   if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
   try {
-    const j = await onReq('on_tour_new', Object.assign(onMe(), { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
-    closeModal(); S.onTour = null; onTourShow(j.tour);
+    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    closeModal(); S.onTour = null; if (S.onTourEdit) toast('変更しました'); S.onTourEdit = null; onTourShow(j.tour);
   } catch (e) { toast(e.message || 'ひらけませんでした'); }
 }
 // ---- 大会の画面（詳細・エントリー・進み具合・順位）----
@@ -11427,7 +11430,7 @@ function otourHTML() {
   if (t.phase === 'entry') {
     body = `<div class="on-ent">${t.entrants.map(e => `<span class="on-e"><span class="on-av">${av(e)}</span>${esc(e.name)}</span>`).join('') || '<span class="small muted">まだエントリーした人はいません</span>'}</div>
       <div class="row" style="gap:8px;flex-wrap:wrap">${open ? (t.entered ? '<button class="btn" data-act="on-tour-cancel">エントリーを取り消す</button>' : t.invited ? `<button class="btn primary" data-act="on-tour-entry" ${t.n >= t.max ? 'disabled' : ''}>エントリーする</button>` : '<span class="small">招待された人だけが出られます</span>') : `<span class="small muted">エントリーは ${new Date(t.entryAt * 1000).getHours()}:${String(new Date(t.entryAt * 1000).getMinutes()).padStart(2, '0')} から（開始の15分前）</span>`}
-      ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
+      ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine && !open ? '<button class="btn sm" data-act="on-tour-edit">✏️ 編集</button><button class="btn ghost sm" data-act="on-tour-delete">🗑 削除</button>' : t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
   } else if (t.stand) {
     const isDone = t.phase === 'done';
     const W = t.wait, wLeft = W ? Math.max(0, Math.round(W.until - Date.now() / 1000)) : 0;
@@ -11619,6 +11622,16 @@ function onAiChar(name) { // サーバーのAIの名前（ロボ太・ピコ…�
 }
 function onName(s) { if (!s) return ''; if (!s.ai && !/（AI★\d）$/.test(s.name || '')) return s.name; const c = onAiChar(s.name); return c.name; }
 function onAv(s, mood) { if (s.ai || /（AI★\d）$/.test(s.name || '')) { const c = onAiChar(s.name); return KB.avatarSVG(KB.charToCh(c), { mood: mood || 'normal', level: c.lv }); } return KB.avatarSVG(Object.assign({}, s.avatar || AVATAR_DEF, { name: s.name }), { mood: mood || 'normal' }); }
+// 出した札（だれにでも見える。切り直しで山札に戻った札はうすく）と、これまでの場札
+function onPlayedHTML(g, i, bare) {
+  const ps = g.played[i] || [];
+  const inner = ps.length ? ps.map(pl => `<span class="pg ${pl.ret ? 'ret' : ''}" title="第${pl.round}巡 場${pl.t}：${esc(pl.expr)}${pl.ret ? '（切り直しで山札に戻った札）' : ''}">${pl.cards.map(c => miniCard({ v: c[0], s: c[1] })).join('')}</span>`).join('') : '<span class="none">まだ出していません</span>';
+  return bare ? `<span class="played">${inner}</span>` : `<div class="played"><span class="pl-l">出した札</span>${inner}</div>`;
+}
+function onFieldsHTML(g, flipped) {
+  const L = (g.fields || []).map(f => ({ v: f[0], s: f[1] })); if (!L.length) return '';
+  return `<div class="fh-mini" title="${g.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${g.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${L.map((f, k) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && k === L.length - 1 ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
+}
 function onTableHTML(v) {
   const g = v.game, me = v.me, n = v.seats.length, spec = me < 0, pov = spec ? (ON.pov || 0) % n : me;
   const tot = i => (v.setPP[i] || []).reduce((a, b) => a + b, 0);
@@ -11643,7 +11656,7 @@ function onTableHTML(v) {
       <div class="nm"><span>${esc(onName(s))}</span><span class="ord">${ordIn(i)}番手</span></div>
       <div class="meta">${s.ai ? `<span class="chip lvchip">AI★${s.lv || 2}</span>` : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
       <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
-      ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}</div>`;
+      ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}${onPlayedHTML(g, i)}</div>`;
   };
   const opp = []; for (let k = 1; k < n; k++) opp.push(seat(order[(myPos + k) % n]));
   const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
@@ -11670,7 +11683,7 @@ function onTableHTML(v) {
       <div class="head"><span class="me-id"><span class="av me-av">${onAv(ps, g.over ? (g.winner === pov ? 'happy' : 'normal') : (g.handN[pov] <= 2 ? 'smug' : 'normal'))}</span><b>${esc(spec ? onName(ps) : ps.name)}</b><span class="me-info">手札 <b class="tnum">${g.handN[pov]}</b>枚${spec ? '' : `・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b>`}</span></span><span class="me-pp">セットPP <b class="tnum">${tot(pov)}</b></span></div>
       ${spec ? '<div class="on-watch">👀 観戦中（手札は見えません）・ほかの席を押すと、その人の席から見られます</div>' : ''}
       ${mySub ? `<div class="on-sub">🤖 ${ps.auto ? `AI★${ps.subLv}に任せています（推定実力−1）` : '時間切れが3回続いたので、AI★2が代わりに打っています'} <button class="btn sm primary" data-act="on-back">自分で打つ</button></div>` : ''}
-      ${myPlayed.length ? `<div class="mine-played"><span>出した札</span><span class="played">${myPlayed.map(pl => `<span class="pg">${pl.cards.map(c => miniCard({ v: c[0], s: c[1] })).join('')}</span>`).join('')}</span></div>` : ''}
+      ${myPlayed.length ? `<div class="mine-played"><span>出した札</span>${onPlayedHTML(g, pov, true)}</div>` : ''}
       <div class="hand ${spec ? 'on-backs' : ''}">${handHTML}</div>
       ${prev ? `<div class="preview">${prev}</div>` : ''}
       ${!spec && v.phase === 'play' ? `<div class="actions"><button class="btn primary" data-act="on-play" ${ok ? '' : 'disabled'}>出す</button><button class="btn felt-btn" data-act="on-draw" ${myTurn ? '' : 'disabled'}>引く</button>${mySub ? '' : `<button class="btn felt-btn sm" data-act="on-auto" title="いまの推定実力−1の強さ（最低★2）のAIが代わりに打ちます">🤖 AIに任せる</button>`}</div>` : ''}
@@ -11680,7 +11693,7 @@ function onTableHTML(v) {
     <div class="opps ring${n - 1}" style="--n:${n - 1}">${opp.join('')}</div>
     <div class="center">
       <div class="side deckside"><div class="deck" aria-label="山札 ${g.deckN}枚">${'<i></i>'.repeat(Math.min(5, Math.ceil(g.deckN / 6)))}<b class="tnum">${g.deckN}</b></div><span>山札</span><span>捨て札 ${g.discardN}</span></div>
-      <div class="pilecol"><div class="pile">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>${flipped && !g.over ? `<div class="round-pop">第${g.round}巡</div>` : ''}` : ''}</div></div>
+      <div class="pilecol"><div class="pile">${f ? `<div class="fieldcard top ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped ? 'deal' : ''}"><span class="tag">場 ・ 第${g.round}巡</span><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div>${flipped && !g.over ? `<div class="round-pop">第${g.round}巡</div>` : ''}` : ''}</div>${onFieldsHTML(g, flipped)}</div>
       ${cmHTML() || `<div class="side r"><span>手番</span><b>${g.over ? '終了' : esc(onName(v.seats[cur]))}</b></div>`}
     </div>
     ${strip}${win}${meBox}</div></div>${res}

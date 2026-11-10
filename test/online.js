@@ -76,6 +76,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     if (st === 'between' || st === 'done') break;
     await wait(500);
   }
+  const pv = await pa.evaluate(() => ({ played: [...document.querySelectorAll('.seat .played')].filter(x => /出した札/.test(x.textContent)).length, fh: document.querySelectorAll('.on-tbl .fh-mini .mc').length, view: KBAPP.S.view, fields: (KBAPP.ON.v.game.fields || []).length }));
+  ok(pv.played === 2 && pv.fh >= 1, 'ほかの人の出した札と、これまでの場札が見える：' + JSON.stringify(pv));
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'on_played.png') });
   ok(aTurns >= 1, `自分の番に出す・引くができる（${aTurns}回）`);
   ok(subSeen, '時間切れが3回続くと、AI★2が代わりに打つ');
   await pa.waitForTimeout(1600);

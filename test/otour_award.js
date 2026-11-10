@@ -78,6 +78,18 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   const okr = await call('on_tour_act', { token: me.token, id: small.id, act: 'remove' });
   const arch2 = await call('on_tours_archive', { token: me.token });
   ok(!ng.ok && okr.ok && !arch2.tours.some(t => t.id === small.id) && arch2.tours.some(t => t.id === tour.id), '主催者だけが、終わった大会をアーカイブから削除できる');
+  // 受付が始まる前なら、主催者は編集・削除できる（受付中は編集できない）
+  const later = (await call('on_tour_new', { token: me.token, name: 'ケン', tname: '来週杯', startAt: Math.round(Date.now() / 1000) + 7200, min: 2, max: 8 })).tour;
+  await p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()));
+  await p.evaluate(id => KBAPP.act('on-tour-open', { dataset: { id } }), later.id); await p.waitForTimeout(1200);
+  ok(await p.evaluate(() => !!document.querySelector('[data-act="on-tour-edit"]') && !!document.querySelector('[data-act="on-tour-delete"]')), '受付前の自分の大会に「編集」「削除」');
+  await p.click('[data-act="on-tour-edit"]'); await p.waitForTimeout(400);
+  await p.evaluate(() => { document.querySelector('#ot-name').value = '来週杯（改）'; KBAPP.S.onTour.name = '来週杯（改）'; }); await p.click('[data-act="on-tour-create"]'); await p.waitForTimeout(1000);
+  ok(await p.evaluate(() => KBAPP.ON.t.name === '来週杯（改）'), '編集した名前が反映される');
+  const ed2 = await call('on_tour_act', { token: me.token, id: tour.id, act: 'edit', tname: 'x', startAt: Math.round(Date.now() / 1000) + 9999 });
+  ok(!ed2.ok, '始まった（終わった）大会は編集できない');
+  await p.evaluate(() => KBAPP.act('on-tour-delete')); await p.waitForTimeout(800);
+  ok((await call('on_tour', { token: me.token, id: later.id })).tour.phase === 'cancel', '受付前の大会を削除（中止）できる');
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill();
 })();
