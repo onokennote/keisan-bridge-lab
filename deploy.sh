@@ -1,6 +1,7 @@
 #!/bin/bash
 # デプロイナウ用：単体で動く dist/index.html を作る（先に ./build.sh）。
 # クラウド保存とランキングを使うときは、APIのURLを渡す：KB_CLOUD_API=https://（さくらのサーバー）/kb/api.php ./deploy.sh
+# テスト版（ブランチ staging → GitHub Actions がさくらの /kb/stg/ に置く）は KB_STAGING=1 も付ける（画面に「テスト版」の帯）
 #シェア画像 dist/og.png は node tools/og.js で作る
 cd "$(dirname "$0")"
 node -e "
@@ -10,5 +11,6 @@ const icon=\"data:image/svg+xml,\"+encodeURIComponent('<svg xmlns=\"http://www.w
 const head='<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\"><title>計算ブリッジ作戦研究所</title><meta name=\"description\" content=\"カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。\"><meta property=\"og:title\" content=\"計算ブリッジ作戦研究所\"><meta property=\"og:description\" content=\"AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）\"><meta property=\"og:type\" content=\"website\"><meta property=\"og:url\" content=\"https://keisan-bridge.lolipop-now.app/\"><meta property=\"og:site_name\" content=\"計算ブリッジ作戦研究所（非公式ファン制作）\"><meta property=\"og:locale\" content=\"ja_JP\"><meta property=\"og:image\" content=\"https://keisan-bridge.lolipop-now.app/og.png\"><meta property=\"og:image:width\" content=\"1200\"><meta property=\"og:image:height\" content=\"630\"><meta property=\"og:image:alt\" content=\"計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）\"><meta name=\"twitter:card\" content=\"summary_large_image\"><link rel=\"canonical\" href=\"https://keisan-bridge.lolipop-now.app/\"><meta name=\"theme-color\" content=\"#0b1a14\"><link rel=\"icon\" href=\"'+icon+'\"><style>html,body{margin:0;background:#0b1a14}</style></head><body>';
 const api=process.env.KB_CLOUD_API||'';
 const cloud=api?'<script>window.KB_CLOUD_API='+JSON.stringify(api)+'</script>':'';
-fs.writeFileSync('dist/index.html',head+cloud+body+'</body></html>');
+const stg=process.env.KB_STAGING?'<script>window.KB_STAGING=1</script>':'';
+fs.writeFileSync('dist/index.html',head+cloud+stg+body+'</body></html>');
 "

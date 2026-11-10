@@ -382,6 +382,8 @@ const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 }
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
+// テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
+function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版（記録は本番と別です）'; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
@@ -401,7 +403,7 @@ function fabHome() {
   go('home');
 }
 function render() {
-  const app = $('#app'); syncFab();
+  const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();

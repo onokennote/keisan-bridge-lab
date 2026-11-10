@@ -1,0 +1,58 @@
+# テスト版：ブランチ staging に push すると、さくらの別フォルダ（~/www/kb/stg/）に置く
+#   テスト版のURL  https://onoken-web.sakura.ne.jp/kb/stg/
+#   APIもテスト用（~/www/kb/stg/api.php）。データベースは本番と別（公開フォルダの外の ~/kb_data_stg/）なので、
+#   テストで打った記録やランキングは本番に混ざらない。本番（デプロイナウ・本番のAPI）には何もしない
+# 必要な Secrets は「さくらにAPIを送る」と同じ（SAKURA_HOST・SAKURA_USER・SAKURA_PASSWORD）
+name: テスト版をさくらに置く
+on:
+  push:
+    branches: [staging]
+  workflow_dispatch:
+concurrency: sakura-staging
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 設定の確認
+        id: cfg
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+        run: |
+          if [ -z "$H" ]; then echo "Secrets（SAKURA_HOST など）が未設定なので送りません"; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: テスト版を組み立てる
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+        run: |
+          php -l server/api.php
+          ./build.sh
+          KB_CLOUD_API="https://$H/kb/stg/api.php" KB_STAGING=1 ./deploy.sh
+          # 検索に出さない・どの版か分かる印を入れる
+          STAMP="$(git rev-parse --short HEAD) $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
+          sed -i "s|<head>|<head><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"kb-version\" content=\"staging $STAMP\">|" dist/index.html
+          # テスト用APIの設定：データベースは本番と別の場所（~/www/kb/stg/ から見て ~/kb_data_stg/）
+          printf "<?php\nreturn ['db' => __DIR__ . '/../../../kb_data_stg/kb.sqlite', 'origins' => ['https://%s']];\n" "$H" > stg-config.php
+          php -l stg-config.php
+      - name: 送る（SFTP）
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+          U: ${{ secrets.SAKURA_USER }}
+          LFTP_PASSWORD: ${{ secrets.SAKURA_PASSWORD }}
+        run: |
+          sudo apt-get install -y -qq lftp >/dev/null
+          lftp -e "set sftp:auto-confirm yes; set net:max-retries 1; mkdir -p -f kb_data_stg; chmod 700 kb_data_stg; mkdir -p -f www/kb/stg; put dist/index.html -o www/kb/stg/index.html; put dist/og.png -o www/kb/stg/og.png; put server/api.php -o www/kb/stg/api.php; put stg-config.php -o www/kb/stg/config.php; bye" --env-password -u "$U" "sftp://$H"
+          rm -f stg-config.php
+      - name: 動いているか確かめる
+        if: steps.cfg.outputs.skip != '1'
+        env:
+          H: ${{ secrets.SAKURA_HOST }}
+        run: |
+          curl -fsS "https://$H/kb/stg/" | grep -q 'kb-version" content="staging' && echo "テスト版のページ：OK"
+          got=$(curl -fsS "https://$H/kb/stg/api.php"); echo "$got"
+          echo "$got" | grep -q '"ok":true' && echo "テスト用API：OK"
+          echo "テスト版のURL：https://$H/kb/stg/"

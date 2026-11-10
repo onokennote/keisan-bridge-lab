@@ -13,6 +13,12 @@
   - claude.ai アーティファクト：https://claude.ai/artifact/Mkh8TNciukTYjh41D9YyWD は閉鎖済み（新しいサイトへの案内だけ）。もう publish しない。開発は GitHub（作業ブランチ）に push し、本番は `./publish.sh`
   - デプロイナウ（本番）：https://keisan-bridge.lolipop-now.app 。公開専用ブランチ `lolipop-deploy`（`index.html`・`og.png` だけ）に push すると自動でデプロイされる。更新は作業ブランチで `./publish.sh`（さくらのAPI `https://onoken-web.sakura.ne.jp/kb/api.php` を埋め込んで作り、`lolipop-deploy` に push）。変更してテストが通ったら、push のあと `./publish.sh` で本番まで出す（作者が「出さないで」と言ったときだけ出さない。毎朝のAI総評改善の予約タスクも同じ）
 
+## テスト版（staging）
+- 新しい機能はブランチ `staging` で作る。`staging` に push すると GitHub Actions（`.github/workflows/staging.yml`）が組み立てて、さくらの `~/www/kb/stg/` に置く
+  - テスト版のURL：https://onoken-web.sakura.ne.jp/kb/stg/ （検索に出さない。画面の上に「🧪 テスト版」の帯 `KB_STAGING`）
+  - APIもテスト用（`/kb/stg/api.php`）。データベースは本番と別（`~/kb_data_stg/`）なので、テストの記録・ランキングは本番に混ざらない
+- 安定したら `staging` を作業ブランチ（`claude/lucid-curie-k2el7s`）にまとめて、いつもどおり `./publish.sh` で本番へ。作業ブランチ側の直し（毎朝のAI総評の改善など）は、ときどき `staging` にも取り込む
+
 ## テスト（Playwright。`./build.sh` のあと `test/` で実行）
 - `node run.js practice` / `node run.js tour` … 1セット／大会を自動で最後まで（エラーが出ないこと）
 - `node rv.js practice` / `node rv.js tour` … でたらめに打ち、ゲームとセットの総評（博士・マサ）を出力。末尾に `good` を付けるとAIの最善手どおりに打った総評
