@@ -1955,3 +1955,9 @@ body.rewinding #home-fab{display:none}
 .rk-hero-tx b{font:900 26px/1.2 var(--f-display);color:var(--ink);overflow-wrap:anywhere}
 .rk-hero-tx small{color:var(--trim);font-weight:800}
 .rk-hero-tx .ai-chip{align-self:flex-start}
+/* ホームのプロフィール：総合の順位（AI込み・人だけ） */
+.pb-rank{display:block;margin-top:3px}
+.pb-rank-b{display:flex;flex-wrap:wrap;align-items:baseline;gap:0 10px;padding:0;border:0;background:none;color:var(--muted);font:inherit;cursor:pointer;text-align:left;line-height:1.45}
+.pb-rank-b .pbr-h{flex-basis:100%;font-size:11px}
+.pb-rank-b .pbr{white-space:nowrap;font-size:11px}
+.pb-rank-b b{color:var(--accent);font-size:15px;margin-left:3px}

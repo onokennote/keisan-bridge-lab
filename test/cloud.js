@@ -57,14 +57,17 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.click('[data-act="rank-ai"]'); await pa.waitForTimeout(1800);
   ok(await pa.evaluate(() => ![...document.querySelectorAll('.rk-row')].some(r => /ゼロ/.test(r.innerText)) && /OFF/.test(document.querySelector('[data-act="rank-ai"]').innerText)), 'ボタンでAI研究員を外せる');
   await pa.click('[data-act="rank-ai"]'); await pa.waitForTimeout(1500);
-  ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p') || ![...document.querySelectorAll('.title .cast .cast-p')].some(b => /ゼロ/.test(b.title)); }), 'タイトルの6人にはAI研究員を入れない');
+  await pa.evaluate(() => { KBAPP.S.homeRank = null; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
+  ok(await pa.evaluate(() => [...document.querySelectorAll('.title .cast .cast-p')].some(b => /ゼロ/.test(b.title) && /AI研究員/.test(b.title)) && !document.querySelector('.title .cast .cast-p i')), 'タイトルの6人にはAI研究員も入る（順位の数字は出さない）');
+  ok(await pa.evaluate(() => /総合/.test((document.querySelector('#pb-rank') || {}).textContent || '') && /AI込み/.test(document.querySelector('#pb-rank').textContent) && /人だけ/.test(document.querySelector('#pb-rank').textContent)), 'ホームのプロフィールに総合の順位（AI込み・人だけ）：' + await pa.evaluate(() => (document.querySelector('#pb-rank') || {}).textContent));
+  await (await pa.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'pb_rank.png') });
   // タイトルの6人：BP上位でアバターを作った人がいれば並ぶ（押すと成績カード）
-  ok(await pa.evaluate(() => { KBAPP.go('home'); return !document.querySelector('.title .cast .cast-p'); }), 'アバターを作っていない人はタイトルに並ばない');
+  ok(await pa.evaluate(() => ![...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'アバターを作っていない人はタイトルに並ばない');
   await pa.evaluate(() => { localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.avatar', JSON.stringify({ hs: 'bob', shirt: '#3070d0' })); return KBAPP.cloudPush(); });
-  await pa.evaluate(() => { KBAPP.S.rank = null; KBAPP.go('ranking'); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
-  ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && !!document.querySelector('.title .cast .cast-p')), 'BP上位でアバターを作った人がタイトルの6人に入る（全部で6人）');
+  await pa.evaluate(() => { KBAPP.S.homeRank = null; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
+  ok(await pa.evaluate(() => document.querySelectorAll('.title .cast > *').length === 6 && [...document.querySelectorAll('.title .cast .cast-p')].some(b => !/AI研究員/.test(b.title))), 'BP上位でアバターを作った人がタイトルの6人に入る（全部で6人）');
   await (await pa.$('.title')).screenshot({ path: path.join(__dirname, 'out', 'cast_top.png') });
-  await pa.click('.title .cast .cast-p'); await pa.waitForTimeout(2500);
+  await pa.evaluate(() => [...document.querySelectorAll('.title .cast .cast-p')].find(b => !/AI研究員/.test(b.title)).click()); await pa.waitForTimeout(2500);
   ok(await pa.evaluate(() => !!document.querySelector('#modal .share-prev img') && /3枚出しの研究中/.test(document.querySelector('#modal .rk-bio').innerText)), 'タイトルのアイコンを押すと成績カードと自己紹介');
   await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // 端末B：NGワードの名前のプレイヤー
