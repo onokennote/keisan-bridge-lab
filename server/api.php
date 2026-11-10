@@ -157,7 +157,7 @@ function obMoves(array $handVals, int $t): array {
 function obGauss(): float { $u = 0; $v = 0; while (!$u) $u = mt_rand() / mt_getrandmax(); while (!$v) $v = mt_rand() / mt_getrandmax(); return sqrt(-2 * log($u)) * cos(2 * M_PI * $v); }
 // AIの手（アプリの★1〜3と同じ考え方）。★1は気づく組み合わせが少なく適当に選ぶ、★2は点の高い3手から選ぶ、★3は一番点の高い手
 function obAi(array $handVals, int $t, int $lv = 2): ?array {
-  $lv = max(1, min(4, $lv)); $L = [1 => ['see' => [1, 0.55, 0.4, 0.25, 0.2], 'miss' => 0.08], 2 => ['see' => [1, 0.85, 0.7, 0.5, 0.45], 'miss' => 0.04], 3 => ['see' => [1, 1, 1, 1, 1], 'miss' => 0.03], 4 => ['see' => [1, 1, 1, 1, 1], 'miss' => 0]][$lv];
+  $lv = max(1, min(5, $lv)); $L = [1 => ['see' => [1, 0.55, 0.4, 0.25, 0.2], 'miss' => 0.08], 2 => ['see' => [1, 0.85, 0.7, 0.5, 0.45], 'miss' => 0.04], 3 => ['see' => [1, 1, 1, 1, 1], 'miss' => 0.03], 4 => ['see' => [1, 1, 1, 1, 1], 'miss' => 0], 5 => ['see' => [1, 1, 1, 1, 1], 'miss' => 0]][$lv];
   $see = $L['see']; $r = fn() => mt_rand() / mt_getrandmax();
   $ms = array_values(array_filter(obMoves($handVals, $t), fn($m) => $r() < $see[$m['cls']]));
   if (!$ms || $r() < $L['miss']) return null;
@@ -167,8 +167,8 @@ function obAi(array $handVals, int $t, int $lv = 2): ?array {
   foreach ($ms as $m) {
     $rest = $handVals; foreach ($m['vals'] as $v) { $i = array_search($v, $rest, true); array_splice($rest, $i, 1); }
     $small = count(array_filter($rest, fn($v) => $v <= 3)); $high = count(array_filter($m['vals'], fn($v) => $v >= 11));
-    $flex = 0; if ($lv >= 4 && $rest) { $reach = []; $nr = count($rest); for ($a = 0; $a < $nr; $a++) { $reach += obExprs([$rest[$a]]); for ($b2 = $a + 1; $b2 < $nr; $b2++) { $reach += obExprs([$rest[$a], $rest[$b2]]); for ($c2 = $b2 + 1; $c2 < $nr; $c2++) $reach += obExprs([$rest[$a], $rest[$b2], $rest[$c2]]); } } $flex = count($reach) / 13 * 9; } // ★4：次の場で出せる形を残す
-    $sc[] = [$m, 14 * $m['n'] + 1.2 * $m['sum'] + 1.6 * min($small, 3) + 0.6 * $high + $flex + obGauss() * 0.3 * ($lv === 2 ? 3 : 1)];
+    $flex = 0; if ($lv >= 4 && $rest) { $reach = []; $nr = count($rest); for ($a = 0; $a < $nr; $a++) { $reach += obExprs([$rest[$a]]); for ($b2 = $a + 1; $b2 < $nr; $b2++) { $reach += obExprs([$rest[$a], $rest[$b2]]); for ($c2 = $b2 + 1; $c2 < $nr; $c2++) $reach += obExprs([$rest[$a], $rest[$b2], $rest[$c2]]); } } $flex = count($reach) / 13 * ($lv >= 5 ? 14 : 9); } // ★4：次の場で出せる形を残す
+    $sc[] = [$m, 14 * $m['n'] + 1.2 * $m['sum'] + 1.6 * min($small, 3) + 0.6 * $high + $flex + ($lv >= 5 ? 0 : obGauss() * 0.3 * ($lv === 2 ? 3 : 1))];
   }
   usort($sc, fn($a, $b) => $b[1] <=> $a[1]);
   return $lv === 2 ? $sc[mt_rand(0, min(3, count($sc)) - 1)][0] : $sc[0][0];
@@ -310,7 +310,7 @@ function obTourStart(array &$t, float $now): void {
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
-  for ($i = 0; count($players) < max(2, $c['min']); $i++) $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $c['aiLv'], 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $c['aiLv'] . '）'];
+  for ($i = 0; count($players) < max(2, $c['min']); $i++) { $lv = isset($c['aiMix']) ? obMixLv($c['aiMix']) : (int)$c['aiLv']; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
   $t['players'] = $players; $t['phase'] = 'prelim'; $t['set'] = 1; $t['stand'] = []; foreach ($players as $p) $t['stand'][$p['key']] = ['pts' => 0, 'pp' => 0];
   obTourDeal($t, array_column($players, 'key'), '予選 第1セット', $now);
 }
@@ -375,11 +375,13 @@ function obTourCfg(array $b, array $u): array {
   $lim = (int)($b['limit'] ?? 30); if (!in_array($lim, OB_LIMITS, true) && !($lim === 3 && !empty($CFG['test']))) $lim = 30;
   $min = max(2, min(40, (int)($b['min'] ?? 4))); $max = max($min, min(40, (int)($b['max'] ?? 15)));
   $pts = array_values(array_map(fn($x) => max(0, min(20, (int)$x)), array_slice((array)($b['points'] ?? [10, 8, 5, 2, 0]), 0, 5)));
-  $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))),
+  $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))), 'aiMix' => in_array($b['aiMix'] ?? '', array_keys(OB_MIX), true) ? $b['aiMix'] : 'even',
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
   'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'points' => $pts ?: [10, 8, 5, 2, 0]];
   return $cfg;
 }
+const OB_MIX = ['random' => [1, 1, 1, 1, 1], 'casual' => [3, 3, 2, 1, 0.3], 'even' => [1, 1.5, 2, 1.5, 1], 'strong' => [0.2, 0.5, 1.5, 3, 3], 'master' => [0, 0, 0, 0, 1]]; // ふつうの大会の「相手の強さ」と同じ割合（★1〜5）
+function obMixLv(string $mix): int { $w = OB_MIX[$mix] ?? OB_MIX['even']; $x = mt_rand() / mt_getrandmax() * array_sum($w); foreach ($w as $i => $v) { $x -= $v; if ($x <= 0) return $i + 1; } return 5; }
 const OB_WAIT = 900; // 次のセットまで最大15分待つ
 function obTourWait(array &$t, array $keys, string $label, float $now): void {
   $t['wait'] = ['keys' => $keys, 'label' => $label, 'until' => $now + OB_WAIT]; $t['ready'] = [];
@@ -407,7 +409,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {

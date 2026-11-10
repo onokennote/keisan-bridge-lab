@@ -29,7 +29,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.click('[data-act="on-tour-new"]'); await pa.waitForTimeout(300);
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_new.png'), fullPage: true });
   const start = new Date(Date.now() + 10 * 60000); const loc = new Date(start.getTime() - start.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  await pa.evaluate((loc) => { Object.assign(KBAPP.S.onTour, { name: 'テスト杯', desc: '段階2のテストです', start: loc, limit: 3, min: 6, max: 10, aiFill: true, aiLv: 2, entry: 'open', sets: 2, games: 1, finalists: 3, pts: 'std' }); document.querySelector('#ot-name').value = 'テスト杯'; document.querySelector('#ot-desc').value = '段階2のテストです'; document.querySelector('#ot-start').value = loc; }, loc);
+  await pa.evaluate((loc) => { Object.assign(KBAPP.S.onTour, { name: 'テスト杯', desc: '段階2のテストです', start: loc, limit: 3, min: 6, max: 10, aiFill: true, aiLv: 2, aiMix: 'master', entry: 'open', sets: 2, games: 1, finalists: 3, pts: 'std' }); document.querySelector('#ot-name').value = 'テスト杯'; document.querySelector('#ot-desc').value = '段階2のテストです'; document.querySelector('#ot-start').value = loc; }, loc);
   await pa.click('[data-act="on-tour-create"]'); await pa.waitForTimeout(800);
   ok(await pa.evaluate(() => KBAPP.S.view === 'otour' && /テスト杯/.test(document.body.innerText) && /主催 ケン/.test(document.body.innerText)), '大会をひらくと、大会の画面になる（主催は自分の名前）');
   // B：ホームの一覧に出る → 開いてエントリー
@@ -50,6 +50,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_entry.png') });
   await pa.click('[data-act="on-tour-startnow"]'); await pa.waitForTimeout(1500);
   ok(await pa.evaluate(() => KBAPP.S.view === 'online' && KBAPP.ON.v && KBAPP.ON.v.tour), '始まると自分の卓に入る');
+  ok(await pa.evaluate(() => KBAPP.ON.v.seats.filter(x => x.ai).every(x => x.lv === 5) && KBAPP.ON.v.seats.some(x => x.ai)), '「全員達人」を選ぶと、補充のAIはみな★5');
   await pb.waitForTimeout(3500);
   ok(await pb.evaluate(() => KBAPP.S.view === 'online' && KBAPP.ON.v && KBAPP.ON.v.tour), 'ほかの参加者も自動で自分の卓に入る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_room.png') });
