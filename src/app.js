@@ -4658,7 +4658,7 @@ const MASA_NETA = {
   // 外し方の種類に合うたとえ：出せたのに引いた（＝降りた）／引くべきところで出した（＝余計に勝負した）／出す手の選び違い
   badDraw: ['ポケットエース持ってフォールドしたようなもんやで！', 'シュートチャンスでバックパスや、もったいない！', 'ええ手で降りてもうたな、ポーカーやったら泣くとこや！'],
   badPlay: ['リバーで余計なコールしてもうたパターンや！', '慌ててシュート打って、カウンター食らうパターンや！', '待つとこで勝負に行ってもうたな、ここは我慢やったで！'],
-  badPick: ['キーパーと1対1で外したようなもんや！', 'オフサイドトラップに見事にかかったな〜！', 'パスの出し先、ちょっとズレとったな！', 'ティルトしとらんか？深呼吸や！'],
+  badPick: ['キーパーと1対1で外したようなもんや！', 'オフサイドトラップに見事にかかったな〜！', 'パスの出し先、ちょっとズレとったな！', 'もっと強い役が見えとったのに、見落としたな！'],
   // 判断は良かったのに結果が出なかったとき（結果より判断をたたえ、気持ちを前に向ける）
   // 判断にも課題が残った負け（「内容で負けたとは限らん」は使わない）
   losePoor: ['ポーカーでも負けたハンドから学ぶのが本物のプロや。', 'アウェーの洗礼やな。次はホームで取り返そ！', 'チップは減っても、席に座っとる限りチャンスはあるで！'],
@@ -4701,14 +4701,15 @@ function rvGameSolo(who) {
   else B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : ''), (f.pp >= 25 ? RVP([`PP${f.pp}か〜、${nmY}、今回は大量失点やな…`, `うわ〜PP${f.pp}、ゴール前でボコボコにされたな${nmY}！`]) : RVP([`PP${f.pp}で${f.n}人中${f.rank}位やな。`, `${nmY}、PP${f.pp}の${f.rank}位や。`])) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられてもうた。` : ''));
   if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : 'lose')); }
   if (f.beatStar) B('★5の達人がいる卓での上がりです。価値ある一勝ですね。', 'しかも★5の達人がおる卓で上がったんやで！ジャイアントキリングや！');
-  if (f.nDec) B(`選択肢のあった${f.nDec}回のうち、最善手は${f.nBest}回${f.nGood > f.nBest ? `、好手まで含めると${f.nGood}回` : ''}でした。${f.nHint ? `（AIの読みを見た${f.nHint}回は数えていません）` : ''}`, `最善手は${f.nDec}回中${f.nBest}回${f.nGood > f.nBest ? `、好手入れたら${f.nGood}回` : ''}や！${f.nBest === f.nDec && f.nDec >= 2 ? 'ハットトリックどころの騒ぎやないで！' : ''}`);
+  if (f.nDec) B(`選択肢のあった${f.nDec}回のうち、最善手は${f.nBest}回${f.nGood > f.nBest ? `、好手まで含めると${f.nGood}回` : ''}でした。${f.nHint ? `（AIの読みを見た${f.nHint}回は数えていません）` : ''}`, `最善手は${f.nDec}回中${f.nBest}回${f.nGood > f.nBest ? `、好手入れたら${f.nGood}回` : ''}や！${f.nBest === f.nDec && f.nDec >= 2 ? (f.nDec >= 4 ? 'ハットトリックどころの騒ぎやないで！' : f.nDec === 3 ? '3本とも決めた、ハットトリックや！' : '2本とも枠に飛ばしたで！') : ''}`);
+  else if (f.nHint) B(`選択肢のあった${f.nHint}回は、すべてAIの読みを見てから打ったので、採点には入れていません。次は自分の読みで打って、答え合わせに使いましょう。`, `選べる場面は${f.nHint}回とも、AIの読みを見てから打ったな！練習試合はそれでええ、次は自分の読みで勝負や！`);
   else B('今回は選択の余地がない局面が続きました。', '今回は選ぶとこがほとんどなかったな！配られたカードで勝負するしかない日もあるんや。');
   sec = 'flow'; // 2. 流れ（序盤・中盤・終盤）
   if (f.flow && f.flow.length >= 2) {
     const parts = f.flow.map(p => `${RV_PHASE[p.k]}（第${p.r0}${p.r1 !== p.r0 ? `〜${p.r1}` : ''}巡）は${p.n}回中${p.best}回が最善`);
     B(`流れを見ると、${parts.join('、')}でした。` + (f.flow[0].s0 ? `手札の合計は、最初の判断のとき${f.flow[0].s0}（${f.flow[0].c0}枚）でした。` : ''), `流れで言うたら、${parts.join('、')}や。`);
     const fl = f.flow, a = fl[0], z = fl[fl.length - 1];
-    if (a.n && z.n && Math.abs(a.best / a.n - z.best / z.n) >= 0.5) { B(a.best / a.n > z.best / z.n ? '序盤は良かったのに、後半で判断が揺れました。終盤ほど一手の重みが増します。' : '序盤は手探りでしたが、後半にかけて判断が冴えていきました。', a.best / a.n > z.best / z.n ? '前半は良かったのに後半バテたな！' : '尻上がりや！後半はキレッキレやったで！'); N('flow'); }
+    if (a.n >= 2 && z.n >= 2 && a.n + z.n >= 5 && Math.abs(a.best / a.n - z.best / z.n) >= 0.5) { /* 数回だけで「尻上がり」などと言わない */ B(a.best / a.n > z.best / z.n ? '序盤は良かったのに、後半で判断が揺れました。終盤ほど一手の重みが増します。' : '序盤は手探りでしたが、後半にかけて判断が冴えていきました。', a.best / a.n > z.best / z.n ? '前半は良かったのに後半バテたな！' : '尻上がりや！後半はキレッキレやったで！'); N('flow'); }
   }
   sec = 'hl'; // 3. 名場面（良かった手を2つまで）
   (f.hl || []).forEach((h, i) => {
@@ -4817,7 +4818,7 @@ function rvSetSolo(who) {
   const c = setContext(), Lg = S.T.setLog || [], L = [], rt = who === 'root', nmY = rvName();
   let sec = 'result'; const B = (r, m) => { const t = rt ? r : m; if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t) L.push({ sec, t, neta: !rt }); };
   const F = Lg.map(x => x.rv);
-  const nDec = Lg.reduce((s, x) => s + (x.nDec || 0), 0), nBest = Lg.reduce((s, x) => s + (x.nBest || 0), 0), nGood = Lg.reduce((s, x) => s + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length;
+  const nHintS = Lg.reduce((s, x) => s + (x.nHint || 0), 0), nDec = Lg.reduce((s, x) => s + (x.nDec || 0), 0), nBest = Lg.reduce((s, x) => s + (x.nBest || 0), 0), nGood = Lg.reduce((s, x) => s + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length;
   // 1. 結果
   if (c.phase === 'final') B(`決勝戦、お疲れさまでした。${c.finalists}人中${c.finalRank}位、決勝PPは${c.finalPP}でした。`, c.finalRank === 1 ? `優勝や〜！${nmY}、ワールドカップ掲げたれ！` : `決勝お疲れさん！${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}や！`);
   else B(RVP([`このセットは卓内${c.rank}位、セットPPは${c.pp}でした。`, `セットの結果は卓内${c.rank}位、PP${c.pp}です。`]), c.rank === 1 ? `${nmY}、このセット卓内1位や！セットPP${c.pp}、ええ仕事したな！` : `このセット、卓内${c.rank}位でセットPP${c.pp}やな。`);
@@ -4825,14 +4826,14 @@ function rvSetSolo(who) {
   if (top1 && sq === 'poor') B('ただ、最善を外した手も多く、順位には運の後押しもありました。結果と判断は分けて振り返りましょう。', `…せやけど最善外した手も多いで。運も実力のうちやからな！中身はここから伸ばそ！`);
   else if (!top1 && sq === 'good') B('順位は伸びませんでしたが、判断は確率に沿っていました。結果はばらつきます。大事なのは、選び方が正しかったかどうかです。', `せやけど判断はしっかり確率どおりや。結果は気にせんでええで！`);
   if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose'));
-  if (!nDec) B(`上がりは${wins}回。採点の対象になる判断はありませんでした。`, `上がり${wins}回や！採点する場面はなかったけど、結果は結果や！`); else B(`上がりは${wins}回、判断は${nDec}回中${nBest}回が最善${nGood > nBest ? `、好手まで含めると${nGood}回` : ''}です${nDec ? `（最善率${Math.round(nBest / nDec * 100)}%）` : ''}。`, `上がり${wins}回、最善手は${nDec}回中${nBest}回やで！`);
+  if (!nDec && nHintS) B(`上がりは${wins}回。選択肢のあった${nHintS}回は、すべてAIの読みを見てから打ったので採点していません。`, `上がり${wins}回や！選べる場面は全部AIの読みを見とったから、採点はなしや。次は自分の読みでいこか！`); else if (!nDec) B(`上がりは${wins}回。採点の対象になる判断はありませんでした。`, `上がり${wins}回や！採点する場面はなかったけど、結果は結果や！`); else B(`上がりは${wins}回、判断は${nDec}回中${nBest}回が最善${nGood > nBest ? `、好手まで含めると${nGood}回` : ''}です${nDec ? `（最善率${Math.round(nBest / nDec * 100)}%）` : ''}。`, `上がり${wins}回、最善手は${nDec}回中${nBest}回やで！`);
   sec = 'games'; // 2. ゲームごとの一言
   if (Lg.length) {
     const one = (x, f) => {
       const res = x.won ? '上がり' : `PP${x.pp}（${x.rank}位）`;
       let note = '';
       if (f && f.hl && f.hl[0]) { const h = f.hl[0]; note = { sutemi: '捨て身が光った', aete: 'あえて引くが光った', divParen: `「${h.mine}」が光った`, div: `「${h.mine}」が光った`, three: '3枚出しで一気に軽くした', one: 'あえて1枚が渋かった', defend: '相手リーチをしのいだ', perfect: '全手最善', run: `最善${f.run}連続`, fast: '速攻の上がり' }[h.k] || ''; }
-      if (f && f.worst && (!note || f.worst.loss > 0.1)) note = `第${f.worst.round}巡の「${f.worst.mine}」が痛手`;
+      if (f && f.worst && (!note || f.worst.loss > 0.1)) note = x.won ? `ただ第${f.worst.round}巡の「${f.worst.mine}」は改善の余地` : `第${f.worst.round}巡の「${f.worst.mine}」が痛手`;
       if (!note && x.luck === 'resultUnlucky') note = '内容最善も不運';
       return `第${x.game}ゲームは${res}${note ? '、' + note : ''}`;
     };
@@ -4846,8 +4847,7 @@ function rvSetSolo(who) {
       if (Lg.length > 1 && bestG !== worstG) {
         const bi = Lg.indexOf(bestG), wi2 = Lg.indexOf(worstG), fw = F[wi2];
         mz += bestG.won ? `ベストゲームは上がった第${bestG.game}ゲームや！` : `いちばん粘れたんは第${bestG.game}ゲーム、PP${bestG.pp}で${bestG.rank}位や。`;
-        const fb = F[bi]; if (fb && fb.hl && fb.hl[0]) { const n1 = one(bestG, fb).split('、')[1]; if (n1 && !/痛手/.test(n1)) mz += `${n1}な！`; }
-        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : '');
+        mz += `逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。` + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : fw && fw.nDec ? '大きな判断ミスはなかった、巡り合わせのゲームや。' : worstG.nHint ? 'AIの読みを見ながら打ったゲームやな。' : '選ぶ場面がほとんどなかったゲームや。');
       }
     }
     B(`ゲームごとに振り返ると、${lines.join('。')}。`, mz);
