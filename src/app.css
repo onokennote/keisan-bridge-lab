@@ -2118,3 +2118,16 @@ body.rewinding #home-fab{display:none}
 .on-round.out{opacity:0;transition:opacity .35s}
 /* PC（マウスで操作する広い画面）はホームボタンを1.5倍に */
 @media (min-width:900px) and (hover:hover){#home-fab{width:81px;height:81px;right:24px;bottom:24px;border-width:4px}#home-fab span{font-size:30px}#home-fab small{font-size:13px}body.has-fab #app{padding-bottom:110px}}
+/* 大会：招待する人を選ぶ */
+.inv-box .inv-chips{display:flex;flex-wrap:wrap;gap:6px;min-height:28px;align-items:center}
+.inv-chip{display:inline-flex;align-items:center;gap:4px;background:var(--trim);color:#2a1c05;font-weight:800;font-size:13px;border-radius:999px;padding:3px 4px 3px 10px}
+.inv-chip button{border:0;background:rgba(0,0,0,.18);color:#2a1c05;width:22px;height:22px;border-radius:50%;font-weight:900;cursor:pointer;line-height:1;padding:0}
+.inv-res{display:flex;flex-direction:column;gap:4px;max-height:230px;overflow-y:auto}
+.inv-p{display:flex;align-items:center;gap:8px;width:100%;text-align:left;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;padding:5px 8px;color:var(--ink);cursor:pointer;font:inherit}
+.inv-p.on{border-color:var(--trim);background:rgba(240,190,60,.14)}
+.inv-av{width:30px;height:30px;border-radius:50%;overflow:hidden;flex:0 0 30px;background:#24323a}
+.inv-av svg{width:100%;height:100%;display:block}
+.inv-nm{flex:1;display:flex;flex-direction:column;font-weight:700;min-width:0}
+.inv-nm small{font-weight:400;color:var(--muted);font-size:11px}
+.inv-add{font-weight:800;color:var(--trim);white-space:nowrap}
+.inv-p.raw{border-style:dashed}

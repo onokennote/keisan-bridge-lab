@@ -652,6 +652,33 @@ try {
       }
       out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid']]);
     }
+    case 'on_people': { // 招待する人の候補：q があれば名前でさがす（ランキングに載っている人。AIと自分は出さない）、なければ最近の大会でいっしょだった人・前に招待した人
+      $b = body(); $u = authUser($b); $kn = fn($x) => obNorm(mb_convert_kana((string)$x, 'C')); $q = $kn(mb_substr((string)($b['q'] ?? ''), 0, 10)); // さがすときは、ひらがなとカタカナを同じとみなす
+      $av = fn($a) => $a ? json_decode($a, true) : null;
+      if ($q !== '') {
+        $out = [];
+        foreach (db()->query("SELECT uid, name, avatar FROM ranks WHERE shown = 1 AND ai = 0 AND name NOT LIKE '研究員%' ORDER BY updated DESC LIMIT 3000")->fetchAll() as $r) {
+          if ($r['uid'] === $u['uid']) continue; $n = $kn($r['name']);
+          if ($n !== '' && mb_strpos($n, $q) !== false) $out[] = ['name' => $r['name'], 'avatar' => $av($r['avatar']), 'exact' => $n === $q, 'pre' => mb_strpos($n, $q) === 0];
+        }
+        usort($out, fn($a, $c) => [$c['exact'], $c['pre']] <=> [$a['exact'], $a['pre']]);
+        out(['ok' => true, 'list' => array_slice($out, 0, 12)]);
+      }
+      $keys = []; $names = [];
+      foreach (db()->query('SELECT st FROM tours ORDER BY start_at DESC LIMIT 200')->fetchAll() as $r) {
+        $t = json_decode($r['st'], true); $ents = $t['entrants'] ?? [];
+        $mine = ($t['host'] ?? '') === $u['uid'];
+        if (!$mine && !in_array($u['uid'], array_column($ents, 'uid'), true)) continue;
+        foreach ($ents as $e) { if (empty($e['uid']) || $e['uid'] === $u['uid']) continue; $keys[$e['uid'] . ':' . ($e['pid'] ?? '')] = 1; }
+        if ($mine) foreach ($t['cfg']['invites'] ?? [] as $nm) $names[obNorm((string)$nm)] = (string)$nm;
+        if (count($keys) >= 30) break;
+      }
+      $out = []; $seen = [];
+      $st = db()->prepare('SELECT name, avatar, shown FROM ranks WHERE uid = ? AND pid = ?');
+      foreach (array_keys($keys) as $k) { [$uu, $pp] = explode(':', $k, 2); $st->execute([$uu, $pp]); $r = $st->fetch(); if (!$r || strpos((string)$r['name'], '研究員') === 0) continue; $n = obNorm((string)$r['name']); if (isset($seen[$n])) continue; $seen[$n] = 1; $out[] = ['name' => $r['name'], 'avatar' => $r['shown'] ? $av($r['avatar']) : null, 'why' => 'played']; }
+      foreach ($names as $n => $nm) { if ($n === '' || isset($seen[$n])) continue; $seen[$n] = 1; $out[] = ['name' => $nm, 'avatar' => null, 'why' => 'invited']; }
+      out(['ok' => true, 'list' => array_slice($out, 0, 16)]);
+    }
     case 'on_tours_archive': { // 終わった大会（新しい順に50件）
       $b = body(); $u = authUser($b); $out = [];
       foreach (db()->query("SELECT id, st, ver FROM tours WHERE st LIKE '%\"phase\":\"done\"%' OR st LIKE '%\"phase\":\"cancel\"%' ORDER BY start_at DESC LIMIT 200")->fetchAll() as $r) {
