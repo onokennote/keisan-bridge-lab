@@ -4215,7 +4215,7 @@ function summaryText() {
 // 選択肢のある手を打つ直前に、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
 // 上がられたあと（「結果を見る」の前）でも戻れる。戻したゲーム・セットは結果のバッジの対象外、やり直した手は推定実力に入れない
 const undoAllowed = () => !!(S.T && ['practice', 'tournament'].includes(S.T.cfg.kind) && !S.attack && !S.spectate && !S.tiebreak);
-const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
+const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow) && !(g.over && g.winner >= 0 && g.players[g.winner] && g.players[g.winner].human); }; // 自分が上がったときは出さない
 function undoTake() {
   const g = S.game, o = {}; for (const k in g) if (k !== 'players') o[k] = g[k];
   return { gameNo: S.gameNo, round: g.round, g: JSON.stringify(o), ids: g.players.map(p => p.id), T: JSON.stringify(S.T), growth: JSON.stringify(store.get('growth', null)), dec: JSON.stringify(S.decisions || []), fouls: JSON.stringify(S.fouls || []), bestStreak: S.bestStreak || 0, foulCount: S.foulCount || 0 };
@@ -4359,7 +4359,7 @@ function winStripHTML(g, me) {
   return `<div class="win-strip" role="status">
     <div class="ws-main"><div class="ws-title">${wp ? esc(w === me ? 'あなた' : nm(wp)) + 'が上がりました！' : '規定の巡数で終了しました'}</div>
     ${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(miniCard).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
-    <div class="ws-btns">${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}<button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button></div></div>`;
+    <div class="ws-btns"><button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button>${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}</div></div>`;
 }
 // カードが飛ぶ演出（山札→人、人→場）
 function flyCard(fromEl, toEl, html, delay, dur, force) {
