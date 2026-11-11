@@ -41,6 +41,8 @@ function db(): PDO {
   // プレイヤーごとの記録と引き継ぎコード（端末まるごとではなく、プレイヤー単位で別の端末に入れる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS players (uid TEXT NOT NULL, pid TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, code TEXT NOT NULL, data TEXT, data_at INTEGER DEFAULT 0, PRIMARY KEY (uid, pid))');
   // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（引き継ぎコードで別の端末に入れたプレイヤー用）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, pid TEXT NOT NULL, kind TEXT NOT NULL, data TEXT, at INTEGER NOT NULL)'); // 通知（ライバル・ライバルの動き・大会）。30日で消す
+  $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
@@ -61,6 +63,17 @@ function authUser(array $b): array {
   if (!$u) fail('ログインが切れました', 401);
   $GLOBALS['tokenPid'] = (string)($u['tpid'] ?? ''); // プレイヤーの鍵なら、そのプレイヤーとしてだけ動く
   return $u;
+}
+// 通知を足す（同じ人から同じ種類の通知は1日に1回まで。kind: rival / rv_badge / rv_bp / invite / award）
+function noteAdd(string $uid, string $pid, string $kind, array $data, string $dedupe = ''): void {
+  if ($dedupe !== '') { $q = db()->prepare('SELECT 1 FROM notes WHERE uid = ? AND pid = ? AND kind = ? AND data LIKE ? AND at > ?'); $q->execute([$uid, $pid, $kind, '%' . $dedupe . '%', time() - 86400]); if ($q->fetch()) return; }
+  db()->prepare('INSERT INTO notes (uid, pid, kind, data, at) VALUES (?, ?, ?, ?, ?)')->execute([$uid, $pid, $kind, json_encode($data, JSON_UNESCAPED_UNICODE), time()]);
+}
+function rankByRid(string $rid): ?array { foreach (db()->query('SELECT uid, pid, name, bp FROM ranks')->fetchAll() as $r) if (rid($r['uid'], $r['pid']) === $rid) return $r; return null; }
+// 招待された人（ランキングの名前と同じ人）に通知
+function noteInvites(array $t, array $names): void {
+  $want = []; foreach ($names as $n) { $k = obNorm((string)$n); if ($k !== '') $want[$k] = 1; } if (!$want) return;
+  foreach (db()->query('SELECT uid, pid, name FROM ranks WHERE ai = 0')->fetchAll() as $r) if ($r['uid'] !== $t['host'] && isset($want[obNorm((string)$r['name'])])) noteAdd($r['uid'], $r['pid'], 'invite', ['tid' => $t['id'], 'tname' => $t['cfg']['name'], 'host' => $t['hostName'] ?? ''], '"tid":"' . $t['id'] . '"');
 }
 function cleanPid($p): string { return substr(preg_replace('/[^a-z0-9]/i', '', (string)$p), 0, 24); }
 // 記録を読み書きするプレイヤー：プレイヤーの鍵ならそのプレイヤーだけ、端末の鍵ならその端末で作ったプレイヤー
@@ -395,6 +408,7 @@ function obTourAward(array &$t): void {
     if (!isset($ent[$k])) continue; // AIの順位にはバッジなし
     $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, !empty($t['cfg']['official']) ? 1 : 0, time()]);
     $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
+    noteAdd($e['uid'], $e['pid'] ?? '', 'award', ['tid' => $t['id'], 'tname' => $t['cfg']['name'], 'place' => $i + 1, 'official' => !empty($t['cfg']['official'])]);
   }
 }
 // 大会の設定を読む（ひらくときと、編集のときに使う）
@@ -513,7 +527,20 @@ try {
       if ($row && (int)$row['data_at'] > $base && empty($b['force'])) { $d->rollBack(); out(['ok' => false, 'conflict' => true, 'at' => (int)$row['data_at'], 'error' => 'ほかの端末の記録のほうが新しいです'], 409); }
       if ($row) { $code = $row['code']; $d->prepare('UPDATE players SET data = ?, data_at = ? WHERE uid = ? AND pid = ?')->execute([$json, $at, $u['uid'], $pid]); }
       else { $code = newCode(); $d->prepare('INSERT INTO players (uid, pid, code_hash, code, data, data_at) VALUES (?, ?, ?, ?, ?, ?)')->execute([$u['uid'], $pid, h($code), $code, $json, $at]); }
-      if (is_array($b['stats'] ?? null)) rankUpsert($d, $u['uid'], $pid, $b['stats']);
+      if (is_array($b['stats'] ?? null)) {
+        $old = $d->prepare('SELECT name, bp, card FROM ranks WHERE uid = ? AND pid = ?'); $old->execute([$u['uid'], $pid]); $old = $old->fetch();
+        rankUpsert($d, $u['uid'], $pid, $b['stats']);
+        // この人をライバルにしている人へ：新しいバッジ・BPで抜いた
+        if ($old) {
+          $oldAch = (array)(json_decode((string)$old['card'], true)['ach'] ?? []); $newAch = array_values(array_diff((array)($b['stats']['card']['ach'] ?? []), $oldAch));
+          $oldBp = (int)$old['bp']; $newBp = max(0, min(20000, (int)($b['stats']['bp'] ?? 0))); $me = rid($u['uid'], $pid); $nm = (string)($b['stats']['name'] ?? $old['name']); $av = is_array($b['stats']['avatar'] ?? null) ? array_slice($b['stats']['avatar'], 0, 20) : null;
+          if ($newAch || $newBp > $oldBp) { $w = $d->prepare('SELECT v.uid, v.pid, r.bp FROM rivals v JOIN ranks r ON r.uid = v.uid AND r.pid = v.pid WHERE v.rid = ?'); $w->execute([$me]);
+            foreach ($w->fetchAll() as $x) {
+              if ($newAch && count($newAch) <= 20) noteAdd($x['uid'], $x['pid'], 'rv_badge', ['who' => $nm, 'rid' => $me, 'ach' => array_slice($newAch, 0, 5), 'n' => count($newAch), 'av' => $av]);
+              if ($oldBp <= (int)$x['bp'] && $newBp > (int)$x['bp']) noteAdd($x['uid'], $x['pid'], 'rv_bp', ['who' => $nm, 'rid' => $me, 'bp' => $newBp, 'av' => $av], '"rid":"' . $me . '"');
+            } }
+        }
+      }
       $d->prepare('UPDATE users SET seen = ? WHERE uid = ?')->execute([time(), $u['uid']]);
       $d->commit();
       out(['ok' => true, 'at' => $at, 'code' => $code]);
@@ -667,9 +694,20 @@ try {
       if (!empty($b['on'])) {
         $n = db()->prepare('SELECT COUNT(*) FROM rivals WHERE uid = ? AND pid = ?'); $n->execute([$u['uid'], $pid]);
         if ((int)$n->fetchColumn() >= 5) { $q = db()->prepare('SELECT 1 FROM rivals WHERE uid = ? AND pid = ? AND rid = ?'); $q->execute([$u['uid'], $pid, $rid]); if (!$q->fetch()) fail('ライバルは5人までです'); }
+        $was = db()->prepare('SELECT 1 FROM rivals WHERE uid = ? AND pid = ? AND rid = ?'); $was->execute([$u['uid'], $pid, $rid]); $was = (bool)$was->fetch();
         db()->prepare('INSERT OR REPLACE INTO rivals (uid, pid, rid, at) VALUES (?, ?, ?, ?)')->execute([$u['uid'], $pid, $rid, time()]);
+        $tg = rankByRid($rid); $myRid = rid($u['uid'], $pid);
+        if ($tg && !$was) { $nm = db()->prepare('SELECT name, avatar FROM ranks WHERE uid = ? AND pid = ?'); $nm->execute([$u['uid'], $pid]); $nm = $nm->fetch();
+          $bk = db()->prepare('SELECT 1 FROM rivals WHERE uid = ? AND pid = ? AND rid = ?'); $bk->execute([$tg['uid'], $tg['pid'], $myRid]);
+          if ($nm) noteAdd($tg['uid'], $tg['pid'], 'rival', ['who' => $nm['name'], 'rid' => $myRid, 'back' => (bool)$bk->fetch(), 'av' => $nm['avatar'] ? json_decode($nm['avatar'], true) : null], '"rid":"' . $myRid . '"'); }
       } else db()->prepare('DELETE FROM rivals WHERE uid = ? AND pid = ? AND rid = ?')->execute([$u['uid'], $pid, $rid]);
       out(['ok' => true]);
+    }
+    case 'notes': { // 自分（このプレイヤー）への通知。新しい順に60件（30日より前のものは消す）
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
+      db()->prepare('DELETE FROM notes WHERE at < ?')->execute([time() - 30 * 86400]);
+      $q = db()->prepare('SELECT id, kind, data, at FROM notes WHERE uid = ? AND pid = ? ORDER BY id DESC LIMIT 60'); $q->execute([$u['uid'], $pid]);
+      out(['ok' => true, 'notes' => array_map(fn($x) => ['id' => (int)$x['id'], 'kind' => $x['kind'], 'data' => json_decode((string)$x['data'], true), 'at' => (int)$x['at']], $q->fetchAll())]);
     }
     case 'rival_by': { // 自分（このプレイヤー）をライバルに指定している人の名前（ランキングに載っている人だけ）
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $me = rid($u['uid'], $pid);
@@ -737,6 +775,7 @@ try {
       $hostName = obSeatInfo($b)['name'];
       $t = ['id' => $id, 'host' => $u['uid'], 'hostName' => $hostName, 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0];
       db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, $u['uid'], json_encode($t, JSON_UNESCAPED_UNICODE), $cfg['startAt'], time(), time()]);
+      if ($cfg['entry'] === 'invite') noteInvites($t, $cfg['invites'] ?? []);
       out(['ok' => true, 'tour' => obTourView($t, $u['uid'], 1, true)]);
     }
     case 'on_tour': { // 大会の詳細（ここでも進める）
@@ -764,7 +803,8 @@ try {
         if (empty($t['wait']) || !in_array('u:' . $u['uid'], $t['wait']['keys'], true)) $err = 'いまは準備の時間ではありません'; else { $t['ready']['u:' . $u['uid']] = 1; obTourTick($t, $now); }
       } elseif ($act === 'edit') { // 受付が始まる前なら、主催者は設定を変えられる
         if ($t['host'] !== $u['uid'] || $t['phase'] !== 'entry' || $now >= $c['startAt'] - 900) $err = '受付が始まる前の自分の大会だけ編集できます';
-        else { $t['cfg'] = obTourCfg($b, $u); db()->prepare('UPDATE tours SET start_at = ? WHERE id = ?')->execute([$t['cfg']['startAt'], $id]); }
+        else { $prevInv = array_map('obNorm', $t['cfg']['invites'] ?? []); $t['cfg'] = obTourCfg($b, $u); db()->prepare('UPDATE tours SET start_at = ? WHERE id = ?')->execute([$t['cfg']['startAt'], $id]);
+          if ($t['cfg']['entry'] === 'invite') noteInvites($t, array_filter($t['cfg']['invites'] ?? [], fn($n) => !in_array(obNorm((string)$n), $prevInv, true))); }
       } elseif ($act === 'remove') { // 終わった大会をアーカイブから消す（主催者だけ。取ったバッジ・称号は残る）
         if ($t['host'] !== $u['uid'] || !in_array($t['phase'], ['done', 'cancel'], true)) $err = '終わった自分の大会だけ削除できます';
         else { db()->prepare('DELETE FROM tours WHERE id = ?')->execute([$id]); db()->exec('COMMIT'); out(['ok' => true, 'removed' => true]); }
