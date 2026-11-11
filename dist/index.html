@@ -2240,7 +2240,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d379f1d814';
+window.KB_BUILD='c705817d5c';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5971,7 +5971,7 @@ function newSession(cfg) {
   players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
   // ★6カナタ：ほかのキャラと同じ割合で大会に参加。予選には出ず、シードとして決勝にだけ現れる（決勝の卓は最大5人なので、そのときは予選からの進出を4人まで）
   if (cfg.kind === 'tournament' && cfg.finalists >= 2 && (window.KB_KANATA != null ? !!window.KB_KANATA : KANATA_MIX[cfg.mix] && Math.random() < KB.kanataRate(cfg.nPlayers - 1))) { // シードが出るのは「強豪ぞろい」「全員達人」のときだけ
-    T.kanata = true; if (cfg.finalists >= 5) { T.cfg = Object.assign({}, cfg, { finalists: 4 }); T.kanataCut = true; }
+    T.kanata = true; if (cfg.finalists >= 5) { T.cfg = Object.assign({}, cfg, { finalists: 4 }); T.kanataCut = true; T.cfgBase = cfg; } // 元の設定は「同じ設定でもう一度」用に残す
   }
   return T;
 }
@@ -11492,7 +11492,7 @@ function act(a, el) {
       S.T = newSession(Object.assign({ kind: 'tournament' }, c));
       go('opening'); break;
     }
-    case 'tour-again': { const cfg = S.T.cfg; S.T = newSession(Object.assign({}, cfg)); go('opening'); break; }
+    case 'tour-again': { const T0 = S.T, cfg = T0.cfgBase || (T0.kanataCut ? Object.assign({}, T0.cfg, { finalists: T0.cfg.finalists + 1 }) : T0.cfg); S.T = newSession(Object.assign({}, cfg)); go('opening'); break; } // シードで減らした決勝の枠は元に戻す
     case 'opening-start': (S.opTimers || []).forEach(clearTimeout); if (S.T && S.T.set === 1 && !S.T.statStarted) { S.T.statStarted = true; stat('tStart'); } startSet(); break;
     case 'opening-skip': (S.opTimers || []).forEach(clearTimeout); document.querySelectorAll('.op-line').forEach(el => { el.style.animation = 'none'; el.style.opacity = 1; }); const ob = $('#op-start'); if (ob) { ob.style.animation = 'none'; ob.style.opacity = 1; } break;
     case 'resume': {
