@@ -516,9 +516,16 @@ function advWhere(k) {
   if (MB_TOUR.includes(k)) return { go: 'setup-tour', l: '大会へ' };
   return { go: 'setup-practice', l: '練習へ' };
 }
+// アドバイスの文の中のバッジ名を押せるように（押すとバッジの詳細。そこから「アドバイスに戻る」）
+const advB = (k, i) => { const a = ACH.find(x => x[0] === k); return a ? { k, i, name: a[4][i] } : null; };
+function advText(t) { let h = esc(t.text); (t.bs || []).filter(Boolean).forEach(b => { const q = `「${esc(b.name)}」`; h = h.split(q).join(`<button class="adv-b" data-advb="${b.k}:${b.i}">${q}</button>`); }); return h; }
+function advModal(html) {
+  modal(html);
+  document.querySelectorAll('#modal [data-advb]').forEach(el => el.onclick = () => { const [k, i] = el.dataset.advb.split(':'); S.advBack = () => advModal(html); KB.sfx('select'); badgeTalk(k, +i); });
+}
 function masaAdvice(more) {
   const g = G_(), nG = (g.games || []).length, nm = san(S.settings.name || 'あなた'), r = ratingOf(g.games || []), R = a => a[(Math.random() * a.length) | 0];
-  const tips = [], add = (w, text, btn) => tips.push({ w: w * (0.6 + Math.random() * 0.8), text, btn });
+  const tips = [], add = (w, text, btn, bs) => tips.push({ w: w * (0.6 + Math.random() * 0.8), text, btn, bs });
   if (nG < 10) { // はじめのころ
     add(5, `${nm}、まずは「はじめて」のセットで1セット打ってみよか！相手は★1〜2や。迷ったら「AIの読み」を開いて、最善手と見比べるんがいちばんの近道やで。`, { go: 'setup-practice', l: '練習へ' });
     add(3, 'ルールがあやふやなら、博士とおれのチュートリアルや。3分で式の作り方と「あえて引く」のコツまで分かるで！', { a: 'tut-start', l: 'チュートリアル' });
@@ -527,10 +534,10 @@ function masaAdvice(more) {
   }
   const near = advNearBadges(g).filter(b => b.c > 0 || nG >= 3);
   near.slice(0, 6).forEach((b, i) => { const w = advWhere(b.k);
-    add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w); });
+    add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w, [advB(b.k, b.i)]); });
   // 冠（カテゴリーの特別バッジ）：残りが少ない系統
-  ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(a[4][i]); }); });
-    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null); });
+  ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(advB(k, i)); }); });
+    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null, miss); });
   // ミニゲーム
   const c = g.cnt || {};
   if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
@@ -540,10 +547,10 @@ function masaAdvice(more) {
   // 苦手な場面
   try { const cs = catStats(g.games || []).filter(x => x.n >= 5).sort((a, b) => b.bad - a.bad)[0]; if (cs && cs.bad >= 0.3) add(3, `データで見ると、苦手は「${cs.label}」の場面や（悪手の割合${Math.round(cs.bad * 100)}%）。次の練習はそこだけ意識してみ！弱点のサイドを固めたら失点は減るで！`, { go: 'growth', l: '成長記録へ' }); } catch (e) { }
   // 推定実力
-  if (r.ok) { const nx = [3, 4, 4.5].find(t => !g.ach['rating:' + t]); if (nx && r.r >= nx && r.n < 40) add(3, `推定実力は★${r.r.toFixed(1)}、もう★${nx}に届いとる！バッジは判断が40回たまったら判定やから、あと${40 - r.n}回、このまま打ち続けよ！`, { go: 'setup-practice', l: '練習へ' }); else if (nx && r.r < nx && r.r >= nx - 0.6) add(3, `推定実力★${r.r.toFixed(1)}、★${nx}のバッジまであと少しや！直近100手の最善率と損失で決まるから、AIの読みを見ずに自分で読み切る手を増やそ！`, { go: 'setup-practice', l: '練習へ' }); }
+  if (r.ok) { const nx = [3, 4, 4.5].find(t => !g.ach['rating:' + t]); if (nx && r.r >= nx && r.n < 40) add(3, `推定実力は★${r.r.toFixed(1)}、もう★${nx}に届いとる！「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」は判断が40回たまったら判定やから、あと${40 - r.n}回、このまま打ち続けよ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); else if (nx && r.r < nx && r.r >= nx - 0.6) add(3, `推定実力★${r.r.toFixed(1)}、★${nx}のバッジ「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」まであと少しや！直近100手の最善率と損失で決まるから、AIの読みを見ずに自分で読み切る手を増やそ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); }
   // 大会
   if (nG >= 10 && !c.qualify) add(3, '練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。', { go: 'setup-tour', l: '大会へ' });
-  if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' });
+  if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' }, [advB('qualify_strong', 0)]);
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
   if (openT.length) add(4, `いま「${openT[0].name}」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！`, null);
   // 重みつきで3つ（押すたびに少し変わる）
@@ -551,8 +558,8 @@ function masaAdvice(more) {
   while (pick.length < 3 && pool.length) { const tot = pool.reduce((a, t) => a + t.w, 0); let x = Math.random() * tot, i = 0; for (; i < pool.length; i++) { x -= pool[i].w; if (x <= 0) break; } pick.push(pool.splice(Math.min(i, pool.length - 1), 1)[0]); }
   if (!pick.length) pick.push({ text: `${nm}、もうほとんどやり尽くしとるやんけ！あとは推定実力を上げて、ランキングのてっぺんを狙うだけや！`, btn: { go: 'ranking', l: 'ランキングへ' } });
   const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
-  modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(intro)}</b></div></div>
-    <div class="adv-list">${pick.map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${esc(t.text)}</p>${t.btn ? `<button class="btn sm" data-act="adv-go" ${t.btn.go ? `data-go="${t.btn.go}"` : `data-a="${t.btn.a}"`}>${esc(t.btn.l)} →</button>` : ''}</div></div>`).join('')}</div>
+  advModal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(intro)}</b></div></div>
+    <div class="adv-list">${pick.map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${advText(t)}</p>${t.btn ? `<button class="btn sm" data-act="adv-go" ${t.btn.go ? `data-go="${t.btn.go}"` : `data-a="${t.btn.a}"`}>${esc(t.btn.l)} →</button>` : ''}</div></div>`).join('')}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end">${CLOUD_ON ? '<button class="btn" data-act="masa-rival">⚔ ライバルと比較</button>' : ''}<button class="btn" data-act="masa-more">🔄 ほかには？</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
@@ -582,15 +589,15 @@ async function rivalCompare(rid, name) {
   const rows = [['推定実力', me.rating, d.rating, v => v == null ? '—' : '★' + (+v).toFixed(1)], ['BP', myBp, rvBp, v => v + ' BP'], ['バッジ', myB, rvB, v => v + '個'], ['連続最善', me.streak, d.streak || 0, v => v + '回'], ['バッジアタック', me.atk, d.atk || 0, v => v ? v + ' BP' : '—'], ['式の図鑑', me.zukan, d.zukan || 0, v => v + '式']];
   const nmR = san(name), tips = [];
   if (rvBp > myBp) { const gap = rvBp - myBp, nb = advNearBadges(g), cand = (nb.filter(b => b.c > 0).length ? nb.filter(b => b.c > 0) : nb).slice(0, 8).sort((a, b) => a.left - b.left || b.bp - a.bp); /* 手をつけている系統から */ let s2 = 0; const use = []; for (const b of cand) { if (s2 > gap) break; use.push(b); s2 += b.bp; }
-    tips.push(s2 > gap ? `BPは${gap}差や。${use.map(b => `「${b.name}」（+${b.bp}・あと${b.left}回）`).join('と')}で逆転できるで！` : `BPは${gap}差や。まずは${use.slice(0, 2).map(b => `「${b.name}」（+${b.bp}）`).join('と')}から詰めていこ！`); }
+    tips.push({ text: s2 > gap ? `BPは${gap}差や。${use.map(b => `「${b.name}」（+${b.bp}・あと${b.left}回）`).join('と')}で逆転できるで！` : `BPは${gap}差や。まずは${use.slice(0, 2).map(b => `「${b.name}」（+${b.bp}）`).join('と')}から詰めていこ！`, bs: use.map(b => advB(b.k, b.i)) }); }
   else tips.push(myBp > rvBp ? `BPは${myBp - rvBp}リードや！せやけど油断したらあかん、試合は90分あるんや！` : 'BPは同点や！ここからが勝負やで！');
   const theirs = ACH.flatMap(a => a[2].map((t, i) => ({ a, i, key: a[0] + ':' + t }))).filter(x => ra[x.key] && !g.ach[x.key]);
-  if (theirs.length) { const x = theirs.sort((p, q) => bpOf(p.a[0], p.i) - bpOf(q.a[0], q.i))[0]; tips.push(`${nmR}が持っとって、${san(S.settings.name)}が持ってへんバッジが${theirs.length}個ある。取りやすいのは「${x.a[4][x.i]}」や。条件は「${x.a[3](x.a[2][x.i])}」やで！`); }
+  if (theirs.length) { const x = theirs.sort((p, q) => bpOf(p.a[0], p.i) - bpOf(q.a[0], q.i))[0]; tips.push({ text: `${nmR}が持っとって、${san(S.settings.name)}が持ってへんバッジが${theirs.length}個ある。取りやすいのは「${x.a[4][x.i]}」や。条件は「${x.a[3](x.a[2][x.i])}」やで！`, bs: [advB(x.a[0], x.i)] }); }
   if (me.rating != null && d.rating != null) tips.push(d.rating > me.rating + 0.05 ? `推定実力は${nmR}が★${(d.rating - me.rating).toFixed(1)}上や。AIの読みを見ずに打った手の最善率を上げるんが一番の近道や！` : me.rating > d.rating + 0.05 ? `推定実力はこっちが★${(me.rating - d.rating).toFixed(1)}上や！判断の質では勝っとるで！` : '推定実力はほぼ互角や！ライバルとして申し分なしや！');
   if ((d.streak || 0) > me.streak) tips.push(`連続最善は${nmR}が${d.streak}回、こっちは${me.streak}回や。一手ずつ「最善かどうか」を意識して打つと伸びるで！`);
-  modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', rvBp > myBp ? 'worried' : 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(san(S.settings.name))} vs ${esc(nmR)}、データで比べたで！</b></div></div>
+  advModal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', rvBp > myBp ? 'worried' : 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(san(S.settings.name))} vs ${esc(nmR)}、データで比べたで！</b></div></div>
     <div class="rv-cmp"><div class="rv-h"><span></span><b>${esc(S.settings.name)}</b><b>⚔ ${esc(name)}</b></div>${rows.map(([l, a, b, f]) => { const A = a == null ? -1 : +a, B = b == null ? -1 : +b; return `<div class="rv-r"><span>${l}</span><b class="${A > B ? 'win' : ''}">${f(a)}</b><b class="${B > A ? 'win' : ''}">${f(b)}</b></div>`; }).join('')}</div>
-    <div class="adv-list">${tips.slice(0, 3).map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${esc(t)}</p></div></div>`).join('')}</div>
+    <div class="adv-list">${tips.slice(0, 3).map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${advText(typeof t === 'string' ? { text: t } : t)}</p></div></div>`).join('')}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="masa-rival">ほかのライバル</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // ---------- 成長記録：実力レーティング・場面別の苦手分析・課題・称号 ----------
@@ -906,7 +913,7 @@ function badgeTalk(key, i) {
   else if (key === 'streak5' || key === 'streak10') text += ' AIの読みを見た手は連続に数えへんで（途切れもせえへん）。';
   modal(`<div class="bdg-talk"><div class="bdg-big">${badgeSVG(a, i, !!got, 72)}<b>${esc(name)}</b><small>${esc(a[1])}・${rank}</small><span class="bp-tag">${bpOf(key, i)} BP</span></div>
     <div class="commentary"><div class="cm-av">${KB.casterSVG('masa', got ? 'happy' : 'normal')}</div><div class="cm-body"><span class="cm-name">実況・ナニワのマサ</span><span class="cm-text">${esc(text)}</span></div></div>
-    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+    <div class="row" style="justify-content:flex-end;gap:8px">${S.advBack ? '<button class="btn" data-act="adv-back">← アドバイスに戻る</button>' : ''}<button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // 判断ごとの記録（課題の進み具合と、連続最善・待ちの称号）
 function growthOnDecision(d) {
@@ -5537,7 +5544,7 @@ function bind() {
   on('#set-auto', 'onchange', e => { S.settings.autoHint = e.target.checked; store.set('settings', S.settings); });
   document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b));
   document.querySelectorAll('[data-dqc]').forEach(b => b.onclick = () => { const D = S.drill, i = +b.dataset.dqc, k = D.sel.indexOf(i); if (k >= 0) D.sel.splice(k, 1); else { if (D.sel.length >= 3) D.sel.shift(); D.sel.push(i); } KB.sfx(k >= 0 ? 'unselect' : 'select'); render(); });
-  document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); badgeTalk(k, +i); });
+  document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); S.advBack = null; badgeTalk(k, +i); });
   document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => catTalk(b.dataset.cat));
   document.querySelectorAll('[data-emb]').forEach(b => b.onclick = () => { const gi = +b.dataset.emb, g = G_(), cp = catProgress(g, gi), got = g.ach['cat:' + gi];
     const text = cp.done ? `「${cp.gn}」コンプリートや！特別バッジ「${cp.name}」、${got ? new Date(got).toLocaleDateString('ja-JP') + 'にゲット、' : ''}これは誇ってええで！` : `これは「${cp.gn}」の特別バッジ「${cp.name}」や！このカテゴリーのバッジを全部集めたらもらえるで。いま${cp.have}/${cp.all}、あと${cp.all - cp.have}個や！`;
@@ -5716,6 +5723,7 @@ function act(a, el) {
     case 'host-root': hostRules(); break;
     case 'host-masa': masaAdvice(); break;
     case 'masa-more': masaAdvice(true); break;
+    case 'adv-back': { const f = S.advBack; S.advBack = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;

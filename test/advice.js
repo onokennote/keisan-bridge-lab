@@ -41,6 +41,12 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); const g = KBAPP.G(); for (let i = 0; i < 30; i++) g.games.push({ at: i, k: 'practice', ds: [{ l: 0, c: [], h: 0, r: 3 }], f: 0 }); localStorage.setItem(Object.keys(localStorage).find(k => /\.growth$/.test(k)), JSON.stringify(g)); KBAPP.testAch('win', 8); KBAPP.testAch('three', 40); KBAPP.testAch('games', 30); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); });
   let sawBadge = false; for (let k = 0; k < 8 && !sawBadge; k++) { await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('host-masa'); }); await pa.waitForTimeout(150); sawBadge = await pa.evaluate(() => /まで、あと\d+回|狙い目は/.test(document.querySelector('#modal').innerText)); }
   ok(sawBadge, '進んだ人には、あと少しで取れるバッジを教える');
+  const bn = await pa.evaluate(() => { const e = document.querySelector('#modal .adv-b'); return e && e.textContent; });
+  await pa.click('#modal .adv-b'); await pa.waitForTimeout(400);
+  ok(!!bn && await pa.evaluate(n => !!document.querySelector('#modal .bdg-talk') && document.querySelector('#modal .bdg-big b').textContent === n.replace(/[「」]/g, ''), bn), 'アドバイスのバッジ名を押すと、そのバッジの詳細が出る：' + bn);
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'adv_badge.png') });
+  await pa.click('#modal [data-act="adv-back"]'); await pa.waitForTimeout(300);
+  ok(await pa.evaluate(() => !!document.querySelector('#modal .adv-list')), '「アドバイスに戻る」で元のアドバイスに戻る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'host_masa2.png') });
   await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pb.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 70); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(false, true); }); await pa.waitForTimeout(600);
   // ランキングでハナを押して「ライバルにする」

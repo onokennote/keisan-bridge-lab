@@ -2188,3 +2188,5 @@ body.rewinding #home-fab{display:none}
 .rv-chip{font-style:normal;margin-left:4px;font-size:12px;background:#c0392b;color:#fff;border-radius:6px;padding:0 4px}
 .pv-rival{margin-top:8px;font-size:13px;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);border-radius:10px;padding:6px 10px}
 @media (max-width:420px){.host-tag{font-size:9px;padding:2px 6px}}
+.adv-b{background:none;border:0;padding:0;font:inherit;color:var(--trim);font-weight:800;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
+.adv-b:hover{color:#ffd77a}
