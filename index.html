@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="ab6a5cc 2026-11-11 17:23"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="23742ce 2026-11-11 19:12"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2234,10 +2234,13 @@ body.rewinding #home-fab{display:none}
 @keyframes beckonAv{0%,100%{box-shadow:0 0 0 0 rgba(255,179,71,.0),0 4px 12px rgba(0,0,0,.45)}50%{box-shadow:0 0 0 6px rgba(255,179,71,.45),0 4px 12px rgba(0,0,0,.45)}}
 @keyframes beckonTag{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @media (prefers-reduced-motion:reduce){.host-r.beckon .host-say,.host-r.beckon .host-av,.host-r.beckon .host-tag{animation:none}}
+/* 上がりの帯のボタン：「結果を見る」を端に（スマホは左端、PCは右端） */
+.ws-btns{justify-content:flex-start}
+@media (min-width:900px){.ws-btns{flex-direction:row-reverse;justify-content:flex-start}}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='07960aa250';
+window.KB_BUILD='d379f1d814';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9981,7 +9984,7 @@ function summaryText() {
 // 選択肢のある手を打つ直前に、対局・セット・成長記録をまるごと控えておき、戻すときはそれに差し替える。
 // 上がられたあと（「結果を見る」の前）でも戻れる。戻したゲーム・セットは結果のバッジの対象外、やり直した手は推定実力に入れない
 const undoAllowed = () => !!(S.T && ['practice', 'tournament'].includes(S.T.cfg.kind) && !S.attack && !S.spectate && !S.tiebreak);
-const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow); };
+const undoOk = () => { const g = S.game; return undoAllowed() && !!S.undoSnap && S.undoSnap.gameNo === S.gameNo && !!g && (!g.over || !!S.winShow) && !(g.over && g.winner >= 0 && g.players[g.winner] && g.players[g.winner].human); }; // 自分が上がったときは出さない
 function undoTake() {
   const g = S.game, o = {}; for (const k in g) if (k !== 'players') o[k] = g[k];
   return { gameNo: S.gameNo, round: g.round, g: JSON.stringify(o), ids: g.players.map(p => p.id), T: JSON.stringify(S.T), growth: JSON.stringify(store.get('growth', null)), dec: JSON.stringify(S.decisions || []), fouls: JSON.stringify(S.fouls || []), bestStreak: S.bestStreak || 0, foulCount: S.foulCount || 0 };
@@ -10125,7 +10128,7 @@ function winStripHTML(g, me) {
   return `<div class="win-strip" role="status">
     <div class="ws-main"><div class="ws-title">${wp ? esc(w === me ? 'あなた' : nm(wp)) + 'が上がりました！' : '規定の巡数で終了しました'}</div>
     ${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(miniCard).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
-    <div class="ws-btns">${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}<button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button></div></div>`;
+    <div class="ws-btns"><button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button>${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}</div></div>`;
 }
 // カードが飛ぶ演出（山札→人、人→場）
 function flyCard(fromEl, toEl, html, delay, dur, force) {
