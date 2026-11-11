@@ -2207,10 +2207,28 @@ body.rewinding #home-fab{display:none}
 .rvc.mu{border-color:rgba(240,190,60,.6)}
 .rv-nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .rv-mu{font-style:normal;font-size:11px;background:rgba(240,190,60,.2);color:var(--trim);border-radius:999px;padding:1px 7px}
+/* 通知 */
+.pb-bell{position:relative}
+.pb-bell .nb{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:#e74c3c;color:#fff;font-style:normal;font-size:11px;font-weight:800;line-height:18px;padding:0 4px;box-shadow:0 0 0 2px var(--bg,#0b1a14)}
+.nt-list{display:flex;flex-direction:column;max-height:62vh;overflow-y:auto;border:1px solid var(--line);border-radius:12px}
+.nt-row{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:8px 10px;font:inherit;color:var(--ink);cursor:pointer}
+.nt-row:last-child{border-bottom:0}
+.nt-row.new{background:rgba(240,190,60,.1)}
+.nt-row.new .nt-tx{font-weight:700}
+.nt-ic{font-size:18px;text-align:center}
+.nt-tx{font-size:13px;line-height:1.5}
+.nt-at{color:var(--muted);font-size:11px;white-space:nowrap}
+.nt-row{grid-template-columns:36px 1fr auto}
+.nt-icw{position:relative;display:inline-flex;width:32px;height:32px;align-items:center;justify-content:center}
+.nt-av{width:32px;height:32px;border-radius:50%;overflow:hidden;background:#24323a;display:block}
+.nt-av svg{width:100%;height:100%;display:block}
+.nt-mk{position:absolute;right:-4px;bottom:-3px;font-style:normal;font-size:12px;line-height:1;background:var(--bg,#0b1a14);border-radius:50%;padding:1px}
+.nt-tour{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#7b2ff2,#4a1aa8);display:flex;align-items:center;justify-content:center;font-size:17px}
+.nt-icw svg{max-width:32px;max-height:32px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='c3c64c1995';
+window.KB_BUILD='20b9431296';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5747,7 +5765,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
+const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -6144,7 +6162,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -6303,6 +6321,58 @@ function masaAdvice(more) {
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
 const rivalsOf = () => store.get('rivals', []) || [];
+// ---------- 通知（ホームのプロフィールの「🔔 通知」）：ライバル・ライバルの動き・大会（サーバー）と、自分のバッジ・記録・順位（端末） ----------
+function noteAdd(kind, data) { try { if (!PID) return; const L = store.get('notes', []) || []; L.unshift(Object.assign({ id: 'l' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), at: Date.now(), kind }, data)); store.set('notes', L.slice(0, 100)); notesBadge(); } catch (e) { } }
+async function notesFetch() {
+  const l = PID && plLink(PID); if (!l) return; S.srvNotesAt = Date.now();
+  try { const j = await cloudReq('notes', { token: l.token, pid: PID }); S.srvNotes = (j.notes || []).map(n => Object.assign({ id: 's' + n.id, at: n.at * 1000, kind: n.kind }, n.data || {})); S.srvNotesPid = PID; } catch (e) { }
+}
+const notesAll = () => [...(store.get('notes', []) || []), ...(S.srvNotesPid === PID ? S.srvNotes || [] : [])].sort((a, b) => b.at - a.at);
+const notesUnread = () => { const seen = store.get('notesSeen', 0) || 0; return notesAll().filter(n => n.at > seen).length; };
+function notesBadge() { const b = $('#pb-nb'); if (!b) return; const n = notesUnread(); b.textContent = n > 99 ? '99+' : n; b.hidden = !n; }
+const agoJa = t => { const m = Math.floor((Date.now() - t) / 60000); return m < 1 ? 'たった今' : m < 60 ? `${m}分前` : m < 1440 ? `${Math.floor(m / 60)}時間前` : `${Math.floor(m / 1440)}日前`; };
+function noteText(n) {
+  const me = san(S.settings.name || 'あなた'), A = (k, i) => { const a = ACH.find(x => x[0] === k); return a ? a : null; };
+  const bn = key => { const [k, t] = String(key).split(':'), a = A(k); if (!a) return key; const i = a[2].indexOf(+t); return i >= 0 ? a[4][i] : key; };
+  switch (n.kind) {
+    case 'rival': return n.back ? ['🔁', `${san(n.who)}がライバルバックしました`] : ['⚔', `${san(n.who)}が${me}をライバルにしました`];
+    case 'rv_badge': return ['🏅', `ライバルの${san(n.who)}が「${bn((n.ach || [])[0])}」${n.n > 1 ? `ほか${n.n - 1}個` : ''}を取りました`];
+    case 'rv_bp': return ['📈', `ライバルの${san(n.who)}が、BPで${me}を抜きました（${n.bp}BP）`];
+    case 'invite': return ['✉', `${n.host ? san(n.host) + 'から' : ''}オンライン大会「${n.tname}」に招待されました`];
+    case 'award': return ['🏆', `${n.official ? '公式大会' : 'オンライン大会'}「${n.tname}」で${n.place}位に入りました`];
+    case 'soon': { const d = new Date(n.at * 1000); return ['⏰', `エントリーした「${n.tname}」がまもなく始まります（${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}）`]; }
+    case 'badge': { const a = A(n.k); return a ? ['🎖', `「${a[4][n.i]}」（${a[1]}・${['銅', '銀', '金'][a[5] ? a[5][n.i] : Math.min(n.i, 2)]}）を取りました`] : ['🎖', 'バッジを取りました']; }
+    case 'cat': return ['👑', `冠「${CAT_SPECIAL[(ACH_GROUPS[n.gi] || [])[0]] || ''}」（${(ACH_GROUPS[n.gi] || [])[0] || ''}）を達成しました`];
+    case 'rating': return ['⭐', `推定実力の最高が★${(+n.v).toFixed(1)}になりました`];
+    case 'streak': return ['🔥', `連続最善の自己ベストを${n.v}回に更新しました`];
+    case 'rank': return ['📊', `総合ランキング（${n.lab}）が${n.from}位から${n.v}位に上がりました`];
+  }
+  return ['🔔', 'お知らせ'];
+}
+// 頭の小さなアイコン：人の通知はその人の顔（右下に種類の印）、バッジ・冠はその絵、大会は大会の印、自分の記録は自分の顔
+function noteIcon(n, mark) {
+  const av = a => `<span class="nt-av">${KB.avatarSVG(Object.assign({}, AVATAR_DEF, a || {}), { mood: 'happy' })}</span>`;
+  if (['rival', 'rv_badge', 'rv_bp'].includes(n.kind)) return `<span class="nt-icw">${av(n.av)}<i class="nt-mk">${mark}</i></span>`;
+  if (n.kind === 'badge') { const a = ACH.find(x => x[0] === n.k); return `<span class="nt-icw">${a ? badgeSVG(a, n.i, true, 28) : mark}</span>`; }
+  if (n.kind === 'cat') return `<span class="nt-icw">${emblemSVG(n.gi, true, 28)}</span>`;
+  if (['invite', 'award', 'soon'].includes(n.kind)) return `<span class="nt-icw"><span class="nt-tour">🏆</span>${n.kind !== 'award' ? `<i class="nt-mk">${mark}</i>` : ''}</span>`;
+  return `<span class="nt-icw">${av(myAvatar())}<i class="nt-mk">${mark}</i></span>`;
+}
+function notesOpen(more) {
+  const L = notesAll(), N = more ? (S.notesN || 40) : (S.notesN = 40), seen = store.get('notesSeen', 0) || 0; S.notesList = L;
+  const rows = L.slice(0, N).map((n, i) => { const [ic, tx] = noteText(n); return `<button class="nt-row ${n.at > seen ? 'new' : ''}" data-act="note-go" data-i="${i}"><span class="nt-ic">${noteIcon(n, ic)}</span><span class="nt-tx">${esc(tx)}</span><small class="nt-at">${agoJa(n.at)}</small></button>`; }).join('');
+  modal(`<div class="stack nt-m"><h3 style="margin:0">🔔 通知</h3>${L.length ? `<div class="nt-list">${rows}</div>${L.length > N ? '<button class="btn sm" data-act="notes-more">もっと見る</button>' : ''}` : '<p class="small muted" style="margin:0">まだ通知はありません。バッジを取ったり、ライバルに指定されたりすると、ここに届きます。</p>'}
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  if (L.length) store.set('notesSeen', Math.max(seen, L[0].at)); notesBadge();
+}
+function noteGo(i) {
+  const n = (S.notesList || [])[i]; if (!n) return;
+  if (n.rid) { rankCardOpen(n.rid, false, null); return; }
+  if (n.kind === 'badge') { S.advBack = notesOpen; badgeTalk(n.k, n.i); return; }
+  if (n.tid) { closeModal(); act('on-tour-open', { dataset: { id: n.tid } }); return; }
+  if (n.kind === 'rank') { closeModal(); go('ranking'); return; }
+  if (n.kind === 'cat' || n.kind === 'rating' || n.kind === 'streak') { closeModal(); go('growth'); return; }
+}
 // ライバル（自分が指定した人）・ライバラー（自分をライバルに指定した人）の数。お互いに指定していれば「ライバルバック」。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
 const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
 async function rvByFetch(force) {
@@ -6574,8 +6644,8 @@ function setMax(key, v) { const g = G_(); if ((g.cnt[key] || 0) >= v) return; g.
 function checkAch(g, key) {
   const a = ACH.find(x => x[0] === key); if (!a) return;
   setTimeout(() => { if (!S.attack) try { checkAvUnlocks(G_()); } catch (e) { } }, 0);
-  a[2].forEach((t, i) => { const id = key + ':' + t; if ((g.cnt[key] || 0) >= t && !g.ach[id]) { g.ach[id] = Date.now(); ACH_Q.push([a, i]); if (ACH_Q.length === 1) setTimeout(showAch, 600); } });
-  ACH_GROUPS.forEach((gr, gi) => { if (!gr[1].includes(key)) return; const cp = catProgress(g, gi); if (cp.done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); ACH_Q.push(['cat', gi]); if (ACH_Q.length === 1) setTimeout(showAch, 600); } });
+  a[2].forEach((t, i) => { const id = key + ':' + t; if ((g.cnt[key] || 0) >= t && !g.ach[id]) { g.ach[id] = Date.now(); ACH_Q.push([a, i]); if (!S.attack) noteAdd('badge', { k: key, i }); if (ACH_Q.length === 1) setTimeout(showAch, 600); } });
+  ACH_GROUPS.forEach((gr, gi) => { if (!gr[1].includes(key)) return; const cp = catProgress(g, gi); if (cp.done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); ACH_Q.push(['cat', gi]); if (!S.attack) noteAdd('cat', { gi }); if (ACH_Q.length === 1) setTimeout(showAch, 600); } });
 }
 
 function showAch() {
@@ -6711,6 +6781,10 @@ function growthOnGame(g0) {
   G_save(g);
   bump('games');
   const r = ratingOf(G_().games); if (r.ok && r.n >= 40) setMax('rating', Math.round(r.r * 10) / 10); // 判断40回以上で安定してから
+  try { const c0 = G_().cnt || {}, mk = store.get('noteMark', {}) || {}; let ch = false;
+    if (c0.rating && c0.rating > (mk.rating || 0)) { if (mk.rating != null) noteAdd('rating', { v: c0.rating }); mk.rating = c0.rating; ch = true; }
+    if ((c0.streakMax || 0) > (mk.streak || 0)) { if (mk.streak != null && c0.streakMax >= 3) noteAdd('streak', { v: c0.streakMax }); mk.streak = c0.streakMax; ch = true; }
+    if (ch) store.set('noteMark', mk); } catch (e) { }
   if (S.gameHinted || !badgeElig(S.T).game) return; // AIの読みを見たゲーム・条件に満たない卓は、結果のバッジの対象外
   { const dd = S.decisions; if (dd.length >= 3 && dd.every(d => d.secs != null && d.secs <= 10 && d.loss <= 0.05)) bump('snap'); } // 即断即決
   // 速攻：最短の第3巡で上がり、自分の番は毎回10秒以内（7枚を3回で出し切る）
@@ -8542,6 +8616,11 @@ async function homeRankFetch() {
   const [j, h] = await Promise.all([fetch(CLOUD_API + '?a=rankings&uid=' + u).then(r => r.json()), fetch(CLOUD_API + '?a=rankings&ai=0&uid=' + u).then(r => r.json()).catch(() => null)]);
   if (j.ok && j.rankings) { S.homeRank = j.rankings; S.homeRankAt = Date.now(); }
   if (h && h.ok && h.rankings) S.rankHuman = h.rankings;
+  try { const mk = store.get('noteMark', {}) || {}, a = totalRankOf(S.homeRank, null, true), hu = totalRankOf(S.rankHuman, null, true); let ch = false;
+    let told = false; // 上がったときだけ知らせる（人だけを優先。同時に上がったら1件）
+    if (hu && hu !== mk.rankH) { if (mk.rankH != null && hu < mk.rankH) { noteAdd('rank', { lab: '人だけ', v: hu, from: mk.rankH }); told = true; } mk.rankH = hu; ch = true; }
+    if (a && a !== mk.rankA) { if (mk.rankA != null && a < mk.rankA && !told) noteAdd('rank', { lab: 'AI込み', v: a, from: mk.rankA }); mk.rankA = a; ch = true; }
+    if (ch) store.set('noteMark', mk); } catch (e) { }
 }
 // ある人の総合の順位（rid で探す。自分は rankMe）
 function totalRankOf(rk, rid, me) { const t = rk && rk.total; if (!t) return null; const x = [...(t.list || []), ...(t.mine || [])].find(x => me ? rankMe(x) : x.rid === rid); return x ? x.rank : null; }
@@ -8581,7 +8660,7 @@ function homeHTML() {
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${castHTML()}</div>
 </section>
-${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
+${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button></span>
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '公式・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
@@ -11493,6 +11572,9 @@ function act(a, el) {
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
     case 'rv-list': rvListModal(el.dataset.k); break;
+    case 'notes-open': notesOpen(); break;
+    case 'notes-more': S.notesN = (S.notesN || 40) + 40; notesOpen(true); break;
+    case 'note-go': noteGo(+el.dataset.i); break;
     case 'bio-edit': bioEdit(el.dataset.from); break;
     case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;
@@ -11681,6 +11763,7 @@ function oarchHTML() {
 async function onToursLoad() {
   if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
   try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  try { const mk = store.get('noteMark', {}) || {}, soon = mk.soon || {}, now = Date.now() / 1000; let ch = false; (ON.tours || []).forEach(t => { if (t.entered && t.phase === 'entry' && t.startAt - now < 1800 && t.startAt > now && !soon[t.id]) { soon[t.id] = 1; ch = true; noteAdd('soon', { tid: t.id, tname: t.name, at: t.startAt }); } }); if (ch) { mk.soon = soon; store.set('noteMark', mk); } } catch (e) { }
   const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }
 // ---- 大会をひらく ----
