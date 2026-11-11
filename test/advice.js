@@ -25,6 +25,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
     return p;
   };
   const pa = await open('ケン'), pb = await open('ハナ');
+  // マサの手招き：まだ一度も押していなければ、ホームで「アドバイスするで〜」
+  ok(await pa.evaluate(() => !!document.querySelector('.host-r.beckon') && /アドバイス|教えたる|おれや/.test(document.querySelector('.host-r .host-say').textContent)), 'ホームを開くと、マサが「アドバイスするで〜」と手招き');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'masa_beckon.png'), clip: { x: 0, y: 0, width: 390, height: 230 } });
   // 博士：公式ルール（博士の言葉の要約・出典つき）
   await pa.click('[data-act="host-root"]'); await pa.waitForTimeout(400);
   ok(await pa.evaluate(() => /出典/.test(document.querySelector('#modal').innerText) && !!document.querySelector('#modal a[href="https://soogackuma.com/18/"]') && document.querySelectorAll('#modal .rule-dl dt').length >= 6), '博士を押すと、ルールの要約と出典（公式ルールへのリンク）');
@@ -41,6 +44,11 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); const g = KBAPP.G(); for (let i = 0; i < 30; i++) g.games.push({ at: i, k: 'practice', ds: [{ l: 0, c: [], h: 0, r: 3 }], f: 0 }); localStorage.setItem(Object.keys(localStorage).find(k => /\.growth$/.test(k)), JSON.stringify(g)); KBAPP.testAch('win', 8); KBAPP.testAch('three', 40); KBAPP.testAch('games', 30); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); });
   let sawBadge = false; for (let k = 0; k < 8 && !sawBadge; k++) { await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('host-masa'); }); await pa.waitForTimeout(150); sawBadge = await pa.evaluate(() => /まで、あと\d+回|狙い目は/.test(document.querySelector('#modal').innerText)); }
   ok(sawBadge, '進んだ人には、あと少しで取れるバッジを教える');
+  let sawRv = false; for (let k = 0; k < 12 && !sawRv; k++) { await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('host-masa'); }); await pa.waitForTimeout(120); sawRv = await pa.evaluate(() => /ライバルにしてみ/.test(document.querySelector('#modal').innerText)); }
+  ok(sawRv, 'ライバルがいなければ「ライバルにすると張り合いが出るで」の案内');
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
+  ok(await pa.evaluate(() => !document.querySelector('.host-r.beckon')), '一度マサを押したら、手招きはしない（次に開いたときの最初の10秒だけ）');
+  await pa.evaluate(() => KBAPP.act('host-masa'));
   const bn = await pa.evaluate(() => { const e = document.querySelector('#modal .adv-b'); return e && e.textContent; });
   await pa.click('#modal .adv-b'); await pa.waitForTimeout(400);
   ok(!!bn && await pa.evaluate(n => !!document.querySelector('#modal .bdg-talk') && document.querySelector('#modal .bdg-big b').textContent === n.replace(/[「」]/g, ''), bn), 'アドバイスのバッジ名を押すと、そのバッジの詳細が出る：' + bn);

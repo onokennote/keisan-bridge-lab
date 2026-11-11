@@ -523,6 +523,15 @@ function advModal(html) {
   modal(html);
   document.querySelectorAll('#modal [data-advb]').forEach(el => el.onclick = () => { const [k, i] = el.dataset.advb.split(':'); S.advBack = () => advModal(html); KB.sfx('select'); badgeTalk(k, +i); });
 }
+// ホームを開いたとき、マサが「アドバイスするで〜」と手招き（まだ一度も押していない人はずっと、押したことのある人は開いた最初の1回だけ・10秒）
+const R0 = a => a[(Date.now() / 60000 | 0) % a.length];
+function masaBeckon() {
+  let used = false; try { used = localStorage.getItem('kb.masaUsed') === '1'; } catch (e) { }
+  if (!used) return true;
+  if (S.masaBeckoned) return false;
+  if (!S.masaBeckonAt) { S.masaBeckonAt = Date.now(); setTimeout(() => { S.masaBeckoned = true; const b = $('.host-r.beckon'); if (b) { b.classList.remove('beckon'); const say = b.querySelector('.host-say'); if (say) say.textContent = 'ほな、いこか！'; } }, 10000); }
+  return Date.now() - S.masaBeckonAt < 10000;
+}
 function masaAdvice(more) {
   const g = G_(), nG = (g.games || []).length, nm = san(S.settings.name || 'あなた'), r = ratingOf(g.games || []), R = a => a[(Math.random() * a.length) | 0];
   const tips = [], add = (w, text, btn, bs) => tips.push({ w: w * (0.6 + Math.random() * 0.8), text, btn, bs });
@@ -551,6 +560,7 @@ function masaAdvice(more) {
   // 大会
   if (nG >= 10 && !c.qualify) add(3, '練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。', { go: 'setup-tour', l: '大会へ' });
   if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' }, [advB('qualify_strong', 0)]);
+  if (CLOUD_ON && nG >= 3 && !rivalsOf().length) add(4, `${nm}、ライバルはまだおらんな？ランキングで実力が近い人をライバルにしてみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！`, { go: 'ranking', l: 'ランキングで選ぶ' });
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
   if (openT.length) add(4, `いま「${openT[0].name}」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！`, null);
   // 重みつきで3つ（押すたびに少し変わる）
@@ -2895,7 +2905,7 @@ function homeHTML() {
   <div class="title-stage">
     <button class="host host-l host-btn" data-act="host-root" aria-label="ルート博士：公式ルールを見る"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span><span class="host-tag">📖 ルール</span></button>
     <div class="fan" aria-hidden="true">${fan}</div>
-    <button class="host host-r host-btn" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">ほな、いこか！</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
+    <button class="host host-r host-btn ${masaBeckon() ? 'beckon' : ''}" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">${masaBeckon() ? R0(['アドバイスするで〜！', '押してみ！教えたる！', '迷ったらおれや！']) : 'ほな、いこか！'}</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
   <div class="logo">計算ブリッジ<small>作戦研究所</small></div>
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
@@ -5807,7 +5817,7 @@ function act(a, el) {
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
-    case 'host-masa': masaAdvice(); break;
+    case 'host-masa': try { localStorage.setItem('kb.masaUsed', '1'); } catch (e) { } S.masaBeckoned = true; masaAdvice(); break;
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
