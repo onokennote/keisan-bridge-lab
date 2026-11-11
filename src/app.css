@@ -2234,3 +2234,6 @@ body.rewinding #home-fab{display:none}
 /* 上がりの帯のボタン：「結果を見る」を端に（スマホは左端、PCは右端） */
 .ws-btns{justify-content:flex-start}
 @media (min-width:900px){.ws-btns{flex-direction:row-reverse;justify-content:flex-start}}
+.rvc i{font-style:normal;font-weight:900;color:var(--trim);margin-right:3px}
+.rvc small{margin-left:3px;font-size:10px;color:var(--muted)}
+.rv-chip.mu{background:#d4a017;color:#2a1c05}.rv-chip.in{background:#555;color:#fff}
