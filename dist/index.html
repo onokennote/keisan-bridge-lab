@@ -2234,10 +2234,11 @@ body.rewinding #home-fab{display:none}
 @keyframes beckonAv{0%,100%{box-shadow:0 0 0 0 rgba(255,179,71,.0),0 4px 12px rgba(0,0,0,.45)}50%{box-shadow:0 0 0 6px rgba(255,179,71,.45),0 4px 12px rgba(0,0,0,.45)}}
 @keyframes beckonTag{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @media (prefers-reduced-motion:reduce){.host-r.beckon .host-say,.host-r.beckon .host-av,.host-r.beckon .host-tag{animation:none}}
+.atk-undo-btn{align-self:flex-end;font-size:12px;opacity:.8}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='23c2f9ea35';
+window.KB_BUILD='6b88a4c21d';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5774,7 +5775,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
+const PROFILE_KEYS = { atkUndo: 1, atkUndoLegacy: 1, notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -7990,12 +7991,14 @@ function attackFinish(quit) {
   A.over = true; ACH_Q.length = 0; document.querySelectorAll('.ach-toast,.toast').forEach(e => e.remove()); clearInterval(S.attackTimer); clearTimeout(S.timer); (S.opTimers || []).forEach(clearTimeout);
   closeModal();
   const bp = atkBP(), badgeBp = bpTotal(A.g), bonus = A.bonus || 0, ranks = (A.ranks || []).slice(), nb = Object.keys(A.g.ach).filter(k => !k.startsWith('cat:')).length;
-  const bests = attackBests(), best = bests[ATTACK_MIN] || null, isBest = !best || bp > best.bp;
+  const bests = attackBests(), best = bests[ATTACK_MIN] || null, isBest = !best || bp > best.bp, bestsBefore = JSON.parse(JSON.stringify(bests));
   const rec = { bp, badges: nb, at: Date.now(), ach: Object.keys(A.g.ach), sets: A.sets, games: A.g.games.length, min: ATTACK_MIN, badgeBp, bonus, ranks };
   if (isBest) { bests[ATTACK_MIN] = rec; store.set('attackBest', bests); }
   S.settings.speed = A.saved.speed; S.settings.judge = A.saved.judge; S.settings.commentary = A.saved.commentary;
   S.attackResult = Object.assign({ isBest, prev: best }, rec);
   S.attack = null; S.game = null; S.T = null;
+  // 取り消せるように、記録を変える前の状態を控える（直前の1回だけ）
+  try { const g0 = G_(); store.set('atkUndo', { at: rec.at, bp, best: bestsBefore, cnt: { atk_done: g0.cnt.atk_done || 0, atk_bp: g0.cnt.atk_bp || 0, atk_badges: g0.cnt.atk_badges || 0 }, ach: Object.keys(g0.ach).filter(k => /^atk_|^cat:/.test(k)) }); } catch (e) { }
   // ふだんの成長記録に、アタックのバッジを記録（途中でやめたときは数えない）
   if (!quit) { const gr = G_(); gr.cnt.atk_done = (gr.cnt.atk_done || 0) + 1; gr.cnt.atk_bp = Math.max(gr.cnt.atk_bp || 0, bp); gr.cnt.atk_badges = Math.max(gr.cnt.atk_badges || 0, nb); ['atk_done', 'atk_bp', 'atk_badges'].forEach(k => checkAch(gr, k)); G_save(gr); }
   S.attackResult.quit = !!quit;
@@ -8058,12 +8061,39 @@ function whistle(title, sub, then, o) {
   if (o.end) el.querySelector('[data-x="next"]').onclick = () => { KB.sfx('confirm'); fin(); };
   else setTimeout(fin, 2500);
 }
+// 直前のバッジアタックを取り消す（記録を変える前に控えた状態に戻す。前の版で記録したアタックは、自己ベストを入れ直して取り消す）
+const ATK_LEGACY_UNTIL = Date.UTC(2026, 10, 18); // 前の版で記録したアタックの取り消しは、この日まで（1回だけ）
+function atkUndoable() { return !!store.get('atkUndo', null) || (Date.now() < ATK_LEGACY_UNTIL && (G_().cnt.atk_done || 0) > 0 && !store.get('atkUndoLegacy', null)); }
+function atkFixAch(gr) { ['atk_done', 'atk_bp', 'atk_badges'].forEach(k => { const a = ACH.find(x => x[0] === k); a[2].forEach(t => { if ((gr.cnt[k] || 0) < t) delete gr.ach[k + ':' + t]; }); }); ACH_GROUPS.forEach((_, gi) => { if (gr.ach['cat:' + gi] && !catProgress(gr, gi).done) delete gr.ach['cat:' + gi]; }); }
+function attackUndoAsk() {
+  const u = store.get('atkUndo', null);
+  if (u) { modal(`<div class="stack"><div class="commentary"><div class="cm-av">${KB.casterSVG('masa', 'worried')}</div><div class="cm-body"><span class="cm-name">実況・ナニワのマサ</span><span class="cm-text">${new Date(u.at).toLocaleString('ja-JP')}のバッジアタック（${u.bp}BP）を取り消すで？完走の回数・自己ベスト・そのアタックで取ったアタックのバッジが、アタックの前に戻る。取り消したら元には戻せへんで！</span></div></div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="attack-undo-go">取り消す</button></div></div>`); return; }
+  const b = attackBests()[ATTACK_MIN];
+  modal(`<div class="stack atk-undo"><div class="commentary"><div class="cm-av">${KB.casterSVG('masa', 'worried')}</div><div class="cm-body"><span class="cm-name">実況・ナニワのマサ</span><span class="cm-text">前の版で記録したアタックやから、取り消す前の記録が残ってへんのや。いまの自己ベストは${b ? `${b.bp}BP（${new Date(b.at).toLocaleDateString('ja-JP')}）` : 'なし'}。取り消したいアタックが自己ベストになっとったら、その前の自己ベストを入れてな（分からんかったら空のままでええ）。</span></div></div>
+    <label class="su-row col"><b>取り消すアタックは自己ベストになった？</b><div class="su-seg"><button class="on" data-aub="1">なった</button><button data-aub="0">なっていない</button></div></label>
+    <div class="row au-prev" style="gap:8px;flex-wrap:wrap"><label class="small">前の自己ベスト <input id="au-bp" class="su-in" type="number" min="0" step="5" style="width:90px"> BP</label><label class="small">バッジ <input id="au-nb" class="su-in" type="number" min="0" style="width:70px"> 個</label></div>
+    <p class="small muted" style="margin:0">完走の回数は1回へらします。取り消しはこの1回だけです。</p>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="attack-undo-legacy">取り消す</button></div></div>`);
+  document.querySelectorAll('#modal [data-aub]').forEach(x => x.onclick = () => { document.querySelectorAll('#modal [data-aub]').forEach(y => y.classList.toggle('on', y === x)); const pv = $('#modal .au-prev'); if (pv) pv.hidden = x.dataset.aub === '0'; });
+}
+function attackUndoGo(legacy) {
+  const gr = G_(), bests = attackBests();
+  if (!legacy) { const u = store.get('atkUndo', null); if (!u) return; store.set('attackBest', u.best || {}); Object.assign(gr.cnt, u.cnt); Object.keys(gr.ach).filter(k => /^atk_|^cat:/.test(k) && !u.ach.includes(k)).forEach(k => delete gr.ach[k]); store.del('atkUndo'); }
+  else {
+    const was = ($('#modal [data-aub].on') || {}).dataset ? $('#modal [data-aub].on').dataset.aub === '1' : true, pb = +(($('#au-bp') || {}).value || 0), pn = +(($('#au-nb') || {}).value || 0);
+    gr.cnt.atk_done = Math.max(0, (gr.cnt.atk_done || 0) - 1);
+    if (was) { if (pb > 0) { bests[ATTACK_MIN] = { bp: Math.round(pb / 5) * 5, badges: pn, at: (bests[ATTACK_MIN] || {}).at - 1 || Date.now(), ach: [] }; } else delete bests[ATTACK_MIN]; store.set('attackBest', bests); gr.cnt.atk_bp = pb > 0 ? Math.round(pb / 5) * 5 : 0; gr.cnt.atk_badges = Math.min(gr.cnt.atk_badges || 0, pn); }
+    store.set('atkUndoLegacy', Date.now());
+  }
+  atkFixAch(gr); G_save(gr); closeModal(); toast('直前のバッジアタックを取り消しました'); KB.sfx('rewind'); go('home');
+}
 function attackCardHTML() {
   const best = attackBests()[ATTACK_MIN];
   return `<div class="mode atk-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">⏱️</span><div><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2></div></div>${modeBadgeRows(MB_ATK, true)}
     <p class="small muted" style="margin:0">15分間で、どれだけバッジ（BP）を取れるかの勝負。4人卓・相手まんべんなく・1セット3ゲームを、時間いっぱいくり返します。セット1位は+30BP・2位は+10BPの順位ボーナス。速さ・判定・解説（掛け合い）は固定。AIの読みとゲームごとの総括はありません。</p>
     ${best ? `<div class="mode-rec row" style="align-items:center;gap:8px"><p style="margin:0;flex:1">自己ベスト：<b class="atk-bp">${best.bp} BP</b>（バッジ${best.badges}個・${new Date(best.at).toLocaleDateString('ja-JP')}）</p><button class="btn sm" data-act="attack-best">ベスト記録を見る</button></div>` : ''}
-    <button class="btn primary" data-act="attack-start">バッジアタック開始</button></div>`;
+    <button class="btn primary" data-act="attack-start">バッジアタック開始</button>${atkUndoable() ? '<button class="btn sm ghost atk-undo-btn" data-act="attack-undo">↩ 直前のアタックを取り消す</button>' : ''}</div>`;
 }
 // ホーム：バッジアタックの最高記録をそのまま表示
 function attackBadgeList(ach, size) {
@@ -8101,7 +8131,7 @@ function attackResultHTML() {
     <p style="margin:0">${R.isBest ? '<b class="ok">自己ベスト更新！</b>' : `自己ベストは ${R.prev ? R.prev.bp : 0} BP`}</p>
   </div>
   <div class="panel stack"><div class="lbl">このアタックで取ったバッジ</div><div class="bdg-grid">${cats}${list || '<p class="small muted">バッジはありませんでした</p>'}</div></div>
-  <div class="row" style="justify-content:center"><button class="btn primary" data-act="attack-start">もう一度挑戦</button></div>`;
+  <div class="row" style="justify-content:center;gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="attack-start">もう一度挑戦</button>${store.get('atkUndo', null) ? '<button class="btn ghost" data-act="attack-undo">↩ このアタックを取り消す</button>' : ''}</div>`;
 }
 
 // ---------- プレイヤー（名前ごとに記録を分ける）・書き出しと読み込み ----------
@@ -8847,7 +8877,7 @@ function suTap(d) {
     case 'ptspre': { const p = PTS_PRE.find(x => x[0] === v); if (p) c.points = p[2].slice(); break; }
     case 'pt': { const [i, dv] = String(v).split(':').map(Number), a = [...Array(Math.max(5, c.points.length))].map((_, k) => c.points[k] || 0); a[i] = Math.max(0, Math.min(20, a[i] + dv)); c.points = a; break; }
     case 'grp': S.suOpen = S.suOpen || {}; S.suOpen[v] = !S.suOpen[v]; break;
-    case 'speed': st.speed = v; save(); break;
+    case 'speed': if (S.attack) break; st.speed = v; save(); break;
     case 'judge': st.judge = v; st.judgeSet = true; save(); break;
     case 'cm': st.commentary = v; save(); break;
     case 'snd': setSnd(v); break;
@@ -9259,7 +9289,7 @@ function whereText() {
 }
 function gameHTML() {
   return `<div class="topbar"><div class="where">${S.tiebreak ? whereText() : progTopHTML(S.T)}</div>${S.attack ? `<span class="atk-box"><span class="atk-clock" title="残り時間">${fmtClock(S.attack.end - Date.now())}</span><small class="atk-now">${atkBP()} BP</small></span>` : ''}
-  <div class="row"><button class="btn sm ghost snd-btn ic-btn" data-act="sound" title="${esc(sndLabel())}（押すたびに切り替え）" aria-label="${esc(sndLabel())}">${sndIcon()}</button><button class="btn sm ghost spd-btn ic-btn" data-act="speed-cycle" title="AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}（押すたびに切り替え）" aria-label="AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
+  <div class="row"><button class="btn sm ghost snd-btn ic-btn" data-act="sound" title="${esc(sndLabel())}（押すたびに切り替え）" aria-label="${esc(sndLabel())}">${sndIcon()}</button><button class="btn sm ghost spd-btn ic-btn" data-act="speed-cycle" ${S.attack ? 'disabled' : ''} title="${S.attack ? 'バッジアタック中は速さが固定です' : `AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}（押すたびに切り替え）`}" aria-label="AIの手番の速さ：${SPD_JA[S.settings.speed] || 'ふつう'}">${spdLabel()}</button><button class="btn sm" data-act="standings">順位表</button>${S.spectate ? '<button class="btn sm ghost" data-act="watch-quit">観戦をやめる</button>' : '<button class="btn sm ghost" data-act="quit">中断</button>'}</div></div>
   <div id="tablewrap"></div>
   <div class="under"><div class="panel" id="unseenpanel"></div><div class="stack under-main"><div class="panel" id="hintpanel"></div><div class="panel" id="prevpanel" hidden></div></div><div class="panel stack" id="sidepanel"></div></div>`;
 }
@@ -11528,7 +11558,7 @@ function act(a, el) {
     case 'draw-yes': humanDraw(true); break;
     case 'draw-no': S.confirmDraw = false; renderGame(); break;
     case 'clear': S.sel = []; renderGame(); break;
-    case 'speed-cycle': { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); b.title = b.ariaLabel = 'AIの手番の速さ：' + SPD_JA[k]; }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
+    case 'speed-cycle': if (S.attack) { toast('バッジアタック中は速さが固定です'); break; } { const k = SPD_ORDER[(SPD_ORDER.indexOf(S.settings.speed) + 1) % SPD_ORDER.length]; S.settings.speed = k; store.set('settings', S.settings); document.querySelectorAll('.spd-btn').forEach(b => { b.textContent = spdLabel(); b.title = b.ariaLabel = 'AIの手番の速さ：' + SPD_JA[k]; }); toast('AIの手番の速さ：' + SPD_JA[k]); break; }
     case 'sound': { const ks = Object.keys(KB.SFX_LEVELS); setSnd(ks[(ks.indexOf(S.settings.sndLv) + 1) % ks.length]); break; }
     case 'toggle-unseen': S.showUnseen = !S.showUnseen; renderSide(); break;
     case 'hint': computeHint(); break;
@@ -11600,6 +11630,9 @@ function act(a, el) {
     case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;
     case 'attack-best': attackBestModal(); break;
+    case 'attack-undo': attackUndoAsk(); break;
+    case 'attack-undo-go': attackUndoGo(false); break;
+    case 'attack-undo-legacy': attackUndoGo(true); break;
     case 'attack-next': attackNextSetGo(); break;
     case 'attack-abort': attackFinish(true); break;
     case 'attack-start': closeModal(); attackStart(el && el.dataset.min); break;
