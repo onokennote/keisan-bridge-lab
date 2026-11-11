@@ -2157,3 +2157,34 @@ body.rewinding #home-fab{display:none}
 .on-st.live{background:var(--bad);color:#fff;font-weight:800}
 @keyframes onPulse{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.on-st.open::before{animation:none}}
+/* ホームの博士・マサ：アイコンとボタンが一体 */
+.host-btn{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.host-btn .host-av{transition:transform .15s,box-shadow .15s}
+.host-btn:hover .host-av,.host-btn:focus-visible .host-av{transform:translateY(-2px);box-shadow:0 0 0 2px var(--trim),0 6px 14px rgba(0,0,0,.5)}
+.host-btn:active .host-av{transform:scale(.95)}
+.host-tag{margin-top:2px;font-size:10px;font-weight:800;white-space:nowrap;background:var(--trim);color:#2a1c05;border-radius:999px;padding:2px 8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.host-r .host-tag{background:#ffb347}
+.host-m .host-mh{display:flex;gap:10px;align-items:center}
+.host-m .host-mh .cm-av{width:52px;height:52px;flex:0 0 52px;border-radius:14px;overflow:hidden}
+.host-m .host-mh .cm-av svg{width:100%;height:100%}
+.host-m .host-mh small{display:block;color:var(--trim);font-weight:800;font-size:11px}
+.host-m .host-mh b{font-size:15px;line-height:1.5}
+.rule-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;font-size:14px;line-height:1.6}
+.rule-dl dt{font-weight:800;color:var(--accent);white-space:nowrap}
+.rule-dl dd{margin:0}
+.rule-src{margin:0;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.rule-src a{color:var(--trim)}
+.adv-list{display:flex;flex-direction:column;gap:8px}
+.adv{display:flex;gap:10px;align-items:flex-start;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:12px;padding:10px}
+.adv-n{flex:0 0 24px;height:24px;border-radius:50%;background:#ffb347;color:#2a1c05;font-weight:900;display:flex;align-items:center;justify-content:center}
+.adv p{margin:0 0 6px;font-size:14px;line-height:1.6}
+.rv-pick{display:flex;flex-wrap:wrap;gap:8px}
+.rv-cmp{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+.rv-h,.rv-r{display:grid;grid-template-columns:7em 1fr 1fr;gap:6px;padding:6px 10px;align-items:center}
+.rv-h{background:rgba(0,0,0,.3);font-size:12px}.rv-h b{text-align:center}
+.rv-r:nth-child(odd){background:rgba(255,255,255,.03)}
+.rv-r span{color:var(--muted);font-size:12px}.rv-r b{text-align:center;font-weight:700}
+.rv-r b.win{color:var(--good)}
+.rv-chip{font-style:normal;margin-left:4px;font-size:12px;background:#c0392b;color:#fff;border-radius:6px;padding:0 4px}
+.pv-rival{margin-top:8px;font-size:13px;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);border-radius:10px;padding:6px 10px}
+@media (max-width:420px){.host-tag{font-size:9px;padding:2px 6px}}

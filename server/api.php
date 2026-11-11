@@ -41,6 +41,7 @@ function db(): PDO {
   // プレイヤーごとの記録と引き継ぎコード（端末まるごとではなく、プレイヤー単位で別の端末に入れる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS players (uid TEXT NOT NULL, pid TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, code TEXT NOT NULL, data TEXT, data_at INTEGER DEFAULT 0, PRIMARY KEY (uid, pid))');
   // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（引き継ぎコードで別の端末に入れたプレイヤー用）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
@@ -651,6 +652,22 @@ try {
         $out[] = $vw;
       }
       out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid']]);
+    }
+    case 'rival_set': { // ライバルに指定する／外す（rid はランキングの人。1人5人まで）
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $rid = preg_replace('/[^a-f0-9]/', '', (string)($b['rid'] ?? ''));
+      if (strlen($rid) !== 16) fail('相手が見つかりません');
+      if ($rid === rid($u['uid'], $pid)) fail('自分はライバルにできません');
+      if (!empty($b['on'])) {
+        $n = db()->prepare('SELECT COUNT(*) FROM rivals WHERE uid = ? AND pid = ?'); $n->execute([$u['uid'], $pid]);
+        if ((int)$n->fetchColumn() >= 5) { $q = db()->prepare('SELECT 1 FROM rivals WHERE uid = ? AND pid = ? AND rid = ?'); $q->execute([$u['uid'], $pid, $rid]); if (!$q->fetch()) fail('ライバルは5人までです'); }
+        db()->prepare('INSERT OR REPLACE INTO rivals (uid, pid, rid, at) VALUES (?, ?, ?, ?)')->execute([$u['uid'], $pid, $rid, time()]);
+      } else db()->prepare('DELETE FROM rivals WHERE uid = ? AND pid = ? AND rid = ?')->execute([$u['uid'], $pid, $rid]);
+      out(['ok' => true]);
+    }
+    case 'rival_by': { // 自分（このプレイヤー）をライバルに指定している人の名前（ランキングに載っている人だけ）
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $me = rid($u['uid'], $pid);
+      $q = db()->prepare('SELECT r.name FROM rivals v JOIN ranks r ON r.uid = v.uid AND r.pid = v.pid WHERE v.rid = ? AND r.shown = 1 ORDER BY v.at DESC LIMIT 30'); $q->execute([$me]);
+      out(['ok' => true, 'names' => array_column($q->fetchAll(), 'name')]);
     }
     case 'on_people': { // 招待する人の候補：q があれば名前でさがす（ランキングに載っている人。AIと自分は出さない）、なければ最近の大会でいっしょだった人・前に招待した人
       $b = body(); $u = authUser($b); $kn = fn($x) => obNorm(mb_convert_kana((string)$x, 'C')); $q = $kn(mb_substr((string)($b['q'] ?? ''), 0, 10)); // さがすときは、ひらがなとカタカナを同じとみなす
