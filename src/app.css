@@ -2231,3 +2231,4 @@ body.rewinding #home-fab{display:none}
 @keyframes beckonAv{0%,100%{box-shadow:0 0 0 0 rgba(255,179,71,.0),0 4px 12px rgba(0,0,0,.45)}50%{box-shadow:0 0 0 6px rgba(255,179,71,.45),0 4px 12px rgba(0,0,0,.45)}}
 @keyframes beckonTag{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @media (prefers-reduced-motion:reduce){.host-r.beckon .host-say,.host-r.beckon .host-av,.host-r.beckon .host-tag{animation:none}}
+.atk-undo-btn{align-self:flex-end;font-size:12px;opacity:.8}
