@@ -2245,7 +2245,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='92dce34261';
+window.KB_BUILD='e67b6ef757';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6420,7 +6420,7 @@ function rvListModal(key) {
   const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
   const one = d.rivals.filter(x => !isMu(x)), oneBy = d.by.filter(x => !isMu(x)), both = d.rivals.filter(isMu);
   const A = sec(`→ ${esc(san(d.name))}がライバル視している`, one, 'いません'), B = sec(`← ${esc(san(d.name))}をライバル視している`, oneBy, 'いません'), M = sec('⇄ 宿敵（お互いにライバル視）', both, 'まだいません');
-  modal(`<div class="stack rv-lm">${tab === 'm' ? M + A + B : tab === 'b' ? B + M + A : A + M + B}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。ランキングの人のプロフィールで「→ ライバル視する」を押すと登録できます（5人まで）。自分をライバル視している人をライバル視し返すと「⇄ 宿敵」になります。</p>
+  modal(`<div class="stack rv-lm">${tab === 'm' ? M : tab === 'b' ? B : A}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 async function rivalToggle(rid, name) {
