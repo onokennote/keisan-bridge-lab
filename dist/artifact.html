@@ -2206,10 +2206,13 @@ body.rewinding #home-fab{display:none}
 .rv-li{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
 .rv-li span{color:var(--trim);font-weight:800}
 .rvc{white-space:nowrap}.pb-rv .pv-rvc{gap:4px}.pb-rv .rvc{font-size:11px;padding:1px 7px}.pb-rv .rvc b{font-size:12px}
+.rvc.mu{border-color:rgba(240,190,60,.6)}
+.rv-nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rv-mu{font-style:normal;font-size:11px;background:rgba(240,190,60,.2);color:var(--trim);border-radius:999px;padding:1px 7px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='b8e6297256';
+window.KB_BUILD='1220e69288';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6302,7 +6305,7 @@ function masaAdvice(more) {
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
 const rivalsOf = () => store.get('rivals', []) || [];
-// ライバル（自分が指定した人）・挑戦者（自分をライバルに指定した人）の数。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
+// ライバル（自分が指定した人）・ライバラー（自分をライバルに指定した人）の数。お互いに指定していれば「ライバルバック」。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
 const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
 async function rvByFetch(force) {
   if (!force && Date.now() - (S.rvByAt || 0) < 60000) return; S.rvByAt = Date.now();
@@ -6311,15 +6314,17 @@ async function rvByFetch(force) {
 }
 function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
-  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r"><b>${rivals.length}</b> ⚔ ライバル</button><button class="rvc" data-act="rv-list" data-k="${id}:b"><b>${by.length}</b> 挑戦者</button></span>`;
+  const mu = rivals.filter(x => x.rid && by.some(y => y.rid === x.rid)).length;
+  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r"><b>${rivals.length}</b> ⚔ ライバル</button><button class="rvc" data-act="rv-list" data-k="${id}:b"><b>${by.length}</b> ライバラー</button>${mu ? `<button class="rvc mu" data-act="rv-list" data-k="${id}:m"><b>${mu}</b> 🔁 ライバルバック</button>` : ''}</span>`;
 }
 function rvListModal(key) {
   const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;
   const back = $('#modal') ? $('#modal .modal').innerHTML : null;
-  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}">${esc(x.name)}<span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
+  const isMu = x => x.rid && d.rivals.some(a => a.rid === x.rid) && d.by.some(b => b.rid === x.rid);
+  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}"><span class="rv-nm">${esc(x.name)}${isMu(x) ? '<em class="rv-mu">🔁 ライバルバック</em>' : ''}</span><span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
   const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
-  const A = sec(`⚔ ${esc(san(d.name))}のライバル`, d.rivals, 'まだだれもライバルにしていません'), B = sec(`${esc(san(d.name))}をライバルにしている人（挑戦者）`, d.by, 'まだいません');
-  modal(`<div class="stack rv-lm">${tab === 'b' ? B + A : A + B}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。ライバルはランキングの人のプロフィールから「⚔ ライバルにする」で登録できます（5人まで）。</p>
+  const A = sec(`⚔ ${esc(san(d.name))}のライバル`, d.rivals, 'まだだれもライバルにしていません'), B = sec(`ライバラー（${esc(san(d.name))}をライバルにしている人）`, d.by, 'まだいません'), M = sec('🔁 ライバルバック（お互いにライバル）', d.rivals.filter(isMu), 'まだいません');
+  modal(`<div class="stack rv-lm">${tab === 'm' ? M + A + B : tab === 'b' ? B + A : A + B}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。ライバルはランキングの人のプロフィールから「⚔ ライバルにする」で登録できます（5人まで）。自分をライバルにしている人をライバルにし返すと「ライバルバック」です。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 async function rivalToggle(rid, name) {
@@ -6328,11 +6333,11 @@ async function rivalToggle(rid, name) {
   const l = PID && plLink(PID);
   try { if (l) await cloudReq('rival_set', { token: l.token, pid: PID, rid, on: on ? 1 : 0 }); } catch (e) { toast(e.message || 'できませんでした'); return; }
   store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid));
-  toast(on ? `⚔ ${name}をライバルにしました` : `${name}をライバルから外しました`); KB.sfx('select');
+  toast(on ? (rvByMine().some(x => x.rid === rid) ? `🔁 ${name}とライバルバック！お互いにライバルです` : `⚔ ${name}をライバルにしました`) : `${name}をライバルから外しました`); KB.sfx('select');
   const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
   if (S.view === 'ranking') render();
 }
-const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバルから外す' : '⚔ ライバルにする'}</button>`; };
+const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid), back = rvByMine().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバルから外す' : back ? '🔁 ライバルバックする' : '⚔ ライバルにする'}</button>`; };
 function rivalPick() {
   const L = rivalsOf();
   modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'smug')}</span><div><small>実況・ナニワのマサ</small><b>${L.length ? 'どのライバルと比べる？' : 'ライバルがまだおらんな！'}</b></div></div>

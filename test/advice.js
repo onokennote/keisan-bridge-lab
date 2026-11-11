@@ -64,23 +64,35 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const cmp = await pa.evaluate(() => document.querySelector('#modal').innerText);
   ok(/BP/.test(cmp) && /推定実力/.test(cmp) && /逆転|差|リード/.test(cmp), 'ライバルと比較：表とかんたんな対策が出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rival_cmp.png') });
-  // ライバル・挑戦者（フォロー・フォロワーのように）：ホーム・自分のプロフィール・ランキングからのプロフィール
+  // ライバル・ライバラー（フォロー・フォロワーのように）：ホーム・自分のプロフィール・ランキングからのプロフィール
   await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rvByAt = 0; KBAPP.go('home'); }); await pb.waitForTimeout(1500);
-  ok(await pb.evaluate(() => /1\s*挑戦者/.test((document.querySelector('#pb-rv') || {}).textContent || '')), 'ホームのプロフィールに「挑戦者 1」（ハナをライバルにしている人の数）');
+  ok(await pb.evaluate(() => /1\s*ライバラー/.test((document.querySelector('#pb-rv') || {}).textContent || '')), 'ホームのプロフィールに「ライバラー 1」（ハナをライバルにしている人の数）');
   await (await pb.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'rival_pb.png') }).catch(() => { });
   await pb.click('#pb-rv [data-k$=":b"]'); await pb.waitForTimeout(300);
   ok(await pb.evaluate(() => [...document.querySelectorAll('#modal .rv-li')].some(e => /ケン/.test(e.textContent))), '押すと一覧に「ケン」（名前を押すとプロフィール）');
   await pb.screenshot({ path: path.join(__dirname, 'out', 'rival_list.png') });
   await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); const el = document.createElement('div'); el.dataset.me = '1'; KBAPP.act('rank-card', el); }); await pb.waitForTimeout(2000);
-  ok(await pb.evaluate(() => /1\s*挑戦者/.test((document.querySelector('#modal .pv-rvc') || {}).textContent || '') && !document.querySelector('#modal .pv-rival')), '自分のプロフィールにも「挑戦者 1」（特別な一文はなし）');
-  // ケンがランキングからハナのプロフィールを見ると、ハナの挑戦者にケン
+  ok(await pb.evaluate(() => /1\s*ライバラー/.test((document.querySelector('#modal .pv-rvc') || {}).textContent || '') && !document.querySelector('#modal .pv-rival')), '自分のプロフィールにも「ライバラー 1」（特別な一文はなし）');
+  // ケンがランキングからハナのプロフィールを見ると、ハナのライバラーにケン
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
   await pa.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ハナ/.test(r.innerText)).click()); await pa.waitForTimeout(1800);
-  ok(await pa.evaluate(() => /1\s*挑戦者/.test((document.querySelector('#modal .pv-rvc') || {}).textContent || '')), 'ランキングから開いたほかの人のプロフィールにも、ライバル・挑戦者の数');
+  ok(await pa.evaluate(() => /1\s*ライバラー/.test((document.querySelector('#modal .pv-rvc') || {}).textContent || '')), 'ランキングから開いたほかの人のプロフィールにも、ライバル・ライバラーの数');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rival_prof.png') });
   await pa.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)) || null);
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(800);
   ok(await pa.evaluate(() => /1\s*⚔ ライバル/.test((document.querySelector('#pb-rv') || {}).textContent || '')), 'ケンのホームには「ライバル 1」');
+  // ハナがケンをライバルにし返す →「ライバルバック」
+  await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pb.waitForTimeout(1800);
+  await pb.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ケン/.test(r.innerText)).click()); await pb.waitForTimeout(1800);
+  ok(await pb.evaluate(() => /ライバルバックする/.test((document.querySelector('#modal [data-act="rival-toggle"]') || {}).textContent || '')), '自分をライバルにしている人のプロフィールでは「🔁 ライバルバックする」');
+  await pb.click('#modal [data-act="rival-toggle"]'); await pb.waitForTimeout(800);
+  await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pb.waitForTimeout(800);
+  ok(await pb.evaluate(() => /1\s*🔁 ライバルバック/.test((document.querySelector('#pb-rv') || {}).textContent || '')), 'お互いにライバルなら「ライバルバック 1」');
+  await pb.click('#pb-rv [data-k$=":m"]'); await pb.waitForTimeout(300);
+  ok(await pb.evaluate(() => [...document.querySelectorAll('#modal .rv-li')].some(e => /ケン/.test(e.textContent) && e.querySelector('.rv-mu'))), '一覧で、お互いの人に「🔁 ライバルバック」の印');
+  await pb.screenshot({ path: path.join(__dirname, 'out', 'rival_back.png') });
+  await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
+  await (await pb.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'rival_pb.png') }).catch(() => { });
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
