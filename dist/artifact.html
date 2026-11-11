@@ -2212,7 +2212,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='1220e69288';
+window.KB_BUILD='c3c64c1995';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6335,6 +6335,9 @@ async function rivalToggle(rid, name) {
   store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid));
   toast(on ? (rvByMine().some(x => x.rid === rid) ? `🔁 ${name}とライバルバック！お互いにライバルです` : `⚔ ${name}をライバルにしました`) : `${name}をライバルから外しました`); KB.sfx('select');
   const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
+  // 開いているプロフィールの「ライバラー」の数も新しくする
+  if ($('#modal .pv-rvc')) fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid)).then(r => r.json()).then(j => { const bx = $('#modal .pv-rvc'); if (!j.ok || !bx) return; bx.outerHTML = rvcHTML(j.card.rivals || [], j.card.rivalBy || [], j.card.name || name); bindModalActs(); }).catch(() => { });
+  S.rvByAt = 0; // ホームの数も読み直す
   if (S.view === 'ranking') render();
 }
 const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid), back = rvByMine().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバルから外す' : back ? '🔁 ライバルバックする' : '⚔ ライバルにする'}</button>`; };
