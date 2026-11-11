@@ -2138,3 +2138,22 @@ body.rewinding #home-fab{display:none}
 .on-stamps{display:flex;flex-wrap:wrap;gap:6px}
 .on-chat-log{display:flex;flex-direction:column;gap:3px;max-height:160px;overflow-y:auto;background:rgba(0,0,0,.25);border-radius:8px;padding:6px 8px;font-size:13px}
 .on-chat-log b{color:var(--trim);margin-right:6px}
+.on-sgrp{display:flex;flex-direction:column;gap:4px}
+.on-stamps .btn.emo{font-size:20px;padding:2px 10px}
+.on-chat-m{max-height:80vh;overflow-y:auto}
+.modal-bg.still,.modal-bg.still .modal{animation:none}
+/* ホームの大会一覧：目につくように（状態の色の帯・アイコン・押せる印） */
+.on-trow{display:grid!important;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;position:relative;overflow:hidden;padding:10px 10px 10px 14px;background:linear-gradient(90deg,rgba(123,47,242,.16),rgba(255,255,255,.04) 60%);border-color:rgba(160,110,255,.45)}
+.on-trow::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--trim)}
+.on-trow.k-open::before{background:var(--good)}.on-trow.k-live::before{background:var(--bad)}.on-trow.k-end::before{background:var(--muted)}
+.on-trow.off{border-color:var(--trim)}
+.on-trow.mine{box-shadow:0 0 0 1px var(--trim) inset}
+.on-ti{font-size:26px;line-height:1;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.on-tb{display:flex;flex-direction:column;gap:2px;min-width:0}
+.on-tgo{font-size:26px;font-weight:800;color:var(--trim);line-height:1}
+.on-trow:hover .on-tgo{transform:translateX(2px)}
+.on-st.open{background:var(--good);color:#0c2414;font-weight:800;display:inline-flex;align-items:center;gap:4px}
+.on-st.open::before{content:"";width:6px;height:6px;border-radius:50%;background:#0c2414;animation:onPulse 1.2s ease-in-out infinite}
+.on-st.live{background:var(--bad);color:#fff;font-weight:800}
+@keyframes onPulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.on-st.open::before{animation:none}}

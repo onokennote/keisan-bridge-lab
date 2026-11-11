@@ -5379,6 +5379,13 @@ function rulesHTML() {
 }
 
 // ---------- モーダル・演出 ----------
+// 設定のモーダルを描き直すとき、スクロールの位置をそのままにする（＋−を押すたびに一番上へ戻らないように）
+function modalKeep(fn) {
+  const bg = $('#modal'), box = bg && bg.querySelector('.modal'), a = bg ? bg.scrollTop : 0, b = box ? box.scrollTop : 0;
+  fn();
+  const bg2 = $('#modal'), box2 = bg2 && bg2.querySelector('.modal');
+  if (bg2) { bg2.classList.add('still'); bg2.scrollTop = a; } if (box2) box2.scrollTop = b;
+}
 function modal(html) {
   closeModal();
   const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
@@ -5752,7 +5759,10 @@ function onlineHomeHTML() {
   const last = store.get('onRoom', null), L = ON.tours;
   const fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()}（${'日月火水木金土'[d.getDay()]}）${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
   const stat = v => v.phase === 'entry' ? (v.now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'done' ? '<em class="on-st">終了</em>' : '<em class="on-st">中止</em>';
-  const rows = L ? (L.length ? L.map(v => `<button class="on-trow" data-act="on-tour-open" data-id="${v.id}"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '招待されています' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
+  // 状態ごとに色の帯とアイコン（受付中は緑・開催中は赤・受付前は金）。押せることが分かるように右に ›
+  const kind = v => v.phase === 'entry' ? (v.now >= v.entryAt ? 'open' : 'soon') : v.phase === 'prelim' || v.phase === 'final' ? 'live' : 'end';
+  const icon = v => ({ open: '🏆', live: '🔥', soon: '⏳', end: '🏁' })[kind(v)];
+  const rows = L ? (L.length ? L.map(v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
   return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
     <div class="on-tlist">${rows}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
@@ -5804,8 +5814,8 @@ function onTourNewModal() {
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
   const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; };
   if (c.entry === 'invite') invInit(c);
-  document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; onTourNewModal(); });
-  document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; onTourNewModal(); });
+  document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; modalKeep(onTourNewModal); });
+  document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; modalKeep(onTourNewModal); });
 }
 // 招待する人を選ぶ：選んだ人はチップ（×で外す）。名前でさがす／最近の大会でいっしょだった人・前に招待した人から押して加える
 const invNorm = x => String(x).normalize('NFKC').toLowerCase().replace(/[\s・._\-ー]/g, '');
@@ -5928,7 +5938,7 @@ function onNewModal() {
     <div class="su-row col"><b>1手の制限時間</b>${suSeg('on-limit', [[60, '1分'], [30, '30秒'], [15, '15秒'], [10, '10秒']], c.limit)}<small class="muted">時間切れは自動で「引く」。3回続くと、AI★2が代わりに打ちます</small></div>
     <div class="su-row col"><b>式の判定</b>${suSeg('on-judge', [['before', '式を先に確認'], ['after3', 'お手つき3枚'], ['after2', 'お手つき2枚']], c.judge)}</div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-create">卓をつくる</button></div></div>`);
-  document.querySelectorAll('#modal [data-su]').forEach(b => b.onclick = () => { const k = b.dataset.su.slice(3), v = b.dataset.v; S.onCfg[k] = isNaN(+v) ? v : +v; onNewModal(); });
+  document.querySelectorAll('#modal [data-su]').forEach(b => b.onclick = () => { const k = b.dataset.su.slice(3), v = b.dataset.v; S.onCfg[k] = isNaN(+v) ? v : +v; modalKeep(onNewModal); });
 }
 async function onEnter(a, extra) {
   try { const v = await onReq(a, Object.assign(onMe(), extra)); closeModal(); store.set('onRoom', v.id); onStart(v); }
@@ -5972,7 +5982,13 @@ function onApply(v) {
   if (fresh.length) setTimeout(() => onAnimate(v, fresh), 0);
 }
 // ひとこと：新しく届いたものを、その人の席のふきだしに少し長めに出す（はじめて開いたときの古いものは出さない）
-const ON_STAMPS = ['よろしく！', 'ナイス！', 'おしい！', 'やられた〜', 'ありがとう', 'おつかれさま！'];
+const ON_STAMP_GROUPS = [
+  ['あいさつ', ['よろしく！', 'よろしくお願いします', 'おつかれさま！', 'ありがとう', 'またね！', 'GG！']],
+  ['反応', ['ナイス！', 'うまい！', 'すごい！', 'おしい！', 'なるほど〜', 'やられた〜', 'あちゃ〜', 'さすが！']],
+  ['対局中', ['いい勝負！', '考え中…', 'ドキドキ…', 'あと少し！', 'お先に失礼！', '次は負けへんで！']],
+  ['絵文字', ['👍', '👏', '😂', '😱', '🙏', '🔥']]
+];
+const ON_STAMPS = ON_STAMP_GROUPS.flatMap(g => g[1]);
 function onChatIn(v, prev) {
   const L = v.chat || [], last = L.length ? L[L.length - 1].id : 0;
   if (!prev || prev.id !== v.id) { ON.chatSeen = last; return; }
@@ -5984,7 +6000,7 @@ function onChatModal() {
   const v = ON.v; if (!v || v.me < 0) return;
   const L = (v.chat || []).slice(-8);
   modal(`<div class="stack on-chat-m"><h3 style="margin:0">💬 ひとこと</h3>
-    <div class="on-stamps">${ON_STAMPS.map(t => `<button class="btn sm" data-onstamp="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+    ${ON_STAMP_GROUPS.map(([gl, L]) => `<div class="on-sgrp"><small class="muted">${gl}</small><div class="on-stamps">${L.map(t => `<button class="btn sm ${/^\p{Extended_Pictographic}$/u.test(t) ? 'emo' : ''}" data-onstamp="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`).join('')}
     <div class="row" style="gap:6px"><input id="on-chat-in" class="su-in" maxlength="30" placeholder="30文字まで" autocomplete="off" style="flex:1"><button class="btn primary" data-act="on-chat-send">送る</button></div>
     <p class="small muted" style="margin:0">卓のみんなの席に、ふきだしで出ます。ふさわしくない言葉や連絡先は送れません。</p>
     ${L.length ? `<div class="on-chat-log">${L.map(c => `<div><b>${esc(c.p === v.me ? 'あなた' : onName(v.seats[c.p] || {}))}</b>${esc(c.t)}</div>`).join('')}</div>` : ''}

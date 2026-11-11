@@ -53,9 +53,16 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.click('#modal [data-ot="limit"][data-v="15"]'); await pa.waitForTimeout(800);
   chips = await pa.evaluate(() => [...document.querySelectorAll('#ot-inv-chips .inv-chip')].map(e => e.firstChild.textContent));
   ok(chips.join() === 'ハナオ,ハナコ', 'ほかの設定を変えても、選んだ人は残る');
+  // ＋−を押しても、スクロールの位置はそのまま（一番上に戻らない）
+  const sc = () => pa.evaluate(() => { const bg = document.querySelector('#modal'), m = bg.querySelector('.modal'); return Math.max(bg.scrollTop, m.scrollTop); });
+  await pa.evaluate(() => document.querySelector('#modal [data-otn="sets"][data-v="1"]').scrollIntoView({ block: 'center' })); await pa.waitForTimeout(200);
+  const s0 = await sc(); await pa.click('#modal [data-otn="sets"][data-v="1"]'); await pa.waitForTimeout(300); const s1 = await sc();
+  ok(s0 > 100 && Math.abs(s1 - s0) < 5 && await pa.evaluate(() => KBAPP.S.onTour.sets === 4), `セット数の＋を押しても、スクロールの位置がそのまま（${s0}→${s1}）`);
   await pa.fill('#ot-name', '招待杯'); await pa.click('[data-act="on-tour-create"]'); await pa.waitForTimeout(1000);
   const see = async p => (await api(p, 'on_tours', {})).tours.some(t => t.name === '招待杯');
   ok(await see(pb) && await see(pc) && !(await see(pd)), '選んだ人（ハナコ・ハナオ）にだけ見え、ジロウには見えない');
+  await pb.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pb.waitForTimeout(1500);
+  await (await pb.$('.on-card')).screenshot({ path: path.join(__dirname, 'out', 'on_card.png') });
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
