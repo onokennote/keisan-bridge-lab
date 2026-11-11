@@ -2190,3 +2190,14 @@ body.rewinding #home-fab{display:none}
 @media (max-width:420px){.host-tag{font-size:9px;padding:2px 6px}}
 .adv-b{background:none;border:0;padding:0;font:inherit;color:var(--trim);font-weight:800;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
 .adv-b:hover{color:#ffd77a}
+/* ライバル・挑戦者（フォロー・フォロワー風） */
+.pv-rvc{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.rvc{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
+.rvc b{color:var(--ink);font-size:14px;margin-right:2px}
+.rvc:hover{border-color:var(--trim)}
+.pb-rv{display:block}
+.rv-sec{display:flex;flex-direction:column;gap:4px}
+.rv-sec>b{color:var(--accent)}
+.rv-li{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.rv-li span{color:var(--trim);font-weight:800}
+.rvc{white-space:nowrap}.pb-rv .pv-rvc{gap:4px}.pb-rv .rvc{font-size:11px;padding:1px 7px}.pb-rv .rvc b{font-size:12px}

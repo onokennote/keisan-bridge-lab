@@ -633,10 +633,17 @@ try {
     }
     case 'card': { // ランキングの人の成績カード（自己紹介つき）。rid で指す
       $rid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['rid'] ?? ''));
-      foreach (db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card, ai FROM ranks WHERE shown = 1')->fetchAll() as $r) {
+      $allR = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, bio, card, ai FROM ranks WHERE shown = 1')->fetchAll(); $ridName = []; foreach ($allR as $x) $ridName[rid($x['uid'], $x['pid'])] = $x['name'];
+      foreach ($allR as $r) {
         if (rid($r['uid'], $r['pid']) !== $rid) continue;
+        // ライバル（この人が指定した人）と挑戦者（この人をライバルに指定した人）。ランキングに載っている人だけ
+        $q1 = db()->prepare('SELECT rid FROM rivals WHERE uid = ? AND pid = ? ORDER BY at'); $q1->execute([$r['uid'], $r['pid']]);
+        $rvs = []; foreach ($q1->fetchAll() as $x) if (isset($ridName[$x['rid']])) $rvs[] = ['name' => $ridName[$x['rid']], 'rid' => $x['rid']];
+        $q2 = db()->prepare('SELECT uid, pid FROM rivals WHERE rid = ? ORDER BY at DESC LIMIT 50'); $q2->execute([$rid]);
+        $rby = []; foreach ($q2->fetchAll() as $x) { $k = rid($x['uid'], $x['pid']); if (isset($ridName[$k])) $rby[] = ['name' => $ridName[$k], 'rid' => $k]; }
+        $GLOBALS['cardRivals'] = ['rivals' => $rvs, 'rivalBy' => $rby];
         $aq = db()->prepare('SELECT tid, tname, place, official, at FROM awards WHERE uid = ? AND pid = ? ORDER BY place, at DESC LIMIT 30'); $aq->execute([$r['uid'], $r['pid']]); $GLOBALS['cardAwards'] = $aq->fetchAll(); $ct = $r['card'] ? (json_decode($r['card'], true)['title'] ?? '') : ''; $GLOBALS['cardTitle'] = null; foreach ($GLOBALS['cardAwards'] as $aw) if ($ct !== '' && ($aw['tid'] ?? '') === $ct) $GLOBALS['cardTitle'] = ['text' => $aw['tname'] . ' ' . ['', '優勝', '準優勝', '3位'][(int)$aw['place']], 'official' => (int)$aw['official'], 'place' => (int)$aw['place']];
-        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['awards' => $GLOBALS['cardAwards'] ?? [], 'titleShow' => $GLOBALS['cardTitle'] ?? null], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
+        out(['ok' => true, 'card' => array_merge($r['card'] ? json_decode($r['card'], true) : ['ach' => []], ['awards' => $GLOBALS['cardAwards'] ?? [], 'titleShow' => $GLOBALS['cardTitle'] ?? null], $GLOBALS['cardRivals'] ?? [], ['name' => $r['name'], 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 2) : null, 'atk' => (int)$r['atk'], 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'bio' => (string)($r['bio'] ?? ''), 'ai' => !empty($r['ai'])])]);
       }
       fail('見つかりません', 404);
     }
@@ -666,8 +673,8 @@ try {
     }
     case 'rival_by': { // 自分（このプレイヤー）をライバルに指定している人の名前（ランキングに載っている人だけ）
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $me = rid($u['uid'], $pid);
-      $q = db()->prepare('SELECT r.name FROM rivals v JOIN ranks r ON r.uid = v.uid AND r.pid = v.pid WHERE v.rid = ? AND r.shown = 1 ORDER BY v.at DESC LIMIT 30'); $q->execute([$me]);
-      out(['ok' => true, 'names' => array_column($q->fetchAll(), 'name')]);
+      $q = db()->prepare('SELECT r.name, r.uid, r.pid FROM rivals v JOIN ranks r ON r.uid = v.uid AND r.pid = v.pid WHERE v.rid = ? AND r.shown = 1 ORDER BY v.at DESC LIMIT 50'); $q->execute([$me]); $L = $q->fetchAll();
+      out(['ok' => true, 'names' => array_column($L, 'name'), 'list' => array_map(fn($x) => ['name' => $x['name'], 'rid' => rid($x['uid'], $x['pid'])], $L)]);
     }
     case 'on_people': { // 招待する人の候補：q があれば名前でさがす（ランキングに載っている人。AIと自分は出さない）、なければ最近の大会でいっしょだった人・前に招待した人
       $b = body(); $u = authUser($b); $kn = fn($x) => obNorm(mb_convert_kana((string)$x, 'C')); $q = $kn(mb_substr((string)($b['q'] ?? ''), 0, 10)); // さがすときは、ひらがなとカタカナを同じとみなす

@@ -2195,10 +2195,21 @@ body.rewinding #home-fab{display:none}
 @media (max-width:420px){.host-tag{font-size:9px;padding:2px 6px}}
 .adv-b{background:none;border:0;padding:0;font:inherit;color:var(--trim);font-weight:800;text-decoration:underline dotted;text-underline-offset:3px;cursor:pointer}
 .adv-b:hover{color:#ffd77a}
+/* ライバル・挑戦者（フォロー・フォロワー風） */
+.pv-rvc{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.rvc{background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:999px;padding:2px 10px;font:inherit;font-size:12px;color:var(--muted);cursor:pointer}
+.rvc b{color:var(--ink);font-size:14px;margin-right:2px}
+.rvc:hover{border-color:var(--trim)}
+.pb-rv{display:block}
+.rv-sec{display:flex;flex-direction:column;gap:4px}
+.rv-sec>b{color:var(--accent)}
+.rv-li{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.rv-li span{color:var(--trim);font-weight:800}
+.rvc{white-space:nowrap}.pb-rv .pv-rvc{gap:4px}.pb-rv .rvc{font-size:11px;padding:1px 7px}.pb-rv .rvc b{font-size:12px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='1b85e6a978';
+window.KB_BUILD='b8e6297256';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6132,7 +6143,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -6291,6 +6302,26 @@ function masaAdvice(more) {
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
 const rivalsOf = () => store.get('rivals', []) || [];
+// ライバル（自分が指定した人）・挑戦者（自分をライバルに指定した人）の数。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
+const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
+async function rvByFetch(force) {
+  if (!force && Date.now() - (S.rvByAt || 0) < 60000) return; S.rvByAt = Date.now();
+  const l = PID && plLink(PID); if (!l) return;
+  try { const j = await cloudReq('rival_by', { token: l.token, pid: PID }); S.rvBy = j.list || (j.names || []).map(n => ({ name: n })); S.rvByPid = PID; } catch (e) { }
+}
+function rvcHTML(rivals, by, name) {
+  if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
+  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r"><b>${rivals.length}</b> ⚔ ライバル</button><button class="rvc" data-act="rv-list" data-k="${id}:b"><b>${by.length}</b> 挑戦者</button></span>`;
+}
+function rvListModal(key) {
+  const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;
+  const back = $('#modal') ? $('#modal .modal').innerHTML : null;
+  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}">${esc(x.name)}<span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
+  const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
+  const A = sec(`⚔ ${esc(san(d.name))}のライバル`, d.rivals, 'まだだれもライバルにしていません'), B = sec(`${esc(san(d.name))}をライバルにしている人（挑戦者）`, d.by, 'まだいません');
+  modal(`<div class="stack rv-lm">${tab === 'b' ? B + A : A + B}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。ライバルはランキングの人のプロフィールから「⚔ ライバルにする」で登録できます（5人まで）。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
 async function rivalToggle(rid, name) {
   if (!rid) return; const L = rivalsOf(), on = !L.some(x => x.rid === rid);
   if (on && L.length >= 5) { toast('ライバルは5人までです'); return; }
@@ -7289,7 +7320,7 @@ function profHTML(D, o) {
     <div class="pv-head"><div class="pv-av">${KB.avatarSVG(Object.assign({}, D.avatar || AVATAR_DEF, { name: NAME }), { mood: 'happy' })}</div>
       <div class="pv-tx">${pvTitle(D)}<div class="pv-nm"><b>${esc(NAME)}</b>${o.ai ? '<em class="ai-chip">AI研究員</em>' : ''}${o.me ? '<small class="pv-me">あなた</small>' : ''}</div>
         ${r != null ? `<div class="pv-rt"><span class="pv-st">${stars}</span><b>${r.toFixed(1)}</b><small>推定実力 ${rateLabel(r)}相当</small></div>` : '<div class="pv-rt"><small>推定実力はまだ出ていません</small></div>'}
-        <div class="pv-rk" id="pv-rk"></div></div></div>
+        <div class="pv-rk" id="pv-rk"></div>${CLOUD_ON ? rvcHTML(D.rivals || [], D.rivalBy || [], NAME) : ''}</div></div>
     <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
     <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
@@ -7305,7 +7336,7 @@ async function rankCardOpen(rid, me, el) {
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
   try {
     let d;
-    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', ''), awards: (ON.myAwards || []).filter(a => a.pid === PID).sort((x, y) => x.place - y.place) });
+    if (me) d = Object.assign(cardDataOf(PID, S.settings.name), { rivals: rivalsOf(), rivalBy: rvByMine() }, { avatar: myAvatar(), ach: G_().ach, zukan: zukanCount(zukanGet()), bio: store.get('bio', ''), awards: (ON.myAwards || []).filter(a => a.pid === PID).sort((x, y) => x.place - y.place) });
     else {
       if (!rid) throw new Error('old');
       const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error);
@@ -7315,7 +7346,7 @@ async function rankCardOpen(rid, me, el) {
     b.innerHTML = profHTML(d, { ai, me });
     // ライバル：ほかの人は「ライバルにする」、自分は「だれから指定されているか」
     if (CLOUD_ON && PID && !me && rid) { const cl = $('#modal .rk-card > .row'); if (cl) { cl.insertAdjacentHTML('afterbegin', rivalBtnHTML(rid, d.name || 'プレイヤー')); bindModalActs(); } }
-    if (CLOUD_ON && PID && me) { const l = plLink(PID); if (l) cloudReq('rival_by', { token: l.token, pid: PID }).then(j => { const bx = $('#modal .pv-box .pv'); if (!bx || !j.names || !j.names.length) return; bx.insertAdjacentHTML('beforeend', `<div class="pv-rival">⚔ ${j.names.map(n => esc(san(n))).join('・')}からライバルに指定されています</div>`); }).catch(() => { }); }
+    if (CLOUD_ON && PID && me) rvByFetch(true).then(() => { const bx = $('#modal .pv-rvc'); if (bx) { bx.outerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); bindModalActs(); } });
     // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
     try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await homeRankFetch(); } catch (e) { }
     const a = totalRankOf(S.homeRank, rid, me), h = ai ? null : totalRankOf(S.rankHuman, rid, me), box = $('#modal #pv-rk');
@@ -8544,7 +8575,7 @@ function homeHTML() {
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${castHTML()}</div>
 </section>
-${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
+${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button></span>
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '公式・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
@@ -11455,6 +11486,7 @@ function act(a, el) {
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
+    case 'rv-list': rvListModal(el.dataset.k); break;
     case 'bio-edit': bioEdit(el.dataset.from); break;
     case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;
