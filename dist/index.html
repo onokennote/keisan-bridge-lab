@@ -2160,10 +2160,41 @@ body.rewinding #home-fab{display:none}
 .on-st.live{background:var(--bad);color:#fff;font-weight:800}
 @keyframes onPulse{50%{opacity:.25}}
 @media (prefers-reduced-motion:reduce){.on-st.open::before{animation:none}}
+/* ホームの博士・マサ：アイコンとボタンが一体 */
+.host-btn{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.host-btn .host-av{transition:transform .15s,box-shadow .15s}
+.host-btn:hover .host-av,.host-btn:focus-visible .host-av{transform:translateY(-2px);box-shadow:0 0 0 2px var(--trim),0 6px 14px rgba(0,0,0,.5)}
+.host-btn:active .host-av{transform:scale(.95)}
+.host-tag{margin-top:2px;font-size:10px;font-weight:800;white-space:nowrap;background:var(--trim);color:#2a1c05;border-radius:999px;padding:2px 8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.host-r .host-tag{background:#ffb347}
+.host-m .host-mh{display:flex;gap:10px;align-items:center}
+.host-m .host-mh .cm-av{width:52px;height:52px;flex:0 0 52px;border-radius:14px;overflow:hidden}
+.host-m .host-mh .cm-av svg{width:100%;height:100%}
+.host-m .host-mh small{display:block;color:var(--trim);font-weight:800;font-size:11px}
+.host-m .host-mh b{font-size:15px;line-height:1.5}
+.rule-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:0;font-size:14px;line-height:1.6}
+.rule-dl dt{font-weight:800;color:var(--accent);white-space:nowrap}
+.rule-dl dd{margin:0}
+.rule-src{margin:0;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.rule-src a{color:var(--trim)}
+.adv-list{display:flex;flex-direction:column;gap:8px}
+.adv{display:flex;gap:10px;align-items:flex-start;background:rgba(0,0,0,.22);border:1px solid var(--line);border-radius:12px;padding:10px}
+.adv-n{flex:0 0 24px;height:24px;border-radius:50%;background:#ffb347;color:#2a1c05;font-weight:900;display:flex;align-items:center;justify-content:center}
+.adv p{margin:0 0 6px;font-size:14px;line-height:1.6}
+.rv-pick{display:flex;flex-wrap:wrap;gap:8px}
+.rv-cmp{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;font-size:14px}
+.rv-h,.rv-r{display:grid;grid-template-columns:7em 1fr 1fr;gap:6px;padding:6px 10px;align-items:center}
+.rv-h{background:rgba(0,0,0,.3);font-size:12px}.rv-h b{text-align:center}
+.rv-r:nth-child(odd){background:rgba(255,255,255,.03)}
+.rv-r span{color:var(--muted);font-size:12px}.rv-r b{text-align:center;font-weight:700}
+.rv-r b.win{color:var(--good)}
+.rv-chip{font-style:normal;margin-left:4px;font-size:12px;background:#c0392b;color:#fff;border-radius:6px;padding:0 4px}
+.pv-rival{margin-top:8px;font-size:13px;background:rgba(192,57,43,.18);border:1px solid rgba(192,57,43,.5);border-radius:10px;padding:6px 10px}
+@media (max-width:420px){.host-tag{font-size:9px;padding:2px 6px}}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='65132ee1ad';
+window.KB_BUILD='6fe4cb268d';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -5700,7 +5731,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
+const PROFILE_KEYS = { rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -6173,6 +6204,118 @@ async function showStats() {
   } catch (e) { modal('<h2>利用状況</h2><p class="muted">読み込めませんでした。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div>'); }
 }
 
+// ---------- ホームの博士とマサ：博士＝公式ルール（博士の言葉での要約・出典つき）、マサ＝次に何をするかのアドバイス・ライバルと比較 ----------
+const RULE_SRC = 'https://soogackuma.com/18/', RULE_SITE = 'https://keisan-bridge.amebaownd.com/';
+function hostRules() {
+  const P = [
+    ['使う札', 'トランプ52枚（ジョーカーなし）。A＝1、J＝11、Q＝12、K＝13 として数えます。'],
+    ['はじめ', 'ひとり7枚ずつ配ります。'],
+    ['場の数', '巡ごとに山札から1枚めくり、その数が「場の数」になります。'],
+    ['出し方', '手番が来たら、手札の1〜3枚を ＋ − × ÷ とかっこで組み合わせ、ちょうど場の数になる式を作れたら出せます。割り算は割り切れるときだけです。'],
+    ['引く', '作れないときは山札から1枚引きます。作れても、あえて出さずに引いてもかまいません。'],
+    ['終わり', 'だれかの手札が0枚になった瞬間にゲーム終了。ほかの人は、残った手札の数の合計がペナルティ（PP）になります。'],
+    ['順位', '何ゲームか続けて、PPの合計が少ない人ほど上位です。']];
+  modal(`<div class="stack host-m"><div class="host-mh"><span class="cm-av">${KB.casterSVG('root', 'happy')}</span><div><small>解説・ルート博士</small><b>計算ブリッジのルールを、わたしの言葉でまとめておきましょう。</b></div></div>
+    <dl class="rule-dl">${P.map(([h, t]) => `<dt>${h}</dt><dd>${t}</dd>`).join('')}</dl>
+    <p class="small rule-src">出典：<a href="${RULE_SRC}" target="_blank" rel="noopener">計算ブリッジ 公式ルール</a>（考案：上野晋太郎さん／すうがっくま）。この画面は、公式ルールをもとに博士が要約したものです。くわしい決まりや最新のルールは、必ず公式ページでご確認ください。</p>
+    <div class="row" style="gap:8px;flex-wrap:wrap"><a class="btn sm" href="${RULE_SRC}" target="_blank" rel="noopener">公式ルールを開く ↗</a><a class="btn sm" href="${RULE_SITE}" target="_blank" rel="noopener">公式サイト ↗</a></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn sm" data-act="adv-go" data-go="rules">このアプリでの前提</button><button class="btn sm" data-act="adv-go" data-a="tut-start">チュートリアルで学ぶ</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
+// バッジの進み具合（回数で数える系統だけ。決まった条件のものは別に扱う）
+function advCount(g, k) { const c = g.cnt || {}; return k === 'sutemi' ? Math.min(c.aete || 0, 10) : k === 'set_low' ? (c.set_low || 0) : (c[k] || 0); }
+function advNearBadges(g) {
+  const out = [], skipK = ['rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
+  ACH.forEach(a => { const k = a[0]; if (skipK.includes(k)) return;
+    for (let i = 0; i < a[2].length; i++) { const t = a[2][i]; if (g.ach[k + ':' + t]) continue; if (k === 'sutemi' && t > 10) break;
+      const c = advCount(g, k); out.push({ k, i, t, c, left: Math.max(1, t - c), ratio: t ? c / t : 0, name: a[4][i], series: a[1], cond: a[3](t), bp: bpOf(k, i), tier: ['銅', '銀', '金'][a[5] ? a[5][i] : Math.min(i, 2)] }); break; } });
+  return out.sort((x, y) => y.ratio - x.ratio || x.left - y.left);
+}
+// どこでその系統が進むか（アドバイスの「やってみる」ボタン）
+function advWhere(k) {
+  if (['hunt', 'zukan', 'zukan_cat'].includes(k) || /^quick|snap|blitz/.test(k)) return k === 'zukan' || k === 'zukan_cat' ? { a: 'hunt-start', l: '式ハンターへ' } : { go: 'setup-practice', l: '練習へ' };
+  if (/^outs/.test(k)) return { a: 'drill', l: 'アウツチャレンジへ' };
+  if (k === 'chart') return { a: 'chart-open', l: '早見表へ' };
+  if (/^atk/.test(k)) return { a: 'attack-start', l: 'バッジアタックへ' };
+  if (MB_TOUR.includes(k)) return { go: 'setup-tour', l: '大会へ' };
+  return { go: 'setup-practice', l: '練習へ' };
+}
+function masaAdvice(more) {
+  const g = G_(), nG = (g.games || []).length, nm = san(S.settings.name || 'あなた'), r = ratingOf(g.games || []), R = a => a[(Math.random() * a.length) | 0];
+  const tips = [], add = (w, text, btn) => tips.push({ w: w * (0.6 + Math.random() * 0.8), text, btn });
+  if (nG < 10) { // はじめのころ
+    add(5, `${nm}、まずは「はじめて」のセットで1セット打ってみよか！相手は★1〜2や。迷ったら「AIの読み」を開いて、最善手と見比べるんがいちばんの近道やで。`, { go: 'setup-practice', l: '練習へ' });
+    add(3, 'ルールがあやふやなら、博士とおれのチュートリアルや。3分で式の作り方と「あえて引く」のコツまで分かるで！', { a: 'tut-start', l: 'チュートリアル' });
+    add(3, '達人の打ち方を見るのもええ練習や。「観戦」で★5がどこで引いて、どこで3枚出すか見てみ！サッカーでもうまい人の試合を見るのが上達の早道や。', { a: 'watch-start', l: '観戦へ' });
+    add(2, '早見表を1行だけ作ってみ。「A・2・6」みたいな待ちの広い組み合わせが分かると、手札の残し方が変わるで！', { a: 'chart-open', l: '早見表へ' });
+  }
+  const near = advNearBadges(g).filter(b => b.c > 0 || nG >= 3);
+  near.slice(0, 6).forEach((b, i) => { const w = advWhere(b.k);
+    add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w); });
+  // 冠（カテゴリーの特別バッジ）：残りが少ない系統
+  ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(a[4][i]); }); });
+    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null); });
+  // ミニゲーム
+  const c = g.cnt || {};
+  if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
+  if ((c.chart || 0) < 10) add(2, `早見表、いま${c.chart || 0}行完成や。完成した行は対局中に見返せるから、作れば作るほど本番で得するで！`, { a: 'chart-open', l: '早見表へ' });
+  if (!c.zukan || c.zukan < 50) add(2, '式ハンターで式を集めると、図鑑も早撃ちのバッジも進むで。3分だけでもええ、リフティングみたいなもんや！', { a: 'hunt-start', l: '式ハンターへ' });
+  if (!c.atk_done) add(2, 'バッジアタック（15分）でどれだけBPを稼げるか、いっぺん挑戦してみ！ランキングにも載るで！', { a: 'attack-start', l: 'バッジアタックへ' });
+  // 苦手な場面
+  try { const cs = catStats(g.games || []).filter(x => x.n >= 5).sort((a, b) => b.bad - a.bad)[0]; if (cs && cs.bad >= 0.3) add(3, `データで見ると、苦手は「${cs.label}」の場面や（悪手の割合${Math.round(cs.bad * 100)}%）。次の練習はそこだけ意識してみ！弱点のサイドを固めたら失点は減るで！`, { go: 'growth', l: '成長記録へ' }); } catch (e) { }
+  // 推定実力
+  if (r.ok) { const nx = [3, 4, 4.5].find(t => !g.ach['rating:' + t]); if (nx && r.r >= nx && r.n < 40) add(3, `推定実力は★${r.r.toFixed(1)}、もう★${nx}に届いとる！バッジは判断が40回たまったら判定やから、あと${40 - r.n}回、このまま打ち続けよ！`, { go: 'setup-practice', l: '練習へ' }); else if (nx && r.r < nx && r.r >= nx - 0.6) add(3, `推定実力★${r.r.toFixed(1)}、★${nx}のバッジまであと少しや！直近100手の最善率と損失で決まるから、AIの読みを見ずに自分で読み切る手を増やそ！`, { go: 'setup-practice', l: '練習へ' }); }
+  // 大会
+  if (nG >= 10 && !c.qualify) add(3, '練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。', { go: 'setup-tour', l: '大会へ' });
+  if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' });
+  const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
+  if (openT.length) add(4, `いま「${openT[0].name}」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！`, null);
+  // 重みつきで3つ（押すたびに少し変わる）
+  const pick = []; const pool = tips.slice();
+  while (pick.length < 3 && pool.length) { const tot = pool.reduce((a, t) => a + t.w, 0); let x = Math.random() * tot, i = 0; for (; i < pool.length; i++) { x -= pool[i].w; if (x <= 0) break; } pick.push(pool.splice(Math.min(i, pool.length - 1), 1)[0]); }
+  if (!pick.length) pick.push({ text: `${nm}、もうほとんどやり尽くしとるやんけ！あとは推定実力を上げて、ランキングのてっぺんを狙うだけや！`, btn: { go: 'ranking', l: 'ランキングへ' } });
+  const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
+  modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(intro)}</b></div></div>
+    <div class="adv-list">${pick.map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${esc(t.text)}</p>${t.btn ? `<button class="btn sm" data-act="adv-go" ${t.btn.go ? `data-go="${t.btn.go}"` : `data-a="${t.btn.a}"`}>${esc(t.btn.l)} →</button>` : ''}</div></div>`).join('')}</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end">${CLOUD_ON ? '<button class="btn" data-act="masa-rival">⚔ ライバルと比較</button>' : ''}<button class="btn" data-act="masa-more">🔄 ほかには？</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
+// ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
+const rivalsOf = () => store.get('rivals', []) || [];
+async function rivalToggle(rid, name) {
+  if (!rid) return; const L = rivalsOf(), on = !L.some(x => x.rid === rid);
+  if (on && L.length >= 5) { toast('ライバルは5人までです'); return; }
+  const l = PID && plLink(PID);
+  try { if (l) await cloudReq('rival_set', { token: l.token, pid: PID, rid, on: on ? 1 : 0 }); } catch (e) { toast(e.message || 'できませんでした'); return; }
+  store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid));
+  toast(on ? `⚔ ${name}をライバルにしました` : `${name}をライバルから外しました`); KB.sfx('select');
+  const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
+  if (S.view === 'ranking') render();
+}
+const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバルから外す' : '⚔ ライバルにする'}</button>`; };
+function rivalPick() {
+  const L = rivalsOf();
+  modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'smug')}</span><div><small>実況・ナニワのマサ</small><b>${L.length ? 'どのライバルと比べる？' : 'ライバルがまだおらんな！'}</b></div></div>
+    ${L.length ? `<div class="rv-pick">${L.map(x => `<button class="btn" data-act="rival-cmp" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}">⚔ ${esc(x.name)}</button>`).join('')}</div>` : '<p class="small" style="margin:0">ランキングで気になる人を押して、プロフィールの「⚔ ライバルにする」を押してな。5人まで登録できるで！</p>'}
+    <div class="row" style="gap:8px;justify-content:flex-end"><button class="btn" data-act="adv-go" data-go="ranking">ランキングで選ぶ</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
+async function rivalCompare(rid, name) {
+  modal(`<div class="stack host-m"><p class="small muted">${esc(name)}のデータを読んでいます…</p></div>`);
+  let d; try { const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error); d = j.card; } catch (e) { modal(`<div class="stack host-m"><p>${esc(name)}のデータを読み込めませんでした（ランキングから外れた可能性があります）。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`); return; }
+  const me = cardDataOf(PID, S.settings.name), g = G_(), ra = Object.fromEntries((d.ach || []).map(k => [k, 1])), rg = { ach: ra };
+  const myBp = bpTotal(g), rvBp = bpTotal(rg), myB = Object.keys(g.ach).filter(k => /^[a-z0-9_]+:\d+$/i.test(k) && g.ach[k]).length, rvB = (d.ach || []).length;
+  const rows = [['推定実力', me.rating, d.rating, v => v == null ? '—' : '★' + (+v).toFixed(1)], ['BP', myBp, rvBp, v => v + ' BP'], ['バッジ', myB, rvB, v => v + '個'], ['連続最善', me.streak, d.streak || 0, v => v + '回'], ['バッジアタック', me.atk, d.atk || 0, v => v ? v + ' BP' : '—'], ['式の図鑑', me.zukan, d.zukan || 0, v => v + '式']];
+  const nmR = san(name), tips = [];
+  if (rvBp > myBp) { const gap = rvBp - myBp, nb = advNearBadges(g), cand = (nb.filter(b => b.c > 0).length ? nb.filter(b => b.c > 0) : nb).slice(0, 8).sort((a, b) => a.left - b.left || b.bp - a.bp); /* 手をつけている系統から */ let s2 = 0; const use = []; for (const b of cand) { if (s2 > gap) break; use.push(b); s2 += b.bp; }
+    tips.push(s2 > gap ? `BPは${gap}差や。${use.map(b => `「${b.name}」（+${b.bp}・あと${b.left}回）`).join('と')}で逆転できるで！` : `BPは${gap}差や。まずは${use.slice(0, 2).map(b => `「${b.name}」（+${b.bp}）`).join('と')}から詰めていこ！`); }
+  else tips.push(myBp > rvBp ? `BPは${myBp - rvBp}リードや！せやけど油断したらあかん、試合は90分あるんや！` : 'BPは同点や！ここからが勝負やで！');
+  const theirs = ACH.flatMap(a => a[2].map((t, i) => ({ a, i, key: a[0] + ':' + t }))).filter(x => ra[x.key] && !g.ach[x.key]);
+  if (theirs.length) { const x = theirs.sort((p, q) => bpOf(p.a[0], p.i) - bpOf(q.a[0], q.i))[0]; tips.push(`${nmR}が持っとって、${san(S.settings.name)}が持ってへんバッジが${theirs.length}個ある。取りやすいのは「${x.a[4][x.i]}」や。条件は「${x.a[3](x.a[2][x.i])}」やで！`); }
+  if (me.rating != null && d.rating != null) tips.push(d.rating > me.rating + 0.05 ? `推定実力は${nmR}が★${(d.rating - me.rating).toFixed(1)}上や。AIの読みを見ずに打った手の最善率を上げるんが一番の近道や！` : me.rating > d.rating + 0.05 ? `推定実力はこっちが★${(me.rating - d.rating).toFixed(1)}上や！判断の質では勝っとるで！` : '推定実力はほぼ互角や！ライバルとして申し分なしや！');
+  if ((d.streak || 0) > me.streak) tips.push(`連続最善は${nmR}が${d.streak}回、こっちは${me.streak}回や。一手ずつ「最善かどうか」を意識して打つと伸びるで！`);
+  modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', rvBp > myBp ? 'worried' : 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(san(S.settings.name))} vs ${esc(nmR)}、データで比べたで！</b></div></div>
+    <div class="rv-cmp"><div class="rv-h"><span></span><b>${esc(S.settings.name)}</b><b>⚔ ${esc(name)}</b></div>${rows.map(([l, a, b, f]) => { const A = a == null ? -1 : +a, B = b == null ? -1 : +b; return `<div class="rv-r"><span>${l}</span><b class="${A > B ? 'win' : ''}">${f(a)}</b><b class="${B > A ? 'win' : ''}">${f(b)}</b></div>`; }).join('')}</div>
+    <div class="adv-list">${tips.slice(0, 3).map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${esc(t)}</p></div></div>`).join('')}</div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="masa-rival">ほかのライバル</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
 // ---------- 成長記録：実力レーティング・場面別の苦手分析・課題・称号 ----------
 // レーティングの基準：自分の席をAIに打たせて実測した「1判断あたりの平均損失pt」と「最善率」
 // 2026-11-10 測り直し（最善扱いの幅を1巡目3.5pt・2巡目2.0ptにして、1手10ptの頭打ちで、各★のAIに約400手ずつ）
@@ -7068,7 +7211,7 @@ const rankMe = x => !!x.me && (x.pid == null || x.pid === PID);
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
   const val = (k, x) => k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
-  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
+  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? '<em class="rv-chip" title="あなたのライバル">⚔</em>' : ''}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.filter(rankMe).length ? '<div class="rk-gap">…</div>' + d.mine.filter(rankMe).map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   const withAi = rankWithAi();
@@ -7159,6 +7302,9 @@ async function rankCardOpen(rid, me, el) {
     }
     const ai = isAi || !!d.ai, b = $('#modal .pv-box'); if (!b) return;
     b.innerHTML = profHTML(d, { ai, me });
+    // ライバル：ほかの人は「ライバルにする」、自分は「だれから指定されているか」
+    if (CLOUD_ON && PID && !me && rid) { const cl = $('#modal .rk-card > .row'); if (cl) { cl.insertAdjacentHTML('afterbegin', rivalBtnHTML(rid, d.name || 'プレイヤー')); bindModalActs(); } }
+    if (CLOUD_ON && PID && me) { const l = plLink(PID); if (l) cloudReq('rival_by', { token: l.token, pid: PID }).then(j => { const bx = $('#modal .pv-box .pv'); if (!bx || !j.names || !j.names.length) return; bx.insertAdjacentHTML('beforeend', `<div class="pv-rival">⚔ ${j.names.map(n => esc(san(n))).join('・')}からライバルに指定されています</div>`); }).catch(() => { }); }
     // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
     try { if (!S.homeRank || !S.rankHuman || Date.now() - (S.homeRankAt || 0) > 300000) await homeRankFetch(); } catch (e) { }
     const a = totalRankOf(S.homeRank, rid, me), h = ai ? null : totalRankOf(S.rankHuman, rid, me), box = $('#modal #pv-rk');
@@ -8377,9 +8523,9 @@ function homeHTML() {
   const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
   return `<section class="title">
   <div class="title-stage">
-    <div class="host host-l"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span></div>
+    <button class="host host-l host-btn" data-act="host-root" aria-label="ルート博士：公式ルールを見る"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span><span class="host-tag">📖 ルール</span></button>
     <div class="fan" aria-hidden="true">${fan}</div>
-    <div class="host host-r"><span class="host-say">ほな、いこか！</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span></div>
+    <button class="host host-r host-btn" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">ほな、いこか！</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
   <div class="logo">計算ブリッジ<small>作戦研究所</small></div>
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
@@ -11290,6 +11436,13 @@ function act(a, el) {
     case 'share-open': shareOpen(); break;
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
+    case 'host-root': hostRules(); break;
+    case 'host-masa': masaAdvice(); break;
+    case 'masa-more': masaAdvice(true); break;
+    case 'masa-rival': rivalPick(); break;
+    case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
+    case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
+    case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
     case 'bio-edit': bioEdit(el.dataset.from); break;
     case 'bio-save': { const t = $('#bio-text'); store.set('bio', t ? [...t.value.replace(/\r/g, '')].slice(0, 140).join('').trim() : ''); toast('自己紹介を保存しました'); if (S.bioFrom === 'home') { closeModal(); render(); } else profileModal(); break; }
     case 'share-save': shareSave(); break;
