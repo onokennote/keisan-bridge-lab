@@ -636,7 +636,7 @@ async function rvByFetch(force) {
 function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
   const isMu = x => x.rid && by.some(y => y.rid === x.rid), mu = rivals.filter(isMu).length, out = rivals.length - mu, inn = by.filter(y => !rivals.some(x => x.rid === y.rid)).length;
-  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>→</i><b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>←</i><b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i><b>${mu}</b><small>宿敵</small></button></span>`;
+  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>→</i>ライバル視<b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>←</i>被ライバル<b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i>宿敵<b>${mu}</b></button></span>`;
 }
 function rvListModal(key) {
   const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;

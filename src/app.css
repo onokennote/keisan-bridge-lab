@@ -2237,3 +2237,4 @@ body.rewinding #home-fab{display:none}
 .rvc i{font-style:normal;font-weight:900;color:var(--trim);margin-right:3px}
 .rvc small{margin-left:3px;font-size:10px;color:var(--muted)}
 .rv-chip.mu{background:#d4a017;color:#2a1c05}.rv-chip.in{background:#555;color:#fff}
+.rvc b{margin:0 0 0 4px}
