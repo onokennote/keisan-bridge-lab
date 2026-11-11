@@ -2242,7 +2242,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='c705817d5c';
+window.KB_BUILD='01daa28774';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -10687,7 +10687,7 @@ function rvGameSolo(who) {
   const q = rvQual(f.nDec, f.nBest, f.nGood);
   if (f.won && (q === 'good' || q === 'none')) B(RVP([`上がりでPP0。${nmY}、見事なゲームでした。`, `${nmY}の上がりです。PP0、完璧な締めくくりでした。`, `第${f.round}巡で上がり切りました。PP0です。`]) + (q === 'good' ? '結果だけでなく、判断も確率に沿っていました。' : ''), RVP([`${nmY}、上がりや！PP0、ゴール決めたで！`, `よっしゃ、${nmY}の上がりや！文句なしや！`, `PP0や！${nmY}、今日の主役はあんたや！`]) + (q === 'good' ? '中身もちゃんと伴っとる、これがほんまの勝ちや！' : ''));
   else if (f.won && q === 'poor') B(RVP([`上がりでPP0。結果は満点です。ただ、最善を外した手が多く、上がれたのには運の後押しもありました。`, `${nmY}の上がりです。結果は良かったのですが、判断には課題が残りました。結果と判断は分けて振り返りましょう。`]), RVP([`${nmY}、上がりや！PP0！…せやけど最善外した手も多いで。ラッキーやった分もあるな！`, `上がりや！運も実力のうちやからな！ただ中身はまだ伸ばせるで！`]));
-  else if (f.won) B(`${nmY}の上がりです。PP0。最善を外した手もいくつかあったので、そこは結果と切り離して振り返りましょう。`, `${nmY}、上がりや！PP0！外した手もちょっとあったから、そこは振り返っとこな！`);
+  else if (f.won) { const miss = Math.max(0, f.nDec - f.nBest); B(`${nmY}の上がりです。PP0。最善を外した手が${miss === 1 ? '1回' : miss + '回'}あったので、そこは結果と切り離して振り返りましょう。`, `${nmY}、上がりや！PP0！${miss === 1 ? '1回だけ' : miss + '回'}最善を外したとこがあるから、そこは振り返っとこな！`); }
   else if (q === 'good') B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : '') + (f.luck === 'resultUnlucky' ? '' : '結果は伴いませんでしたが、判断は確率に沿っていました。大事なのはそちらです。'), RVP([`${nmY}、PP${f.pp}の${f.rank}位や。せやけど判断はしっかりしとった、結果は気にせんでええで！`, `PP${f.pp}で${f.n}人中${f.rank}位か。点は取られたけど、打ち方は間違うてへん。気を取り直して前に進むのみや！`]) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられたんは、巡り合わせや。` : ''));
   else B(RVP([`このゲームのPPは${f.pp}、${f.n}人中${f.rank}位でした。`, `PPは${f.pp}で、${f.n}人中${f.rank}位という結果です。`]) + (f.winner ? `上がったのは${f.winner}で、第${f.winnerRound}巡でした。` : ''), (f.pp >= 25 ? RVP([`PP${f.pp}か〜、${nmY}、今回は大量失点やな…`, `うわ〜PP${f.pp}、ゴール前でボコボコにされたな${nmY}！`]) : RVP([`PP${f.pp}で${f.n}人中${f.rank}位やな。`, `${nmY}、PP${f.pp}の${f.rank}位や。`])) + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられてもうた。` : ''));
   if (!rt) { N(f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : 'lose')); }
