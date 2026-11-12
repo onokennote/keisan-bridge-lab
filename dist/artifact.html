@@ -2330,10 +2330,14 @@ body.rewinding #home-fab{display:none}
 .pv-info em.ok{color:#8ce99a}
 .pv-eb small{font-size:10px;color:var(--muted)}
 .pv-bb{display:inline-flex}
+
+/* 大会の順位：名前を押すとプロフィール */
+.on-pn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
+.on-sr .ai-chip{margin-left:6px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='dd6b1a997a';
+window.KB_BUILD='e1b7f079b0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -12036,7 +12040,7 @@ function onCeremony(t) {
 // 順位の表：決勝があるときは、上に決勝（決勝PPの少ない順）、下に予選（得点→累計PP）
 function onStandHTML(t) {
   const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
-  const nm = r => esc(r.ai ? onName(r) : r.name);
+  const nm = r => { if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
   const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
   let fin = '';
   if (hasFin) {

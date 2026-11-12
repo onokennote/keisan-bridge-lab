@@ -348,7 +348,7 @@ function obTourDeal(array &$t, array $keys, string $label, float $now, array $ab
 function obTourStart(array &$t, float $now): void {
   $c = $t['cfg']; $ent = $t['entrants'];
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
-  $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
+  $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'pid' => $e['pid'] ?? '', 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
   $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
   $cap = OB_AI_CAP; $total = array_sum($cap);
@@ -460,7 +460,9 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
       $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
-      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'lv' => $byKey[$k]['lv'] ?? null, 'slot' => $byKey[$k]['slot'] ?? null, 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
+      $pidOf = array_column($t['entrants'], 'pid', 'uid'); // プロフィールを開くための公開用の番号（人だけ）
+      $ridOf = function ($p) use ($pidOf) { if (!empty($p['ai']) || empty($p['uid'])) return null; $pd = (string)($p['pid'] ?? ($pidOf[$p['uid']] ?? '')); return $pd !== '' ? rid($p['uid'], $pd) : null; };
+      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'rid' => $ridOf($byKey[$k]), 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'lv' => $byKey[$k]['lv'] ?? null, 'slot' => $byKey[$k]['slot'] ?? null, 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
       $v['myRoom'] = null; $v['rooms'] = [];
       foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name'), 'seats' => array_map(fn($x) => ['name' => $x['name'], 'ai' => !empty($x['ai']), 'lv' => $x['lv'] ?? null, 'slot' => $x['slot'] ?? null], $st['seats'])]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
     }

@@ -6152,7 +6152,7 @@ function onCeremony(t) {
 // 順位の表：決勝があるときは、上に決勝（決勝PPの少ない順）、下に予選（得点→累計PP）
 function onStandHTML(t) {
   const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
-  const nm = r => esc(r.ai ? onName(r) : r.name);
+  const nm = r => { if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
   const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
   let fin = '';
   if (hasFin) {

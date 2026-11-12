@@ -2325,3 +2325,7 @@ body.rewinding #home-fab{display:none}
 .pv-info em.ok{color:#8ce99a}
 .pv-eb small{font-size:10px;color:var(--muted)}
 .pv-bb{display:inline-flex}
+
+/* 大会の順位：名前を押すとプロフィール */
+.on-pn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
+.on-sr .ai-chip{margin-left:6px}
