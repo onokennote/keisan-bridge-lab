@@ -503,7 +503,7 @@ function hostRules() {
 // バッジの進み具合（回数で数える系統だけ。決まった条件のものは別に扱う）
 function advCount(g, k) { const c = g.cnt || {}; return k === 'sutemi' ? Math.min(c.aete || 0, 10) : k === 'set_low' ? (c.set_low || 0) : (c[k] || 0); }
 function advNearBadges(g) {
-  const out = [], skipK = ['rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
+  const out = [], skipK = ['rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
   ACH.forEach(a => { const k = a[0]; if (skipK.includes(k)) return;
     for (let i = 0; i < a[2].length; i++) { const t = a[2][i]; if (g.ach[k + ':' + t]) continue; if (k === 'sutemi' && t > 10) break;
       const c = advCount(g, k); out.push({ k, i, t, c, left: Math.max(1, t - c), ratio: t ? c / t : 0, name: a[4][i], series: a[1], cond: a[3](t), bp: bpOf(k, i), tier: ['銅', '銀', '金'][a[5] ? a[5][i] : Math.min(i, 2)] }); break; } });
@@ -630,10 +630,12 @@ function noteGo(i) {
 }
 // ライバル視の数を矢印で（重なりなし）：→ ライバル視している（片方）・← ライバル視されている（片方）・⇄ 宿敵（お互い）。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
 const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
+// ライバル系のバッジ：ライバル視・被ライバル・宿敵の数（いままでの最高）
+function rivalBadges() { try { if (S.attack || !PID) return; const R = rivalsOf(), B = rvByMine(), mu = R.filter(x => x.rid && B.some(y => y.rid === x.rid)).length; setMax('rival_out', R.length); if (S.rvByPid === PID) { setMax('rival_in', B.length); setMax('rival_mu', mu); } } catch (e) { } }
 async function rvByFetch(force) {
   if (!force && Date.now() - (S.rvByAt || 0) < 60000) return; S.rvByAt = Date.now();
   const l = PID && plLink(PID); if (!l) return;
-  try { const j = await cloudReq('rival_by', { token: l.token, pid: PID }); S.rvBy = j.list || (j.names || []).map(n => ({ name: n })); S.rvByPid = PID; } catch (e) { }
+  try { const j = await cloudReq('rival_by', { token: l.token, pid: PID }); S.rvBy = j.list || (j.names || []).map(n => ({ name: n })); S.rvByPid = PID; rivalBadges(); } catch (e) { }
 }
 function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
@@ -656,7 +658,7 @@ async function rivalToggle(rid, name) {
   if (on && L.length >= 5) { toast('ライバルは5人までです'); return; }
   const l = PID && plLink(PID);
   try { if (l) await cloudReq('rival_set', { token: l.token, pid: PID, rid, on: on ? 1 : 0 }); } catch (e) { toast(e.message || 'できませんでした'); return; }
-  store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid));
+  store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid)); rivalBadges();
   toast(on ? (rvByMine().some(x => x.rid === rid) ? `⇄ ${name}と宿敵になりました！` : `→ ${name}をライバル視しました`) : `${name}のライバル視をやめました`); KB.sfx('select');
   const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
   // 開いているプロフィールのライバル視の数も新しくする
@@ -798,9 +800,13 @@ const ACH = [
   // オンライン大会（人が10人以上参加した大会の上位3位）。段階は3位以上（銅）・2位以上（銀）・優勝（金）。公式大会は別のバッジ
   ['on_podium', 'オンライン大会 表彰台', [1, 2, 3], n => n >= 3 ? 'オンライン大会（人が10人以上）で優勝' : n >= 2 ? 'オンライン大会（人が10人以上）で2位以上' : 'オンライン大会（人が10人以上）で3位以上', ['表彰台', '準優勝', 'オンライン王者'], [0, 1, 2]],
   ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
+  // ライバル（クラウド版）：盛り上げ用の軽いバッジ。数は今までの最高で数える
+  ['rival_out', 'ライバル視', [1, 3, 5], n => n === 1 ? 'だれかをライバル視する' : `${n}人をライバル視する（同時に）`, ['ライバル宣言', '負けず嫌い', '全方位ライバル']],
+  ['rival_in', '被ライバル', [1, 5, 10], n => n === 1 ? 'だれかにライバル視される' : `${n}人にライバル視される（同時に）`, ['注目の的', '人気者', 'みんなの目標']],
+  ['rival_mu', '宿敵', [1, 2, 3], n => n === 1 ? '宿敵ができる（お互いにライバル視）' : `宿敵が${n}人できる（同時に）`, ['宿命の出会い', 'ダブル宿敵', '宿敵トリオ']],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -936,7 +942,7 @@ function badgeSVG(a, i, got, size) {
   return `<svg class="bdg" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,1 37,10 37,30 20,39 3,30 3,10" fill="${c2}"/><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="${c1}"/>${tier >= 1 && got ? '<circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' : ''}<text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" fill="${got ? '#2a1c00' : '#6b7672'}">${esc(ch)}</text></svg>`;
 }
 // カテゴリーをすべて集めると付く特別バッジ
-const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証' };
+const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証', 'ライバル': '宿命の好敵手' };
 function catProgress(g, gi) { const [gn, ks] = ACH_GROUPS[gi]; const list = ks.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); return { gn, have, all, done: all > 0 && have >= all, name: CAT_SPECIAL[gn] || gn }; }
 function emblemSVG(gi, got, size) {
   const z = size || 48, id = 'em' + gi + (got ? 'g' : 'n') + z;
@@ -996,6 +1002,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
+  else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
@@ -1882,7 +1889,7 @@ function growthHTML() {
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
     <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
-    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${BP_CAT}BP・アバター${(CROWN_SETS[gn] || []).length}点セット）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
+    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${BP_CAT}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
   </div>
   <div class="panel stack">
     <div class="lbl">記録</div>
@@ -2146,7 +2153,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
+const BP_W = { rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
 const BP_CAT = 500;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {

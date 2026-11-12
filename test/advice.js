@@ -123,6 +123,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await pa.evaluate(() => [...document.querySelectorAll('#modal .nt-row')].some(e => /ハナさんと宿敵になりました/.test(e.innerText))), '通知：「🔁 ハナさんがライバルバックしました」');
   await pa.evaluate(() => [...document.querySelectorAll('#modal .nt-row')].find(e => /宿敵/.test(e.innerText)).click()); await pa.waitForTimeout(1500);
   ok(await pa.evaluate(() => !!document.querySelector('#modal .pv-head')), '人の通知を押すと、その人のプロフィール');
+  // ライバル系のバッジ：宿敵ができたハナに「宿命の出会い」、ライバル視・被ライバルも
+  const rb = await pb.evaluate(() => { const g = KBAPP.G(); return ['rival_out:1', 'rival_in:1', 'rival_mu:1'].map(k => !!g.ach[k]); });
+  ok(rb.every(Boolean), 'ライバル系のバッジ（ライバル宣言・注目の的・宿命の出会い）を取れる：' + rb.join());
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
