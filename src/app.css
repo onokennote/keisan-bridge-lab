@@ -2238,3 +2238,17 @@ body.rewinding #home-fab{display:none}
 .rvc small{margin-left:3px;font-size:10px;color:var(--muted)}
 .rv-chip.mu{background:#d4a017;color:#2a1c05}.rv-chip.in{background:#555;color:#fff}
 .rvc b{margin:0 0 0 4px}
+/* 式ハンターの弾：手元で大きく光り、小さくなりながら標的へ（遠近感）。残像と発射の光つき。命中以降の演出はそのぶん遅らせる */
+.hunt-cap{animation-duration:2s}
+.hc-bullet{width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fff 0,#fff6c9 30%,#ffc94a 55%,rgba(255,140,40,.0) 72%);box-shadow:0 0 18px 6px rgba(255,200,80,.75);animation:hcBullet3d .5s cubic-bezier(.25,0,.85,.55) both}
+.hc-bullet.tr1{animation-delay:.04s;opacity:.55;filter:blur(1px)}
+.hc-bullet.tr2{animation-delay:.08s;opacity:.35;filter:blur(2px)}
+.hc-bullet.tr3{animation-delay:.12s;opacity:.2;filter:blur(3px)}
+.hc-muzzle{position:absolute;left:-36px;top:-36px;width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffe08a 30%,rgba(255,150,40,0) 70%);transform:translate(var(--bx),var(--by));animation:hcMuzzle .25s ease-out both}
+@keyframes hcBullet3d{0%{opacity:1;transform:translate(var(--bx),var(--by)) scale(2.8)}80%{opacity:1}100%{opacity:0;transform:translate(0,0) scale(.4)}}
+@keyframes hcMuzzle{0%{opacity:1;transform:translate(var(--bx),var(--by)) scale(.4)}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(1.6)}}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .5s both,hcFly .45s 1.45s cubic-bezier(.6,0,.8,.4) both}
+.hc-hit{animation:hcHit .45s .48s ease-out both}
+.hc-ring{animation:hcRing .45s .5s ease-out both}
+.hc-stamp{animation:hcStamp .35s .58s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.4s both}
+.hc-n{animation:ciTxt .3s .7s both,hcOut .3s 1.4s both}

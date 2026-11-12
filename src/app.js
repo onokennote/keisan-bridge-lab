@@ -1237,8 +1237,9 @@ function huntConquer(t) {
   document.body.appendChild(el);
   if (H.auto && !allDone) setTimeout(() => { const b = el.querySelector('[data-hq="go"],[data-hq="random"]'); if (b && el.isConnected) b.click(); }, 2600); // 自動照準の間は、制覇の演出を見せてから自動で続ける
   el.querySelectorAll('[data-hq]').forEach(b => b.onclick = () => {
+    if (el.dataset.done) return; el.dataset.done = '1'; // 自動で続けるのと手で押すのが重なっても1回だけ（2回目で時間がこわれないように）
     const k = b.dataset.hq; el.classList.add('out'); setTimeout(() => el.remove(), 350);
-    if (S.hunt !== H || H.over) return;
+    if (S.hunt !== H || H.over || !H.pausedAt) return;
     if (k === 'end') { H.end = Date.now(); huntFinish(); return; }
     if (k === 'random') { H.target = null; store.set('huntT', null); }
     H.end += Date.now() - H.pausedAt; H.fieldAt = Date.now(); H.pausedAt = null; H.blocked = false; huntDeal(H); render();
@@ -1291,11 +1292,11 @@ function huntCapture(expr, t, n, kind) {
   el.style.left = cx + 'px'; el.style.top = cy + 'px';
   el.style.setProperty('--tx', (to.left + to.width / 2 - cx) + 'px'); el.style.setProperty('--ty', (to.top + to.height / 2 - cy) + 'px');
   el.innerHTML = `<div class="hc-ex">${esc(expr)} = ${t}</div>
-    <div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
+    <div class="hc-muzzle" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>${[3, 2, 1].map(k => `<div class="hc-bullet tr${k}" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>`).join('')}<div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
     <div class="hc-hit"></div><div class="hc-ring"></div><div class="hc-stamp">${kind === 'out' ? '命中' : '捕獲！'}</div><div class="hc-n">${kind === 'reg' ? '登録済みの式' : kind === 'out' ? '図鑑外の式' : `図鑑 ${n}/${ZUKAN.length}`}</div>`;
   document.body.appendChild(el);
-  KB.sfx('shot'); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 200);
-  setTimeout(() => el.remove(), 1700);
+  KB.sfx('shot'); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 480);
+  setTimeout(() => el.remove(), 2000);
 }
 // 演出：見送ったとき、手札に隠れていた式が姿を見せてから逃げていく（未登録＝獲物は大きく金色、ほかの式は小さく）
 function huntFlee(miss, others, t) {
@@ -6496,6 +6497,6 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
