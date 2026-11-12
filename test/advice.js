@@ -48,7 +48,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(sawRv, 'ライバルがいなければ「ライバル視すると張り合いが出るで」の案内');
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300);
   ok(await pa.evaluate(() => !document.querySelector('.host-r.beckon')), '一度マサを押したら、手招きはしない（次に開いたときの最初の10秒だけ）');
-  await pa.evaluate(() => KBAPP.act('host-masa'));
+  for (let k = 0; k < 20; k++) { await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('host-masa'); }); await pa.waitForTimeout(120); if (await pa.evaluate(() => !!document.querySelector('#modal .adv-b'))) break; }
   const bn = await pa.evaluate(() => { const e = document.querySelector('#modal .adv-b'); return e && e.textContent; });
   await pa.click('#modal .adv-b'); await pa.waitForTimeout(400);
   ok(!!bn && await pa.evaluate(n => !!document.querySelector('#modal .bdg-talk') && document.querySelector('#modal .bdg-big b').textContent === n.replace(/[「」]/g, ''), bn), 'アドバイスのバッジ名を押すと、そのバッジの詳細が出る：' + bn);

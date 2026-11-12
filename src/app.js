@@ -67,21 +67,21 @@ function makeAI(id, level, style, used) {
 // アバター編集
 const AV_OPTS = {
   age: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア']],
-  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン']],
+  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン'], ['tiger', 'トラ']],
   hs: [['short', 'ショート'], ['spiky', 'ツンツン'], ['side', '七三'], ['buzz', '坊主'], ['bald', 'つるつる'], ['mohawk', 'モヒカン'], ['afro', 'アフロ'], ['curly', 'くるくる'], ['bob', 'ボブ'], ['long', 'ロング'], ['pony', 'ポニー'], ['twin', 'ツイン'], ['bun', 'おだんご']],
   hair: ['#1b1b1f', '#2b2522', '#5a3a24', '#a8763e', '#d9b46a', '#e8e8e8', '#b0443a', '#e8590c', '#3d5a9e', '#7048e8', '#f06595', '#20c997'],
   skin: ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'],
   shirt: ['#f0a020', '#e03131', '#4263eb', '#20c997', '#7950f2', '#e64980', '#212529', '#f8f9fa', '#868e96', '#15aabf', '#2f9e44', '#a0522d'],
   acc: [[null, 'なし'], ['cap', 'キャップ'], ['baseball', '野球帽'], ['beret', 'ベレー帽'], ['headband', 'はちまき'], ['ribbon', 'リボン'], ['flower', 'お花'], ['headphones', 'ヘッドホン'], ['goggles', 'ゴーグル'], ['nekomimi', 'ネコ耳'], ['bunny', 'ウサ耳'], ['chef', 'コック帽'], ['towel', '手ぬぐい'], ['ninja', '忍者'], ['helmet', 'ヘルメット'], ['pirate', '海賊帽'], ['horns', 'ツノ'], ['thief', '怪盗マスク'], ['clown', 'ピエロ帽'],
-    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠']],
+    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠'], ['redband', '赤いバンダナ']],
   outfit: [[null, 'ふつう'], ['stripe', 'ボーダー'], ['hoodie', 'フード'], ['tie', 'ネクタイ'], ['bowtie', '蝶ネクタイ'], ['gakuran', '学ラン'], ['kimono', '着物'], ['judo', '柔道着'], ['coat', '白衣'], ['apron', 'エプロン'], ['armband', '腕章'], ['samurai', '侍'], ['butler', '執事'],
-    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン']],
+    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン'], ['vsjacket', 'VSジャケット']],
   face: [[null, 'なし'], ['freckles', 'そばかす'], ['blush', 'ほっぺ'], ['mustache', 'ちょびひげ'], ['beard', 'あごひげ'], ['bandage', 'ばんそうこう'], ['star', '星'], ['monocle', '片めがね'], ['kirakira', 'キラキラ'], ['flame', '炎のペイント'], ['scar', '歴戦の傷'], ['bolt', '稲妻ペイント']],
   gl: [[null, 'なし'], ['round', '丸めがね'], ['square', '四角めがね'], ['shades', 'サングラス'], ['gold', '金縁めがね'], ['star', '星めがね'], ['heart', 'ハートめがね'], ['visor', 'サイバーバイザー']],
-  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ']],
-  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥']],
+  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ'], ['glove', 'グローブ']],
+  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥'], ['hawk', 'たか']],
   bg: ['#8a9a93', '#1c7ed6', '#e8590c', '#2f9e44', '#ae3ec9', '#495057', '#e64980', '#f2b632'],
-  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台']]
+  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台'], ['pat:vs', 'VS']]
 };
 // カテゴリーの冠（コンプリート）と、各系統の金（いちばん上）バッジでアイテムが増える
 // カテゴリーの冠（コンプリート）でまとめてもらえるセット
@@ -94,7 +94,8 @@ const CROWN_SETS = {
   'アウツチャレンジ': ['base:ghost', 'acc:turban', 'outfit:starrobe', 'hold:dice', 'pet:bat', 'bgpat:pat:moon'],
   'バッジアタック': ['base:skeleton', 'acc:goldhelm', 'outfit:cape', 'hold:hourglass', 'pet:crow', 'bgpat:pat:clock'],
   '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy'],
-  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora']
+  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora'],
+  'ライバル': ['base:tiger', 'acc:redband', 'outfit:vsjacket', 'hold:glove', 'pet:hawk', 'bgpat:pat:vs']
 };
 const AV_LOCK = {
   ...(() => { const o = {}; Object.entries(CROWN_SETS).forEach(([cat, items]) => items.forEach(k => o[k] = { cat })); return o; })(),
@@ -548,7 +549,7 @@ function masaAdvice(more) {
     add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w, [advB(b.k, b.i)]); });
   // 冠（カテゴリーの特別バッジ）：残りが少ない系統
   ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(advB(k, i)); }); });
-    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null, miss); });
+    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${catBp(gi)}BPとアバターの特別セットやで！`, null, miss); });
   // ミニゲーム
   const c = g.cnt || {};
   if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
@@ -919,7 +920,7 @@ function showAch() {
   if (S.view === 'hunt' && S.hunt && S.hunt.started) {
     const tier = a === 'cat' ? 3 : a[5] ? a[5][i] : a[2].length === 1 ? 2 : Math.min(i, 2);
     const d = document.createElement('div'); d.className = 'ach-big t' + tier; d.setAttribute('role', 'status');
-    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${BP_CAT} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
+    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${catBp(i)} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
     document.body.appendChild(d); KB.sfx('best'); setTimeout(() => KB.sfx('combo'), 250); if (tier >= 2) setTimeout(confetti, 150);
     setTimeout(() => d.classList.add('out'), 2600);
     setTimeout(() => { d.remove(); ACH_Q.shift(); showAch(); }, 3000);
@@ -927,7 +928,7 @@ function showAch() {
   }
   const d = document.createElement('div'); d.className = 'ach-toast'; d.setAttribute('role', 'status');
   d.innerHTML = a === 'cat' ? `${emblemSVG(i, true, 30)}<span>「${esc(ACH_GROUPS[i][0])}」コンプリート！ <b>${esc(CAT_SPECIAL[ACH_GROUPS[i][0]])}</b></span>` : `${badgeSVG(a, i, true, 24)}<span>バッジ <b>${esc(a[4][i])}</b></span>`;
-  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? BP_CAT : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
+  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? catBp(i) : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
   if (a === 'cat') { d.classList.add('cat'); setTimeout(confetti, 100); }
   toastStack().appendChild(d); KB.sfx('best');
   setTimeout(() => d.classList.add('out'), 1800);
@@ -1888,8 +1889,8 @@ function growthHTML() {
   </div>
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
-    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
-    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${BP_CAT}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
+    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP（ライバルは${BP_CAT_G['ライバル']}BP）。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
+    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${catBp(gi)}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
   </div>
   <div class="panel stack">
     <div class="lbl">記録</div>
@@ -2154,12 +2155,13 @@ function zukanHTML() {
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
 const BP_W = { rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
-const BP_CAT = 500;
+const BP_CAT = 500, BP_CAT_G = { 'ライバル': 300 }; // 冠は500BP（ライバルは盛り上げ用なので300BP）
+const catBp = gi => BP_CAT_G[(ACH_GROUPS[gi] || [])[0]] || BP_CAT;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
   let t = 0;
   ACH.forEach(a => a[2].forEach((tt, i) => { if (g.ach[a[0] + ':' + tt]) t += bpOf(a[0], i); }));
-  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += BP_CAT; });
+  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += catBp(gi); });
   return t;
 }
 // ---------- バッジアタック：45分でどれだけバッジ（BP）を取れるか ----------
@@ -2312,7 +2314,7 @@ function attackCardHTML() {
 }
 // ホーム：バッジアタックの最高記録をそのまま表示
 function attackBadgeList(ach, size) {
-  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   // カテゴリー順・段階順に並べる
   const order = ACH_GROUPS.flatMap(([, ks]) => ks);
   const list = ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); const i = a ? a[2].indexOf(+t) : -1; return { k, i, a }; }).filter(x => x.i >= 0)
@@ -2337,7 +2339,7 @@ function attackBestModal() {
 function attackResultHTML() {
   const R = S.attackResult || { bp: 0, badges: 0, ach: [] };
   const list = R.ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); if (!a) return ''; const i = a[2].indexOf(+t); return i < 0 ? '' : `<div class="bdg-cell got">${badgeSVG(a, i, true, 34)}<b>${esc(a[4][i])}</b><small>${bpOf(k, i)} BP</small></div>`; }).join('');
-  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">バッジアタック 結果</div><div></div></div>
   <div class="panel stack" style="align-items:center;text-align:center">
     <div class="dq-title ok">${R.quit ? '途中で終了' : 'タイムアップ！'}</div>
