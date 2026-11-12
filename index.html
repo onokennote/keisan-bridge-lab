@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="3c844e4 2026-11-12 21:13"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="7008677 2026-11-12 21:25"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2304,7 +2304,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='4677f7c70c';
+window.KB_BUILD='c2500d4ec9';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -3330,6 +3330,9 @@ KB.creatureSVG = function (ch, mood) {
     case 'tanuki': return body('#8a6a48') + `<circle cx="30" cy="32" r="8" fill="#6b4e33"/><circle cx="70" cy="32" r="8" fill="#6b4e33"/>` + head(c || '#a07850') + `<ellipse cx="40" cy="51" rx="9" ry="7" fill="#4a3424"/><ellipse cx="60" cy="51" rx="9" ry="7" fill="#4a3424"/><ellipse cx="50" cy="63" rx="10" ry="7" fill="#efe1c8"/><circle cx="50" cy="59" r="3" fill="${INK}"/><path d="M47 22q3 -6 8 -2q-2 4 -8 2Z" fill="#40c057"/>` + f(51, 66, 10, true);
     case 'fox': return body('#e8873a') + `<path d="M26 44L28 14L46 32Z M74 44L72 14L54 32Z" fill="${c || '#f08c3a'}"/><path d="M30 38L31 22L40 32Z M70 38L69 22L60 32Z" fill="#fff3e0"/>` + head(c || '#f08c3a') + `<path d="M34 58Q50 80 66 58Q58 66 50 66Q42 66 34 58Z" fill="#fff3e0"/><circle cx="50" cy="63" r="3" fill="${INK}"/><path d="M42 30l-3 8M58 30l3 8" stroke="#c92a2a" stroke-width="2"/>` + f(50, 69);
     case 'bear': return body('#e9e4d8') + `<circle cx="30" cy="32" r="9" fill="${c || '#f4f1e8'}"/><circle cx="70" cy="32" r="9" fill="${c || '#f4f1e8'}"/>` + head(c || '#f4f1e8', 26, 24) + `<ellipse cx="50" cy="62" rx="11" ry="8" fill="#fff"/><ellipse cx="50" cy="58" rx="4" ry="3" fill="${INK}"/><path d="M38 76h24" stroke="#c92a2a" stroke-width="4"/>` + f(49, 66);
+    case 'tiger': return body('#f08c00') + `<path d="M24 98l8 -8M76 98l-8 -8M40 104l3 -12M60 104l-3 -12" stroke="#1b1b1f" stroke-width="2.6" stroke-linecap="round"/><path d="M42 104Q44 88 50 86Q56 88 58 104Z" fill="#fff4e6"/>` + `<circle cx="29" cy="31" r="9" fill="#f59f00"/><circle cx="71" cy="31" r="9" fill="#f59f00"/><circle cx="29" cy="31" r="4.5" fill="#fff4e6"/><circle cx="71" cy="31" r="4.5" fill="#fff4e6"/>` + head(c || '#ffa94d', 26, 23) +
+      `<path d="M50 30v7M44 31l2 6M56 31l-2 6M25 46l8 2M25 52l7 1M75 46l-8 2M75 52l-7 1M28 60l6 -1M72 60l-6 -1" stroke="#1b1b1f" stroke-width="2.2" stroke-linecap="round"/>` +
+      `<path d="M36 58Q50 52 64 58Q66 72 50 75Q34 72 36 58Z" fill="#fff4e6"/><path d="M45 58h10l-5 4Z" fill="#e8798a" stroke="#1b1b1f" stroke-width=".8"/><path d="M41 64h-13M41 67h-12M59 64h13M59 67h12" stroke="#5c4033" stroke-width=".9"/>` + f(48, 67);
     case 'dragon': return `<path d="M20 74Q2 50 8 26Q16 42 30 54Z M80 74Q98 50 92 26Q84 42 70 54Z" fill="#1f7a35"/><path d="M12 32Q18 46 28 54M88 32Q82 46 72 54" stroke="#69db7c" stroke-width="1.5" fill="none"/>` + body('#2f9e44') + `<path d="M38 104Q40 88 50 86Q60 88 62 104Z" fill="#d8f5a2"/>` + `<path d="M33 34L25 8L43 28Z M67 34L75 8L57 28Z" fill="#fff3bf" stroke="#e8c547" stroke-width="1"/>` + head(c || '#40c057', 25, 22, 46) + `<path d="M43 28l3 -9 3 9M51 28l3 -9 3 9" fill="#8ce99a"/><path d="M30 40q6 -4 12 -1M70 40q-6 -4 -12 -1" stroke="#1f7a35" stroke-width="2.2" fill="none" stroke-linecap="round"/>` +
       // 長い鼻先：顔と同じ色でつなげて下へ張り出す（輪郭線なし）。先だけ明るく、鼻すじは顔から続く
       `<path d="M30 54Q50 44 70 54Q70 70 64 77Q57 84 50 84Q43 84 36 77Q30 70 30 54Z" fill="${c || '#40c057'}"/><path d="M44 46Q43 60 41 70M56 46Q57 60 59 70" stroke="#2f9e44" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M43 58q7 2 14 0M42 64q8 2 16 0" stroke="#2f9e44" stroke-width="1" fill="none"/><ellipse cx="50" cy="74" rx="13" ry="8" fill="#8ce99a" opacity=".8"/>` +
@@ -3393,6 +3396,7 @@ KB.glSVG = function (gl, eyY, ex) {
 // 手に持つもの（右下）
 KB.holdSVG = function (h) {
   switch (h) {
+    case 'glove': return `<g transform="translate(68 70) rotate(-15)"><rect x="4" y="20" width="14" height="8" rx="2" fill="#f8f9fa" stroke="#adb5bd"/><path d="M2 8Q2 -2 12 -2Q22 -2 22 9Q22 20 12 21Q2 20 2 8Z" fill="#e03131" stroke="#a51111"/><path d="M4 9Q-3 8 -2 14Q-1 18 5 16" fill="#e03131" stroke="#a51111"/><path d="M8 3q4 -2 8 0" stroke="#ff8787" stroke-width="1.5" fill="none"/></g>`;
     case 'torch': return `<g transform="translate(74 66) rotate(12)"><path d="M-3 10L3 10L1.6 38H-1.6Z" fill="#adb5bd" stroke="#495057"/><rect x="-6" y="6" width="12" height="5" rx="1.5" fill="#fcc419" stroke="#e67700"/><path d="M0 6Q-9 -4 -2 -14Q-1 -6 3 -10Q9 -2 0 6Z" fill="#ff922b"/><path d="M0 5Q-4 -1 0 -7Q4 -1 0 5Z" fill="#ffe066"/></g>`;
     case 'goldcup': return `<g transform="translate(66 68)"><path d="M2 0H24Q24 16 13 19Q2 16 2 0Z" fill="#fcc419" stroke="#e67700" stroke-width="1.2"/><path d="M2 3Q-5 3 -4 9Q-3 14 4 13M24 3Q31 3 30 9Q29 14 22 13" stroke="#e67700" stroke-width="2" fill="none"/><rect x="10.5" y="19" width="5" height="6" fill="#e67700"/><rect x="6" y="25" width="14" height="5" rx="1.5" fill="#8b5a2b"/><text x="13" y="11" text-anchor="middle" font-size="9" font-weight="900" fill="#7a4b00" font-family="sans-serif">1</text></g>`;
     case 'flag': return `<g transform="translate(70 62)"><rect x="0" y="0" width="2.4" height="40" fill="#8b5a2b"/><path d="M2.4 1h20l-4 6 4 6h-20Z" fill="#e03131"/><circle cx="10" cy="7" r="3" fill="#fff"/></g>`;
@@ -3418,6 +3422,7 @@ KB.holdSVG = function (h) {
 // おとも（左下の小さな仲間）
 KB.petSVG = function (p) {
   switch (p) {
+    case 'hawk': return `<g transform="translate(4 74)"><path d="M0 10Q6 0 14 6Q22 0 28 10Q20 9 18 14Q14 20 10 14Q8 9 0 10Z" fill="#8b5a2b"/><circle cx="14" cy="6" r="5.5" fill="#f1f3f5"/><circle cx="12" cy="5" r="1.2" fill="#1b1b1f"/><circle cx="16" cy="5" r="1.2" fill="#1b1b1f"/><path d="M12.5 7.5h3l-1.5 3Z" fill="#fab005"/><path d="M11 18l-1 4M17 18l1 4" stroke="#fab005" stroke-width="1.5"/></g>`;
     case 'goldbird': return `<g transform="translate(6 76)"><path d="M4 12Q-4 6 2 2Q6 8 10 9Z M22 12Q30 6 24 2Q20 8 16 9Z" fill="#f59f00"/><ellipse cx="13" cy="13" rx="10" ry="8" fill="#fcc419"/><circle cx="13" cy="4" r="6.5" fill="#ffd43b"/><path d="M11 -2l2 -5 2 5" fill="#e67700"/><circle cx="10.5" cy="3.5" r="1.2" fill="#1b1b1f"/><circle cx="15.5" cy="3.5" r="1.2" fill="#1b1b1f"/><path d="M11.5 6h3l-1.5 2.5Z" fill="#e8590c"/><path d="M6 10l1.5 1.5M20 10l-1.5 1.5" stroke="#fff3bf" stroke-width="1"/></g>`;
     case 'chick': return `<g transform="translate(8 80)"><ellipse cx="12" cy="11" rx="11" ry="9" fill="#ffe066"/><circle cx="12" cy="3" r="7" fill="#ffe066"/><circle cx="9" cy="2" r="1.3" fill="#1b1b1f"/><circle cx="15" cy="2" r="1.3" fill="#1b1b1f"/><path d="M10.5 5h3l-1.5 2.5Z" fill="#f59f00"/><path d="M11 -4l1 -3 1 3" stroke="#f59f00" fill="none"/></g>`;
     case 'phoenix': return `<g transform="translate(4 70)"><path d="M2 10Q8 -4 14 6Q20 -6 28 6Q22 8 20 14Q16 22 10 20Q4 18 2 10Z" fill="#fa5252"/><path d="M8 12Q14 4 22 10Q16 12 14 18Z" fill="#ffa94d"/><path d="M10 20l-6 8M14 21l0 8M18 20l5 7" stroke="#fcc419" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="7" r="1.3" fill="#1b1b1f"/><path d="M26 7l4 1-4 2Z" fill="#fcc419"/></g>`;
@@ -3436,6 +3441,7 @@ KB.petSVG = function (p) {
 // 背景の柄
 KB.bgPatSVG = function (pat) {
   switch (pat) {
+    case 'vs': return `<rect x="0" y="0" width="100" height="100" fill="#c92a2a"/><path d="M58 0H100V100H38Z" fill="#1864ab"/><path d="M60 -2L44 46H56L40 102L70 38H57L72 -2Z" fill="#ffe066" opacity=".9"/>`;
     case 'aurora': return `<rect x="0" y="0" width="100" height="100" fill="#0b1640"/><path d="M-5 40Q20 20 45 34T100 26V52Q75 40 50 54T-5 56Z" fill="rgba(105,219,124,.45)"/><path d="M-5 30Q25 12 55 26T105 18V34Q80 26 55 38T-5 42Z" fill="rgba(151,117,250,.4)"/>${[[12, 8], [80, 10], [92, 60], [6, 70], [60, 6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.1" fill="#fff"/>`).join('')}`;
     case 'podium': return `<rect x="0" y="0" width="100" height="100" fill="#1b1d2b"/><path d="M50 -10L20 100H80Z" fill="rgba(255,236,153,.22)"/><g font-family="sans-serif" font-weight="900" font-size="9" text-anchor="middle"><rect x="2" y="78" width="30" height="22" fill="#ced4da"/><text x="17" y="92" fill="#495057">2</text><rect x="35" y="70" width="30" height="30" fill="#fcc419"/><text x="50" y="86" fill="#7a4b00">1</text><rect x="68" y="84" width="30" height="16" fill="#e8a76a"/><text x="83" y="95" fill="#6b3d12">3</text></g>`;
     case 'fire': return `<rect x="0" y="0" width="100" height="100" fill="#3b0d0d"/><path d="M0 100V70q8 -14 14 0q4 -18 12 -4q6 -16 12 0q6 -20 14 -2q6 -14 12 2q6 -16 12 0q6 -12 14 4V100Z" fill="#e8590c"/><path d="M0 100V82q8 -10 14 0q6 -12 12 0q6 -10 12 0q6 -12 14 0q6 -10 12 0q6 -10 12 0q6 -8 14 2V100Z" fill="#fcc419"/>`;
@@ -3485,7 +3491,9 @@ KB.accSVG = function (acc, fy, rx, top) {
     case 'apron': return { back: '', front: `<path d="M34 104V88h32v16Z" fill="#fff"/><path d="M34 88L40 80M66 88L60 80" stroke="#fff" stroke-width="2"/><rect x="${L - 1}" y="${top + 8}" width="${2 * rx + 2}" height="5" fill="#e03131"/>` };
     case 'flower': return { back: '', front: `<circle cx="${Rr - 8}" cy="${top + 4}" r="5" fill="#f783ac"/><circle cx="${Rr - 8}" cy="${top + 4}" r="2" fill="#ffd43b"/>` };
     case 'tie': return { back: '', front: `<path d="M46 82h8l-2 4l4 16h-12l4 -16Z" fill="#e03131"/>` };
+    case 'redband': return { back: `<path d="M${100 - L - 2} ${top + 12}l12 10l-3 4l-11 -8Z M${100 - L - 2} ${top + 12}l8 16l-4 2l-7 -14Z" fill="#c92a2a"/>`, front: `<path d="M${L - 1} ${top + 10}Q50 ${top + 2} ${100 - L + 1} ${top + 10}L${100 - L + 1} ${top + 17}Q50 ${top + 9} ${L - 1} ${top + 17}Z" fill="#e03131"/><g fill="#fff" opacity=".85"><circle cx="40" cy="${top + 11}" r="1.2"/><circle cx="50" cy="${top + 9}" r="1.2"/><circle cx="60" cy="${top + 11}" r="1.2"/></g>` };
     case 'platcrown': return { back: '', front: `<path d="M${L + 1} ${top + 4}l3 -16l8 10l7 -14l7 14l8 -10l3 16Z" fill="#e9ecef" stroke="#868e96" stroke-width="1.2"/><path d="M${L + 2} ${top + 1}h${(50 - L) * 2 - 4}" stroke="#adb5bd" stroke-width="1.5"/><circle cx="50" cy="${top - 7}" r="2.6" fill="#4dabf7" stroke="#1971c2"/><circle cx="${L + 12}" cy="${top - 3}" r="1.6" fill="#da77f2"/><circle cx="${100 - L - 12}" cy="${top - 3}" r="1.6" fill="#da77f2"/>` };
+    case 'vsjacket': return { back: `<path d="M10 104Q12 70 34 64H66Q88 70 90 104Z" fill="#1c1c2e"/>`, front: `<path d="M12 104Q14 78 34 68L44 104Z" fill="#1c1c2e"/><path d="M88 104Q86 78 66 68L56 104Z" fill="#1c1c2e"/><path d="M34 68L44 104M66 68L56 104" stroke="#fcc419" stroke-width="1.8"/><path d="M15 100Q18 84 28 74" stroke="#e03131" stroke-width="3.5" fill="none"/><path d="M85 100Q82 84 72 74" stroke="#1c7ed6" stroke-width="3.5" fill="none"/><g font-family="sans-serif" font-weight="900" font-size="11" font-style="italic"><text x="25" y="92" fill="#ff6b6b">V</text><text x="66" y="92" fill="#4dabf7">S</text></g>` };
     case 'gown': return { back: `<path d="M10 104Q12 70 34 64H66Q88 70 90 104Z" fill="#5f3dc4"/>`, front: `<path d="M38 66L44 104M62 66L56 104" stroke="#fcc419" stroke-width="3.2"/><path d="M34 66Q50 74 66 66" stroke="#fcc419" stroke-width="2.4" fill="none"/><circle cx="50" cy="86" r="5.5" fill="#fcc419" stroke="#e67700"/><text x="50" y="88.6" text-anchor="middle" font-size="6.5" font-weight="900" fill="#7a4b00" font-family="sans-serif">1</text>` };
     case 'crown': return { back: '', front: `<path d="M${L + 2} ${top + 4}l4 -14l8 9l6 -12l6 12l8 -9l4 14Z" fill="#fcc419" stroke="#e67700"/><circle cx="50" cy="${top - 4}" r="2" fill="#e03131"/>` };
     // ---- 追加の帽子・頭の小物 ----
@@ -5914,21 +5922,21 @@ function makeAI(id, level, style, used) {
 // アバター編集
 const AV_OPTS = {
   age: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア']],
-  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン']],
+  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン'], ['tiger', 'トラ']],
   hs: [['short', 'ショート'], ['spiky', 'ツンツン'], ['side', '七三'], ['buzz', '坊主'], ['bald', 'つるつる'], ['mohawk', 'モヒカン'], ['afro', 'アフロ'], ['curly', 'くるくる'], ['bob', 'ボブ'], ['long', 'ロング'], ['pony', 'ポニー'], ['twin', 'ツイン'], ['bun', 'おだんご']],
   hair: ['#1b1b1f', '#2b2522', '#5a3a24', '#a8763e', '#d9b46a', '#e8e8e8', '#b0443a', '#e8590c', '#3d5a9e', '#7048e8', '#f06595', '#20c997'],
   skin: ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'],
   shirt: ['#f0a020', '#e03131', '#4263eb', '#20c997', '#7950f2', '#e64980', '#212529', '#f8f9fa', '#868e96', '#15aabf', '#2f9e44', '#a0522d'],
   acc: [[null, 'なし'], ['cap', 'キャップ'], ['baseball', '野球帽'], ['beret', 'ベレー帽'], ['headband', 'はちまき'], ['ribbon', 'リボン'], ['flower', 'お花'], ['headphones', 'ヘッドホン'], ['goggles', 'ゴーグル'], ['nekomimi', 'ネコ耳'], ['bunny', 'ウサ耳'], ['chef', 'コック帽'], ['towel', '手ぬぐい'], ['ninja', '忍者'], ['helmet', 'ヘルメット'], ['pirate', '海賊帽'], ['horns', 'ツノ'], ['thief', '怪盗マスク'], ['clown', 'ピエロ帽'],
-    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠']],
+    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠'], ['redband', '赤いバンダナ']],
   outfit: [[null, 'ふつう'], ['stripe', 'ボーダー'], ['hoodie', 'フード'], ['tie', 'ネクタイ'], ['bowtie', '蝶ネクタイ'], ['gakuran', '学ラン'], ['kimono', '着物'], ['judo', '柔道着'], ['coat', '白衣'], ['apron', 'エプロン'], ['armband', '腕章'], ['samurai', '侍'], ['butler', '執事'],
-    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン']],
+    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン'], ['vsjacket', 'VSジャケット']],
   face: [[null, 'なし'], ['freckles', 'そばかす'], ['blush', 'ほっぺ'], ['mustache', 'ちょびひげ'], ['beard', 'あごひげ'], ['bandage', 'ばんそうこう'], ['star', '星'], ['monocle', '片めがね'], ['kirakira', 'キラキラ'], ['flame', '炎のペイント'], ['scar', '歴戦の傷'], ['bolt', '稲妻ペイント']],
   gl: [[null, 'なし'], ['round', '丸めがね'], ['square', '四角めがね'], ['shades', 'サングラス'], ['gold', '金縁めがね'], ['star', '星めがね'], ['heart', 'ハートめがね'], ['visor', 'サイバーバイザー']],
-  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ']],
-  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥']],
+  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ'], ['glove', 'グローブ']],
+  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥'], ['hawk', 'たか']],
   bg: ['#8a9a93', '#1c7ed6', '#e8590c', '#2f9e44', '#ae3ec9', '#495057', '#e64980', '#f2b632'],
-  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台']]
+  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台'], ['pat:vs', 'VS']]
 };
 // カテゴリーの冠（コンプリート）と、各系統の金（いちばん上）バッジでアイテムが増える
 // カテゴリーの冠（コンプリート）でまとめてもらえるセット
@@ -5941,7 +5949,8 @@ const CROWN_SETS = {
   'アウツチャレンジ': ['base:ghost', 'acc:turban', 'outfit:starrobe', 'hold:dice', 'pet:bat', 'bgpat:pat:moon'],
   'バッジアタック': ['base:skeleton', 'acc:goldhelm', 'outfit:cape', 'hold:hourglass', 'pet:crow', 'bgpat:pat:clock'],
   '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy'],
-  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora']
+  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora'],
+  'ライバル': ['base:tiger', 'acc:redband', 'outfit:vsjacket', 'hold:glove', 'pet:hawk', 'bgpat:pat:vs']
 };
 const AV_LOCK = {
   ...(() => { const o = {}; Object.entries(CROWN_SETS).forEach(([cat, items]) => items.forEach(k => o[k] = { cat })); return o; })(),
@@ -6395,7 +6404,7 @@ function masaAdvice(more) {
     add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w, [advB(b.k, b.i)]); });
   // 冠（カテゴリーの特別バッジ）：残りが少ない系統
   ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(advB(k, i)); }); });
-    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null, miss); });
+    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${catBp(gi)}BPとアバターの特別セットやで！`, null, miss); });
   // ミニゲーム
   const c = g.cnt || {};
   if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
@@ -6766,7 +6775,7 @@ function showAch() {
   if (S.view === 'hunt' && S.hunt && S.hunt.started) {
     const tier = a === 'cat' ? 3 : a[5] ? a[5][i] : a[2].length === 1 ? 2 : Math.min(i, 2);
     const d = document.createElement('div'); d.className = 'ach-big t' + tier; d.setAttribute('role', 'status');
-    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${BP_CAT} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
+    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${catBp(i)} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
     document.body.appendChild(d); KB.sfx('best'); setTimeout(() => KB.sfx('combo'), 250); if (tier >= 2) setTimeout(confetti, 150);
     setTimeout(() => d.classList.add('out'), 2600);
     setTimeout(() => { d.remove(); ACH_Q.shift(); showAch(); }, 3000);
@@ -6774,7 +6783,7 @@ function showAch() {
   }
   const d = document.createElement('div'); d.className = 'ach-toast'; d.setAttribute('role', 'status');
   d.innerHTML = a === 'cat' ? `${emblemSVG(i, true, 30)}<span>「${esc(ACH_GROUPS[i][0])}」コンプリート！ <b>${esc(CAT_SPECIAL[ACH_GROUPS[i][0]])}</b></span>` : `${badgeSVG(a, i, true, 24)}<span>バッジ <b>${esc(a[4][i])}</b></span>`;
-  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? BP_CAT : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
+  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? catBp(i) : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
   if (a === 'cat') { d.classList.add('cat'); setTimeout(confetti, 100); }
   toastStack().appendChild(d); KB.sfx('best');
   setTimeout(() => d.classList.add('out'), 1800);
@@ -7735,8 +7744,8 @@ function growthHTML() {
   </div>
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
-    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
-    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${BP_CAT}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
+    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP（ライバルは${BP_CAT_G['ライバル']}BP）。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
+    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${catBp(gi)}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
   </div>
   <div class="panel stack">
     <div class="lbl">記録</div>
@@ -8001,12 +8010,13 @@ function zukanHTML() {
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
 const BP_W = { rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
-const BP_CAT = 500;
+const BP_CAT = 500, BP_CAT_G = { 'ライバル': 300 }; // 冠は500BP（ライバルは盛り上げ用なので300BP）
+const catBp = gi => BP_CAT_G[(ACH_GROUPS[gi] || [])[0]] || BP_CAT;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
   let t = 0;
   ACH.forEach(a => a[2].forEach((tt, i) => { if (g.ach[a[0] + ':' + tt]) t += bpOf(a[0], i); }));
-  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += BP_CAT; });
+  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += catBp(gi); });
   return t;
 }
 // ---------- バッジアタック：45分でどれだけバッジ（BP）を取れるか ----------
@@ -8159,7 +8169,7 @@ function attackCardHTML() {
 }
 // ホーム：バッジアタックの最高記録をそのまま表示
 function attackBadgeList(ach, size) {
-  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   // カテゴリー順・段階順に並べる
   const order = ACH_GROUPS.flatMap(([, ks]) => ks);
   const list = ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); const i = a ? a[2].indexOf(+t) : -1; return { k, i, a }; }).filter(x => x.i >= 0)
@@ -8184,7 +8194,7 @@ function attackBestModal() {
 function attackResultHTML() {
   const R = S.attackResult || { bp: 0, badges: 0, ach: [] };
   const list = R.ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); if (!a) return ''; const i = a[2].indexOf(+t); return i < 0 ? '' : `<div class="bdg-cell got">${badgeSVG(a, i, true, 34)}<b>${esc(a[4][i])}</b><small>${bpOf(k, i)} BP</small></div>`; }).join('');
-  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">バッジアタック 結果</div><div></div></div>
   <div class="panel stack" style="align-items:center;text-align:center">
     <div class="dq-title ok">${R.quit ? '途中で終了' : 'タイムアップ！'}</div>
