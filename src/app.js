@@ -1295,7 +1295,7 @@ function huntCapture(expr, t, n, kind) {
     <div class="hc-muzzle" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>${[3, 2, 1].map(k => `<div class="hc-bullet tr${k}" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>`).join('')}<div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
     <div class="hc-hit"></div><div class="hc-ring"></div><div class="hc-stamp">${kind === 'out' ? '命中' : '捕獲！'}</div><div class="hc-n">${kind === 'reg' ? '登録済みの式' : kind === 'out' ? '図鑑外の式' : `図鑑 ${n}/${ZUKAN.length}`}</div>`;
   document.body.appendChild(el);
-  KB.sfx('shot'); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 480);
+  setTimeout(() => KB.sfx('shot'), 130); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 380);
   setTimeout(() => el.remove(), 2000);
 }
 // 演出：見送ったとき、手札に隠れていた式が姿を見せてから逃げていく（未登録＝獲物は大きく金色、ほかの式は小さく）
