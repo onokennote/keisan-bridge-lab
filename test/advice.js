@@ -126,6 +126,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   // ライバル系のバッジ：宿敵ができたハナに「宿命の出会い」、ライバル視・被ライバルも
   const rb = await pb.evaluate(() => { const g = KBAPP.G(); return ['rival_out:1', 'rival_in:1', 'rival_mu:1'].map(k => !!g.ach[k]); });
   ok(rb.every(Boolean), 'ライバル系のバッジ（ライバル宣言・注目の的・宿命の出会い）を取れる：' + rb.join());
+  await pb.waitForTimeout(6000);
+  const rk = await pb.evaluate(async () => { const g = KBAPP.G(), nm = KBAPP.S.settings.name; const j = await (await fetch(KB_CLOUD_API + '?a=rankings', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: KBAPP.cloud().l && KBAPP.cloud().l.token, ai: 0 }) })).json(); const L = ((j.rankings || {}).badges || {}).list || []; const r = (Array.isArray(L) ? L : []).find(x => x.name === nm); return { local: Object.keys(g.ach).filter(k => !/^cat:/.test(k)).length, rank: r ? r.badges : null, raw: JSON.stringify(j).slice(0, 200) }; });
+  ok(rk.rank === rk.local, 'ランキングのバッジ数に、ライバル系のバッジも入る：端末' + rk.local + '・ランキング' + rk.rank + ' ' + (rk.rank == null ? rk.raw : ''));
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
