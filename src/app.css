@@ -2266,3 +2266,17 @@ body.rewinding #home-fab{display:none}
 .hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .4s both,hcFly .45s 1.35s cubic-bezier(.6,0,.8,.4) both}
 .hc-stamp{animation:hcStamp .35s .48s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.3s both}
 .hc-n{animation:ciTxt .3s .6s both,hcOut .3s 1.3s both}
+/* 弾：0.2秒溜めて、0.14秒で一気に（飛ぶ間は進む向きに細長く伸ばして速さを見せる） */
+.hc-bullet{animation:hcBulletDash .34s linear both}
+@keyframes hcBulletDash{
+  0%{opacity:.6;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(1)}
+  58%{opacity:1;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(3.2);animation-timing-function:cubic-bezier(.9,0,1,.6)}
+  70%{transform:translate(calc(var(--bx) * .75),calc(var(--by) * .75)) rotate(var(--ang)) scale(3.6,1.1)}
+  96%{opacity:1}
+  100%{opacity:0;transform:translate(0,0) rotate(var(--ang)) scale(1.4,.4)}}
+.hc-muzzle{animation:hcMuzzle .25s .19s ease-out both}
+.hc-hit{animation:hcHit .45s .33s ease-out both}
+.hc-ring{animation:hcRing .45s .34s ease-out both}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .34s both,hcFly .45s 1.3s cubic-bezier(.6,0,.8,.4) both}
+.hc-stamp{animation:hcStamp .35s .42s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.25s both}
+.hc-n{animation:ciTxt .3s .55s both,hcOut .3s 1.25s both}
