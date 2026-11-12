@@ -56,6 +56,17 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.click('#modal [data-act="adv-back"]'); await pa.waitForTimeout(300);
   ok(await pa.evaluate(() => !!document.querySelector('#modal .adv-list')), '「アドバイスに戻る」で元のアドバイスに戻る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'host_masa2.png') });
+  // 自動照準のアドバイス：「三場制覇」の前→式ハンターへ、持っていれば→大会へ
+  const findAim = async (re) => { await pa.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(300); await pa.click('[data-act="host-masa"]'); await pa.waitForTimeout(300);
+    for (let k = 0; k < 40; k++) { const hit = await pa.evaluate(r => { const e = [...document.querySelectorAll('#modal .adv')].find(e => new RegExp(r).test(e.innerText)); return e ? { t: e.innerText, b: !!e.querySelector('.adv-b'), go: (e.querySelector('[data-act="adv-go"]') || {}).dataset } : null; }, re.source); if (hit) return hit; await pa.click('#modal [data-act="masa-more"]'); await pa.waitForTimeout(80); } return null; };
+  await pa.evaluate(() => KBAPP.testAch('zukan_cat', 1));
+  const a1 = await findAim(/自動照準/);
+  ok(a1 && /3つ制覇/.test(a1.t) && /いま1つ/.test(a1.t) && a1.b && a1.go && a1.go.a === 'hunt-start', 'マサ：「三場制覇」を持って決勝に進むと自動照準がもらえる（式ハンターへ）：' + (a1 ? a1.t.slice(0, 50) : 'なし'));
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'adv_aim.png') });
+  await pa.evaluate(() => KBAPP.testAch('zukan_cat', 3));
+  const a2 = await findAim(/自動照準/);
+  ok(a2 && /持っとる/.test(a2.t) && a2.go && a2.go.go === 'setup-tour', '「三場制覇」を持っていれば、大会の決勝を狙おう（大会へ）');
+  await pa.evaluate(() => { const g = KBAPP.G(); g.cnt.zukan_cat = 0; delete g.ach['zukan_cat:1']; delete g.ach['zukan_cat:3']; document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); });
   await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pb.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 70); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(false, true); }); await pa.waitForTimeout(600);
   // ランキングでハナを押して「ライバルにする」
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
