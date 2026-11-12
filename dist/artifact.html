@@ -2246,7 +2246,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d1fda2385e';
+window.KB_BUILD='57c4896867';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9182,7 +9182,7 @@ function loop() {
     const setKey = S.T ? (S.T.phase || '') + ':' + (S.T.set || 0) : 'p', first = S.toushiSet !== setKey; S.toushiSet = setKey;
     S.thinking = p; if (first) { toushiFx(g, p); say('kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say('kanataAgain', { n: nm(pl) }); }
     renderGame();
-    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : first ? 3300 : 1100); return;
+    S.timer = pt(loop, first ? 3300 : 1100); return; // 演出を見せ終わってから打つ（速さに関係なく）
   }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
@@ -9302,14 +9302,12 @@ function cutInFx(label, expr, t) {
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
 }
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
-function toushiLite(g, p) {
-  if (S.settings.speed === 'instant') return;
+function toushiLite(g, p) { // 速さが「一瞬」でも見せる
   const el = document.createElement('div'); el.className = 'toushi-lite';
   el.innerHTML = `<span class="tl-eye">${KB.avatarSVG(g.players[p].ch, { open: true, level: 6 })}</span><b>絶対透視</b>`;
   document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
 }
-function toushiFx(g, p) {
-  if (S.settings.speed === 'instant') return;
+function toushiFx(g, p) { // 速さが「一瞬」でも見せる
   // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
   const pl = g.players[p], back = (_, k) => `<span class="tx-c" style="animation-delay:${0.5 + k * 0.06}s"></span>`;
   const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(back).join('')}</div>`).join('');
