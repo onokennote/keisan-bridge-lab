@@ -2203,6 +2203,7 @@ body.rewinding #home-fab{display:none}
 .rvc{white-space:nowrap}.pb-rv .pv-rvc{gap:4px}.pb-rv .rvc{font-size:11px;padding:1px 7px}.pb-rv .rvc b{font-size:12px}
 .rvc.mu{border-color:rgba(240,190,60,.6)}
 .rv-nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rv-li .rv-nm{flex:1}.rv-mu{font-style:normal;font-weight:900;color:#f0be3c;margin-right:8px;flex:none}
 .rv-mu{font-style:normal;font-size:11px;background:rgba(240,190,60,.2);color:var(--trim);border-radius:999px;padding:1px 7px}
 /* 通知 */
 .pb-bell{position:relative}

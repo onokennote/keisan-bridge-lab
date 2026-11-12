@@ -640,16 +640,19 @@ async function rvByFetch(force) {
 }
 function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
-  const isMu = x => x.rid && by.some(y => y.rid === x.rid), mu = rivals.filter(isMu).length, out = rivals.length - mu, inn = by.filter(y => !rivals.some(x => x.rid === y.rid)).length;
+  // ライバル視・被ライバルの数は宿敵も含む（宿敵はその中のお互いの人）
+  const mu = rivals.filter(x => x.rid && by.some(y => y.rid === x.rid)).length, out = rivals.length, inn = by.length;
   return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>→</i>ライバル視<b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>←</i>被ライバル<b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i>宿敵<b>${mu}</b></button></span>`;
 }
 function rvListModal(key) {
   const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;
   const back = $('#modal') ? $('#modal .modal').innerHTML : null;
   const isMu = x => x.rid && d.rivals.some(a => a.rid === x.rid) && d.by.some(b => b.rid === x.rid);
-  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}"><span class="rv-nm">${esc(x.name)}</span><span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
+  const mk = x => isMu(x) ? '<i class="rv-mu" title="宿敵">⇄</i>' : '';
+  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}">${mk(x)}<span class="rv-nm">${esc(x.name)}</span><span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
   const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
-  const one = d.rivals.filter(x => !isMu(x)), oneBy = d.by.filter(x => !isMu(x)), both = d.rivals.filter(isMu);
+  const muFirst = L => L.filter(isMu).concat(L.filter(x => !isMu(x))); // 宿敵（⇄）を上に
+  const one = muFirst(d.rivals), oneBy = muFirst(d.by), both = d.rivals.filter(isMu);
   const A = sec(`→ ${esc(san(d.name))}がライバル視している`, one, 'いません'), B = sec(`← ${esc(san(d.name))}をライバル視している`, oneBy, 'いません'), M = sec('⇄ 宿敵（お互いにライバル視）', both, 'まだいません');
   modal(`<div class="stack rv-lm">${tab === 'm' ? M : tab === 'b' ? B : A}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
