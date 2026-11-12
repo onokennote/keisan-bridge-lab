@@ -1670,12 +1670,27 @@ function profHTML(D, o) {
         <div class="pv-rk" id="pv-rk"></div>${CLOUD_ON ? rvcHTML(D.rivals || [], D.rivalBy || [], NAME) : ''}</div></div>
     <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
-    <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
-    <div class="pv-badges">${got.length ? got.map(b => badgeSVG(b.a, b.i, true, 26)).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
+    <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<button type="button" class="pv-eb" data-pvi="c:${gi}:${cp.have}:${cp.all}:${cp.done ? 1 : 0}" title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></button>`; }).join('')}</div>
+    <div class="pv-info" hidden></div>
+    <div class="pv-badges">${got.length ? got.map(b => `<button type="button" class="pv-bb" data-pvi="b:${b.a[0]}:${b.i}" aria-label="${esc(b.a[4][b.i])}">${badgeSVG(b.a, b.i, true, 26)}</button>`).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
     ${podiumHTML(D.awards)}
     ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${+a.official ? '<em class="on-off">公式</em> ' : ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
+}
+// プロフィールのバッジ・冠を押すと、その上に説明（プロフィールは閉じない）
+function pvInfoBind(box, name, me) {
+  const info = box.querySelector('.pv-info'); if (!info) return; const myG = G_(), TIER = ['銅', '銀', '金'];
+  box.querySelectorAll('[data-pvi]').forEach(el => el.onclick = () => {
+    const v = el.dataset.pvi; if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
+    box.querySelectorAll('[data-pvi].sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); info.dataset.cur = v;
+    const q = v.split(':'); let h = '';
+    if (q[0] === 'b') { const a = ACH.find(x => x[0] === q[1]), i = +q[2]; if (!a) return; const t = a[2][i], tier = a[5] ? a[5][i] : Math.min(i, 2), mine = !!myG.ach[a[0] + ':' + t];
+      h = `${badgeSVG(a, i, true, 44)}<div><b>${esc(a[4][i])}</b><small>${esc(a[1])}・${TIER[tier] || '金'}・${bpOf(a[0], i)}BP</small><p>${esc(a[3](t))}</p>${me ? '' : `<em class="${mine ? 'ok' : ''}">${mine ? '✓ あなたも持っています' : 'あなたはまだ持っていません'}</em>`}</div>`; }
+    else { const gi = +q[1], have = +q[2], all = +q[3], done = q[4] === '1', gn = ACH_GROUPS[gi][0], cs = (CROWN_SETS[gn] || []).length, mine = !!myG.ach['cat:' + gi];
+      h = `${emblemSVG(gi, done, 44)}<div><b>冠「${esc(CAT_SPECIAL[gn])}」</b><small>${esc(gn)}・${catBp(gi)}BP${cs ? `・アバター${cs}点セット` : ''}</small><p>「${esc(gn)}」のバッジを全部（${all}個）集めるともらえる冠。${done ? `${esc(name)}は獲得ずみ。` : `${esc(name)}はいま${have}/${all}。`}</p>${me ? '' : `<em class="${mine ? 'ok' : ''}">${mine ? '✓ あなたも持っています' : `あなたは${catProgress(myG, gi).have}/${all}`}</em>`}</div>`; }
+    info.innerHTML = h; info.hidden = false;
+  });
 }
 async function rankCardOpen(rid, me, el) {
   const isAi = !!((el && el.closest('.rk-row') && el.closest('.rk-row').querySelector('.ai-chip')) || (el && /AI研究員/.test(el.title || '')));
@@ -1690,7 +1705,7 @@ async function rankCardOpen(rid, me, el) {
       d = Object.assign({}, j.card, { ach: Object.fromEntries((j.card.ach || []).map(k => [k, 1])) });
     }
     const ai = isAi || !!d.ai, b = $('#modal .pv-box'); if (!b) return;
-    b.innerHTML = profHTML(d, { ai, me });
+    b.innerHTML = profHTML(d, { ai, me }); pvInfoBind(b, d.name || 'プレイヤー', me);
     // ライバル視：ほかの人は「→ ライバル視する／⇄ 宿敵になる」
     if (CLOUD_ON && PID && !me && rid) { const cl = $('#modal .rk-card > .row'); if (cl) { cl.insertAdjacentHTML('afterbegin', rivalBtnHTML(rid, d.name || 'プレイヤー')); bindModalActs(); } }
     if (CLOUD_ON && PID && me) rvByFetch(true).then(() => { const bx = $('#modal .pv-rvc'); if (bx) { bx.outerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); bindModalActs(); } });
