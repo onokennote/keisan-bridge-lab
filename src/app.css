@@ -2298,3 +2298,10 @@ body.rewinding #home-fab{display:none}
 .pb-btns2{flex-basis:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .pb-btns2 .btn{width:100%;padding:8px 6px;font-size:13px}
 .pb-btns2 .pb-grow{background:linear-gradient(180deg,#ffd76a,#e8a92a);color:#2a1c05;border-color:#e8a92a;font-weight:900}
+
+/* 成長記録のバッジ：カテゴリーごとに開く */
+.bdg-gh[data-bgt]{cursor:pointer;user-select:none}
+.bdg-group:not(.open) > .bdg-grid{display:none}
+.bdg-chev{font-style:normal;color:var(--muted,#8a8f98);transition:transform .15s;margin-left:4px}
+.bdg-group.open .bdg-chev{transform:rotate(90deg)}
+.bdg-all{align-self:flex-end}
