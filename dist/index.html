@@ -2269,10 +2269,24 @@ body.rewinding #home-fab{display:none}
 .hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .4s both,hcFly .45s 1.35s cubic-bezier(.6,0,.8,.4) both}
 .hc-stamp{animation:hcStamp .35s .48s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.3s both}
 .hc-n{animation:ciTxt .3s .6s both,hcOut .3s 1.3s both}
+/* 弾：0.2秒溜めて、0.14秒で一気に（飛ぶ間は進む向きに細長く伸ばして速さを見せる） */
+.hc-bullet{animation:hcBulletDash .34s linear both}
+@keyframes hcBulletDash{
+  0%{opacity:.6;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(1)}
+  58%{opacity:1;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(3.2);animation-timing-function:cubic-bezier(.9,0,1,.6)}
+  70%{transform:translate(calc(var(--bx) * .75),calc(var(--by) * .75)) rotate(var(--ang)) scale(3.6,1.1)}
+  96%{opacity:1}
+  100%{opacity:0;transform:translate(0,0) rotate(var(--ang)) scale(1.4,.4)}}
+.hc-muzzle{animation:hcMuzzle .25s .19s ease-out both}
+.hc-hit{animation:hcHit .45s .33s ease-out both}
+.hc-ring{animation:hcRing .45s .34s ease-out both}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .34s both,hcFly .45s 1.3s cubic-bezier(.6,0,.8,.4) both}
+.hc-stamp{animation:hcStamp .35s .42s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.25s both}
+.hc-n{animation:ciTxt .3s .55s both,hcOut .3s 1.25s both}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='5b65a93b06';
+window.KB_BUILD='e610f20cdd';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7093,10 +7107,10 @@ function huntCapture(expr, t, n, kind) {
   el.style.left = cx + 'px'; el.style.top = cy + 'px';
   el.style.setProperty('--tx', (to.left + to.width / 2 - cx) + 'px'); el.style.setProperty('--ty', (to.top + to.height / 2 - cy) + 'px');
   el.innerHTML = `<div class="hc-ex">${esc(expr)} = ${t}</div>
-    <div class="hc-muzzle" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>${[3, 2, 1].map(k => `<div class="hc-bullet tr${k}" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>`).join('')}<div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
+    <div class="hc-muzzle" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>${[3, 2, 1].map(k => `<div class="hc-bullet tr${k}" style="--ang:${ang}deg;--bx:${fx - cx}px;--by:${fy - cy}px"></div>`).join('')}<div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
     <div class="hc-hit"></div><div class="hc-ring"></div><div class="hc-stamp">${kind === 'out' ? '命中' : '捕獲！'}</div><div class="hc-n">${kind === 'reg' ? '登録済みの式' : kind === 'out' ? '図鑑外の式' : `図鑑 ${n}/${ZUKAN.length}`}</div>`;
   document.body.appendChild(el);
-  setTimeout(() => KB.sfx('shot'), 130); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 380);
+  setTimeout(() => KB.sfx('shot'), 190); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 330);
   setTimeout(() => el.remove(), 2000);
 }
 // 演出：見送ったとき、手札に隠れていた式が姿を見せてから逃げていく（未登録＝獲物は大きく金色、ほかの式は小さく）
