@@ -2280,3 +2280,21 @@ body.rewinding #home-fab{display:none}
 .hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .34s both,hcFly .45s 1.3s cubic-bezier(.6,0,.8,.4) both}
 .hc-stamp{animation:hcStamp .35s .42s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.25s both}
 .hc-n{animation:ciTxt .3s .55s both,hcOut .3s 1.25s both}
+/* ホームのプロフィール欄（作り直し）：上＝アイコン・名前・推定実力（星を大きく）、中＝順位とライバル視、下＝ボタン2×2 */
+.player-bar.pb2{display:flex;flex-wrap:wrap;gap:10px}
+.pb2 .pb-top{flex-basis:100%;display:flex;align-items:center;gap:14px}
+.pb2 .pb-avatar svg{width:84px;height:84px}
+.pb2 .pb-main{gap:2px}
+.pb2 .pb-nm{font-size:26px;line-height:1.15}
+.pb-rate{display:inline-flex;align-items:baseline;gap:6px;flex-wrap:wrap;align-self:flex-start;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.pb-stars{font-size:22px;letter-spacing:1px;color:#ffc93c;text-shadow:0 0 10px rgba(255,201,60,.55)}
+.pb-stars .half{opacity:.55}
+.pb-rate b{font-size:24px;font-weight:900;color:#ffc93c}
+.pb-rate small{font-size:12px;color:var(--accent);font-weight:800}
+.pb2 .pb-sub{font-size:12px}
+.pb-meta{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between}
+.pb-meta .pb-rank{margin:0}
+.pb-meta .pv-rvc{margin:0}
+.pb-btns2{flex-basis:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pb-btns2 .btn{width:100%;padding:8px 6px;font-size:13px}
+.pb-btns2 .pb-grow{background:linear-gradient(180deg,#ffd76a,#e8a92a);color:#2a1c05;border-color:#e8a92a;font-weight:900}
