@@ -2244,7 +2244,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='d1fda2385e';
+window.KB_BUILD='4d6e71c0d5';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6325,6 +6325,11 @@ function masaAdvice(more) {
   if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
   if ((c.chart || 0) < 10) add(2, `早見表、いま${c.chart || 0}行完成や。完成した行は対局中に見返せるから、作れば作るほど本番で得するで！`, { a: 'chart-open', l: '早見表へ' });
   if (!c.zukan || c.zukan < 50) add(2, '式ハンターで式を集めると、図鑑も早撃ちのバッジも進むで。3分だけでもええ、リフティングみたいなもんや！', { a: 'hunt-start', l: '式ハンターへ' });
+  // ご褒美アイテム「自動照準」：「図鑑の場」の銀（三場制覇）→ 大会の決勝進出でもらえる
+  const aimB = advB('zukan_cat', 1), cats = c.zukan_cat || 0;
+  if (!g.ach['zukan_cat:3']) { if (nG >= 3 || cats) add(cats ? 3 : 2, `式ハンターで図鑑の場を3つ制覇すると「三場制覇」や（いま${cats}つ）。これを持って大会の決勝に進んだら、ご褒美に便利アイテム「自動照準」がもらえるで！式ハンターで${HUNT_SEC / 60}分間ずっと自動で捕まえてくれるんや。サッカーで言うたら、勝ち上がったチームへの特別ボーナスやな！`, { a: 'hunt-start', l: '式ハンターへ' }, [aimB]); }
+  else if (!aimCount()) add(3, `「三場制覇」持っとるやん！${AIM_RULE}、ご褒美の「自動照準」がもらえるで。大会で決勝を狙お！`, { go: 'setup-tour', l: '大会へ' }, [aimB]);
+  else add(2, `自動照準が${aimCount()}発たまっとるで！式ハンターで使うと${HUNT_SEC / 60}分間ずっと自動で捕まえてくれるから、図鑑の残りを一気に埋めよ！`, { a: 'hunt-start', l: '式ハンターへ' });
   if (!c.atk_done) add(2, 'バッジアタック（15分）でどれだけBPを稼げるか、いっぺん挑戦してみ！ランキングにも載るで！', { a: 'attack-start', l: 'バッジアタックへ' });
   // 苦手な場面
   try { const cs = catStats(g.games || []).filter(x => x.n >= 5).sort((a, b) => b.bad - a.bad)[0]; if (cs && cs.bad >= 0.3) add(3, `データで見ると、苦手は「${cs.label}」の場面や（悪手の割合${Math.round(cs.bad * 100)}%）。次の練習はそこだけ意識してみ！弱点のサイドを固めたら失点は減るで！`, { go: 'growth', l: '成長記録へ' }); } catch (e) { }
