@@ -67,21 +67,21 @@ function makeAI(id, level, style, used) {
 // アバター編集
 const AV_OPTS = {
   age: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア']],
-  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人']],
+  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン']],
   hs: [['short', 'ショート'], ['spiky', 'ツンツン'], ['side', '七三'], ['buzz', '坊主'], ['bald', 'つるつる'], ['mohawk', 'モヒカン'], ['afro', 'アフロ'], ['curly', 'くるくる'], ['bob', 'ボブ'], ['long', 'ロング'], ['pony', 'ポニー'], ['twin', 'ツイン'], ['bun', 'おだんご']],
   hair: ['#1b1b1f', '#2b2522', '#5a3a24', '#a8763e', '#d9b46a', '#e8e8e8', '#b0443a', '#e8590c', '#3d5a9e', '#7048e8', '#f06595', '#20c997'],
   skin: ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'],
   shirt: ['#f0a020', '#e03131', '#4263eb', '#20c997', '#7950f2', '#e64980', '#212529', '#f8f9fa', '#868e96', '#15aabf', '#2f9e44', '#a0522d'],
   acc: [[null, 'なし'], ['cap', 'キャップ'], ['baseball', '野球帽'], ['beret', 'ベレー帽'], ['headband', 'はちまき'], ['ribbon', 'リボン'], ['flower', 'お花'], ['headphones', 'ヘッドホン'], ['goggles', 'ゴーグル'], ['nekomimi', 'ネコ耳'], ['bunny', 'ウサ耳'], ['chef', 'コック帽'], ['towel', '手ぬぐい'], ['ninja', '忍者'], ['helmet', 'ヘルメット'], ['pirate', '海賊帽'], ['horns', 'ツノ'], ['thief', '怪盗マスク'], ['clown', 'ピエロ帽'],
-    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと']],
+    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠']],
   outfit: [[null, 'ふつう'], ['stripe', 'ボーダー'], ['hoodie', 'フード'], ['tie', 'ネクタイ'], ['bowtie', '蝶ネクタイ'], ['gakuran', '学ラン'], ['kimono', '着物'], ['judo', '柔道着'], ['coat', '白衣'], ['apron', 'エプロン'], ['armband', '腕章'], ['samurai', '侍'], ['butler', '執事'],
-    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服']],
+    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン']],
   face: [[null, 'なし'], ['freckles', 'そばかす'], ['blush', 'ほっぺ'], ['mustache', 'ちょびひげ'], ['beard', 'あごひげ'], ['bandage', 'ばんそうこう'], ['star', '星'], ['monocle', '片めがね'], ['kirakira', 'キラキラ'], ['flame', '炎のペイント'], ['scar', '歴戦の傷'], ['bolt', '稲妻ペイント']],
   gl: [[null, 'なし'], ['round', '丸めがね'], ['square', '四角めがね'], ['shades', 'サングラス'], ['gold', '金縁めがね'], ['star', '星めがね'], ['heart', 'ハートめがね'], ['visor', 'サイバーバイザー']],
-  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑']],
-  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO']],
+  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ']],
+  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥']],
   bg: ['#8a9a93', '#1c7ed6', '#e8590c', '#2f9e44', '#ae3ec9', '#495057', '#e64980', '#f2b632'],
-  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河']]
+  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台']]
 };
 // カテゴリーの冠（コンプリート）と、各系統の金（いちばん上）バッジでアイテムが増える
 // カテゴリーの冠（コンプリート）でまとめてもらえるセット
@@ -93,10 +93,12 @@ const CROWN_SETS = {
   '早撃ち': ['base:fox', 'acc:halo', 'outfit:shinobi', 'hold:stopwatch', 'pet:swallow', 'bgpat:pat:speed'],
   'アウツチャレンジ': ['base:ghost', 'acc:turban', 'outfit:starrobe', 'hold:dice', 'pet:bat', 'bgpat:pat:moon'],
   'バッジアタック': ['base:skeleton', 'acc:goldhelm', 'outfit:cape', 'hold:hourglass', 'pet:crow', 'bgpat:pat:clock'],
-  '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy']
+  '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy'],
+  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora']
 };
 const AV_LOCK = {
   ...(() => { const o = {}; Object.entries(CROWN_SETS).forEach(([cat, items]) => items.forEach(k => o[k] = { cat })); return o; })(),
+  'hold:goldcup': { badge: 'on_podium' }, 'bgpat:pat:podium': { badge: 'off_podium' }, // オンライン大会：表彰台の金（オンライン王者）・公式の金（公式チャンピオン）
   'hold:trophy': { badge: 'games' }, 'outfit:blackbelt': { badge: 'practice_set' }, 'pet:hamster': { badge: 'tour_done' }, 'outfit:uniform': { badge: 'win' }, 'face:kirakira': { badge: 'set_low' },
   'acc:laurel': { badge: 'all_sets' }, 'outfit:sash': { badge: 'set_win' }, 'gl:star': { badge: 'qualify' }, 'outfit:royal': { badge: 'champion' }, 'hold:ticket': { badge: 'qualify_strong' }, 'pet:dragon': { badge: 'champion_strong' },
   'face:flame': { badge: 'streak5' }, 'bgpat:pat:fire': { badge: 'streak10' }, 'gl:gold': { badge: 'perfect' }, 'face:scar': { badge: 'sutemi' }, 'hold:scroll': { badge: 'perfect_set' }, 'outfit:armor': { badge: 'no_foul_set' },
