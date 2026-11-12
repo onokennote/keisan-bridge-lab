@@ -2318,7 +2318,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='5b09089cb1';
+window.KB_BUILD='c1fbe0292b';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11002,8 +11002,8 @@ function rvSetSolo(who) {
   sec = 'tour'; // 8. 大会の行方
   if (c.kind === 'tournament' && c.phase === 'prelim') {
     let line = '';
-    try { const s = standingsSorted(S.T), F2 = c.F, lp = s[F2 - 1], i = s.findIndex(p => p.id === 0), nb2 = i > 0 ? s[i - 1] : null; const a1 = lp && lp.id !== 0 ? `決勝ラインの${F2}位は${san(nm(P(lp.id)))}（${S.T.points[lp.id]}点）` : '', a2 = nb2 && nb2.id !== 0 && (!lp || nb2.id !== lp.id) ? `すぐ上の${i}位は${san(nm(P(nb2.id)))}（${S.T.points[nb2.id]}点）` : '';
-      line = rt ? (a1 ? a1 + '。' : '') + (a2 ? a2 + 'です。' : '') : (a1 || a2 ? [a1, a2].filter(Boolean).join('、') + 'や。まずはそこを抜いたろ！' : ''); } catch (e) { }
+    try { const s = standingsSorted(S.T), F2 = c.F, lp = s[F2 - 1], i = s.findIndex(p => p.id === 0), nb2 = i > 0 ? s[i - 1] : null; const a1 = lp && lp.id !== 0 ? `決勝ラインの${F2}位は${san(nm(P(lp.id)))}（${S.T.points[lp.id]}点）` : '', tie2 = nb2 && S.T.points[nb2.id] === S.T.points[0], a2 = nb2 && nb2.id !== 0 && (!lp || nb2.id !== lp.id) ? (tie2 ? `${i}位の${san(nm(P(nb2.id)))}とは同点（${S.T.points[nb2.id]}点）で、累計PPなどの差で後ろ` : `すぐ上の${i}位は${san(nm(P(nb2.id)))}（${S.T.points[nb2.id]}点）`) : '';
+      line = rt ? (a1 ? a1 + '。' : '') + (a2 ? a2 + 'です。' : '') : (a1 || a2 ? [a1, a2].filter(Boolean).join('、') + (tie2 ? 'や。次のセットで1点でも取れば前に出られるで！' : 'や。まずはそこを抜いたろ！') : ''); } catch (e) { }
     if (c.last) { if (c.qualified) B(c.tieRisk ? '決勝ライン上で同点です。決定戦に備えましょう。' : `予選${c.overall}位で決勝進出です。おめでとうございます。決勝でも同じ判断を続けましょう。`, c.tieRisk ? 'ライン上で同点や！PK戦やで、気合い入れていこか！' : `予選${c.overall}位で決勝進出や！ファイナルテーブルやで、おめでとう！`); else B(`予選${c.overall}位、決勝ラインまで${c.gap}点でした。${line}次の大会では、今回の課題を一つ潰して臨みましょう。`, `予選${c.overall}位、決勝まであと${c.gap}点やったな…${line}次こそファイナルテーブルや！`); }
     else B(`ここまでの総合は${c.overall}位${c.qualified ? '（決勝圏内）' : `（決勝ラインまで${c.gap}点）`}です。${line}`, (c.qualified ? `総合${c.overall}位、決勝圏内や！このまま逃げ切るで！` : `総合${c.overall}位、ラインまで${c.gap}点や。まだ巻き返せる！`) + line);
   }
