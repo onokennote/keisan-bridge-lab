@@ -41,7 +41,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.click('[data-go="ranking"]'); await pa.waitForTimeout(1500);
   const secs = await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')].map(e => ({ h: e.querySelector('h2').innerText, t: e.querySelector('.rk-list').innerText, me: !!e.querySelector('.rk-row.me') })));
   const sec = h => secs.find(x => x.h.startsWith(h)) || {};
-  ok(secs.length === 6 && secs[0].h === '総合', '6つのランキングが全部展開して出る（総合が先頭）：' + secs.map(x => x.h).join(' / '));
+  ok(secs.length >= 6 && secs[0].h === '総合' && secs[5].h === 'バッジアタック', '6つのランキングが全部展開して出る（総合が先頭）：' + secs.map(x => x.h).join(' / '));
   ok(/ケン/.test(sec('バッジ数').t) && sec('バッジ数').me, 'バッジ数のランキングに自分（ケン）が出る');
   ok(/ケン/.test(sec('BP').t) && sec('BP').me, 'BPのランキングに自分（ケン）が出る');
   ok(/ケン/.test(sec('連続最善').t) && /7回/.test(sec('連続最善').t), '連続最善のランキングに自分（7回）が出る');
