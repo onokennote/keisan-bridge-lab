@@ -148,7 +148,7 @@ function safeCard($c): ?string {
   $ach = array_values(array_slice(array_filter((array)($c['ach'] ?? []), fn($k) => is_string($k) && preg_match('/^[a-z0-9_]{1,40}:\d{1,3}$/i', $k)), 0, 400));
   $n = fn($k, $max) => max(0, min($max, (int)($c[$k] ?? 0)));
   $title = preg_replace('/[^0-9A-Z]/', '', (string)($c['title'] ?? ''));
-  return json_encode(['title' => substr($title, 0, 12), 'ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000)], JSON_UNESCAPED_UNICODE);
+  return json_encode(['title' => substr($title, 0, 12), 'ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000), 'rateBest' => isset($c['rateBest']) && is_numeric($c['rateBest']) ? round(max(0, min(6, (float)$c['rateBest'])), 1) : null], JSON_UNESCAPED_UNICODE);
 }
 // 名前の重複：ほかのプレイヤー（別の端末・別の人）がもう使っている名前か（全角半角・大文字小文字・記号の違いは同じとみなす）
 function nameTaken(string $name, string $uid, string $pid): bool {

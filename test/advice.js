@@ -57,10 +57,13 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await pa.evaluate(() => !!document.querySelector('#modal .adv-list')), '「アドバイスに戻る」で元のアドバイスに戻る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'host_masa2.png') });
   await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pb.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 70); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(false, true); }); await pa.waitForTimeout(600);
+  await pb.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')), g = JSON.parse(localStorage.getItem('kb.p.' + id + '.growth')); g.cnt.rating = 4.1; localStorage.setItem('kb.p.' + id + '.growth', JSON.stringify(g)); KBAPP.testAch('three', 71); document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); return KBAPP.cloudPush(false, true); }); await pb.waitForTimeout(500);
   // ランキングでハナを押して「ライバルにする」
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rank = null; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
   await pa.evaluate(() => [...document.querySelectorAll('.rk-row')].find(r => /ハナ/.test(r.innerText)).click()); await pa.waitForTimeout(1500);
   ok(!!(await pa.$('#modal [data-act="rival-toggle"]')), 'ほかの人のプロフィールに「⚔ ライバルにする」');
+  ok(await pa.evaluate(() => /最高到達\s*★4\.1/.test((document.querySelector('#modal .pv-best') || {}).textContent || '')), 'ほかの人のプロフィールに推定実力の最高到達点（★4.1）');
+  await (await pa.$('#modal .pv-box')).screenshot({ path: path.join(__dirname, 'out', 'prof_best.png') });
   await pa.click('#modal [data-act="rival-toggle"]'); await pa.waitForTimeout(800);
   ok(await pa.evaluate(() => /ライバル視をやめる/.test(document.querySelector('#modal [data-act="rival-toggle"]').innerText)), '押すとライバルになる（ボタンが「外す」に変わる）');
   await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove())); await pa.waitForTimeout(300);

@@ -1785,7 +1785,7 @@ function profHTML(D, o) {
   return `<div class="pv">
     <div class="pv-head"><div class="pv-av">${KB.avatarSVG(Object.assign({}, D.avatar || AVATAR_DEF, { name: NAME }), { mood: 'happy' })}</div>
       <div class="pv-tx">${pvTitle(D)}<div class="pv-nm"><b>${esc(NAME)}</b>${o.ai ? '<em class="ai-chip">AI研究員</em>' : ''}${o.me ? '<small class="pv-me">あなた</small>' : ''}</div>
-        ${r != null ? `<div class="pv-rt"><span class="pv-st">${stars}</span><b>${r.toFixed(1)}</b><small>推定実力 ${rateLabel(r)}相当</small></div>` : '<div class="pv-rt"><small>推定実力はまだ出ていません</small></div>'}
+        ${r != null ? `<div class="pv-rt"><span class="pv-st">${stars}</span><b>${r.toFixed(1)}</b><small>推定実力 ${rateLabel(r)}相当</small></div>` : '<div class="pv-rt"><small>推定実力はまだ出ていません</small></div>'}${D.rateBest ? `<div class="pv-best">🏔 最高到達 <b>★${Math.max(D.rateBest, r || 0).toFixed(1)}</b><small>${rateLabel(Math.max(D.rateBest, r || 0))}相当</small></div>` : ''}
         <div class="pv-rk" id="pv-rk"></div>${CLOUD_ON ? rvcHTML(D.rivals || [], D.rivalBy || [], NAME) : ''}</div></div>
     <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
@@ -1885,10 +1885,10 @@ function cardDataOf(pid, name) {
   const ab0 = P('attackBest') || {}, ab = ab0.bp != null ? ab0 : (ab0[15] || null), hb = P('huntBest'), avr = P('avatar');
   return { name, avatar: avr ? Object.assign({}, AVATAR_DEF, avr) : null, rating: r.ok ? Math.round(r.r * 100) / 100 : null, ach: Object.assign({}, g.ach || {}),
     champion: c.champion || 0, qualify: c.qualify || 0, atk: ab ? ab.bp : 0, atkBadges: ab ? ab.badges || 0 : 0, hunt: hb && hb.regs || 0,
-    zukan: zukanCount(P('zukan') || {}), streak: c.streakMax || 0, outs5: c.outs5 || 0, bio: P('bio') || '', title: P('title') || '' };
+    zukan: zukanCount(P('zukan') || {}), streak: c.streakMax || 0, outs5: c.outs5 || 0, bio: P('bio') || '', title: P('title') || '', rateBest: Math.max(c.rating || 0, r.ok ? Math.round(r.r * 10) / 10 : 0) || null };
 }
 // サーバーに送るカード：バッジは取ったものの名前だけ
-function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5, title: d.title || '' }; }
+function cardBrief(d) { return { ach: Object.keys(d.ach).filter(k => d.ach[k] && /^[a-z0-9_]+:\d+$/i.test(k)), champion: d.champion, qualify: d.qualify, atkBadges: d.atkBadges, hunt: d.hunt, zukan: d.zukan, streak: d.streak, outs5: d.outs5, title: d.title || '', rateBest: d.rateBest || null }; }
 async function shareCard(data, opt) {
   const W = 1200, H = 675, cv = document.createElement('canvas'); cv.width = W; cv.height = H;
   const x = cv.getContext('2d');
