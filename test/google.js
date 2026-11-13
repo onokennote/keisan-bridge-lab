@@ -41,8 +41,19 @@ const post = (a, body) => fetch('http://localhost:8095/api.php?a=' + a, { method
   const st = await pa.evaluate(() => { const l = KBAPP.plLink(JSON.parse(localStorage.getItem('kb.profile'))); return fetch(KBAPP.cloud().CLOUD_ON ? window.KB_CLOUD_API + '?a=g_status' : '', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: l.token, pid: JSON.parse(localStorage.getItem('kb.profile')) }) }).then(r => r.json()); });
   ok(st.ok && st.linked, 'Googleでまもると、サーバーにひもづく');
   await pa.evaluate(() => KBAPP.act('profiles')); await pa.waitForTimeout(300);
-  ok(await pa.evaluate(() => /Googleでまもっています/.test(document.querySelector('#modal').innerText)), 'プレイヤーの画面に「Googleでまもっています」');
+  ok(await pa.evaluate(() => /Googleでまもり中/.test(document.querySelector('#modal').innerText)), 'プレイヤーの画面に「Googleでまもり中」');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'g_panel.png') });
+  // プレイヤーを2人にして、切り替えの画面を見る
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('new-profile'); }); await pa.waitForTimeout(300);
+  await pa.fill('#new-name', 'ミカ'); await pa.click('[data-act="create-profile"]'); await pa.waitForTimeout(1500);
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await pa.waitForTimeout(400);
+  ok(await pa.evaluate(() => /ミカ/.test(document.querySelector('#modal .pm-me').innerText) && /ケン/.test(document.querySelector('#modal .pm-row').innerText) && !document.querySelector('[data-act="export-data"]')), 'プレイヤーの画面：いまの人（ミカ）が上、ほかの人（ケン）は下の一覧。書き出しはない');
+  await pa.evaluate(() => { let e = document.querySelector('#modal .pm'); while (e && e.id !== 'modal') { e.style.maxHeight = 'none'; e.style.overflow = 'visible'; e = e.parentElement; } const m = document.querySelector('#modal'); m.style.position = 'absolute'; m.style.height = 'auto'; m.style.minHeight = '100%'; });
+  await pa.setViewportSize({ width: 390, height: 1500 }); await pa.waitForTimeout(300);
+  await (await pa.$('#modal .pm')).screenshot({ path: path.join(__dirname, 'out', 'pm_two.png') }); await pa.setViewportSize({ width: 390, height: 844 });
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await pa.waitForTimeout(400);
+  await pa.click('#modal .pm-row'); await pa.waitForTimeout(800);
+  ok(await pa.evaluate(() => KBAPP.S.settings.name === 'ケン'), '一覧の人を押すと、その人に切り替わる');
   // B：別の端末（データを消したあと）：Googleでログインして戻る
   const pb = await ctx();
   await pb.click('#modal .an-g'); await pb.waitForTimeout(300); await pb.click('#g-test'); await pb.waitForTimeout(800);

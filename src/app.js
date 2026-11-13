@@ -1683,15 +1683,6 @@ function codeHashCheck() {
   setTimeout(() => { if (!$('#an-code')) { if (!profiles().length) return; profileModal(); } const d = $('#an-code') || $('#cl-in'); if (d) { d.value = c; const det = d.closest('details'); if (det) det.open = true; toast('復活の呪文を入れました。「入る」を押してください'); } }, 900);
 }
 if (CLOUD_ON && typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(CLOUD.timer); cloudPush(true); } });
-function cloudPanelHTML() {
-  if (!CLOUD_ON) return '';
-  const l = PID ? plLink(PID) : null, code = l && l.code;
-  return `<div class="lbl">復活の呪文（${esc(S.settings.name)}）</div>
-    <p class="small" style="margin:0">記録はプレイヤーごとにクラウドに保存されます。別の端末で${esc(san(S.settings.name))}の記録を使うときは、その端末で<b>この呪文</b>を入れてください。どちらの端末で遊んでも、同じ記録に保存されます（この端末のほかのプレイヤーは入りません）。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
-    ${code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 呪文カード</button></div><p class="small muted" style="margin:0">呪文は人に教えないでください。知っている人は、このプレイヤーの記録に入れます。</p>` : `<p class="small muted" style="margin:0">${l && !l.token && l.dead ? 'このプレイヤーは、作った端末で消されたため保存できません。' : 'はじめて保存したあとに、ここに復活の呪文が出ます。'}</p>`}
-    ${G_ON ? `<div class="g-sec">${gLinked() ? `<p class="small" style="margin:0">🛡 <b>Googleでまもっています。</b>スマホを替えたり、ブラウザのデータを消したりしても、Googleでログインすれば戻れます。</p><button class="btn sm ghost" data-act="g-unlink">Googleでまもるのをやめる</button>` : `<button class="btn sm g-pro" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted" style="margin:0">呪文を控えなくても、Googleでログインすれば戻れるようになります。Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>`}</div>` : ''}
-    <details class="small"><summary>別の端末のプレイヤーを、この端末に入れる</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${G_ON ? '<button class="btn sm g-pro" data-act="g-restore">Googleでログインして入れる</button>' : ''}<input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">入れる</button></div><p class="small muted" style="margin:4px 0 0">そのプレイヤーが、この端末のプレイヤーに加わります。いまこの端末にいるプレイヤーの記録は、そのまま残ります。</p></details>`;
-}
 // ---------- ランキング ----------
 // 4つのランキングを並べて全部見せる（各上位20人＋20位より下の自分）
 const RANK_DEFS = [['total', '総合', '推定実力・BP・連続最善・バッジアタックの4つを、それぞれ1位の成績を満点とした割合で点数にして合わせたもの（100点満点。全部1位なら100点）。配分は推定実力35・BP30・連続最善20・バッジアタック15。'], ['rating', '推定実力', '直近の判断の質から出した推定実力（★）。判断が8回以上たまると載ります。'], ['badges', 'バッジ数', '獲得したバッジの数（同じ数ならBPの多い順）。'], ['bp', 'BP（バッジポイント）', 'バッジの段階（銅・銀・金）と取りにくさで決まるポイントの合計。'], ['streak', '連続最善', '最善手を続けて打った最長記録。'], ['attack', 'バッジアタック', 'バッジアタック（15分）の自己ベスト。']];
@@ -2499,7 +2490,7 @@ function attackResultHTML() {
   <div class="row" style="justify-content:center"><button class="btn primary" data-act="attack-start">もう一度挑戦</button></div>`;
 }
 
-// ---------- プレイヤー（名前ごとに記録を分ける）・書き出しと読み込み ----------
+// ---------- プレイヤー（名前ごとに記録を分ける） ----------
 // 名前が使えるか：この端末のほかのプレイヤーと同じ名前、（公開版では）ほかの人がもう使っている名前は使えない
 async function nameCheck(name, exceptPid) {
   if (!name) return '名前を入れてください';
@@ -2542,55 +2533,45 @@ function deleteProfile(id) {
   if (id === PID) switchProfile(profiles()[0].id); else { profileModal(); render(); setTimeout(profileModal, 0); }
 }
 function profileModal() {
-  const L = profiles();
-  modal(`<h2>プレイヤー</h2>
-    <div class="pf-list">${L.map(p => `<div class="pf-row ${p.id === PID ? 'cur' : ''}"><b>${esc(p.name)}</b><span class="small muted">${(() => { const g = raw.get('kb.p.' + p.id + '.growth', null); const r = g ? ratingOf(g.games) : null; return r && r.ok ? `★${r.r.toFixed(1)}・${gamesN(g)}ゲーム` : g ? `${gamesN(g)}ゲーム` : '記録なし'; })()}</span>${p.id === PID ? '<span class="pf-cur">プレイ中</span>' : ''}<span class="pf-btns">${p.id === PID ? '<button class="btn sm ghost" data-act="rename-profile">名前を変更</button>' : `<button class="btn sm" data-pf="${p.id}">この人で遊ぶ</button>`}${L.length > 1 ? `<button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button>` : ''}</span></div>`).join('')}</div>
-    ${PID ? (() => { const b = store.get('bio', ''); return `<div class="pf-bio"><div class="lbl">${esc(S.settings.name)}の自己紹介</div><p class="small" style="margin:0;${b ? '' : 'color:var(--muted,#9a9)'}">${b ? esc(b).replace(/\n/g, '<br>') : 'まだ書いていません（140文字まで）'}</p><button class="btn sm" data-act="bio-edit">${b ? '自己紹介を編集' : '自己紹介を書く'}</button></div>`; })() : ''}
-    <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="new-profile">新しい名前で始める</button></div>
-    ${CLOUD_ON ? `<details class="save-note"><summary>記録の保存について</summary><ul><li>記録（成長記録・バッジ・図鑑・アバターなど）は<b>クラウド</b>に保存されます。ブラウザの履歴を消しても、復活の呪文があれば戻せます。</li><li>端末には、すぐ遊べるように控えと、ログインの鍵だけを置いています。</li><li>同じ端末を使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li></ul></details>` : `
-    <details class="save-note" open><summary>記録の保存について</summary><ul>
-      <li>記録（成長記録・バッジ・続きから）は、<b>いま使っている端末のこのブラウザの中</b>に保存されます。成長記録やバッジはサーバーには送っていません（アプリの利用回数の集計だけは、名前や対局内容を含めずに記録しています）。</li>
-      <li><b>別の端末や別のブラウザ</b>（スマホとパソコン、ChromeとSafariなど）では共有されません。</li>
-      <li>ブラウザの<b>履歴・キャッシュ・サイトデータを消す</b>と、記録も消えます。<b>シークレット（プライベート）モード</b>で開くと、閉じたときに消えます。</li>
-      <li>アプリのアップデートでは消えません。</li>
-      <li>同じ端末・同じブラウザを使う人どうしは、プレイヤーを分ければ記録を別々に残せます。</li>
-      <li>大事な記録は、ときどき下の「書き出す」で保存しておくと安心です。</li>
-    </ul></details>
-    `}
-    ${cloudPanelHTML()}
-    <div class="lbl">記録の書き出し・読み込み</div>
-    <p class="small muted" style="margin:0">書き出したファイル（JSON）を別の端末で読み込むと、成長記録と続きからのデータを引き継げます。読み込んだ記録は新しいプレイヤーとして追加されます。</p>
-    <div class="row" style="flex-wrap:wrap"><button class="btn" data-act="export-data">いまのプレイヤーの記録を書き出す</button><label class="btn file-btn">記録を読み込む<input type="file" id="imp-file" accept=".json,application/json" hidden></label></div>
-    <details class="small"><summary>ファイルが使えないとき（テキストで貼り付け）</summary><textarea id="imp-text" rows="4" placeholder="書き出したテキストを貼り付け"></textarea><button class="btn sm" data-act="import-text">貼り付けた記録を読み込む</button></details>
-    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div>`);
+  const L = profiles(), cur = L.find(p => p.id === PID), others = L.filter(p => p.id !== PID);
+  const avOf = id => id === PID ? myAvatar() : Object.assign({}, AVATAR_DEF, raw.get('kb.p.' + id + '.avatar', null) || {});
+  const statOf = id => { const g = raw.get('kb.p.' + id + '.growth', null), r = g ? ratingOf(g.games) : null; return r && r.ok ? `★${r.r.toFixed(1)}・${gamesN(g)}ゲーム` : g && gamesN(g) ? `${gamesN(g)}ゲーム` : 'まだ記録なし'; };
+  const face = (id, name) => KB.avatarSVG(Object.assign({ name }, avOf(id)), { mood: 'happy' });
+  const bio = store.get('bio', '');
+  const l = CLOUD_ON && PID ? plLink(PID) : null, code = l && l.code, safe = gLinked() || raw.get(plKey(PID, 'bkDone'), false);
+  modal(`<div class="pm">
+    <h2 class="pm-title">プレイヤー</h2>
+    ${cur ? `<section class="pm-me">
+      <button class="pm-av" data-act="avatar-edit" aria-label="アバターを変える">${face(PID, cur.name)}<span>🎨</span></button>
+      <div class="pm-id"><b>${esc(cur.name)}</b><small>${statOf(PID)}</small><span class="pm-now">いま遊んでいる人</span></div>
+      <div class="pm-acts"><button class="btn sm" data-act="rename-profile">✏️ 名前</button><button class="btn sm" data-act="bio-edit">📝 自己紹介</button><button class="btn sm" data-act="avatar-edit">🎨 アバター</button></div>
+      <p class="pm-bio ${bio ? '' : 'none'}">${bio ? esc(bio).replace(/\n/g, '<br>') : '自己紹介はまだありません（140文字まで）'}</p>
+    </section>` : ''}
+    ${CLOUD_ON ? `<section class="pm-sec">
+      <div class="pm-h">🛡 記録をまもる <span class="pm-st ${safe ? 'ok' : 'warn'}">${gLinked() ? '✅ Googleでまもり中' : safe ? '✅ 呪文を控えた' : '⚠ まだまもっていません'}</span></div>
+      <p class="small muted pm-p">記録はクラウドに保存されています。スマホを替えたり、ブラウザのデータを消したりしたときは、<b>復活の呪文</b>${G_ON ? 'か<b>Google</b>' : ''}で戻れます。</p>
+      ${code ? `<div class="pm-code"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 カード</button></div><p class="small muted pm-p">呪文は人に教えないでね（おうちの人はOK）。</p>` : '<p class="small muted pm-p">復活の呪文は、少し遊んでクラウドに保存されると出ます。</p>'}
+      ${G_ON ? (gLinked() ? '<button class="pm-link" data-act="g-unlink">Googleでまもるのをやめる</button>' : '<button class="btn g-pro pm-g" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted pm-p">Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>') : ''}
+    </section>` : ''}
+    <section class="pm-sec">
+      <div class="pm-h">👥 この端末のプレイヤー</div>
+      ${others.length ? `<div class="pm-list">${others.map(p => `<button class="pm-row" data-pf="${p.id}"><span class="pm-rav">${face(p.id, p.name)}</span><span class="pm-rn"><b>${esc(p.name)}</b><small>${statOf(p.id)}</small></span><span class="pm-go">この人で遊ぶ ›</span></button>`).join('')}</div>` : '<p class="small muted pm-p">ほかのプレイヤーはいません。家族やきょうだいで使うときは、プレイヤーを分けると記録が混ざりません。</p>'}
+      <button class="pm-add" data-act="new-profile">＋ 新しいプレイヤーを作る</button>
+      ${CLOUD_ON ? `<details class="pm-in"><summary>📲 別の端末のプレイヤーを入れる</summary>
+        ${G_ON ? '<button class="btn g-pro pm-g" data-act="g-restore">Googleでログインして入れる</button>' : ''}
+        <div class="pm-code"><input id="cl-in" class="name-input" placeholder="復活の呪文 XXXX-XXXX-XXXX" maxlength="16" autocomplete="off"><button class="btn sm primary" data-act="cloud-restore">入る</button></div>
+        <p class="small muted pm-p">そのプレイヤーが、この端末に加わります（いまいるプレイヤーはそのまま）。</p></details>` : ''}
+    </section>
+    ${L.length > 1 ? `<details class="pm-more"><summary>プレイヤーを削除する</summary><div class="pm-list">${L.map(p => `<div class="pm-drow"><span>${esc(p.name)}${p.id === PID ? '<small>（いま遊んでいる人）</small>' : ''}</span><button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button></div>`).join('')}</div><p class="small muted pm-p">${CLOUD_ON ? 'この端末で作ったプレイヤーは、記録・ランキング・復活の呪文も消えます。別の端末から入れたプレイヤーは、この端末から外すだけです（記録は残ります）。' : '削除した記録は元に戻せません。'}</p></details>` : ''}
+    ${CLOUD_ON ? '' : '<p class="small muted pm-p">この版では、記録はこの端末のこのブラウザの中だけに保存されます。ブラウザのデータを消すと記録も消えます。</p>'}
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div>
+  </div>`);
   document.querySelectorAll('#modal [data-pf]').forEach(b => b.onclick = () => switchProfile(b.dataset.pf));
   document.querySelectorAll('#modal [data-pfdel]').forEach(b => b.onclick = () => {
     const id = b.dataset.pfdel;
-    if (S.delArm !== id) { S.delArm = id; profileModal(); setTimeout(() => { if (S.delArm === id) { S.delArm = null; if ($('#modal .pf-list')) profileModal(); } }, 4000); return; }
+    if (S.delArm !== id) { S.delArm = id; profileModal(); const m = $('#modal .pm-more'); if (m) m.open = true; setTimeout(() => { if (S.delArm === id) { S.delArm = null; if ($('#modal .pm')) { profileModal(); const m2 = $('#modal .pm-more'); if (m2) m2.open = true; } } }, 4000); return; }
     S.delArm = null; deleteProfile(id);
   });
-  const f = $('#imp-file'); if (f) f.onchange = async () => { const file = f.files && f.files[0]; if (!file) return; importData(await file.text()); };
-}
-function exportPayload() {
-  return JSON.stringify({ app: 'keisan-bridge', v: 1, name: S.settings.name, exportedAt: new Date().toISOString(), growth: store.get('growth', null), session: store.get('session', null), zukan: store.get('zukan', null), attackBest: store.get('attackBest', null), huntBest: store.get('huntBest', null) });
-}
-async function exportData() {
-  const data = exportPayload(), fn = `計算ブリッジ_${S.settings.name}_${new Date().toISOString().slice(0, 10)}.json`;
-  try { const dl = window.claude && window.claude.use ? await window.claude.use('downloads') : null; if (dl) { await dl.save({ filename: fn, data }); toast('書き出しました'); return; } } catch (e) { if (e && e.code === 'declined') return; }
-  modal(`<h2>記録の書き出し</h2><p class="small" style="margin:0">ファイルを保存できない環境のため、テキストで表示しています。全部コピーして、別の端末の「貼り付け」から読み込んでください。</p><textarea id="exp-text" rows="8" readonly>${esc(data)}</textarea><div class="row" style="justify-content:flex-end"><button class="btn" data-act="copy-export">コピー</button><button class="btn primary" data-act="close">閉じる</button></div>`);
-}
-function importData(text) {
-  let o; try { o = JSON.parse(text); } catch (e) { toast('読み込めませんでした（形式が違います）'); return; }
-  if (!o || o.app !== 'keisan-bridge') { toast('計算ブリッジの記録ではないようです'); return; }
-  let name = String(o.name || 'プレイヤー').slice(0, 10); const L = profiles();
-  if (L.some(p => p.name === name)) name = (name + '（読込）').slice(0, 14);
-  const id = createProfile(name);
-  if (o.growth) raw.set('kb.p.' + id + '.growth', o.growth);
-  if (o.session) raw.set('kb.p.' + id + '.session', o.session);
-  if (o.zukan) raw.set('kb.p.' + id + '.zukan', o.zukan);
-  if (o.attackBest) raw.set('kb.p.' + id + '.attackBest', o.attackBest);
-  if (o.huntBest) raw.set('kb.p.' + id + '.huntBest', o.huntBest);
-  toast(`「${name}」として読み込みました`); switchProfile(id);
 }
 // ---------- チュートリアル：博士とマサが会話でルールとコツを説明（例を触りながら・簡単な選択つき） ----------
 function tutInvite(name) {
@@ -2972,7 +2953,7 @@ async function migrateOut() {
   try {
     const payload = JSON.stringify({ app: 'keisan-bridge', mv: 1, id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8), at: new Date().toISOString(), data });
     url = PUBLIC_URL + '#kbmove=' + b64u.enc(await zipText(payload));
-  } catch (e) { toast('この端末では引っ越しの準備ができませんでした。「プレイヤー」の書き出しを使ってください'); return; }
+  } catch (e) { toast('この端末では引っ越しの準備ができませんでした'); return; }
   raw.set('kb.migSent', Date.now());
   modal(`<h2>新しいサイトへ移る</h2>
     <p class="small" style="margin:0">${n ? `${n}人分の` : ''}記録（成長記録・図鑑・アバター・ベスト記録など）をまとめました。下のボタンで新しいサイトを開くと、記録がそのまま引き継がれます。</p>
@@ -5942,9 +5923,7 @@ function act(a, el) {
     case 'rename-ok': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
     case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, null).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('create-ok'); }); break; }
     case 'create-ok': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
-    case 'export-data': exportData(); break;
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
-    case 'import-text': { const t = $('#imp-text'); if (t && t.value.trim()) importData(t.value.trim()); break; }
     case 'growth-reset': if (!S.resetArm) { S.resetArm = true; render(); setTimeout(() => { S.resetArm = false; if (S.view === 'growth') render(); }, 4000); } else { S.resetArm = false; store.del('growth'); store.del('zukan'); toast('成長記録をリセットしました'); render(); } break;
     case 'dismiss-update': S.updatedNotice = false; closeModal(); render(); break;
     case 'play': humanPlay(); break;
