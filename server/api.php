@@ -709,8 +709,8 @@ try {
       $total = (int)db()->query("SELECT COUNT(*) c FROM ranks WHERE shown = 1 AND $where")->fetch()['c'];
       out(['ok' => true, 'type' => $type, 'list' => $list, 'total' => $total]);
     }
-    case 'rankings': { // 6つのランキングをまとめて返す（各上位20人＋20位より下の自分の行）
-      $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = 20; $res = [];
+    case 'rankings': { // 6つのランキングをまとめて返す（各上位20人（all=1 なら300人）＋それより下の自分の行）
+      $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = !empty($_GET['all']) ? 300 : 20; $res = []; // all=1：上位300人まで（画面で「自分のまわり」「ライバル」「もっと見る」に使う）
       $withAi = ($_GET['ai'] ?? '1') !== '0'; // ai=0 でAI研究員を外す
       $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1' . ($withAi ? '' : ' AND (ai IS NULL OR ai = 0)'))->fetchAll();
       foreach ($all as &$r) {

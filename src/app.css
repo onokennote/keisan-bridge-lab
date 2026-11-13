@@ -1632,6 +1632,8 @@ body.spectate .me .hand .card{cursor:default}
 /* ランキング・クラウド */
 .rk-tabs{display:flex;gap:6px;flex-wrap:wrap}
 .rk-list{display:flex;flex-direction:column;gap:4px}
+.rk-tabs{margin:2px 0 0}.rk-tabs button{font-size:12.5px;padding:7px 4px}
+.rk-more{align-self:center;margin-top:4px}
 .rk-row{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22)}
 .rk-row.me{outline:2px solid #f2b632;background:rgba(242,182,50,.12)}
 .rk-n{font-family:var(--f-display);color:#ffd43b;text-align:center}
