@@ -2387,7 +2387,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='9638af776f';
+window.KB_BUILD='42a627c508';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7572,8 +7572,8 @@ function rankingHTML() {
     return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : (top.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') + (mine.length ? '<div class="rk-gap">…</div>' + mine.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
   // ここから下は「大会ポイント」（デイリー・シーズン・公式大会）。上の部門とは別に集計する
-  const dailyS = `<h2 class="rk-group-h" id="rk-cup">🏆 大会ポイント<small>デイリートーナメント・シーズン・公式大会（上のランキングとは別に集計）</small></h2>` + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。デイリーに出たAI研究員も載ります。`, di && di.total)
-    + dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。デイリーに出たAI研究員も載り、総ポイントとシーズンの表彰もこの順位のまま（AIが上なら、人は繰り上がりません）。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や仕様変更の可能性があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`);
+  const dailyS = `<h2 class="rk-group-h" id="rk-cup">🏆 大会ポイント<small>デイリートーナメント・シーズン・公式大会（上のランキングとは別に集計）</small></h2>` + dsec('rk-tpoints', '総ポイント', `シーズンが終わるたびに、シーズンの順位でもらえるポイントの合計です。1位100pt・2位70pt・3位50pt・4位40pt・5位20pt、6位から下は参加者の上位半分まで10pt。公式大会で入賞してももらえます。`, di && di.total)
+    + dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントの成績でたまるポイントです。予選はグループ（15人）の中の順位で、1位15pt・2位14pt…15位1pt。決勝に進むと、決勝の順位でさらに1位60pt・2位40pt・3位30pt・4位20pt・5位10pt。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や仕様変更の可能性があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
