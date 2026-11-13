@@ -2437,3 +2437,6 @@ body.rewinding #home-fab{display:none}
 .pm-drow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.04)}.pm-drow small{color:var(--muted,#9a9);margin-left:4px}
 
 .pv-best{display:inline-flex;align-items:baseline;gap:6px;margin-top:2px;padding:2px 10px;border-radius:999px;background:rgba(255,214,102,.1);border:1px solid rgba(255,214,102,.35);font-size:12.5px;color:#e9dfc0}.pv-best b{color:#ffd666;font-size:15px}.pv-best small{color:#c9c2ad;font-size:11px}
+/* モーダルの中のマサ・博士のふきだしは、横いっぱいに（対局画面の実況欄は右側の幅のまま） */
+#modal .commentary{max-width:none;justify-self:stretch;width:100%;box-sizing:border-box}
+#modal .commentary .cm-text{font-size:14px;line-height:1.7}
