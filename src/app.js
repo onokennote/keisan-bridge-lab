@@ -1629,12 +1629,12 @@ function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
   const val = (k, x) => k === 'season' ? `${x.pts}pt<small>${x.n}回</small>` : k === 'tpoints' ? `${x.pts}pt` : k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
   const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? (rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip mu" title="宿敵（お互いにライバル視）">⇄</em>' : '<em class="rv-chip" title="ライバル視している">→</em>') : (x.rid && rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip in" title="ライバル視されている">←</em>' : '')}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
-  const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
+  const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}${RK_NAV}</div><p class="small muted" style="margin:0">${note}</p>
     ${R && d ? rkTabs(k) : ''}<div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : rkRows(k, d.list.concat(d.mine.filter(rankMe)), x => rowH(k, x), d.total)}</div></section>`; };
   const withAi = rankWithAi();
   // デイリートーナメント：今のシーズンと総ポイント（人だけ。AI研究員はポイントを持たない）
   const di = ON.dinfo, dsec = (id, title, note, L0, extra) => { const L = L0 && (withAi ? L0 : L0.filter(x => !x.ai).map((x, i) => Object.assign({}, x, { rank: i + 1 }))), top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
-    return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
+    return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}${RK_NAV}</div><p class="small muted" style="margin:0">${note}</p>
     ${di && L ? rkTabs(id) : ''}<div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : rkRows(id, L || [], x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x), (L || []).length) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
   // ここから下は「大会ポイント」（デイリー・シーズン・公式大会）。上の部門とは別に集計する
   const dailyS = `<h2 class="rk-group-h" id="rk-cup">🏆 大会ポイント<small>デイリートーナメント・シーズン・公式大会（上のランキングとは別に集計）</small></h2>` + dsec('rk-tpoints', '総ポイント', `シーズンが終わるたびに、シーズンの順位でもらえるポイントの合計です。1位100pt・2位70pt・3位50pt・4位40pt・5位20pt、6位から下は参加者の上位半分まで10pt。公式大会で入賞してももらえます。`, di && di.total)
@@ -1646,6 +1646,8 @@ function rankingHTML() {
     <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」・「自分のまわり」（自分が真ん中。どちらも10人分の枠の中をスクロール）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
 }
 // ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位／自分のまわり（自分が真ん中）。どちらも10人分の枠でスクロール／ライバル
+// 見出しの右端の ▲▼：前・次の部門へ画面を動かす（スマホで長い一覧を飛ばす）
+const RK_NAV = '<span class="rk-nav"><button data-act="rk-nav" data-v="-1" aria-label="前の部門へ">▲</button><button data-act="rk-nav" data-v="1" aria-label="次の部門へ">▼</button></span>';
 const RK_MODES = [['top', '🏆 上位'], ['near', '📍 自分のまわり'], ['rival', '⚔ ライバル']];
 function rkTabs(k) { const m = (S.rkMode || {})[k] || 'top'; return `<div class="su-seg rk-tabs">${RK_MODES.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" data-act="rk-mode" data-k="${k}" data-v="${v}">${l}</button>`).join('')}</div>`; }
 function rkRows(k, L, rowF, total) {
@@ -5931,6 +5933,7 @@ function act(a, el) {
     case 'av-save': { store.set('avatar', S.avDraft); if (S.T) { const h = S.T.players.find(p => p.human); if (h) Object.assign(h.ch, S.avDraft); } S.avDraft = null; closeModal(); toast('アバターを保存しました'); render(); break; }
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
+    case 'rk-nav': { const L = [...document.querySelectorAll('.rk-sec')], i = L.indexOf(el.closest('.rk-sec')), t = L[i + +el.dataset.v]; if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); else if (+el.dataset.v < 0) scrollTo({ top: 0, behavior: 'smooth' }); break; }
     case 'rk-mode': { S.rkMode = Object.assign({}, S.rkMode, { [el.dataset.k]: el.dataset.v }); rkRepaint(); break; }
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;

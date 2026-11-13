@@ -1654,6 +1654,8 @@ body.spectate .me .hand .card{cursor:default}
 @media (min-width:760px){.rk-all{grid-template-columns:1fr 1fr}}
 .rk-h{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
 .rk-h h2{margin:0;font-size:18px}
+.rk-h small{margin-left:auto}.rk-nav{display:flex;gap:4px;align-self:center}.rk-nav button{width:30px;height:30px;border-radius:50%;border:1px solid rgba(255,214,102,.45);background:rgba(255,214,102,.08);color:#ffd666;font-size:12px;line-height:1;padding:0;cursor:pointer}
+.rk-sec{scroll-margin-top:8px}
 .rk-gap{text-align:center;color:#c9c2ad;line-height:1}
 .rk-av{padding:0;border:0;background:none;cursor:pointer;border-radius:10px}
 .rk-av:focus-visible{outline:2px solid #f2b632}

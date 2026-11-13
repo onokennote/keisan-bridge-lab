@@ -82,6 +82,9 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await pa.evaluate(() => { const bx = document.querySelector('.rk-scroll'); return bx.scrollTop === 0 && bx.scrollHeight > bx.clientHeight && document.querySelectorAll('.rk-sec')[0].querySelector('.rk-gap + .rk-row.me'); }), '「上位」は1位から10人分の枠、枠の下に自分の行');
   await (await pa.$('.rk-sec')).screenshot({ path: path.join(__dirname, 'out', 'rank_top.png') });
   await pa.evaluate(() => { KBAPP.S.rank = null; KBAPP.S.rkMode = {}; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
+  await pa.evaluate(() => scrollTo(0, 0)); await pa.click('.rk-sec [data-act="rk-nav"][data-v="1"]'); await pa.waitForTimeout(900);
+  ok(await pa.evaluate(() => Math.abs(document.querySelectorAll('.rk-sec')[1].getBoundingClientRect().top) < 30), '見出しの ▼ で次の部門へ');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_nav.png') });
   await pa.click('[data-act="rk-mode"][data-k="total"][data-v="top"]'); await pa.waitForTimeout(300);
   ok(await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')][0].querySelector('.rk-scroll')), '「🏆 上位」は枠の中をスクロール');
   // マサ → ライバルと比較
