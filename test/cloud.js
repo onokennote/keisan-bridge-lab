@@ -22,7 +22,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.evaluate(() => document.querySelectorAll('#modal [data-act="tut-skip"],#modal [data-act="close"]').forEach(b => b.click()));
   await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pa.waitForTimeout(500);
   const c1 = await pa.evaluate(() => KBAPP.cloud()); c1.c.code = c1.l && c1.l.code;
-  ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code || ''), '公開版は自動で匿名アカウントができ、プレイヤーの引き継ぎコードが出る：' + c1.c.code);
+  ok(c1.CLOUD_ON && c1.c && /^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(c1.c.code || ''), '公開版は自動で匿名アカウントができ、プレイヤーの復活の呪文が出る：' + c1.c.code);
   // バッジと記録を作って保存
   await pa.evaluate(() => { KBAPP.testAch('win', 12); KBAPP.testAch('three', 60); KBAPP.testAch('streakMax', 7); localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.attackBest', JSON.stringify({ 15: { bp: 820, badges: 21 } })); });
   // 自己紹介を書く（プロフィールから）
@@ -105,7 +105,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pb.evaluate(() => document.querySelector('.rk-row.me .rk-av').click()); await pb.waitForTimeout(2500);
   ok(await pb.evaluate(() => !!document.querySelector('#modal .pv-head')), '自分のアイコンを押すと自分のプロフィールが出る');
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
-  // 端末C：はじめの名前の画面で、Aのプレイヤー（ケン）の引き継ぎコードを入れて入る
+  // 端末C：はじめの名前の画面で、Aのプレイヤー（ケン）の復活の呪文を入れて入る
   const C = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const pc = await C.newPage(); pc.on('pageerror', e => errs.push(e.message));
   await pc.goto('http://localhost:8124/'); await pc.waitForTimeout(1200);
   await pc.click('#modal .an-code summary'); await pc.waitForTimeout(200);
@@ -113,7 +113,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pc.screenshot({ path: path.join(__dirname, 'out', 'code_first.png') });
   await pc.click('#modal [data-act="code-restore"]'); await pc.waitForTimeout(3500); await pc.waitForLoadState('load'); await pc.waitForTimeout(1500);
   const st = await pc.evaluate(() => ({ prof: JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name), uid: KBAPP.cloud().l && KBAPP.cloud().l.uid, dev: KBAPP.cloud().c && KBAPP.cloud().c.uid, win: (JSON.parse(localStorage.getItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth')) || { cnt: {} }).cnt.win }));
-  ok(st.prof.join() === 'ケン' && st.uid === c1.c.uid && st.dev !== c1.c.uid && st.win === 12, 'はじめの名前の画面で引き継ぎコード（小文字・ハイフンなしでもOK）を入れると、そのプレイヤーの記録で入れる（端末の鍵は別）');
+  ok(st.prof.join() === 'ケン' && st.uid === c1.c.uid && st.dev !== c1.c.uid && st.win === 12, 'はじめの名前の画面で復活の呪文（小文字・ハイフンなしでもOK）を入れると、そのプレイヤーの記録で入れる（端末の鍵は別）');
   // Cで記録を進めると、Aを開き直したときにクラウドの新しい記録になる（引き継ぎ後の自動の開き直し・保存が落ち着くのを待つ）
   const settle = async (pg, fn) => { for (let k = 0; k < 12; k++) { try { await pg.waitForLoadState('load'); return await pg.evaluate(fn); } catch (e) { await pg.waitForTimeout(800); } } return null; };
   await pa.waitForTimeout(6000); await pc.waitForTimeout(500);
@@ -134,7 +134,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pd2.screenshot({ path: path.join(__dirname, 'out', 'code_profile.png') });
   await pd2.fill('#cl-in', c1.c.code); await pd2.click('#modal [data-act="cloud-restore"]'); await pd2.waitForTimeout(3000); await pd2.waitForLoadState('load'); await pd2.waitForTimeout(1500);
   const sd = await settle(pd2, () => ({ prof: JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name).sort().join(), cur: KBAPP.S.settings.name }));
-  ok(sd && sd.prof === 'ケン,ミカ' && sd.cur === 'ケン', 'プロフィールから引き継ぎコードを入れると、その人が加わり、もとのプレイヤー（ミカ）も残る：' + JSON.stringify(sd));
+  ok(sd && sd.prof === 'ケン,ミカ' && sd.cur === 'ケン', 'プロフィールから復活の呪文を入れると、その人が加わり、もとのプレイヤー（ミカ）も残る：' + JSON.stringify(sd));
   await settle(pa, () => location.reload()); await pa.waitForTimeout(3000);
   ok(await settle(pa, () => JSON.parse(localStorage.getItem('kb.profiles') || '[]').map(p => p.name).join() === 'ケン'), 'ほかの端末のプレイヤー（ミカ）は、ケンの元の端末には入らない');
   // Dでケンを外しても、記録はクラウドに残る（Aでは消えない）

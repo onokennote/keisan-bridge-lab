@@ -1,4 +1,4 @@
-// Googleでまもる（テストのログイン）と、ふっかつの呪文（引き継ぎコード）の声かけ・リンク。使い方：cd test && node google.js（php が必要）
+// Googleでまもる（テストのログイン）と、復活の呪文（復活の呪文）の声かけ・リンク。使い方：cd test && node google.js（php が必要）
 const { chromium } = require('playwright');
 const fs = require('fs'), path = require('path'), http = require('http'), { spawn, execSync } = require('child_process'), os = require('os');
 const root = path.join(__dirname, '..'), ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.exitCode = 1; };
@@ -23,10 +23,10 @@ const post = (a, body) => fetch('http://localhost:8095/api.php?a=' + a, { method
   await pa.fill('#new-name', 'ケン'); await pa.click('[data-act="create-profile"]'); await pa.waitForTimeout(1500);
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.settings.sndLv = 'off'; KBAPP.testAch('win', 7); }); await pa.evaluate(() => KBAPP.cloudPush()); await pa.waitForTimeout(600);
   const code = await pa.evaluate(() => KBAPP.plLink(JSON.parse(localStorage.getItem('kb.profile'))).code);
-  ok(/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code || ''), '引き継ぎコードがある：' + code);
-  // ふっかつの呪文：3ゲーム遊んだらマサが声をかける
+  ok(/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/.test(code || ''), '復活の呪文がある：' + code);
+  // 復活の呪文：3ゲーム遊んだらマサが声をかける
   await pa.evaluate(() => { const g = KBAPP.G(); g.cnt.games = 3; localStorage.setItem('kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth', JSON.stringify(g)); KBAPP.S.backupShown = false; KBAPP.go('home'); }); await pa.waitForTimeout(2200);
-  ok(await pa.evaluate(c => { const m = document.querySelector('#modal .bk-card'); return !!m && m.innerText.includes(c); }, code), '3ゲームでマサが「ふっかつの呪文」を控えるよう声をかける（コードのカード）');
+  ok(await pa.evaluate(c => { const m = document.querySelector('#modal .bk-card'); return !!m && m.innerText.includes(c); }, code), '3ゲームでマサが「復活の呪文」を控えるよう声をかける（コードのカード）');
   ok(!!(await pa.$('#modal [data-act="g-protect"]')), '声かけの中に「Googleでまもる」');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'g_backup.png') });
   await pa.click('#modal [data-act="bk-done"]'); await pa.waitForTimeout(300);

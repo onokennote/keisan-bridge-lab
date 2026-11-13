@@ -38,9 +38,9 @@ function db(): PDO {
   if (!in_array('card', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN card TEXT');
   if (!in_array('streak', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN streak INTEGER DEFAULT 0');
   if (!in_array('ai', $cols, true)) $pdo->exec('ALTER TABLE ranks ADD COLUMN ai INTEGER DEFAULT 0'); // AI研究員（倶楽部のキャラ）
-  // プレイヤーごとの記録と引き継ぎコード（端末まるごとではなく、プレイヤー単位で別の端末に入れる）
+  // プレイヤーごとの記録と復活の呪文（端末まるごとではなく、プレイヤー単位で別の端末に入れる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS players (uid TEXT NOT NULL, pid TEXT NOT NULL, code_hash TEXT NOT NULL UNIQUE, code TEXT NOT NULL, data TEXT, data_at INTEGER DEFAULT 0, PRIMARY KEY (uid, pid))');
-  // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（引き継ぎコードで別の端末に入れたプレイヤー用）
+  // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（復活の呪文で別の端末に入れたプレイヤー用）
   $pdo->exec('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, pid TEXT NOT NULL, kind TEXT NOT NULL, data TEXT, at INTEGER NOT NULL)'); // 通知（ライバル・ライバルの動き・大会）。30日で消す
   $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS glinks (g TEXT NOT NULL, uid TEXT NOT NULL, pid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (g, uid, pid))'); // Googleでまもる：Googleのアカウントの番号（sub）をハッシュにしたもの g と、プレイヤー
@@ -615,18 +615,18 @@ function obSeatInfo(array $b): array { $tp = (string)($GLOBALS['tokenPid'] ?? ''
 $a = $_GET['a'] ?? '';
 try {
   switch ($a) {
-    case 'register': { // 何も入力せずに始められる匿名アカウント。引き継ぎコードを返す
+    case 'register': { // 何も入力せずに始められる匿名アカウント。復活の呪文を返す
       rateLimit('reg', 30);
       $uid = bin2hex(random_bytes(8)); $token = bin2hex(random_bytes(24)); $code = newCode();
       db()->prepare('INSERT INTO users (uid, token_hash, code_hash, created, seen) VALUES (?, ?, ?, ?, ?)')->execute([$uid, '', h($code), time(), time()]);
       db()->prepare('INSERT INTO tokens (token_hash, uid, created) VALUES (?, ?, ?)')->execute([h($token), $uid, time()]);
       out(['ok' => true, 'uid' => $uid, 'token' => $token, 'code' => $code]);
     }
-    case 'restore': { // 引き継ぎコードで、別の端末から同じアカウントに入る（その端末用の新しい鍵を出す）
+    case 'restore': { // 復活の呪文で、別の端末から同じアカウントに入る（その端末用の新しい鍵を出す）
       rateLimit('restore', 20);
       $b = body(); $code = normCode((string)($b['code'] ?? ''));
       $st = db()->prepare('SELECT uid FROM users WHERE code_hash = ?'); $st->execute([h($code)]); $u = $st->fetch();
-      if (!$u) fail('引き継ぎコードが見つかりません', 404);
+      if (!$u) fail('復活の呪文が見つかりません', 404);
       $token = bin2hex(random_bytes(24));
       db()->prepare('INSERT INTO tokens (token_hash, uid, created) VALUES (?, ?, ?)')->execute([h($token), $u['uid'], time()]);
       db()->prepare('UPDATE users SET seen = ? WHERE uid = ?')->execute([time(), $u['uid']]);
@@ -651,7 +651,7 @@ try {
       $d->commit();
       out(['ok' => true, 'at' => $at]);
     }
-    case 'p_save': { // プレイヤー1人の記録を保存し、ランキングの行も更新する。はじめて保存したときに、そのプレイヤーの引き継ぎコードを作る
+    case 'p_save': { // プレイヤー1人の記録を保存し、ランキングの行も更新する。はじめて保存したときに、そのプレイヤーの復活の呪文を作る
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
       $data = $b['data'] ?? null; if (!is_array($data)) fail('データがありません');
       $json = json_encode($data, JSON_UNESCAPED_UNICODE); if (strlen($json) > $CFG['max_data']) fail('データが大きすぎます', 413);
@@ -685,15 +685,15 @@ try {
       $st = db()->prepare('SELECT data, data_at, code FROM players WHERE uid = ? AND pid = ?'); $st->execute([$u['uid'], $pid]); $r = $st->fetch();
       out(['ok' => true, 'data' => $r && $r['data'] ? json_decode($r['data'], true) : null, 'at' => $r ? (int)$r['data_at'] : 0, 'code' => $r ? $r['code'] : null]);
     }
-    case 'p_restore': { // プレイヤーの引き継ぎコードで、そのプレイヤーを別の端末に入れる（その端末用の、そのプレイヤーだけの鍵を出す）
+    case 'p_restore': { // プレイヤーの復活の呪文で、そのプレイヤーを別の端末に入れる（その端末用の、そのプレイヤーだけの鍵を出す）
       rateLimit('restore', 20);
       $b = body(); $code = normCode((string)($b['code'] ?? ''));
       $st = db()->prepare('SELECT uid, pid, code, data, data_at FROM players WHERE code_hash = ?'); $st->execute([h($code)]); $r = $st->fetch();
       if (!$r) { // 前の版の「端末まるごと」のコード：プレイヤーが1人だけなら、その人を入れる
         $q = db()->prepare('SELECT uid FROM users WHERE code_hash = ?'); $q->execute([h($code)]); $old = $q->fetch();
-        if (!$old) fail('引き継ぎコードが見つかりません', 404);
+        if (!$old) fail('復活の呪文が見つかりません', 404);
         $ps = db()->prepare('SELECT uid, pid, code, data, data_at FROM players WHERE uid = ?'); $ps->execute([$old['uid']]); $all = $ps->fetchAll();
-        if (count($all) !== 1) fail(count($all) ? 'このコードは前の版の「端末まるごと」のコードです。プレイヤーごとのコード（元の端末の「プレイヤー」に出ます）を入れてください' : 'このコードは前の版のコードです。元の端末でアプリを開くと、プレイヤーごとのコードが「プレイヤー」に出ます', 404);
+        if (count($all) !== 1) fail(count($all) ? 'これは前の版の「端末まるごと」の呪文です。プレイヤーごとの復活の呪文（元の端末の「プレイヤー」に出ます）を入れてください' : 'これは前の版の呪文です。元の端末でアプリを開くと、プレイヤーごとの復活の呪文が「プレイヤー」に出ます', 404);
         $r = $all[0];
       }
       $token = bin2hex(random_bytes(24));
@@ -731,7 +731,7 @@ try {
         $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: (is_array($d) ? ($d['name'] ?? 'プレイヤー') : 'プレイヤー'), 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'bp' => (int)$r['bp']]; }
       out(['ok' => true, 'list' => $L]);
     }
-    case 'g_restore': { // Googleでログインして、選んだプレイヤーをこの端末に入れる（引き継ぎコードと同じく、そのプレイヤーだけの鍵を出す）
+    case 'g_restore': { // Googleでログインして、選んだプレイヤーをこの端末に入れる（復活の呪文と同じく、そのプレイヤーだけの鍵を出す）
       rateLimit('restore', 20);
       $b = body(); $g = gVerify((string)($b['idt'] ?? '')); $k = (string)($b['k'] ?? ''); $r = null;
       $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]);
@@ -743,7 +743,7 @@ try {
       $nm = db()->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $nm->execute([$p['uid'], $p['pid']]); $n = $nm->fetch();
       out(['ok' => true, 'uid' => $p['uid'], 'pid' => $p['pid'], 'token' => $token, 'code' => $p['code'], 'name' => $n ? $n['name'] : null, 'data' => $p['data'] ? json_decode($p['data'], true) : null, 'at' => (int)$p['data_at']]);
     }
-    case 'p_del': { // この端末で作ったプレイヤーを消す：ランキング・引き継ぎコード・ほかの端末に入れた鍵も消す（オンライン大会の実績は残す）
+    case 'p_del': { // この端末で作ったプレイヤーを消す：ランキング・復活の呪文・ほかの端末に入れた鍵も消す（オンライン大会の実績は残す）
       $b = body(); $u = authUser($b);
       if ((string)($u['tpid'] ?? '') !== '') fail('このプレイヤーは、作った端末でだけ消せます', 403);
       $pid = cleanPid($b['pid'] ?? ''); if ($pid === '') fail('プレイヤーがありません');
