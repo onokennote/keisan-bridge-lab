@@ -1634,12 +1634,13 @@ function rankingHTML() {
   const di = ON.dinfo, dsec = (id, title, note, L0, extra) => { const L = L0 && (withAi ? L0 : L0.filter(x => !x.ai).map((x, i) => Object.assign({}, x, { rank: i + 1 }))), top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
     return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : (top.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') + (mine.length ? '<div class="rk-gap">…</div>' + mine.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
-  const dailyS = dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。デイリーに出たAI研究員も載り、総ポイントとシーズンの表彰もこの順位のまま（AIが上なら、人は繰り上がりません）。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や仕様変更の可能性があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`)
-    + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。デイリーに出たAI研究員も載ります。`, di && di.total);
+  // ここから下は「大会ポイント」（デイリー・シーズン・公式大会）。上の部門とは別に集計する
+  const dailyS = `<h2 class="rk-group-h" id="rk-cup">🏆 大会ポイント<small>デイリートーナメント・シーズン・公式大会（上のランキングとは別に集計）</small></h2>` + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。デイリーに出たAI研究員も載ります。`, di && di.total)
+    + dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。デイリーに出たAI研究員も載り、総ポイントとシーズンの表彰もこの順位のまま（AIが上なら、人は繰り上がりません）。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や仕様変更の可能性があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
-  <div class="panel stack"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
+  <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
     <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは上位20人まで。20位より下のときは、自分の順位を下に出します。</p></div>`;
 }
 const rankWithAi = () => raw.get('kb.rankAI', true) !== false; // 見る人ごとの設定（はじめはON）
@@ -5959,7 +5960,7 @@ function act(a, el) {
     case 'on-begin': onAct('start'); break;
     case 'on-back': onAct('back'); break;
     case 'on-chat': onChatModal(); break;
-    case 'daily-rank': if (el && el.dataset.tab) dailyRankOpen(el.dataset.tab); else { S.rankJump = 'rk-season'; go('ranking'); } break;
+    case 'daily-rank': if (el && el.dataset.tab) dailyRankOpen(el.dataset.tab); else { S.rankJump = 'rk-cup'; go('ranking'); } break;
     case 'on-chat-send': onChatSend(($('#on-chat-in') || {}).value); break;
     case 'on-auto': { const r = ratingOf(G_().games), lv = r.ok ? Math.max(2, Math.min(4, Math.floor(r.r - 1))) : 2; onAct('auto', { lv }); toast(`AI★${lv}に任せました（「自分で打つ」でいつでも戻れます）`); break; }
     case 'on-draw': onAct('draw'); break;

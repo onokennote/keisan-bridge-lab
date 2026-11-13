@@ -83,7 +83,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   await pa.evaluate(() => document.querySelector('.dl-card').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_joined.png') });
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
   await pa.click('.dl-card [data-act="daily-rank"]'); await pa.waitForTimeout(3000);
-  ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length >= 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
+  ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && !!document.querySelector('#rk-cup') && document.querySelectorAll('#rk-tpoints .rk-row').length >= 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank.png') });
   await pa.evaluate(() => document.querySelector('#rk-tpoints').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank2.png') });
   // 順位ごとの回数でバッジ（サーバーの返事を差し替えて確かめる）：優勝2回→銀、2位1回→銅、3位3回→金
