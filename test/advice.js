@@ -108,6 +108,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pb.click('#pb-rv [data-k$=":m"]'); await pb.waitForTimeout(300);
   ok(await pb.evaluate(() => /宿敵/.test(document.querySelector('#modal .rv-sec b').textContent) && /ケン/.test(document.querySelector('#modal .rv-sec').textContent)), '一覧で、お互いの人に「🔁 ライバルバック」の印');
   await pb.screenshot({ path: path.join(__dirname, 'out', 'rival_back.png') });
+  ok(await pb.evaluate(() => /→ライバル視\s*1/.test(document.querySelector('#pb-rv').textContent) && /←被ライバル\s*1/.test(document.querySelector('#pb-rv').textContent)), 'ライバル視・被ライバルの数に宿敵も入る');
+  await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove())); await pb.click('#pb-rv [data-k$=":r"]'); await pb.waitForTimeout(300);
+  ok(await pb.evaluate(() => { const r = document.querySelector('#modal .rv-sec .rv-li'); return r && /ケン/.test(r.textContent) && /⇄ 宿敵/.test(r.textContent); }), 'ライバル視の一覧に宿敵も入り、⇄ の印で上に');
+  await pb.screenshot({ path: path.join(__dirname, 'out', 'rival_list_mu.png') });
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   await (await pb.$('.player-bar')).screenshot({ path: path.join(__dirname, 'out', 'rival_pb.png') }).catch(() => { });
   // 通知：ケンがバッジを取る → ライバルのハナに「ライバルのケンさんが…」。ケンが招待だけの大会にハナを招待 → ハナに招待の通知

@@ -2351,3 +2351,5 @@ body.rewinding #home-fab{display:none}
 
 /* ホームの名前：最大10文字。長い名前は字を小さくして1行に収める */
 .pb2 .pb-nm{font-size:clamp(15px, calc(190px / max(var(--nl, 6), 7) * 1.0), 26px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
+
+.rv-mu{font-style:normal;margin-left:8px;padding:1px 7px;border-radius:99px;background:rgba(242,182,50,.18);border:1px solid rgba(242,182,50,.55);color:#ffd666;font-size:11px;font-weight:800;vertical-align:middle}
