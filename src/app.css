@@ -2335,3 +2335,6 @@ body.rewinding #home-fab{display:none}
 .rest-cards .mc{margin:0}
 .rest-cards .mc.back{background:repeating-linear-gradient(45deg,#2b4a6f,#2b4a6f 3px,#1f3654 3px,#1f3654 6px);color:#cfe3ff;border-color:#4d78a8}
 .rest-cards .mc{min-width:20px;height:25px;font-size:13px}
+
+/* 新しい版のお知らせ */
+.ver-bar{white-space:nowrap;position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:9999;background:#1b3a2c;border:1px solid #f2b632;color:#fff;border-radius:99px;padding:6px 8px 6px 14px;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}

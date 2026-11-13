@@ -3902,7 +3902,9 @@ function recordDecision(move) {
   const key = stateKey(g);
   let ev, ctx = ctxFor(me);
   const view = g.view(me, S.settings.showLevel && S.settings.showStyle);
-  if (S.hint && S.hint.key === key && S.hint.ev) { ev = S.hint.ev.slice(); ctx = S.hint.ctx; }
+  // 読みを使い回すのは、その読みの手がぜんぶ今の手札で出せるときだけ（別の局面の読みを取り違えないように、二重に確かめる）
+  const hintOk = S.hint && S.hint.key === key && S.hint.ev && S.hint.t === t && S.hint.ev.every(e => !e.m || e.m.vals.every(v => counts[v] >= e.m.vals.filter(x => x === v).length));
+  if (hintOk) { ev = S.hint.ev.slice(); ctx = S.hint.ctx; }
   else ev = KB.evaluate(view, KB.candidates(counts, t, 8).concat([null]), 1600, ctx);
   if (!ev.find(e => sameMove(e, move))) {
     const top = ev.slice().sort((a, b) => b.goal - a.goal)[0];
@@ -5949,6 +5951,15 @@ function evalMine() {
   }, 30);
 }
 
+// 新しい版が出ていたら知らせる（開きっぱなしのページは古いまま動き続けるので）。公開版（KB_BUILD がある）だけ、画面に戻ったとき・10分ごとに確かめる
+const verCheck = { at: 0, told: false };
+async function checkNewVersion() {
+  if (!window.KB_BUILD || verCheck.told || Date.now() - verCheck.at < 60000) return; verCheck.at = Date.now();
+  try { const t = await (await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })).text(); const m = t.match(/KB_BUILD="([0-9a-f]+)"/);
+    if (m && m[1] !== window.KB_BUILD) { verCheck.told = true; const d = document.createElement('div'); d.className = 'ver-bar'; d.innerHTML = '🆕 新しい版があります <button class="btn sm primary">再読み込み</button>'; d.querySelector('button').onclick = () => location.reload(); document.body.appendChild(d); } } catch (e) { }
+}
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewVersion(); });
+setInterval(checkNewVersion, 600000);
 // 吹き出しを時間で消す
 setInterval(() => {
   if (S.view !== 'game' || S.winShow) return;

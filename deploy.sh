@@ -12,5 +12,6 @@ const head='<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\"><meta
 const api=process.env.KB_CLOUD_API||'';
 const cloud=api?'<script>window.KB_CLOUD_API='+JSON.stringify(api)+'</script>':'';
 const stg=process.env.KB_STAGING?'<script>window.KB_STAGING=1</script>':'';
-fs.writeFileSync('dist/index.html',head+cloud+stg+body+'</body></html>');
+const ver='<script>window.KB_BUILD='+JSON.stringify(require('crypto').createHash('sha1').update(body).digest('hex').slice(0,12))+'</script>';
+fs.writeFileSync('dist/index.html',head+cloud+stg+ver+body+'</body></html>');
 "
