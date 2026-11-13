@@ -2387,7 +2387,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='42a627c508';
+window.KB_BUILD='7c1352c274';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -11083,6 +11083,7 @@ function rvSetSolo(who) {
       let note = '';
       if (f && f.hl && f.hl[0]) { const h = f.hl[0]; note = { sutemi: '捨て身が光った', aete: 'あえて引くが光った', divParen: `「${h.mine}」が光った`, div: `「${h.mine}」が光った`, three: '3枚出しで一気に軽くした', one: 'あえて1枚が渋かった', defend: '相手リーチをしのいだ', perfect: '全手最善', run: `最善${f.run}連続`, fast: '速攻の上がり' }[h.k] || ''; }
       if (f && f.worst && (!note || f.worst.loss > 0.1)) note = x.won ? `ただ第${f.worst.round}巡の「${f.worst.mine}」は改善の余地` : `第${f.worst.round}巡の「${f.worst.mine}」が痛手`;
+      else if (f && f.worst && note && f.worst.loss > 0.03) note += `。ただ第${f.worst.round}巡の「${f.worst.mine}」は${x.won ? '改善の余地' : '痛手'}`; // 光った手と大きく外した手が同じゲームにあるときは両方（片方だけだと、マサの「分かれ目」と食い違って見える）
       if (!note && x.luck === 'resultUnlucky') note = '内容最善も不運';
       return `第${x.game}ゲームは${res}${note ? '、' + note : ''}`;
     };
