@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="654bb50 2026-11-13 12:10"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="7635b53 2026-11-13 12:19"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2332,10 +2332,16 @@ body.rewinding #home-fab{display:none}
 /* 大会の順位：名前を押すとプロフィール */
 .on-pn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
 .on-sr .ai-chip{margin-left:6px}
+
+/* 解説：手を打ったあとに残る手札 */
+.rest-cards{display:inline-flex;flex-wrap:wrap;gap:3px;margin-left:8px;vertical-align:middle}
+.rest-cards .mc{margin:0}
+.rest-cards .mc.back{background:repeating-linear-gradient(45deg,#2b4a6f,#2b4a6f 3px,#1f3654 3px,#1f3654 6px);color:#cfe3ff;border-color:#4d78a8}
+.rest-cards .mc{min-width:20px;height:25px;font-size:13px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='e19e0ed00b';
+window.KB_BUILD='14f310b315';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -9593,6 +9599,13 @@ function fieldMiniHTML(g, flipped) {
   if (!live.length) return h.reshuffled ? '<div class="fh-mini" title="切り直し後の場札"><span class="fh-rs">切直</span></div>' : '';
   return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('、')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
 }
+// 手を打ったあとに残る手札（引く手は今の手札＋裏向きの1枚）。解説の手の一覧で「残り○枚」の横に並べる
+function restCardsHTML(counts, m) {
+  if (!counts) return ''; const c = counts.slice(); if (m) for (const v of m.vals) c[v]--;
+  const vs = []; for (let v = 13; v >= 1; v--) for (let k = 0; k < (c[v] || 0); k++) vs.push(v);
+  if (!vs.length && m) return '';
+  return `<span class="rest-cards">${vs.map(v => `<i class="mc">${KB.vname(v)}</i>`).join('')}${m ? '' : '<i class="mc back">?</i>'}</span>`;
+}
 function miniCard(c) { return `<i class="mc ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</i>`; }
 function playedHTML(g, i, bare) {
   const ps = g.played[i], rt = boardHist(g).ret[i] || 0;
@@ -9686,7 +9699,7 @@ function evalRowHTML(e, i, H, mine) {
       <div class="metric">期待PP<b>${fx1(e.pp)}</b><div class="bar"><i style="width:${Math.min(100, e.pp / 40 * 100)}%;background:var(--warn)"></i></div></div>
       <div class="metric">ゲーム内の期待順位<b>${fx1(e.rank)}位</b></div>
     </div>
-    <ul class="reasons">${rs.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+    <ul class="reasons">${rs.map((r, k) => `<li>${esc(r)}${k === 0 ? restCardsHTML(H.counts, e.m) : ''}</li>`).join('')}</ul></div>`;
 }
 function renderHint() {
   const el = $('#hintpanel'); if (!el) return;
@@ -10414,7 +10427,7 @@ function whyHTML(d) {
     if (e.danger > 0.08) rs.push(`次の自分の番までに誰かが上がる確率 ${pct(e.danger)}`);
     return `<div class="cand ${cls}"><div class="top"><span class="rk ${cls === 'best' ? 'r1' : ''}">${label}</span><span class="expr">${e.m ? esc(e.m.expr) + ' = ' + d.t : 'あえて引く'}</span></div>
     <div class="metrics"><div class="metric">${d.goalLbl || goalLabel()}<b>${d.goalLbl ? (d.goalPct ? pct(e.goal) : fx1(e.goal) + '点') : fmtGoal(e.goal)}</b></div><div class="metric">上がる確率<b>${pct(e.win)}</b></div><div class="metric">期待PP<b>${fx1(e.pp)}</b></div><div class="metric">期待順位<b>${fx1(e.rank)}位</b></div></div>
-    <ul class="reasons">${rs.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+    <ul class="reasons">${rs.map((r, k) => `<li>${esc(r)}${k === 0 ? restCardsHTML(d.counts, e.m) : ''}</li>`).join('')}</ul></div>`;
   };
   const best = d.bestStats, mine = d.mineStats;
   // AIが考えた手（総合評価の順）：最善かどうかに関係なく一覧で見せる
