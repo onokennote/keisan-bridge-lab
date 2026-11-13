@@ -71,9 +71,19 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   ok(await pa.evaluate(() => { const L = [...document.querySelectorAll('.rk-sec')][0].querySelectorAll('.rk-row'); return [...L].some(r => /ハナ/.test(r.innerText)) && [...L].every(r => /ハナ|ケン/.test(r.innerText)); }), '「⚔ ライバル」でライバルと自分だけ');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rank_rival_tab.png') });
   await pa.click('[data-act="rk-mode"][data-k="total"][data-v="near"]'); await pa.waitForTimeout(300);
-  ok(await pa.evaluate(() => { const L = [...document.querySelectorAll('.rk-sec')][0].querySelectorAll('.rk-row'); return L.length <= 21 && [...L].some(r => r.classList.contains('me')); }), '「📍 自分のまわり」に自分（上下10人まで）');
+  ok(await pa.evaluate(() => { const L = [...document.querySelectorAll('.rk-sec')][0].querySelectorAll('.rk-row'); return [...L].some(r => r.classList.contains('me')); }), '「📍 自分のまわり」に自分（真ん中）');
+  // 30人のとき：10人分の枠でスクロール、「自分のまわり」は自分が真ん中
+  await pa.evaluate(() => { const L = Array.from({ length: 30 }, (_, i) => ({ rank: i + 1, name: i === 17 ? 'ケン' : '研究員' + (i + 1), total: 90 - i * 2.5, me: i === 17 }));
+    KBAPP.S.rank = { rankings: { total: { list: L, mine: [], total: 30 } }, at: Date.now(), ai: true }; KBAPP.S.rkMode = { total: 'near' }; KBAPP.go('ranking'); }); await pa.waitForTimeout(800);
+  { const f = await pa.evaluate(() => { const bx = document.querySelector('.rk-scroll'), me = bx.querySelector('.me'), a = bx.getBoundingClientRect(), m = me.getBoundingClientRect(), r = bx.querySelectorAll('.rk-row')[0].getBoundingClientRect(); return { rows: bx.clientHeight / (r.height + 4), off: Math.abs(m.top + m.height / 2 - a.top - a.height / 2), sc: bx.scrollHeight > bx.clientHeight }; });
+    ok(f.sc && f.rows > 9.5 && f.rows < 10.5 && f.off < 8, `「自分のまわり」は10人分の枠で、自分が真ん中（${JSON.stringify(f)}）`); }
+  await (await pa.$('.rk-sec')).screenshot({ path: path.join(__dirname, 'out', 'rank_near.png') });
   await pa.click('[data-act="rk-mode"][data-k="total"][data-v="top"]'); await pa.waitForTimeout(300);
-  ok(await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')][0].querySelectorAll('.rk-row').length <= 21), '「🏆 上位」ははじめ20人（＋自分）');
+  ok(await pa.evaluate(() => { const bx = document.querySelector('.rk-scroll'); return bx.scrollTop === 0 && bx.scrollHeight > bx.clientHeight && document.querySelectorAll('.rk-sec')[0].querySelector('.rk-gap + .rk-row.me'); }), '「上位」は1位から10人分の枠、枠の下に自分の行');
+  await (await pa.$('.rk-sec')).screenshot({ path: path.join(__dirname, 'out', 'rank_top.png') });
+  await pa.evaluate(() => { KBAPP.S.rank = null; KBAPP.S.rkMode = {}; KBAPP.go('ranking'); }); await pa.waitForTimeout(1800);
+  await pa.click('[data-act="rk-mode"][data-k="total"][data-v="top"]'); await pa.waitForTimeout(300);
+  ok(await pa.evaluate(() => [...document.querySelectorAll('.rk-sec')][0].querySelector('.rk-scroll')), '「🏆 上位」は枠の中をスクロール');
   // マサ → ライバルと比較
   await pa.evaluate(() => { KBAPP.go('home'); KBAPP.act('host-masa'); }); await pa.waitForTimeout(300); await pa.click('#modal [data-act="masa-rival"]'); await pa.waitForTimeout(300);
   await pa.click('#modal [data-act="rival-cmp"]'); await pa.waitForTimeout(1200);

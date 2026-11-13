@@ -1643,25 +1643,27 @@ function rankingHTML() {
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
   <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
-    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」（はじめ20人。「もっと見る」で続き）・「自分のまわり」（上下10人ずつ）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」・「自分のまわり」（自分が真ん中。どちらも10人分の枠の中をスクロール）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
 }
-// ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位（はじめ20人・もっと見るで+20人）／自分のまわり（上下10人）／ライバル
+// ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位／自分のまわり（自分が真ん中）。どちらも10人分の枠でスクロール／ライバル
 const RK_MODES = [['top', '🏆 上位'], ['near', '📍 自分のまわり'], ['rival', '⚔ ライバル']];
 function rkTabs(k) { const m = (S.rkMode || {})[k] || 'top'; return `<div class="su-seg rk-tabs">${RK_MODES.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" data-act="rk-mode" data-k="${k}" data-v="${v}">${l}</button>`).join('')}</div>`; }
 function rkRows(k, L, rowF, total) {
   const m = (S.rkMode || {})[k] || 'top', gap = '<div class="rk-gap">…</div>', mi = L.findIndex(rankMe), empty = t => `<p class="small muted">${t}</p>`;
   if (!L.length) return '';
-  if (m === 'near') { if (mi < 0) return empty('まだこのランキングに載っていません。'); const a = Math.max(0, mi - 10), z = Math.min(L.length, mi + 11); return L.slice(a, z).map(rowF).join('') + (z >= L.length && total > L.length ? gap : ''); }
-  if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? R.map(rowF).join('') : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
-  const n = (S.rkMore || {})[k] || 20, top = L.slice(0, n), more = L.length > n || total > L.length;
-  return top.map(rowF).join('') + (mi >= n ? gap + rowF(L[mi]) : '') + (more ? `<button class="btn sm ghost rk-more" data-act="rk-more" data-k="${k}">もっと見る（${Math.min(L.length, total) > n ? `あと${Math.min(L.length, total) - n}人` : '続き'}）</button>` : '');
+  const box = (rows, center) => `<div class="rk-scroll"${center ? ' data-center="1"' : ''}>${rows.map(rowF).join('')}</div>`; // 10人分の高さで、中をスクロール（rkFit）
+  if (m === 'near') return mi < 0 ? empty('まだこのランキングに載っていません。') : box(L, true);
+  if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? box(R) : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
+  return box(L) + (mi >= 10 ? gap + rowF(L[mi]) : '') + (total > L.length ? `<p class="small muted" style="margin:0;text-align:center">上位${L.length}人まで表示しています</p>` : '');
 }
-function rkRepaint() { if (S.view !== 'ranking') return; const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); rankingLoad(); scrollTo(0, y); }
+// ランキングの枠を10人分の高さにして、「自分のまわり」は自分が真ん中に来るようにスクロール
+function rkFit() { document.querySelectorAll('.rk-scroll').forEach(bx => { const rows = bx.querySelectorAll('.rk-row'); bx.style.maxHeight = rows.length > 10 ? (rows[10].getBoundingClientRect().top - rows[0].getBoundingClientRect().top - 4) + 'px' : ''; if (bx.dataset.center) { const me = bx.querySelector('.rk-row.me'); if (me) bx.scrollTop += me.getBoundingClientRect().top - bx.getBoundingClientRect().top - (bx.clientHeight - me.offsetHeight) / 2; } }); }
+function rkRepaint() { if (S.view !== 'ranking') return; const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); rkFit(); rankingLoad(); scrollTo(0, y); }
 const rankWithAi = () => raw.get('kb.rankAI', true) !== false; // 見る人ごとの設定（はじめはON）
 async function rankingLoad() {
   const c = (PID && plLink(PID)) || raw.get('kb.cloud', null);
   const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
-  bindHide();
+  bindHide(); rkFit();
   if (ON_ENABLED()) dailyInfoLoad(true).then(() => { if (S.view === 'ranking') { const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); bindHide(); rankJumpDo(y); } }); // デイリー（シーズン・総ポイント）
   if (S.rank && !S.rank.home && S.rank.ai === rankWithAi() && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
   try {
@@ -1676,7 +1678,7 @@ async function rankingLoad() {
   if (S.view === 'ranking') { const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); bindHide(); rankJumpDo(y); }
 }
 // デイリーのカードから来たときは、シーズンの欄まで動かす（それ以外は読み直しの前の位置のまま）
-function rankJumpDo(y) { if (S.rankJump && ON.dinfo) { const el = $('#' + S.rankJump); S.rankJump = null; if (el) el.scrollIntoView({ block: 'start' }); } else if (y != null) window.scrollTo(0, y); }
+function rankJumpDo(y) { rkFit(); if (S.rankJump && ON.dinfo) { const el = $('#' + S.rankJump); S.rankJump = null; if (el) el.scrollIntoView({ block: 'start' }); } else if (y != null) window.scrollTo(0, y); }
 // ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
 // ランキング・タイトルのアイコンを押したときのプロフィール（スマホで見やすい独自の表示。X用の画像とは別）
 // 上にアイコンと名前を大きく＋推定実力・総合の順位（AI込み・人だけ）、その下に成績のタイル・カテゴリーの紋章・バッジ・自己紹介
@@ -5928,7 +5930,6 @@ function act(a, el) {
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
     case 'rk-mode': { S.rkMode = Object.assign({}, S.rkMode, { [el.dataset.k]: el.dataset.v }); rkRepaint(); break; }
-    case 'rk-more': { S.rkMore = Object.assign({}, S.rkMore, { [el.dataset.k]: ((S.rkMore || {})[el.dataset.k] || 20) + 20 }); rkRepaint(); break; }
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
