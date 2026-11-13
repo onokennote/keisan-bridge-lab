@@ -9,7 +9,9 @@ API=${KB_CLOUD_API:-https://onoken-web.sakura.ne.jp/kb/api.php}
 if [ -z "$KB_SKIP_JUDGE" ]; then
   (cd test && node judge.js quick) || { echo '判定チェックで失敗したので、本番には出しませんでした（test/out/judge_fail.json）'; exit 1; }
 fi
-KB_CLOUD_API="$API" ./deploy.sh
+# Googleでまもる：GoogleのOAuthクライアントID（公開してよい値。空ならボタンを出さない）。サーバー側は api.php の GOOGLE_CLIENT_ID
+GCID=${KB_GOOGLE_CLIENT_ID:-}
+KB_CLOUD_API="$API" KB_GOOGLE_CLIENT_ID="$GCID" ./deploy.sh
 SRC=$(git rev-parse --short HEAD)
 WT=$(mktemp -d)
 git fetch -q origin lolipop-deploy 2>/dev/null && git worktree add -q "$WT" origin/lolipop-deploy -B lolipop-deploy || git worktree add -q --orphan -b lolipop-deploy "$WT"

@@ -43,6 +43,7 @@ function db(): PDO {
   // プレイヤーの鍵：pid の入った鍵は、そのプレイヤーの記録だけを読み書きできる（引き継ぎコードで別の端末に入れたプレイヤー用）
   $pdo->exec('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, pid TEXT NOT NULL, kind TEXT NOT NULL, data TEXT, at INTEGER NOT NULL)'); // 通知（ライバル・ライバルの動き・大会）。30日で消す
   $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS glinks (g TEXT NOT NULL, uid TEXT NOT NULL, pid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (g, uid, pid))'); // Googleでまもる：Googleのアカウントの番号（sub）をハッシュにしたもの g と、プレイヤー
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
@@ -77,6 +78,21 @@ function rankByRid(string $rid): ?array { foreach (db()->query('SELECT uid, pid,
 function noteInvites(array $t, array $names): void {
   $want = []; foreach ($names as $n) { $k = obNorm((string)$n); if ($k !== '') $want[$k] = 1; } if (!$want) return;
   foreach (db()->query('SELECT uid, pid, name FROM ranks WHERE ai = 0')->fetchAll() as $r) if ($r['uid'] !== $t['host'] && isset($want[obNorm((string)$r['name'])])) noteAdd($r['uid'], $r['pid'], 'invite', ['tid' => $t['id'], 'tname' => $t['cfg']['name'], 'host' => $t['hostName'] ?? ''], '"tid":"' . $t['id'] . '"');
+}
+// Googleでまもる：ログインで受け取ったIDトークンをGoogleに確かめ、アカウントの番号（sub）をハッシュにして返す（メールアドレスなどは使わない・保存しない）
+// クライアントID は config.php の google_client_id（なければ GOOGLE_CLIENT_ID）。テストの設定では「test:番号」をそのまま通す
+const GOOGLE_CLIENT_ID = '';
+function gClientId(): string { global $CFG; return (string)($CFG['google_client_id'] ?? GOOGLE_CLIENT_ID); }
+function gVerify(string $idt): string {
+  global $CFG;
+  if (!empty($CFG['test']) && preg_match('/^test:([a-z0-9]{1,40})$/', $idt, $m)) return h('g:' . $m[1]);
+  $cid = gClientId(); if ($cid === '') fail('Googleのログインはまだ準備中です', 503);
+  if (strlen($idt) < 100 || strlen($idt) > 4096) fail('Googleのログインを確かめられませんでした', 401);
+  $ctx = stream_context_create(['http' => ['timeout' => 8, 'ignore_errors' => true]]);
+  $r = @file_get_contents('https://oauth2.googleapis.com/tokeninfo?id_token=' . rawurlencode($idt), false, $ctx);
+  $j = $r ? json_decode($r, true) : null;
+  if (!is_array($j) || ($j['aud'] ?? '') !== $cid || !in_array($j['iss'] ?? '', ['accounts.google.com', 'https://accounts.google.com'], true) || (int)($j['exp'] ?? 0) < time() || empty($j['sub'])) fail('Googleのログインを確かめられませんでした', 401);
+  return h('g:' . $j['sub']);
 }
 function cleanPid($p): string { return substr(preg_replace('/[^a-z0-9]/i', '', (string)$p), 0, 24); }
 // 記録を読み書きするプレイヤー：プレイヤーの鍵ならそのプレイヤーだけ、端末の鍵ならその端末で作ったプレイヤー
@@ -685,6 +701,48 @@ try {
       $nm = db()->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $nm->execute([$r['uid'], $r['pid']]); $n = $nm->fetch();
       out(['ok' => true, 'uid' => $r['uid'], 'pid' => $r['pid'], 'token' => $token, 'code' => $r['code'], 'name' => $n ? $n['name'] : null, 'data' => $r['data'] ? json_decode($r['data'], true) : null, 'at' => (int)$r['data_at']]);
     }
+    case 'g_link': { // Googleでまもる：いまのプレイヤーを、Googleのアカウントにひもづける（1つのGoogleに何人でも）
+      rateLimit('glink', 30);
+      $b = body(); $u = authUser($b); $pid = cleanPid($b['pid'] ?? '');
+      if ($pid === '' || ($GLOBALS['tokenPid'] !== '' && $GLOBALS['tokenPid'] !== $pid)) fail('プレイヤーがありません', 403);
+      $q = db()->prepare('SELECT 1 FROM players WHERE uid = ? AND pid = ?'); $q->execute([$u['uid'], $pid]); if (!$q->fetch()) fail('まだクラウドに保存されていません。少し遊んでから、もう一度ためしてください');
+      $g = gVerify((string)($b['idt'] ?? ''));
+      $n = db()->prepare('SELECT COUNT(*) FROM glinks WHERE g = ?'); $n->execute([$g]); if ((int)$n->fetchColumn() >= 20) fail('1つのGoogleアカウントでまもれるのは20人までです');
+      db()->prepare('INSERT OR REPLACE INTO glinks (g, uid, pid, at) VALUES (?, ?, ?, ?)')->execute([$g, $u['uid'], $pid, time()]);
+      out(['ok' => true]);
+    }
+    case 'g_unlink': { // Googleでまもるのをやめる（このプレイヤーのひもづけを全部外す）
+      $b = body(); $u = authUser($b); $pid = cleanPid($b['pid'] ?? '');
+      if ($pid === '' || ($GLOBALS['tokenPid'] !== '' && $GLOBALS['tokenPid'] !== $pid)) fail('プレイヤーがありません', 403);
+      db()->prepare('DELETE FROM glinks WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
+      out(['ok' => true]);
+    }
+    case 'g_status': { // このプレイヤーがGoogleでまもられているか
+      $b = body(); $u = authUser($b); $pid = cleanPid($b['pid'] ?? '');
+      $q = db()->prepare('SELECT COUNT(*) FROM glinks WHERE uid = ? AND pid = ?'); $q->execute([$u['uid'], $pid]);
+      out(['ok' => true, 'linked' => (int)$q->fetchColumn() > 0, 'ready' => gClientId() !== '' || !empty($CFG['test'])]);
+    }
+    case 'g_list': { // Googleでログイン：そのアカウントでまもっているプレイヤーの一覧（名前とアバター）
+      rateLimit('restore', 20);
+      $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
+      $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, r.rating, r.bp FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid WHERE l.g = ? ORDER BY l.at');
+      $q->execute([$g]); $L = [];
+      foreach ($q->fetchAll() as $r) { $pd = db()->prepare('SELECT data FROM players WHERE uid = ? AND pid = ?'); $pd->execute([$r['uid'], $r['pid']]); $d = json_decode((string)$pd->fetchColumn(), true);
+        $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: (is_array($d) ? ($d['name'] ?? 'プレイヤー') : 'プレイヤー'), 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rating' => $r['rating'] !== null ? round((float)$r['rating'], 1) : null, 'bp' => (int)$r['bp']]; }
+      out(['ok' => true, 'list' => $L]);
+    }
+    case 'g_restore': { // Googleでログインして、選んだプレイヤーをこの端末に入れる（引き継ぎコードと同じく、そのプレイヤーだけの鍵を出す）
+      rateLimit('restore', 20);
+      $b = body(); $g = gVerify((string)($b['idt'] ?? '')); $k = (string)($b['k'] ?? ''); $r = null;
+      $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]);
+      foreach ($q->fetchAll() as $x) if (hash_equals(hash_hmac('sha256', $x['uid'] . ':' . $x['pid'], $g), $k)) $r = $x;
+      if (!$r) fail('このGoogleアカウントでまもっているプレイヤーではありません', 404);
+      $st = db()->prepare('SELECT uid, pid, code, data, data_at FROM players WHERE uid = ? AND pid = ?'); $st->execute([$r['uid'], $r['pid']]); $p = $st->fetch(); if (!$p) fail('プレイヤーが見つかりません', 404);
+      $token = bin2hex(random_bytes(24));
+      db()->prepare('INSERT INTO tokens (token_hash, uid, created, pid) VALUES (?, ?, ?, ?)')->execute([h($token), $p['uid'], time(), $p['pid']]);
+      $nm = db()->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ?'); $nm->execute([$p['uid'], $p['pid']]); $n = $nm->fetch();
+      out(['ok' => true, 'uid' => $p['uid'], 'pid' => $p['pid'], 'token' => $token, 'code' => $p['code'], 'name' => $n ? $n['name'] : null, 'data' => $p['data'] ? json_decode($p['data'], true) : null, 'at' => (int)$p['data_at']]);
+    }
     case 'p_del': { // この端末で作ったプレイヤーを消す：ランキング・引き継ぎコード・ほかの端末に入れた鍵も消す（オンライン大会の実績は残す）
       $b = body(); $u = authUser($b);
       if ((string)($u['tpid'] ?? '') !== '') fail('このプレイヤーは、作った端末でだけ消せます', 403);
@@ -693,6 +751,7 @@ try {
       $d->prepare('DELETE FROM ranks WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
       $d->prepare('DELETE FROM players WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
       $d->prepare('DELETE FROM tokens WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
+      $d->prepare('DELETE FROM glinks WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]);
       $d->commit();
       out(['ok' => true]);
     }

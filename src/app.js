@@ -410,7 +410,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -1602,6 +1602,12 @@ async function cloudInit() {
 async function cloudRestore(code) {
   try {
     const j = await cloudReq('p_restore', { code });
+    return cloudRestoreApply(j);
+  } catch (e) { toast(e.message || '引き継げませんでした'); return false; }
+}
+// 引き継ぎコード・Googleでログイン のどちらでも：サーバーから受け取ったプレイヤーを、この端末に加える
+function cloudRestoreApply(j) {
+  {
     const mine = raw.get('kb.cloud', null), own = mine && mine.uid === j.uid; // この端末で作ったプレイヤーなら端末の鍵のまま
     plSetLocal(j.pid, 'link', own ? { code: j.code } : { uid: j.uid, token: j.token, code: j.code });
     const data = j.data || { name: j.name || 'プレイヤー', keys: {} }; if (j.name) data.name = j.name;
@@ -1609,7 +1615,72 @@ async function cloudRestore(code) {
     plApply(j.pid, data, j.at || 0); // いまのプレイヤーにして、名前もそろえる
     toast(`「${data.name}」をこの端末に入れました`); setTimeout(() => location.reload(), 700);
     return true;
-  } catch (e) { toast(e.message || '引き継げませんでした'); return false; }
+  }
+}
+// ---------- Googleでまもる（任意）：プレイヤーをGoogleのアカウントにひもづけ、別の端末やデータを消したあとでも、Googleでログインすれば戻れる ----------
+// サーバーに送るのはGoogleのIDトークンだけ。サーバーはアカウントの番号をハッシュにして持つ（メールアドレスなどは保存しない）。保護者のGoogleで子どものプレイヤーをまもることもできる
+const G_CID = (typeof window !== 'undefined' && window.KB_GOOGLE_CLIENT_ID) || '';
+const G_TEST = typeof window !== 'undefined' && !!window.KB_GOOGLE_TEST; // テスト：Googleの画面の代わりに「test:番号」
+const G_ON = CLOUD_ON && (!!G_CID || G_TEST);
+const gLinked = () => !!(PID && raw.get(plKey(PID, 'glinked'), false));
+function gLoad() { return new Promise((ok, ng) => { if (window.google && google.accounts && google.accounts.id) return ok(); const sc = document.createElement('script'); sc.src = 'https://accounts.google.com/gsi/client'; sc.async = true; sc.onload = () => ok(); sc.onerror = () => ng(new Error('Googleのログイン画面を読み込めませんでした')); document.head.appendChild(sc); }); }
+// Googleのボタンを出して、押してもらう → IDトークン（1時間有効。同じ画面の中では使い回す）
+function gSignIn(title, note) {
+  if (S.gIdt && Date.now() - S.gIdt.at < 50 * 60000) return Promise.resolve(S.gIdt.t);
+  return new Promise((resolve, reject) => {
+    modal(`<div class="stack g-modal"><h3 style="margin:0">${title}</h3><p class="small" style="margin:0">${note}</p><div id="g-btn" class="g-btn">${G_TEST ? '<button class="btn primary" id="g-test">（テスト）Googleでログイン</button>' : '<span class="small muted">読み込み中…</span>'}</div><p class="small muted" style="margin:0">研究所が受け取るのは、Googleのアカウントを見分ける番号だけです（メールアドレス・名前・写真は受け取りません）。Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます（1つのGoogleで何人でも）。</p><div class="row" style="justify-content:flex-end"><button class="btn" id="g-cancel">やめる</button></div></div>`);
+    const done = t => { S.gIdt = { t, at: Date.now() }; resolve(t); };
+    $('#g-cancel').onclick = () => { closeModal(); reject(new Error('')); };
+    if (G_TEST) { $('#g-test').onclick = () => done('test:' + (window.KB_GOOGLE_TEST_SUB || 'u1')); return; }
+    gLoad().then(() => { google.accounts.id.initialize({ client_id: G_CID, callback: r => r && r.credential ? done(r.credential) : reject(new Error('ログインできませんでした')), ux_mode: 'popup', auto_select: false });
+      const el = $('#g-btn'); if (el) { el.innerHTML = ''; google.accounts.id.renderButton(el, { theme: 'filled_black', size: 'large', shape: 'pill', text: 'signin_with', locale: 'ja', width: 260 }); } }).catch(e => { const el = $('#g-btn'); if (el) el.innerHTML = `<span class="ng small">${esc(e.message)}</span>`; });
+  });
+}
+async function gProtect() {
+  const l = PID && plLink(PID); if (!l) { toast('まだクラウドに保存されていません。少し遊んでから、もう一度ためしてください'); return; }
+  try { const idt = await gSignIn('🛡 Googleでまもる', `${esc(san(S.settings.name))}の記録を、Googleのアカウントでまもります。スマホを替えたり、ブラウザのデータを消したりしても、Googleでログインすれば戻れます。`);
+    await cloudReq('g_link', { token: l.token, pid: PID, idt }); plSetLocal(PID, 'glinked', true); closeModal(); toast('🛡 Googleでまもりました'); render();
+  } catch (e) { if (e.message) toast(e.message); }
+}
+async function gUnlink() { const l = PID && plLink(PID); if (!l) return; try { await cloudReq('g_unlink', { token: l.token, pid: PID }); plSetLocal(PID, 'glinked', false); toast('Googleでまもるのをやめました'); closeModal(); render(); } catch (e) { toast(e.message); } }
+async function gStatusSync() { const l = G_ON && PID && plLink(PID); if (!l) return; try { const j = await cloudReq('g_status', { token: l.token, pid: PID }); plSetLocal(PID, 'glinked', !!j.linked); } catch (e) { } }
+async function gRestore() {
+  try { const idt = await gSignIn('Googleでログインして戻る', '前に「Googleでまもる」をしたプレイヤーを、この端末に入れます。');
+    const j = await cloudReq('g_list', { idt }); S.gList = j.list;
+    if (!j.list.length) { modal('<div class="stack"><h3 style="margin:0">まもっているプレイヤーがいません</h3><p class="small" style="margin:0">このGoogleアカウントで「Googleでまもる」をしたプレイヤーは見つかりませんでした。別のGoogleアカウントか、引き継ぎコードでためしてください。</p><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>'); return; }
+    modal(`<div class="stack"><h3 style="margin:0">どのプレイヤーを入れますか？</h3><div class="pf-list">${j.list.map(x => `<button class="pf-row g-pick" data-act="g-pick" data-k="${esc(x.k)}"><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><b>${esc(x.name)}</b><span class="small muted">${x.rating != null ? '★' + x.rating.toFixed(1) + '・' : ''}${x.bp}BP</span></button>`).join('')}</div><div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">やめる</button></div></div>`);
+  } catch (e) { if (e.message) toast(e.message); }
+}
+async function gPick(k) { if (S.restBusy) return; S.restBusy = true; try { const j = await cloudReq('g_restore', { idt: S.gIdt && S.gIdt.t, k }); plSetLocal(j.pid, 'glinked', true); cloudRestoreApply(j); } catch (e) { toast(e.message || '入れられませんでした'); } finally { S.restBusy = false; } }
+// ---------- ふっかつの呪文（引き継ぎコード）を控えてもらう：マサが声をかける ----------
+// 3ゲーム遊んだら1回。控えていなければ、その後は7日以上たって10ゲーム以上遊んだときにまた。「控えた」かGoogleでまもると、もう言わない
+const IS_IOS = typeof navigator !== 'undefined' && /iP(hone|ad|od)/.test(navigator.userAgent || '') || (typeof navigator !== 'undefined' && navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_STANDALONE = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+function codeLink(code) { return 'https://keisan-bridge.lolipop-now.app/#code=' + code.replace(/-/g, ''); }
+function backupDue() {
+  if (!CLOUD_ON || !PID || S.backupShown) return false; const l = plLink(PID); if (!l || !l.code) return false;
+  if (raw.get(plKey(PID, 'bkDone'), false) || gLinked()) return false;
+  const n = gamesN(G_()), a = raw.get(plKey(PID, 'bkAsk'), null);
+  return a ? (n - a.n >= 10 && Date.now() - a.at > 7 * 86400000) : n >= 3;
+}
+function backupNag(force) {
+  if (!force && !backupDue()) return; S.backupShown = true;
+  const l = plLink(PID), code = l && l.code; if (!code) { toast('引き継ぎコードは、少し遊んでクラウドに保存されると出ます'); return; }
+  plSetLocal(PID, 'bkAsk', { at: Date.now(), n: gamesN(G_()) });
+  try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist(); } catch (e) { }
+  const nm = san(S.settings.name), say = force ? `${nm}の「ふっかつの呪文」や。スマホを替えたり、ブラウザのデータを消したりしたら、これで記録に戻れるで！` : `${nm}、「ふっかつの呪文」（引き継ぎコード）は控えとるか？ スマホを替えたり、ブラウザのデータを消したりすると、これがないと記録に戻れへんのや。スクショでもメモでもええから、控えといてな！`;
+  modal(`<div class="op-lines"><div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(say)}</div></div></div>
+    <div class="bk-card"><small>ふっかつの呪文（${esc(S.settings.name)}）</small><b class="mono">${esc(code)}</b><small>計算ブリッジ作戦研究所 ・ プレイヤー → 「別の端末のプレイヤーを入れる」で入力</small></div>
+    <div class="row bk-btns"><button class="btn sm" data-act="bk-copy" data-code="${esc(code)}">📋 コピー</button>${navigator.share ? `<button class="btn sm" data-act="bk-share" data-code="${esc(code)}">📤 おうちの人などに送る</button>` : ''}${G_ON && !gLinked() ? '<button class="btn sm g-pro" data-act="g-protect">🛡 Googleでまもる</button>' : ''}</div>
+    ${IS_IOS && !IS_STANDALONE() ? '<p class="small bk-ios">📱 iPhone・iPadは、7日ほど開かないとブラウザのデータが消えることがあります。共有ボタン（□↑）→「ホーム画面に追加」で開くと消えにくくなります。</p>' : ''}
+    <p class="small muted" style="margin:0">呪文を知っている人は、このプレイヤーの記録に入れます。人に見せないでね（おうちの人はOK）。</p>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">あとで</button><button class="btn primary" data-act="bk-done">✅ 控えた</button></div>`);
+}
+// 呪文のリンク（#code=…）で開いたとき：コードを入れる欄に入れておく
+function codeHashCheck() {
+  const m = /^#code=([0-9A-Za-z]{12})$/.exec(location.hash || ''); if (!m) return; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+  const c = m[1].toUpperCase().replace(/(.{4})(?=.)/g, '$1-');
+  setTimeout(() => { if (!$('#an-code')) { if (!profiles().length) return; profileModal(); } const d = $('#an-code') || $('#cl-in'); if (d) { d.value = c; const det = d.closest('details'); if (det) det.open = true; toast('ふっかつの呪文を入れました。「入る」を押してください'); } }, 900);
 }
 if (CLOUD_ON && typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') { clearTimeout(CLOUD.timer); cloudPush(true); } });
 function cloudPanelHTML() {
@@ -1617,8 +1688,9 @@ function cloudPanelHTML() {
   const l = PID ? plLink(PID) : null, code = l && l.code;
   return `<div class="lbl">引き継ぎコード（${esc(S.settings.name)}）</div>
     <p class="small" style="margin:0">記録はプレイヤーごとにクラウドに保存されます。別の端末で${esc(san(S.settings.name))}の記録を使うときは、その端末で<b>このコード</b>を入れてください。どちらの端末で遊んでも、同じ記録に保存されます（この端末のほかのプレイヤーは入りません）。名前やメールは送っていません。${CLOUD.status === 'error' ? `<br><span class="ng">いまは保存できていません（${esc(CLOUD.err)}）</span>` : ''}</p>
-    ${code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、このプレイヤーの記録に入れます。</p>` : `<p class="small muted" style="margin:0">${l && !l.token && l.dead ? 'このプレイヤーは、作った端末で消されたため保存できません。' : 'はじめて保存したあとに、ここにコードが出ます。'}</p>`}
-    <details class="small"><summary>別の端末のプレイヤーを、この端末に入れる</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px"><input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">入れる</button></div><p class="small muted" style="margin:4px 0 0">そのプレイヤーが、この端末のプレイヤーに加わります。いまこの端末にいるプレイヤーの記録は、そのまま残ります。</p></details>`;
+    ${code ? `<div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 呪文カード</button></div><p class="small muted" style="margin:0">コードは人に教えないでください。知っている人は、このプレイヤーの記録に入れます。</p>` : `<p class="small muted" style="margin:0">${l && !l.token && l.dead ? 'このプレイヤーは、作った端末で消されたため保存できません。' : 'はじめて保存したあとに、ここにコードが出ます。'}</p>`}
+    ${G_ON ? `<div class="g-sec">${gLinked() ? `<p class="small" style="margin:0">🛡 <b>Googleでまもっています。</b>スマホを替えたり、ブラウザのデータを消したりしても、Googleでログインすれば戻れます。</p><button class="btn sm ghost" data-act="g-unlink">Googleでまもるのをやめる</button>` : `<button class="btn sm g-pro" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted" style="margin:0">コードを控えなくても、Googleでログインすれば戻れるようになります。Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>`}</div>` : ''}
+    <details class="small"><summary>別の端末のプレイヤーを、この端末に入れる</summary><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:6px">${G_ON ? '<button class="btn sm g-pro" data-act="g-restore">Googleでログインして入れる</button>' : ''}<input id="cl-in" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px"><button class="btn sm" data-act="cloud-restore">入れる</button></div><p class="small muted" style="margin:4px 0 0">そのプレイヤーが、この端末のプレイヤーに加わります。いまこの端末にいるプレイヤーの記録は、そのまま残ります。</p></details>`;
 }
 // ---------- ランキング ----------
 // 4つのランキングを並べて全部見せる（各上位20人＋20位より下の自分）
@@ -2447,7 +2519,7 @@ function askName(again) {
     <input id="new-name" class="name-input" maxlength="10" placeholder="名前" value="${again ? '' : esc(S.settings.name !== 'あなた' ? S.settings.name : '')}">
     <p class="small name-err" id="name-err" hidden></p>
     <button class="btn primary upd-go" data-act="create-profile">はじめる</button>
-    ${CLOUD_ON ? `<details class="an-code"><summary>${again ? '別の端末のプレイヤーを入れる（引き継ぎコード）' : '別の端末で遊んでいた人は（引き継ぎコード）'}</summary><p class="small" style="margin:4px 0">別の端末の「プレイヤー」に出ている引き継ぎコードを入れると、そのプレイヤーの記録でこの端末でも遊べます。</p><div class="row" style="gap:6px;flex-wrap:wrap;justify-content:center"><input id="an-code" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px" autocomplete="off"><button class="btn" data-act="code-restore">入る</button></div></details>` : ''}
+    ${CLOUD_ON ? `${G_ON ? `<button class="btn g-pro an-g" data-act="g-restore">${again ? 'Googleでログインして、別の端末のプレイヤーを入れる' : '前に遊んでいた人：Googleでログインして戻る'}</button>` : ''}<details class="an-code"><summary>${again ? '別の端末のプレイヤーを入れる（引き継ぎコード）' : '別の端末で遊んでいた人は（引き継ぎコード）'}</summary><p class="small" style="margin:4px 0">別の端末の「プレイヤー」に出ている引き継ぎコードを入れると、そのプレイヤーの記録でこの端末でも遊べます。</p><div class="row" style="gap:6px;flex-wrap:wrap;justify-content:center"><input id="an-code" class="name-input" placeholder="XXXX-XXXX-XXXX" maxlength="16" style="max-width:200px" autocomplete="off"><button class="btn" data-act="code-restore">入る</button></div></details>` : ''}
     ${again ? '<button class="btn ghost sm" data-act="close">やめる</button>' : ''}</div>`);
   setTimeout(() => { const i = $('#new-name'); if (i) { i.focus(); i.onkeydown = e => { if (e.key === 'Enter' && !e.isComposing) act('create-profile'); }; } }, 50);
 }
@@ -5782,6 +5854,7 @@ function bind() {
     renderEst();
   }
   if (S.view === 'game') renderGame();
+  if (CLOUD_ON && !S.codeHashDone) { S.codeHashDone = true; codeHashCheck(); }
   if (S.view === 'home' && !profiles().length && !S.askedName && !(window.KB_TEST && !localStorage.getItem('kb.testAskName'))) { S.askedName = true; askName(); }
   else if (S.view === 'home' && S.updatedNotice && !S.updShown) { S.updShown = true; showUpdateNotice(); }
 }
@@ -5900,6 +5973,14 @@ function act(a, el) {
     case 'migrate-out': migrateOut(); break;
     case 'chart-open': chartIntro(); break;
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
+    case 'g-protect': gProtect(); break;
+    case 'g-unlink': gUnlink(); break;
+    case 'g-restore': gRestore(); break;
+    case 'g-pick': gPick(el.dataset.k); break;
+    case 'bk-open': backupNag(true); break;
+    case 'bk-done': plSetLocal(PID, 'bkDone', true); closeModal(); toast('✅ 呪文は大事にしまっといてな！'); break;
+    case 'bk-copy': { const c = el.dataset.code; try { navigator.clipboard.writeText(c).then(() => toast('コピーしました'), () => toast(c)); } catch (x) { toast(c); } break; }
+    case 'bk-share': { const c = el.dataset.code; try { navigator.share({ title: '計算ブリッジ作戦研究所 ふっかつの呪文', text: `${S.settings.name}のふっかつの呪文：${c}\n（研究所の「プレイヤー」→「別の端末のプレイヤーを入れる」で入力。リンクを開いても入れられます）`, url: codeLink(c) }).catch(() => { }); } catch (x) { } break; }
     case 'cloud-copy': { const e = $('#cl-code'); if (e) { try { navigator.clipboard.writeText(e.dataset.code).then(() => toast('コピーしました'), () => toast(e.dataset.code)); } catch (x) { toast(e.dataset.code); } } break; }
     case 'cloud-restore': case 'code-restore': { const v = (($(a === 'code-restore' ? '#an-code' : '#cl-in') || {}).value || '').trim(); if (v.replace(/[^0-9a-z]/gi, '').length !== 12) { toast('12文字のコードを入れてください'); break; } if (S.restBusy) break; S.restBusy = true; cloudRestore(v).finally(() => { S.restBusy = false; }); break; }
     case 'watch-start': { closeModal(); const first = !store.get('watched', false); store.set('watched', true); watchStart(first); break; } // 初めての観戦は、強さも性格もそろった決まった顔ぶれ

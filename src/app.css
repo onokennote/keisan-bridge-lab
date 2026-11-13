@@ -2396,3 +2396,14 @@ body.rewinding #home-fab{display:none}
 
 .on-rres{display:flex;flex-direction:column;gap:2px;width:100%;font-size:12px}.on-rres small{color:#8ce99a;font-weight:800}
 .on-rres span{display:grid;grid-template-columns:2.6em 1fr auto;gap:6px;align-items:center}.on-rres i{font-style:normal;color:var(--muted)}
+
+/* ふっかつの呪文・Googleでまもる */
+.bk-card{margin:10px 0 8px;padding:14px 12px;border-radius:14px;border:2px dashed #ffd666;background:linear-gradient(180deg,rgba(255,214,102,.12),rgba(255,214,102,.04));display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center}
+.bk-card b{font-size:26px;letter-spacing:2px;color:#ffe9a8}.bk-card small{color:#c9c2ad;font-size:11.5px}
+.bk-btns{gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:6px}
+.bk-ios{margin:4px 0;padding:8px 10px;border-radius:10px;background:rgba(120,170,255,.1);border:1px solid rgba(120,170,255,.3)}
+.g-pro{background:#fff;color:#1f1f1f;border-color:#dadce0;font-weight:700}
+.g-sec{display:flex;flex-direction:column;gap:6px;align-items:flex-start;margin:8px 0;padding:10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1)}
+.g-btn{display:flex;justify-content:center;min-height:44px;align-items:center}
+.an-g{width:100%;margin-top:10px}
+.g-pick{display:flex;align-items:center;gap:10px;width:100%;text-align:left;cursor:pointer}

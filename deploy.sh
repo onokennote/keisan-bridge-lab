@@ -1,6 +1,7 @@
 #!/bin/bash
 # デプロイナウ用：単体で動く dist/index.html を作る（先に ./build.sh）。
 # クラウド保存とランキングを使うときは、APIのURLを渡す：KB_CLOUD_API=https://（さくらのサーバー）/kb/api.php ./deploy.sh
+# Googleでまもる：KB_GOOGLE_CLIENT_ID（GoogleのOAuthクライアントID。公開してよい値）を渡すとボタンが出る。テストは KB_GOOGLE_TEST=1
 # テスト版（ブランチ staging → GitHub Actions がさくらの /kb/stg/ に置く）は KB_STAGING=1 も付ける（画面に「テスト版」の帯）
 #シェア画像 dist/og.png は node tools/og.js で作る
 cd "$(dirname "$0")"
@@ -12,6 +13,8 @@ const head='<!doctype html><html lang=\"ja\"><head><meta charset=\"utf-8\"><meta
 const api=process.env.KB_CLOUD_API||'';
 const cloud=api?'<script>window.KB_CLOUD_API='+JSON.stringify(api)+'</script>':'';
 const stg=process.env.KB_STAGING?'<script>window.KB_STAGING=1</script>':'';
+const gc=process.env.KB_GOOGLE_CLIENT_ID?'<script>window.KB_GOOGLE_CLIENT_ID='+JSON.stringify(process.env.KB_GOOGLE_CLIENT_ID)+'</script>':'';
+const gt=process.env.KB_GOOGLE_TEST?'<script>window.KB_GOOGLE_TEST=1</script>':'';
 const ver='<script>window.KB_BUILD='+JSON.stringify(require('crypto').createHash('sha1').update(body).digest('hex').slice(0,12))+'</script>';
-fs.writeFileSync('dist/index.html',head+cloud+stg+ver+body+'</body></html>');
+fs.writeFileSync('dist/index.html',head+cloud+stg+gc+gt+ver+body+'</body></html>');
 "
