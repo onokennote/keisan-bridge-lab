@@ -805,7 +805,7 @@ const ACH = [
   // アウツチャレンジ
   ['outs3', 'アウツ3問目', [1, 3, 10], n => `アウツチャレンジで3問目までヒントなしでクリアを${n}回`, ['数え上手', 'カウンター', 'カウント職人']],
   ['outs4', 'アウツ4問目', [1, 3, 10], n => `アウツチャレンジで4問目までヒントなしでクリアを${n}回`, ['見切り上手', '読み切り名人', '確率の目']],
-  ['outs5', 'アウツチャレンジ', [1, 3, 10], n => `アウツチャレンジ（5問連続正解）をヒントなしで${n}回成功`, ['アウツ見習い', 'アウツ名人', '確率の鬼']],
+  ['outs5', 'アウツチャレンジ', [1, 3, 6], n => `アウツチャレンジ（5問連続正解）をヒントなしで${n}回成功`, ['アウツ見習い', 'アウツ名人', '確率の鬼']],
   // バッジアタック（15分を最後までやり切ったときだけ数える）
   ['atk_done', 'アタック完走', [1, 5, 15], n => `バッジアタックを${n}回、時間いっぱいやり切る`, ['キックオフ', '常連アタッカー', 'アタックの鬼']],
   ['atk_bp', 'アタック得点', [300, 700, 1000], n => `1回のバッジアタックで${n}BP以上`, ['得点王候補', 'ゴールゲッター', '得点王']],
@@ -874,6 +874,7 @@ function G_() {
   if (!g.asfix && g.ach) { g.asfix = 1; const c = (g.cnt && g.cnt.all_sets) || 0; delete g.ach['all_sets:2']; [1, 3, 5].forEach(t => { const id = 'all_sets:' + t; if (c >= t) { if (!g.ach[id]) g.ach[id] = Date.now(); } else delete g.ach[id]; }); store.set('growth', g); }
   // 「アタックの鬼」を20回→15回にしたので、15回以上の人には黙って付ける（前の20回の印は15回に移す）
   if (!g.akfix && g.ach) { g.akfix = 1; const c = (g.cnt && g.cnt.atk_done) || 0; if (g.ach['atk_done:20']) { g.ach['atk_done:15'] = g.ach['atk_done:20']; delete g.ach['atk_done:20']; } if (c >= 15 && !g.ach['atk_done:15']) g.ach['atk_done:15'] = Date.now(); store.set('growth', g); }
+  if (!g.o5fix && g.ach) { g.o5fix = 1; const c = (g.cnt && g.cnt.outs5) || 0; const was = g.ach['outs5:10']; delete g.ach['outs5:10']; if (c >= 6 && !g.ach['outs5:6']) g.ach['outs5:6'] = was || Date.now(); store.set('growth', g); } // アウツチャレンジのクリアの金を10回→6回に
   if (!g.bpfix && g.ach) { g.bpfix = 1; const c = (g.cnt && g.cnt.bestpair) || 0; delete g.ach['bestpair:10']; [1, 2, 3].forEach(t => { if (c >= t && !g.ach['bestpair:' + t]) g.ach['bestpair:' + t] = Date.now(); }); store.set('growth', g); }
   if (g.v === 1) { // 旧形式からの引き継ぎ：分かる範囲で回数を数え直す
     const old = g.ach || {}, cnt = {};
