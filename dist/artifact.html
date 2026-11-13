@@ -2377,10 +2377,14 @@ body.rewinding #home-fab{display:none}
 .dl-pn{display:flex;flex-direction:column;line-height:1.1}.dl-pn small{color:var(--muted);font-size:12px;font-weight:700}
 .dl-ps{display:flex;flex-direction:column;gap:1px;font-size:12px}.dl-ps .on-cd{font-size:13px}
 .dl-ps .on-st{align-self:flex-start}
+
+.dl-joined{font-size:12px;font-weight:800;color:#8ce99a;white-space:nowrap}
+.dl-part.done-day{opacity:.75}
+.dl-mine{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;padding:6px 10px;border-radius:10px;background:rgba(140,233,154,.1);border:1px solid rgba(140,233,154,.4)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='46bc8d8616';
+window.KB_BUILD='cdf0017ad0';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -12047,17 +12051,18 @@ setInterval(() => document.querySelectorAll('[data-cd]').forEach(e => { e.textCo
 function dailyCardHTML(D) {
   // 1日4部（17:30・18:30・19:30・20:30）。出られるのはどれか1部だけ。グループに分かれた部は、自分の入ったグループ（なければA）を代表に
   const di = ON.dinfo, parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
-  const myPart = Object.keys(parts).find(k => parts[k].some(v => v.entered));
+  const dm = ON.dailyMine, myPart = Object.keys(parts).find(k => parts[k].some(v => v.entered)) || (dm && String(dm.part)); // 終わった部はここに出ないので、サーバーの「今日出た部」も見る
   const rowOf = k => { const L = parts[k], v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0], d = new Date(v.startAt * 1000), hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
     const live = v.phase === 'prelim' || v.phase === 'final', n = L.reduce((a, x) => a + x.n, 0);
     const pre = v.phase === 'entry' && Date.now() / 1000 < v.entryAt, eAt = new Date(v.entryAt * 1000), eHm = `${eAt.getHours()}:${String(eAt.getMinutes()).padStart(2, '0')}`;
     const st = v.phase === 'entry' ? `<b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${pre ? `エントリーは${eHm}から` : `${n}人エントリー`}</small>` : live ? `<em class="on-st live">開催中</em>${L.length > 1 ? `<small>${L.length}グループ</small>` : ''}` : v.phase === 'cancel' ? '<small class="muted">中止（参加者なし）</small>' : '<small class="muted">終了</small>';
-    const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : myPart || pre ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
+    if (v.phase === 'entry' && myPart && !v.entered) return `<div class="dl-part done-day"><b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps"><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small></span><span class="dl-joined">✅ きょうは参加済み</span></div>`; // 1日1部：出た人にはエントリーを出さない
+    const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : pre ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
     return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}"><b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`.replace(`btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}`, `btn sm ${v.phase === 'entry' && !myPart && !pre ? 'primary' : ''}`); };
   const rows = Object.keys(parts).sort().map(rowOf).join('') || '<p class="small muted" style="margin:0">きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）</p>';
   const me = di && di.me, sl = di ? `<div class="dl-season"><b>🗓 ${esc(di.label)}シーズン</b><span>${me ? `${esc(san(S.settings.name))}は <b>${me.rank}位</b>・<b>${me.pts}pt</b>（${me.n}回）` : 'まだポイントはありません'}</span><small class="muted">シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</small></div>` : '';
   return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日4部（17:30・18:30・19:30・20:30）から1日1部だけ・エントリーは15分前から。15人・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）・空きはAI</small></div></div>
-    <div class="dl-parts">${rows}</div>${myPart ? `<p class="small" style="margin:0">きょうは<b class="on-in">第${myPart}部</b>にエントリーしています（1日1部まで）</p>` : ''}
+    <div class="dl-parts">${rows}</div>${myPart ? `<div class="dl-mine"><span>✅ きょうは<b class="on-in">第${myPart}部</b>に${dm && (dm.phase === 'done') ? '参加しました' : dm && (dm.phase === 'prelim' || dm.phase === 'final') ? '参加中です' : 'エントリーしています'}（1日1部まで）</span>${dm && dm.phase === 'done' && !parts[myPart] ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : ''}
     <div class="row"><button class="btn sm" data-act="daily-rank">📊 ランキング</button></div>
     ${sl}<p class="dl-test">🧪 テスト中：不具合や仕様変更の可能性があります</p></div>`;
 }
@@ -12096,7 +12101,7 @@ function oarchHTML() {
 }
 async function onToursLoad() {
   if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
-  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); dailyInfoLoad(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  try { const j = await onReq('on_tours', { pid: PID }); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; ON.dailyMine = j.dailyMine || null; onAwardsSync(); dailyInfoLoad(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
   try { const mk = store.get('noteMark', {}) || {}, soon = mk.soon || {}, now = Date.now() / 1000; let ch = false; (ON.tours || []).forEach(t => { if (t.entered && t.phase === 'entry' && t.startAt - now < 1800 && t.startAt > now && !soon[t.id]) { soon[t.id] = 1; ch = true; noteAdd('soon', { tid: t.id, tname: t.name, at: t.startAt }); } }); if (ch) { mk.soon = soon; store.set('noteMark', mk); } } catch (e) { }
   const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }

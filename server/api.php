@@ -460,6 +460,15 @@ function dailyEnsure(): void {
     db()->prepare('INSERT OR IGNORE INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
   }
 }
+// 今日のデイリーに出た部（終わった部も）：ホームのカードで「参加済み」を出すため
+function dailyMineToday(string $uid, string $tpid, string $bpid): ?array {
+  $d = (new DateTime('@' . time()))->setTimezone(jstTz()); $date = $d->format('Y-m-d'); $pid = $tpid !== '' ? $tpid : $bpid;
+  foreach (db()->query("SELECT id, st FROM tours WHERE id LIKE 'D" . $d->format('ymd') . "%'")->fetchAll() as $r) {
+    $x = json_decode($r['st'], true); if (empty($x['cfg']['daily']) || ($x['cfg']['date'] ?? '') !== $date || ($x['phase'] ?? '') === 'cancel') continue;
+    foreach ($x['entrants'] as $e) if ($e['uid'] === $uid && ($pid === '' || (string)($e['pid'] ?? '') === $pid)) return ['part' => (int)($x['cfg']['part'] ?? 0), 'id' => $r['id'], 'phase' => $x['phase']];
+  }
+  return null;
+}
 // 同じ日のデイリー（4部のどれか）に、もう出ているか（出られるのは1日1部だけ。取り消せば別の部に出られる）
 function dailyEnteredPart(array $t, string $uid, string $pid): ?int {
   foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D%' AND st LIKE '%\"date\":\"" . $t['cfg']['date'] . "\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) {
@@ -791,7 +800,7 @@ try {
         $vw = obTourView($t, $u['uid'], $ver, false); if ($t['cfg']['entry'] === 'invite' && !$vw['invited'] && !$vw['entered']) continue; // 招待だけの大会は、招待された人にだけ見える
         $out[] = $vw;
       }
-      out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid']]);
+      out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid'], 'dailyMine' => dailyMineToday($u['uid'], (string)($u['tpid'] ?? ''), cleanPid($b['pid'] ?? ''))]);
     }
     case 'rival_set': { // ライバルに指定する／外す（rid はランキングの人。1人5人まで）
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $rid = preg_replace('/[^a-f0-9]/', '', (string)($b['rid'] ?? ''));

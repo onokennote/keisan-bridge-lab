@@ -2372,3 +2372,7 @@ body.rewinding #home-fab{display:none}
 .dl-pn{display:flex;flex-direction:column;line-height:1.1}.dl-pn small{color:var(--muted);font-size:12px;font-weight:700}
 .dl-ps{display:flex;flex-direction:column;gap:1px;font-size:12px}.dl-ps .on-cd{font-size:13px}
 .dl-ps .on-st{align-self:flex-start}
+
+.dl-joined{font-size:12px;font-weight:800;color:#8ce99a;white-space:nowrap}
+.dl-part.done-day{opacity:.75}
+.dl-mine{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;padding:6px 10px;border-radius:10px;background:rgba(140,233,154,.1);border:1px solid rgba(140,233,154,.4)}

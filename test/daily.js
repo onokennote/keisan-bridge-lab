@@ -76,6 +76,11 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_rank.png') });
   await pa.click('#modal [data-tab="total"]'); await pa.waitForTimeout(400);
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_total.png') });
+  await api('daily_test', { startIn: 3000, part: 4 }); // まだ受付前の別の部
+  await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(2500);
+  const dc = await pa.evaluate(() => { const c = document.querySelector('.dl-card'); return { joined: /きょうは参加済み/.test(c.innerText) && /第3部.{0,3}に参加しました/.test(c.innerText), noEntry: ![...c.querySelectorAll('button')].some(b => b.textContent.trim() === 'エントリー'), result: !!c.querySelector('.dl-mine [data-act="on-tour-open"]') }; });
+  ok(dc.joined && dc.noEntry && dc.result, `その日に出た人には、ほかの部のエントリーを出さず「参加済み」と結果のボタン（${JSON.stringify(dc)}）`);
+  await pa.evaluate(() => document.querySelector('.dl-card').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_joined.png') });
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
   await pa.click('.dl-card [data-act="daily-rank"]'); await pa.waitForTimeout(3000);
   ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length >= 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
