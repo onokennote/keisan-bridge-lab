@@ -5939,7 +5939,7 @@ function act(a, el) {
     case 'on-new': onNewModal(); break;
     case 'on-tour-new': S.onTourEdit = null; S.onTour = null; S.inv = null; onTourNewModal(); break;
     case 'on-tour-edit': { const t = ON.t, d = new Date(t.startAt * 1000), loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); const pk = (PTS_PRE.find(x => x[2].join() === (t.points || []).join()) || PTS_PRE[0])[0];
-      S.inv = null; S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, pts: pk };
+      S.inv = null; S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, waitMin: t.waitMin || 15, pts: pk };
       S.onTourEdit = t.id; onTourNewModal(); break; }
     case 'on-arch': onArchiveOpen(); break;
     case 'title-open': titleModal(); break;
@@ -6178,7 +6178,7 @@ async function onToursLoad() {
 function onTourNewModal() {
   const d0 = new Date(Date.now() + 20 * 60000); d0.setMinutes(Math.ceil(d0.getMinutes() / 5) * 5, 0, 0);
   const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', min: 4, max: 15, aiFill: true, aiLv: 2, aiMix: 'even', entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, pts: 'std' };
+  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', min: 4, max: 15, aiFill: true, aiLv: 2, aiMix: 'even', entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, waitMin: 15, pts: 'std' };
   const seg = (k, opts) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(c[k]) === String(v) ? 'on' : ''}" data-ot="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
   const num = (k, mn, mx) => `<div class="su-step"><button class="su-pm" data-otn="${k}" data-v="-1" ${c[k] <= mn ? 'disabled' : ''}>−</button><b class="tnum">${c[k]}</b><button class="su-pm" data-otn="${k}" data-v="1" ${c[k] >= mx ? 'disabled' : ''}>＋</button></div>`;
   modal(`<div class="stack on-new"><h3 style="margin:0">🌐 ${S.onTourEdit ? '大会を編集' : '大会をひらく'}</h3>
@@ -6194,6 +6194,7 @@ function onTourNewModal() {
     ${c.entry === 'invite' ? `<div class="su-row col inv-box"><b>招待する人 <small class="muted" id="ot-inv-n"></small></b><div class="inv-chips" id="ot-inv-chips"></div><input id="ot-inv-q" class="su-in" placeholder="🔍 名前でさがす（ランキングの名前）" autocomplete="off" maxlength="10"><div class="inv-res" id="ot-inv-res"></div></div>` : ''}
     <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
+    <div class="su-row col"><b>セットの合間の待ち時間</b>${seg('waitMin', [[3, '3分'], [5, '5分'], [10, '10分'], [15, '15分'], [30, '30分']])}<small class="muted">全員が「準備OK」を押せばすぐ次のセット。そろわなくてもこの時間で始まり、来ていない人の席はAIが打ちます</small></div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
     ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>${c.official === true ? `<label class="su-row col"><b>入賞した人の総ポイント（1位から。AIは飛ばして数える）</b><input id="ot-tpts" class="su-in" value="${esc(c.tpts || '100,70,50,40,20')}"></label>` : ''}` : ''}
     <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
@@ -6239,7 +6240,7 @@ async function onTourCreate() {
   if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
   if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
   try {
-    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, tpts: String(c.tpts || '100,70,50,40,20').split(/[,、\s]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x)), sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, waitMin: c.waitMin, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, tpts: String(c.tpts || '100,70,50,40,20').split(/[,、\s]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x)), sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
     closeModal(); S.onTour = null; if (S.onTourEdit) toast('変更しました'); S.onTourEdit = null; onTourShow(j.tour);
   } catch (e) { toast(e.message || 'ひらけませんでした'); }
 }
@@ -6325,7 +6326,7 @@ function otourHTML() {
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
       <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
       ${t.desc ? `<p style="margin:0;white-space:pre-wrap">${esc(t.desc)}</p>` : ''}
-      <div class="on-facts small muted">${t.daily ? `🏅 デイリーは人数にかかわらず、順位でシーズンポイント（予選は「16−グループ内の順位」、決勝は順位で60・40・30・20・10を追加）、上位3位にデイリーのバッジと称号・1日4部のうち1部だけ・エントリーは開始の15分前から・15人ずつのグループ（空きはAI）・予選${t.sets}セット×${t.games}ゲーム・上位${t.finalists}人で決勝（${t.finalGames || t.games}ゲーム）・1手${t.limit}秒` : `${t.awardOk === true ? `🏅 人が${t.awardMin}人以上の大会なので、上位3位にバッジと称号（${t.official ? '公式大会のバッジ' : 'オンライン大会のバッジ'}）・` : t.awardOk === false ? `人が${t.awardMin}人未満だったので、バッジはなし・` : `🏅 人が${t.awardMin}人以上集まれば、上位3位にバッジと称号・`}${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・${{ before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚'}・${t.aiFill ? `足りなければAI（${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}）で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}`}</div>
+      <div class="on-facts small muted">${t.daily ? `🏅 デイリーは人数にかかわらず、順位でシーズンポイント（予選は「16−グループ内の順位」、決勝は順位で60・40・30・20・10を追加）、上位3位にデイリーのバッジと称号・1日4部のうち1部だけ・エントリーは開始の15分前から・15人ずつのグループ（空きはAI）・予選${t.sets}セット×${t.games}ゲーム・上位${t.finalists}人で決勝（${t.finalGames || t.games}ゲーム）・1手${t.limit}秒・セットの合間は最大${t.waitMin || 5}分` : `${t.awardOk === true ? `🏅 人が${t.awardMin}人以上の大会なので、上位3位にバッジと称号（${t.official ? '公式大会のバッジ' : 'オンライン大会のバッジ'}）・` : t.awardOk === false ? `人が${t.awardMin}人未満だったので、バッジはなし・` : `🏅 人が${t.awardMin}人以上集まれば、上位3位にバッジと称号・`}${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・セットの合間は最大${t.waitMin || 15}分・${{ before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚'}・${t.aiFill ? `足りなければAI（${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}）で補充` : '足りなければ中止'}・得点 ${t.points.join('/')}`}</div>
       ${body}</div>`;
 }
 function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }

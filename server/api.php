@@ -445,14 +445,14 @@ function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
   return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
-    'sets' => 3, 'games' => 3, 'finalGames' => 5, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
+    'sets' => 3, 'games' => 3, 'finalGames' => 5, 'finalists' => 5, 'waitMin' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
 function dailyEnsure(): void {
   $d = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$d->format('G') < DAILY_HOUR) return;
   foreach (DAILY_PARTS as $i => $hm) {
     $id = 'D' . $d->format('ymd') . ($i + 1); $q = db()->prepare('SELECT st FROM tours WHERE id = ?'); $q->execute([$id]); $old = $q->fetchColumn();
     if ($old) { $o = json_decode($old, true); if (($o['phase'] ?? '') === 'entry' && empty($o['cfg']['test']) && (($o['cfg']['sets'] ?? 0) !== 3 || empty($o['cfg']['finalGames']))) { // 形式を変えた日：まだ始まっていない部を新しい形式に
-        $nc = dailyCfg($d, $i + 1, (int)$o['cfg']['startAt']); $o['cfg'] = array_merge($o['cfg'], ['sets' => $nc['sets'], 'games' => $nc['games'], 'finalGames' => $nc['finalGames'], 'desc' => $nc['desc']]);
+        $nc = dailyCfg($d, $i + 1, (int)$o['cfg']['startAt']); $o['cfg'] = array_merge($o['cfg'], ['sets' => $nc['sets'], 'games' => $nc['games'], 'finalGames' => $nc['finalGames'], 'waitMin' => 5, 'desc' => $nc['desc']]);
         db()->prepare('UPDATE tours SET st = ?, updated = ? WHERE id = ?')->execute([json_encode($o, JSON_UNESCAPED_UNICODE), time(), $id]); }
       continue; }
     $start = (new DateTime($d->format('Y-m-d') . ' ' . $hm, jstTz()))->getTimestamp();
@@ -533,16 +533,18 @@ function obTourCfg(array $b, array $u): array {
   $pts = array_values(array_map(fn($x) => max(0, min(20, (int)$x)), array_slice((array)($b['points'] ?? [10, 8, 5, 2, 0]), 0, 5)));
   $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))), 'aiMix' => in_array($b['aiMix'] ?? '', array_keys(OB_MIX), true) ? $b['aiMix'] : 'even',
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
-  'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'points' => $pts ?: [10, 8, 5, 2, 0]];
+  'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'waitMin' => in_array((int)($b['waitMin'] ?? 15), OB_WAITS, true) ? (int)$b['waitMin'] : 15, 'points' => $pts ?: [10, 8, 5, 2, 0]];
   if ($cfg['official']) { $tp = array_values(array_map(fn($x) => max(0, min(1000, (int)$x)), array_slice((array)($b['tpts'] ?? OFFICIAL_TPTS), 0, 10))); $cfg['tpts'] = $tp ?: OFFICIAL_TPTS; }
   return $cfg;
 }
 const OB_MIX = ['random' => [1, 1, 1, 1, 1], 'casual' => [3, 3, 2, 1, 0.3], 'even' => [1, 1.5, 2, 1.5, 1], 'strong' => [0.2, 0.5, 1.5, 3, 3], 'master' => [0, 0, 0, 0, 1]]; // ふつうの大会の「相手の強さ」と同じ割合（★1〜5）
 function obMixLv(string $mix): int { $w = OB_MIX[$mix] ?? OB_MIX['even']; $x = mt_rand() / mt_getrandmax() * array_sum($w); foreach ($w as $i => $v) { $x -= $v; if ($x <= 0) return $i + 1; } return 5; }
 const OB_AI_CAP = [1 => 10, 2 => 11, 3 => 12, 4 => 11, 5 => 15]; // 倶楽部のキャラの人数（★ごと。chars.js と同じ。★5はゼロを除く）
-const OB_WAIT = 900; // 次のセットまで最大15分待つ
+const OB_WAIT = 900; // 次のセットまで最大15分待つ（大会の設定 waitMin がないとき。デイリーは5分）
+const OB_WAITS = [3, 5, 10, 15, 30];
+function obWaitSec(array $c): int { return isset($c['waitMin']) ? (int)$c['waitMin'] * 60 : (!empty($c['daily']) ? 300 : OB_WAIT); }
 function obTourWait(array &$t, array $keys, string $label, float $now): void {
-  $t['wait'] = ['keys' => $keys, 'label' => $label, 'until' => $now + OB_WAIT]; $t['ready'] = [];
+  $t['wait'] = ['keys' => $keys, 'label' => $label, 'until' => $now + obWaitSec($t['cfg'])]; $t['ready'] = [];
   foreach ($t['players'] as $p) if (!empty($p['ai'])) $t['ready'][$p['key']] = 1; // AIはいつでも準備OK
 }
 function obTourOrder(array $t): array { $k = array_keys($t['stand']); usort($k, fn($a, $b) => $t['stand'][$b]['pts'] <=> $t['stand'][$a]['pts'] ?: $t['stand'][$a]['pp'] <=> $t['stand'][$b]['pp']); return $k; }
@@ -567,7 +569,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
