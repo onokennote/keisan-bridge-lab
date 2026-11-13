@@ -443,7 +443,7 @@ function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' .
 function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
 function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
-  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合や仕様変更の可能性があります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
     'sets' => 3, 'games' => 3, 'finalGames' => 5, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
