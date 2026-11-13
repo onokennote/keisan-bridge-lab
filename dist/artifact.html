@@ -2346,7 +2346,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='6f08e73e03';
+window.KB_BUILD='e7e4f19dd7';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6263,6 +6263,7 @@ function rankEv(ev, ctx) {
 }
 function ctxFor(pIdx) {
   const T = S.T, g = S.game;
+  if (T.cfg.kind === 'practice' && T.cfg.points.join() !== PRACTICE_POINTS.join() && !T.attack && !S.spectate) T.cfg.points = PRACTICE_POINTS.slice(); // 練習は固定（前の版で変えた設定・続きからも直す）
   if (T.cfg.points && T.cfg.points.some((v, i) => i && v > T.cfg.points[i - 1])) T.cfg.points = ptsSorted(T.cfg.points); // 前の版で保存した並び（下の順位のほうが高い）を直す
   const ids = g.players.map(p => p.id);
   const setPP = ids.map(id => S.tiebreak ? 0 : setTotal(T, id));
@@ -8941,9 +8942,9 @@ function suCustomHTML(kind, tableGroup) {
       `${suSw('showLevel', !!st.showLevel, '相手の強さを表示')}${suSw('showStyle', !!st.showStyle, '相手の性格を表示', 'かくすと、AIの読みも「相手は中級・平均的」と仮定して計算します')}
        ${suSw('autoHint', !!st.autoHint, '自分の番で自動的にAIの読み', 'オンにすると成績のバッジは対象外になります')}`),
     suGroup('snd', '🔊', '効果音', `音量：${(KB.SFX_LEVELS[st.sndLv] || KB.SFX_LEVELS.l)[0]}`, `<div class="su-row col">${suSeg('snd', Object.entries(KB.SFX_LEVELS).map(([k, v]) => [k, v[0]]), st.sndLv)}</div>`),
-    suGroup('pts', '🏅', '得点のつけ方', `${c.points.join('・')}点${kind === 'tour' ? '・同点は' + (c.tie === 'sudden' ? 'サドンデス' : 'ジャンケン') : ''}`,
+    kind === 'tour' && suGroup('pts', '🏅', '得点のつけ方', `${c.points.join('・')}点${kind === 'tour' ? '・同点は' + (c.tie === 'sudden' ? 'サドンデス' : 'ジャンケン') : ''}`,
       `${suPointsHTML(kind, c)}
-       ${kind === 'tour' ? `<div class="su-row col"><b>同点（得点・PPとも同じ）のとき</b>${suSeg('tie', [['janken', 'ジャンケン'], ['sudden', 'サドンデス']], c.tie)}</div><input type="hidden" id="t-tie" value="${c.tie}">` : ''}`)];
+       ${kind === 'tour' ? `<div class="su-row col"><b>同点（得点・PPとも同じ）のとき</b>${suSeg('tie', [['janken', 'ジャンケン'], ['sudden', 'サドンデス']], c.tie)}</div><input type="hidden" id="t-tie" value="${c.tie}">` : ''}`)].filter(Boolean);
   return `<details class="su-custom" id="su-adv" ${S.suAdv ? 'open' : ''}><summary><span>⚙️ カスタム設定</span><small>ふだんは変えなくてOK</small></summary><div class="su-gs">${groups.join('')}</div></details>`;
 }
 function setupPracticeHTML() {
@@ -8979,6 +8980,7 @@ function suTourRefresh() {
 }
 // 設定画面のタップ
 // 得点のつけ方：よく使う形から選ぶ＋順位ごとに −＋ で調整（値は隠しの入力欄にも入れて、開始のときに読む）
+const PRACTICE_POINTS = [10, 8, 5, 2, 0]; // 練習のセット順位の得点（固定）
 const PTS_PRE = [['std', '標準', [10, 8, 5, 2, 0]], ['top', '1位重視', [10, 5, 2, 0, 0]], ['flat', 'なだらか', [4, 3, 2, 1, 0]]];
 function suPointsHTML(kind, c) {
   const n = kind === 'tour' ? 5 : c.n, pts = [...Array(n)].map((_, i) => c.points[i] || 0), cur = PTS_PRE.find(([, , a]) => a.slice(0, n).join() === pts.join());
@@ -11663,12 +11665,12 @@ function act(a, el) {
     case 'start-practice': {
       const n = +$('#p-n').value;
       const opps = []; document.querySelectorAll('.opp-row').forEach(r => opps.push({ level: r.querySelector('.o-lv').value, style: r.querySelector('.o-st').value }));
-      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: readPoints($('#p-points') ? $('#p-points').value : suP().points.join(',')), preset: suP().preset };
+      const c = { n, games: +$('#p-games').value, mix: $('#p-mix').value, opps, points: PRACTICE_POINTS.slice(), preset: suP().preset };
       store.set('cfgPractice', c);
       S.T = newSession({ kind: 'practice', games: c.games, mix: c.mix, opps: opps.slice(0, n - 1), points: c.points, tie: 'janken' });
       stat('pStart'); startSet(); break;
     }
-    case 'practice-again': { const cfg = S.T.cfg; S.T = newSession(Object.assign({}, cfg)); stat('pStart'); startSet(); break; }
+    case 'practice-again': { const cfg = S.T.cfg; S.T = newSession(Object.assign({}, cfg, { points: PRACTICE_POINTS.slice() })); stat('pStart'); startSet(); break; }
     case 'start-tour': {
       const c = readTourCfg();
       store.set('cfgTour', c);
