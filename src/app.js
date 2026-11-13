@@ -3707,6 +3707,13 @@ function fieldMiniHTML(g, flipped) {
   if (!live.length) return h.reshuffled ? '<div class="fh-mini" title="切り直し後の場札"><span class="fh-rs">切直</span></div>' : '';
   return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('、')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
 }
+// 手を打ったあとに残る手札（引く手は今の手札＋裏向きの1枚）。解説の手の一覧で「残り○枚」の横に並べる
+function restCardsHTML(counts, m) {
+  if (!counts) return ''; const c = counts.slice(); if (m) for (const v of m.vals) c[v]--;
+  const vs = []; for (let v = 13; v >= 1; v--) for (let k = 0; k < (c[v] || 0); k++) vs.push(v);
+  if (!vs.length && m) return '';
+  return `<span class="rest-cards">${vs.map(v => `<i class="mc">${KB.vname(v)}</i>`).join('')}${m ? '' : '<i class="mc back">?</i>'}</span>`;
+}
 function miniCard(c) { return `<i class="mc ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</i>`; }
 function playedHTML(g, i, bare) {
   const ps = g.played[i], rt = boardHist(g).ret[i] || 0;
@@ -3800,7 +3807,7 @@ function evalRowHTML(e, i, H, mine) {
       <div class="metric">期待PP<b>${fx1(e.pp)}</b><div class="bar"><i style="width:${Math.min(100, e.pp / 40 * 100)}%;background:var(--warn)"></i></div></div>
       <div class="metric">ゲーム内の期待順位<b>${fx1(e.rank)}位</b></div>
     </div>
-    <ul class="reasons">${rs.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+    <ul class="reasons">${rs.map((r, k) => `<li>${esc(r)}${k === 0 ? restCardsHTML(H.counts, e.m) : ''}</li>`).join('')}</ul></div>`;
 }
 function renderHint() {
   const el = $('#hintpanel'); if (!el) return;
@@ -4528,7 +4535,7 @@ function whyHTML(d) {
     if (e.danger > 0.08) rs.push(`次の自分の番までに誰かが上がる確率 ${pct(e.danger)}`);
     return `<div class="cand ${cls}"><div class="top"><span class="rk ${cls === 'best' ? 'r1' : ''}">${label}</span><span class="expr">${e.m ? esc(e.m.expr) + ' = ' + d.t : 'あえて引く'}</span></div>
     <div class="metrics"><div class="metric">${d.goalLbl || goalLabel()}<b>${d.goalLbl ? (d.goalPct ? pct(e.goal) : fx1(e.goal) + '点') : fmtGoal(e.goal)}</b></div><div class="metric">上がる確率<b>${pct(e.win)}</b></div><div class="metric">期待PP<b>${fx1(e.pp)}</b></div><div class="metric">期待順位<b>${fx1(e.rank)}位</b></div></div>
-    <ul class="reasons">${rs.map(r => `<li>${esc(r)}</li>`).join('')}</ul></div>`;
+    <ul class="reasons">${rs.map((r, k) => `<li>${esc(r)}${k === 0 ? restCardsHTML(d.counts, e.m) : ''}</li>`).join('')}</ul></div>`;
   };
   const best = d.bestStats, mine = d.mineStats;
   // AIが考えた手（総合評価の順）：最善かどうかに関係なく一覧で見せる

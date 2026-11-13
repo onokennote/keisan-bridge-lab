@@ -2329,3 +2329,9 @@ body.rewinding #home-fab{display:none}
 /* 大会の順位：名前を押すとプロフィール */
 .on-pn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
 .on-sr .ai-chip{margin-left:6px}
+
+/* 解説：手を打ったあとに残る手札 */
+.rest-cards{display:inline-flex;flex-wrap:wrap;gap:3px;margin-left:8px;vertical-align:middle}
+.rest-cards .mc{margin:0}
+.rest-cards .mc.back{background:repeating-linear-gradient(45deg,#2b4a6f,#2b4a6f 3px,#1f3654 3px,#1f3654 6px);color:#cfe3ff;border-color:#4d78a8}
+.rest-cards .mc{min-width:20px;height:25px;font-size:13px}
