@@ -1,0 +1,36 @@
+# 判定（AIの読み・最善手・損失）の自動チェック。test/judge.js を回し、矛盾があれば失敗にする（GitHub から作者にメールが届く）
+# push のたび（判定にかかわるファイルが変わったとき）は短いチェック、毎日1回はフルのチェック。失敗した局面は成果物 judge_fail に残る
+name: 判定の自動チェック
+on:
+  push:
+    branches: [claude/lucid-curie-k2el7s, staging]
+    paths: ['src/engine.js', 'src/app.js', 'test/judge.js', '.github/workflows/judge.yml']
+  schedule:
+    - cron: '43 18 * * *' # 毎日3:43（日本時間）
+  workflow_dispatch:
+concurrency: judge-${{ github.ref }}
+jobs:
+  judge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 準備（Playwright と Chromium）
+        run: |
+          npm i --no-save playwright@1.48.2
+          npx playwright install --with-deps chromium
+      - name: アプリを組み立てる
+        run: ./build.sh
+      - name: 自己テスト（わざと壊した得点の表で、チェックが引っかけられるか）
+        run: cd test && node judge.js selftest
+      - name: 判定のチェック
+        run: cd test && node judge.js ${{ github.event_name == 'push' && 'quick' || '' }}
+      - name: 失敗した局面を残す
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: judge_fail
+          path: test/out/judge_fail.json

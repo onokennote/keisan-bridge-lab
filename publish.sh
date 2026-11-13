@@ -5,6 +5,10 @@ set -e
 cd "$(dirname "$0")"
 API=${KB_CLOUD_API:-https://onoken-web.sakura.ne.jp/kb/api.php}
 ./build.sh
+# 判定（AIの読み・最善手・損失）の自動チェック。矛盾があれば本番に出さない（どうしても出すときは KB_SKIP_JUDGE=1 ./publish.sh）
+if [ -z "$KB_SKIP_JUDGE" ]; then
+  (cd test && node judge.js quick) || { echo '判定チェックで失敗したので、本番には出しませんでした（test/out/judge_fail.json）'; exit 1; }
+fi
 KB_CLOUD_API="$API" ./deploy.sh
 SRC=$(git rev-parse --short HEAD)
 WT=$(mktemp -d)
