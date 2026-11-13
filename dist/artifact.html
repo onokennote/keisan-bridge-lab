@@ -2380,7 +2380,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='6602023a27';
+window.KB_BUILD='cd3efc144d';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6436,7 +6436,7 @@ function hostRules() {
 // バッジの進み具合（回数で数える系統だけ。決まった条件のものは別に扱う）
 function advCount(g, k) { const c = g.cnt || {}; return k === 'sutemi' ? Math.min(c.aete || 0, 10) : k === 'set_low' ? (c.set_low || 0) : (c[k] || 0); }
 function advNearBadges(g) {
-  const out = [], skipK = ['daily_podium', 'season_podium', 'rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
+  const out = [], skipK = ['daily_win', 'daily_2nd', 'daily_3rd', 'season_podium', 'rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
   ACH.forEach(a => { const k = a[0]; if (skipK.includes(k)) return;
     for (let i = 0; i < a[2].length; i++) { const t = a[2][i]; if (g.ach[k + ':' + t]) continue; if (k === 'sutemi' && t > 10) break;
       const c = advCount(g, k); out.push({ k, i, t, c, left: Math.max(1, t - c), ratio: t ? c / t : 0, name: a[4][i], series: a[1], cond: a[3](t), bp: bpOf(k, i), tier: ['銅', '銀', '金'][a[5] ? a[5][i] : Math.min(i, 2)] }); break; } });
@@ -6748,7 +6748,10 @@ const ACH = [
   ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
   // デイリートーナメント（クラウド版）：参加回数・その日の3位以内・シーズン（毎月前半・後半）の3位以内。人数の条件なし
   ['daily_play', 'デイリー 参加', [1, 10, 30], n => n === 1 ? 'デイリートーナメントに参加して最後まで' : `デイリートーナメントに${n}回参加`, ['デイリーデビュー', 'デイリー常連', '毎晩のチャレンジャー']],
-  ['daily_podium', 'デイリー 表彰台', [1, 2, 3], n => n >= 3 ? 'デイリートーナメントで優勝' : n >= 2 ? 'デイリートーナメントで2位以上' : 'デイリートーナメントで3位以上', ['デイリー表彰台', 'デイリー準優勝', 'デイリー王者'], [0, 1, 2]],
+  // デイリーの順位：優勝・2位・3位それぞれ、1回で銅・2回で銀・3回で金（AIも順位に入る）
+  ['daily_win', 'デイリー 優勝', [1, 2, 3], n => n === 1 ? 'デイリートーナメントで優勝' : `デイリートーナメントで${n}回優勝`, ['デイリー初優勝', '連覇の手ごたえ', 'デイリーの覇者']],
+  ['daily_2nd', 'デイリー 2位', [1, 2, 3], n => n === 1 ? 'デイリートーナメントで2位' : `デイリートーナメントで2位を${n}回`, ['デイリー準優勝', '銀の常連', '銀メダルコレクター']],
+  ['daily_3rd', 'デイリー 3位', [1, 2, 3], n => n === 1 ? 'デイリートーナメントで3位' : `デイリートーナメントで3位を${n}回`, ['デイリー表彰台', '銅の常連', '銅メダルコレクター']],
   ['season_podium', 'シーズン 表彰台', [1, 2, 3], n => n >= 3 ? 'デイリーのシーズン（毎月前半・後半）で1位' : n >= 2 ? 'デイリーのシーズンで2位以上' : 'デイリーのシーズンで3位以上', ['シーズン表彰台', 'シーズン準優勝', 'シーズン王者'], [0, 1, 2]],
   // ライバル（クラウド版）：盛り上げ用の軽いバッジ。数は今までの最高で数える
   ['rival_out', 'ライバル視', [1, 3, 5], n => n === 1 ? 'だれかをライバル視する' : `${n}人をライバル視する（同時に）`, ['ライバル宣言', '負けず嫌い', '全方位ライバル']],
@@ -6756,7 +6759,7 @@ const ACH = [
   ['rival_mu', '宿敵', [1, 2, 3], n => n === 1 ? '宿敵ができる（お互いにライバル視）' : `宿敵が${n}人できる（同時に）`, ['宿命の出会い', 'ダブル宿敵', '宿敵トリオ']],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]], ["デイリー", ["daily_play", "daily_podium", "season_podium"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]], ["デイリー", ["daily_play", "daily_win", "daily_2nd", "daily_3rd", "season_podium"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -6804,6 +6807,7 @@ function G_() {
   if (!g.asfix && g.ach) { g.asfix = 1; const c = (g.cnt && g.cnt.all_sets) || 0; delete g.ach['all_sets:2']; [1, 3, 5].forEach(t => { const id = 'all_sets:' + t; if (c >= t) { if (!g.ach[id]) g.ach[id] = Date.now(); } else delete g.ach[id]; }); store.set('growth', g); }
   // 「アタックの鬼」を20回→15回にしたので、15回以上の人には黙って付ける（前の20回の印は15回に移す）
   if (!g.akfix && g.ach) { g.akfix = 1; const c = (g.cnt && g.cnt.atk_done) || 0; if (g.ach['atk_done:20']) { g.ach['atk_done:15'] = g.ach['atk_done:20']; delete g.ach['atk_done:20']; } if (c >= 15 && !g.ach['atk_done:15']) g.ach['atk_done:15'] = Date.now(); store.set('growth', g); }
+  if (g.ach && Object.keys(g.ach).some(k => /^daily_podium:/.test(k))) { Object.keys(g.ach).forEach(k => { if (/^daily_podium:/.test(k)) delete g.ach[k]; }); store.set('growth', g); } // 前の「デイリー 表彰台」は順位ごとのバッジに分けた（回数はサーバーの記録から付け直す）
   if (!g.o5fix && g.ach) { g.o5fix = 1; const c = (g.cnt && g.cnt.outs5) || 0; const was = g.ach['outs5:10']; delete g.ach['outs5:10']; if (c >= 6 && !g.ach['outs5:6']) g.ach['outs5:6'] = was || Date.now(); store.set('growth', g); } // アウツチャレンジのクリアの金を10回→6回に
   if (!g.bpfix && g.ach) { g.bpfix = 1; const c = (g.cnt && g.cnt.bestpair) || 0; delete g.ach['bestpair:10']; [1, 2, 3].forEach(t => { if (c >= t && !g.ach['bestpair:' + t]) g.ach['bestpair:' + t] = Date.now(); }); store.set('growth', g); }
   if (g.v === 1) { // 旧形式からの引き継ぎ：分かる範囲で回数を数え直す
@@ -6953,7 +6957,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
-  else if (key === 'daily_play' || key === 'daily_podium' || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！毎晩20:30のデイリートーナメント、ホームの「オンライン大会」から出られるで！` : 'ホームの「オンライン大会」のデイリートーナメントから狙えるで。毎晩20:30、シーズンは毎月前半と後半や！';
+  else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！毎晩20:30のデイリートーナメント、ホームの「オンライン大会」から出られるで！` : 'ホームの「オンライン大会」のデイリートーナメントから狙えるで。毎晩20:30、シーズンは毎月前半と後半や！';
   else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
@@ -8134,7 +8138,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { daily_play: 0.5, daily_podium: 1.2, season_podium: 2.5, rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
+const BP_W = { daily_play: 0.5, daily_win: 1.5, daily_2nd: 1, daily_3rd: 0.8, season_podium: 2.5, rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
 const BP_CAT = 500, BP_CAT_G = { 'ライバル': 300 }; // 冠は500BP（ライバルは盛り上げ用なので300BP）
 const catBp = gi => BP_CAT_G[(ACH_GROUPS[gi] || [])[0]] || BP_CAT;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
@@ -12078,7 +12082,8 @@ async function dailyRankOpen(tab) {
 async function onAwardsSync() {
   try { const j = await onReq('on_awards'); ON.myAwards = j.awards || [];
     const mine = ON.myAwards.filter(a => a.pid === PID), best = kind => Math.max(0, ...mine.filter(a => (+a.official || 0) === kind).map(a => 4 - a.place)); // official：0 オンライン・1 公式・2 デイリー・3 シーズン
-    [['on_podium', 0], ['off_podium', 1], ['daily_podium', 2], ['season_podium', 3]].forEach(([k, kind]) => { const b = best(kind); if (b) setMax(k, b); });
+    [['on_podium', 0], ['off_podium', 1], ['season_podium', 3]].forEach(([k, kind]) => { const b = best(kind); if (b) setMax(k, b); });
+    [['daily_win', 1], ['daily_2nd', 2], ['daily_3rd', 3]].forEach(([k, pl]) => { const n = mine.filter(a => +a.official === 2 && +a.place === pl).length; if (n) setMax(k, n); }); // デイリー：順位ごとの回数
     if (j.daily) setMax('daily_play', j.daily);
   } catch (e) { }
 }

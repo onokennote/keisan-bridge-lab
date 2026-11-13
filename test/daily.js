@@ -68,7 +68,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   
   ok((info.total || []).length === 5 && info.total[0].pts === 100 && info.total.some(r => r.ai), '総ポイントのランキング（AI研究員も入る）');
   await pa.evaluate(() => KBAPP.onAwardsSync()); await pa.waitForTimeout(1500);
-  const bd = await pa.evaluate(() => { const g = KBAPP.G(); return { play: !!g.ach['daily_play:1'], dpod: Object.keys(g.ach).some(k => /^daily_podium:/.test(k)), spod: Object.keys(g.ach).some(k => /^season_podium:/.test(k)) }; });
+  const bd = await pa.evaluate(() => { const g = KBAPP.G(); return { play: !!g.ach['daily_play:1'], dpod: Object.keys(g.ach).some(k => /^daily_(win|2nd|3rd):/.test(k)), spod: Object.keys(g.ach).some(k => /^season_podium:/.test(k)) }; });
   ok(bd.play, `バッジ：デイリー参加（表彰台はAIも入れた順位で3位以内のときだけ）（${JSON.stringify(bd)}）`);
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.ON.dinfoAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
   await pa.evaluate(() => { const e = document.createElement('b'); e.dataset.tab = 'past'; KBAPP.act('daily-rank', e); }); await pa.waitForTimeout(1200);
@@ -81,6 +81,11 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length >= 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank.png') });
   await pa.evaluate(() => document.querySelector('#rk-tpoints').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank2.png') });
+  // 順位ごとの回数でバッジ（サーバーの返事を差し替えて確かめる）：優勝2回→銀、2位1回→銅、3位3回→金
+  const bd2 = await pa.evaluate(async () => { const pid = JSON.parse(localStorage.getItem('kb.profile')), f0 = window.fetch;
+    window.fetch = async (u, o) => /a=on_awards/.test(String(u)) ? new Response(JSON.stringify({ ok: true, daily: 6, awards: [1, 1, 2, 3, 3, 3].map((pl, i) => ({ pid, tid: 'X' + i, tname: 'デイリー', place: pl, official: 2 })) })) : f0(u, o);
+    await KBAPP.onAwardsSync(); window.fetch = f0; const g = KBAPP.G(); return ['daily_win:2', 'daily_2nd:1', 'daily_3rd:3'].map(k => !!g.ach[k]).concat([!g.ach['daily_win:3'], !g.ach['daily_2nd:2']]); });
+  ok(bd2.every(Boolean), 'デイリーの順位ごとのバッジ（優勝2回で銀・2位1回で銅・3位3回で金）：' + bd2.join());
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
