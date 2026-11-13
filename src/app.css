@@ -2338,3 +2338,13 @@ body.rewinding #home-fab{display:none}
 
 /* 新しい版のお知らせ */
 .ver-bar{white-space:nowrap;position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:9999;background:#1b3a2c;border:1px solid #f2b632;color:#fff;border-radius:99px;padding:6px 8px 6px 14px;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+
+/* ライバル比較：バッジ・冠の差分 */
+.rv-r.tap{cursor:pointer}.rv-r.tap span{color:var(--gold,#f2b632)}
+.rv-chev{font-style:normal;display:inline-block;transition:transform .15s}.rv-r.open .rv-chev{transform:rotate(90deg)}
+.rv-diff{padding:8px 10px;background:rgba(0,0,0,.25);display:flex;flex-direction:column;gap:8px}
+.rv-diff[hidden]{display:none}.rv-diff small{color:var(--muted);font-size:11px}
+.rv-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}.rv-chips em{font-style:normal;color:var(--muted);font-size:12px}
+.rv-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 7px 2px 3px;border-radius:99px;background:rgba(255,255,255,.06);border:1px solid var(--line);color:inherit;font:inherit;font-size:11px;cursor:pointer}
+.rv-chip svg{width:22px;height:22px}.rv-chip.sel{border-color:#ffd666;background:rgba(255,214,102,.15)}
+.rv-cmp .pv-info{margin:6px 8px}

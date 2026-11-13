@@ -72,6 +72,12 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const cmp = await pa.evaluate(() => document.querySelector('#modal').innerText);
   ok(/BP/.test(cmp) && /推定実力/.test(cmp) && /逆転|差|リード/.test(cmp), 'ライバルと比較：表とかんたんな対策が出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'rival_cmp.png') });
+  ok(/冠/.test(cmp), 'ライバルと比較：バッジと冠を別の行に');
+  await pa.click('#modal [data-rvd] >> nth=0'); await pa.waitForTimeout(200);
+  ok(await pa.evaluate(() => { const d = document.querySelector('#modal .rv-diff'); return d && !d.hidden && /だけ/.test(d.innerText); }), 'バッジの行を押すと、相手だけ・自分だけのバッジ');
+  const chip = await pa.$('#modal .rv-chip'); if (chip) { await chip.click(); await pa.waitForTimeout(200); }
+  ok(!chip || await pa.evaluate(() => !document.querySelector('#modal .pv-info').hidden), 'バッジを押すと説明');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'rival_cmp_diff.png'), fullPage: true });
   // ライバル・ライバラー（フォロー・フォロワーのように）：ホーム・自分のプロフィール・ランキングからのプロフィール
   await pb.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.rvByAt = 0; KBAPP.go('home'); }); await pb.waitForTimeout(1500);
   ok(await pb.evaluate(() => /←被ライバル\s*1/.test((document.querySelector('#pb-rv') || {}).textContent || '')), 'ホームのプロフィールに「ライバラー 1」（ハナをライバルにしている人の数）');

@@ -680,8 +680,16 @@ async function rivalCompare(rid, name) {
   modal(`<div class="stack host-m"><p class="small muted">${esc(name)}のデータを読んでいます…</p></div>`);
   let d; try { const j = await (await fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid))).json(); if (!j.ok) throw new Error(j.error); d = j.card; } catch (e) { modal(`<div class="stack host-m"><p>${esc(name)}のデータを読み込めませんでした（ランキングから外れた可能性があります）。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`); return; }
   const me = cardDataOf(PID, S.settings.name), g = G_(), ra = Object.fromEntries((d.ach || []).map(k => [k, 1])), rg = { ach: ra };
-  const myBp = bpTotal(g), rvBp = bpTotal(rg), myB = Object.keys(g.ach).filter(k => /^[a-z0-9_]+:\d+$/i.test(k) && g.ach[k]).length, rvB = (d.ach || []).length;
-  const rows = [['推定実力', me.rating, d.rating, v => v == null ? '—' : '★' + (+v).toFixed(1)], ['BP', myBp, rvBp, v => v + ' BP'], ['バッジ', myB, rvB, v => v + '個'], ['連続最善', me.streak, d.streak || 0, v => v + '回'], ['バッジアタック', me.atk, d.atk || 0, v => v ? v + ' BP' : '—'], ['式の図鑑', me.zukan, d.zukan || 0, v => v + '式']];
+  const myBp = bpTotal(g), rvBp = bpTotal(rg);
+  // バッジ（段階ごと）と冠は別に数える。押すと差分（相手だけ・自分だけ）を出す
+  const allB = ACH.flatMap(a => a[2].map((t, i) => ({ a, i, key: a[0] + ':' + t }))), myB = allB.filter(x => g.ach[x.key]).length, rvB = allB.filter(x => ra[x.key]).length;
+  const myC = ACH_GROUPS.filter((_, gi) => g.ach['cat:' + gi]).length, rvC = ACH_GROUPS.filter((_, gi) => ra['cat:' + gi]).length;
+  const chipB = x => `<button type="button" class="rv-chip" data-pvi="b:${x.a[0]}:${x.i}">${badgeSVG(x.a, x.i, true, 22)}<span>${esc(x.a[4][x.i])}</span></button>`;
+  const chipC = (gi, src, who) => `<button type="button" class="rv-chip" data-who="${esc(who)}" data-pvi="c:${gi}:${catProgress(src, gi).have}:${catProgress(src, gi).all}:1">${emblemSVG(gi, true, 22)}<span>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</span></button>`;
+  const diffHTML = (onlyR, onlyM, chip, unit) => `<div class="rv-diff" hidden><div><small>${esc(name)}だけ（${onlyR.length}${unit}）</small><div class="rv-chips">${onlyR.map(x => chip(x, rg, name)).join('') || '<em>なし</em>'}</div></div><div><small>${esc(S.settings.name)}だけ（${onlyM.length}${unit}）</small><div class="rv-chips">${onlyM.map(x => chip(x, g, S.settings.name)).join('') || '<em>なし</em>'}</div></div></div>`;
+  const dB = diffHTML(allB.filter(x => ra[x.key] && !g.ach[x.key]), allB.filter(x => g.ach[x.key] && !ra[x.key]), chipB, '個');
+  const cg = ACH_GROUPS.map((_, gi) => gi), dC = diffHTML(cg.filter(gi => ra['cat:' + gi] && !g.ach['cat:' + gi]), cg.filter(gi => g.ach['cat:' + gi] && !ra['cat:' + gi]), chipC, '個');
+  const rows = [['推定実力', me.rating, d.rating, v => v == null ? '—' : '★' + (+v).toFixed(1)], ['BP', myBp, rvBp, v => v + ' BP'], ['バッジ', myB, rvB, v => v + '個', dB], ['冠', myC, rvC, v => v + '個', dC], ['連続最善', me.streak, d.streak || 0, v => v + '回'], ['バッジアタック', me.atk, d.atk || 0, v => v ? v + ' BP' : '—'], ['式の図鑑', me.zukan, d.zukan || 0, v => v + '式']];
   const nmR = san(name), tips = [];
   if (rvBp > myBp) { const gap = rvBp - myBp, nb = advNearBadges(g), cand = (nb.filter(b => b.c > 0).length ? nb.filter(b => b.c > 0) : nb).slice(0, 8).sort((a, b) => a.left - b.left || b.bp - a.bp); /* 手をつけている系統から */ let s2 = 0; const use = []; for (const b of cand) { if (s2 > gap) break; use.push(b); s2 += b.bp; }
     tips.push({ text: s2 > gap ? `BPは${gap}差や。${use.map(b => `「${b.name}」（+${b.bp}・あと${b.left}回）`).join('と')}で逆転できるで！` : `BPは${gap}差や。まずは${use.slice(0, 2).map(b => `「${b.name}」（+${b.bp}）`).join('と')}から詰めていこ！`, bs: use.map(b => advB(b.k, b.i)) }); }
@@ -691,9 +699,12 @@ async function rivalCompare(rid, name) {
   if (me.rating != null && d.rating != null) tips.push(d.rating > me.rating + 0.05 ? `推定実力は${nmR}が★${(d.rating - me.rating).toFixed(1)}上や。AIの読みを見ずに打った手の最善率を上げるんが一番の近道や！` : me.rating > d.rating + 0.05 ? `推定実力はこっちが★${(me.rating - d.rating).toFixed(1)}上や！判断の質では勝っとるで！` : '推定実力はほぼ互角や！ライバルとして申し分なしや！');
   if ((d.streak || 0) > me.streak) tips.push(`連続最善は${nmR}が${d.streak}回、こっちは${me.streak}回や。一手ずつ「最善かどうか」を意識して打つと伸びるで！`);
   advModal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', rvBp > myBp ? 'worried' : 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(san(S.settings.name))} vs ${esc(nmR)}、データで比べたで！</b></div></div>
-    <div class="rv-cmp"><div class="rv-h"><span></span><b>${esc(S.settings.name)}</b><b>⚔ ${esc(name)}</b></div>${rows.map(([l, a, b, f]) => { const A = a == null ? -1 : +a, B = b == null ? -1 : +b; return `<div class="rv-r"><span>${l}</span><b class="${A > B ? 'win' : ''}">${f(a)}</b><b class="${B > A ? 'win' : ''}">${f(b)}</b></div>`; }).join('')}</div>
+    <div class="rv-cmp"><div class="rv-h"><span></span><b>${esc(S.settings.name)}</b><b>⚔ ${esc(name)}</b></div>${rows.map(([l, a, b, f, df]) => { const A = a == null ? -1 : +a, B = b == null ? -1 : +b; return `<div class="rv-r ${df ? 'tap' : ''}" ${df ? 'role="button" data-rvd="1"' : ''}><span>${l}${df ? ' <i class="rv-chev">▸</i>' : ''}</span><b class="${A > B ? 'win' : ''}">${f(a)}</b><b class="${B > A ? 'win' : ''}">${f(b)}</b></div>${df || ''}`; }).join('')}<div class="pv-info" hidden></div></div>
     <div class="adv-list">${tips.slice(0, 3).map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${advText(typeof t === 'string' ? { text: t } : t)}</p></div></div>`).join('')}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="masa-rival">ほかのライバル</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+  const box = $('#modal .rv-cmp'); if (!box) return;
+  box.querySelectorAll('[data-rvd]').forEach(r => r.onclick = () => { const df = r.nextElementSibling; if (!df || !df.classList.contains('rv-diff')) return; df.hidden = !df.hidden; r.classList.toggle('open', !df.hidden); });
+  pvInfoBind(box, name, false); // バッジ・冠を押すと説明（自分が持っているかも）
 }
 // ---------- 成長記録：実力レーティング・場面別の苦手分析・課題・称号 ----------
 // レーティングの基準：自分の席をAIに打たせて実測した「1判断あたりの平均損失pt」と「最善率」
@@ -1681,10 +1692,10 @@ function profHTML(D, o) {
   </div>`;
 }
 // プロフィールのバッジ・冠を押すと、その上に説明（プロフィールは閉じない）
-function pvInfoBind(box, name, me) {
+function pvInfoBind(box, name0, me) {
   const info = box.querySelector('.pv-info'); if (!info) return; const myG = G_(), TIER = ['銅', '銀', '金'];
   box.querySelectorAll('[data-pvi]').forEach(el => el.onclick = () => {
-    const v = el.dataset.pvi; if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
+    const v = el.dataset.pvi, name = el.dataset.who || name0; if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
     box.querySelectorAll('[data-pvi].sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); info.dataset.cur = v;
     const q = v.split(':'); let h = '';
     if (q[0] === 'b') { const a = ACH.find(x => x[0] === q[1]), i = +q[2]; if (!a) return; const t = a[2][i], tier = a[5] ? a[5][i] : Math.min(i, 2), mine = !!myG.ach[a[0] + ':' + t];
@@ -5971,11 +5982,12 @@ function evalMine() {
 }
 
 // 新しい版が出ていたら知らせる（開きっぱなしのページは古いまま動き続けるので）。公開版（KB_BUILD がある）だけ、画面に戻ったとき・10分ごとに確かめる
-const verCheck = { at: 0, told: false };
+const verCheck = { at: 0, told: false }; window.__kbLoadAt = Date.now();
 async function checkNewVersion() {
   if (!window.KB_BUILD || verCheck.told || Date.now() - verCheck.at < 60000) return; verCheck.at = Date.now();
+  const asked = (location.search.match(/[?&]v=([0-9a-f]+)/) || [])[1]; if (asked && asked !== window.KB_BUILD && verCheck.at - (window.__kbLoadAt || 0) < 120000) return; // 開き直した直後に、まだ配信が古いときは出し続けない
   try { const t = await (await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })).text(); const m = t.match(/KB_BUILD="([0-9a-f]+)"/);
-    if (m && m[1] !== window.KB_BUILD) { verCheck.told = true; const d = document.createElement('div'); d.className = 'ver-bar'; d.innerHTML = '🆕 新しい版があります <button class="btn sm primary">再読み込み</button>'; d.querySelector('button').onclick = () => location.reload(); document.body.appendChild(d); } } catch (e) { }
+    if (m && m[1] !== window.KB_BUILD) { verCheck.told = true; const d = document.createElement('div'); d.className = 'ver-bar'; d.innerHTML = '🆕 新しい版があります <button class="btn sm primary">再読み込み</button>'; d.querySelector('button').onclick = () => location.replace(location.pathname + '?v=' + m[1] + location.hash); /* 「?v=新しい版」を付けて開き直す（ふつうの再読み込みだと、ブラウザや配信の控え（キャッシュ）から古い版が出ることがある） */ document.body.appendChild(d); } } catch (e) { }
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewVersion(); });
 setInterval(checkNewVersion, 600000);
