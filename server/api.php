@@ -47,6 +47,9 @@ function db(): PDO {
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS dpoints (uid TEXT NOT NULL, pid TEXT NOT NULL, season TEXT NOT NULL, tid TEXT NOT NULL, pts INTEGER NOT NULL, name TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, tid))'); // デイリートーナメントのポイント（シーズンポイントの元）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS tpoints (uid TEXT NOT NULL, pid TEXT NOT NULL, src TEXT NOT NULL, ref TEXT NOT NULL, pts INTEGER NOT NULL, name TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, src, ref))'); // 総ポイント（シーズンの順位・公式大会の入賞）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS seasons (season TEXT PRIMARY KEY, closed INTEGER NOT NULL, st TEXT NOT NULL)'); // 締めたシーズンの最終順位（アーカイブ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS tours (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, start_at INTEGER NOT NULL, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン大会
   $pdo->exec('CREATE TABLE IF NOT EXISTS awards (uid TEXT NOT NULL, pid TEXT NOT NULL, tid TEXT NOT NULL, tname TEXT NOT NULL, place INTEGER NOT NULL, official INTEGER NOT NULL DEFAULT 0, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, tid))'); // オンライン大会の上位3位（人が10人以上の大会だけ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS rooms (id TEXT PRIMARY KEY, host TEXT NOT NULL, st TEXT NOT NULL, ver INTEGER NOT NULL DEFAULT 1, updated INTEGER NOT NULL, created INTEGER NOT NULL)'); // オンライン対局の卓（山札・手札はサーバーだけが持つ）
@@ -347,6 +350,15 @@ function obTourDeal(array &$t, array $keys, string $label, float $now, array $ab
 }
 function obTourStart(array &$t, float $now): void {
   $c = $t['cfg']; $ent = $t['entrants'];
+  if (!empty($c['daily'])) {
+    if (!$ent) { $t['phase'] = 'cancel'; $t['note'] = '参加者がいなかったため中止'; return; }
+    if (empty($c['group']) && count($ent) > DAILY_GROUP) { // 15人ずつのグループに分ける（人はなるべく均等に。空きは「まんべんなく」のAI）
+      shuffle($ent); $G = (int)ceil(count($ent) / DAILY_GROUP); $chunks = array_fill(0, $G, []); foreach ($ent as $i => $e) $chunks[$i % $G][] = $e;
+      for ($g = 1; $g < $G; $g++) { $L = chr(65 + $g); $ct = $t; $ct['id'] = $t['id'] . $L; $ct['cfg']['group'] = $L; $ct['cfg']['name'] = $c['name'] . '・' . $L . 'グループ'; $ct['entrants'] = $chunks[$g]; $ct['phase'] = 'entry';
+        obTourStart($ct, $now); db()->prepare('INSERT OR REPLACE INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$ct['id'], $ct['host'], json_encode($ct, JSON_UNESCAPED_UNICODE), $c['startAt'], time(), time()]); }
+      $t['cfg']['group'] = 'A'; $t['cfg']['name'] = $c['name'] . '・Aグループ'; $t['entrants'] = $chunks[0]; $ent = $chunks[0]; $c = $t['cfg'];
+    }
+  }
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'pid' => $e['pid'] ?? '', 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
@@ -401,14 +413,83 @@ function obTourTick(array &$t, float $now): bool {
 const OB_AWARD_MIN = 10; // バッジ・称号は、人が10人以上参加した大会だけ
 function obTourAward(array &$t): void {
   if (!empty($t['awarded'])) return; $t['awarded'] = true;
-  $t['awardOk'] = count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
+  $daily = !empty($t['cfg']['daily']);
+  if ($daily) dailyPoints($t);
+  $t['awardOk'] = $daily || count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
   if (!$t['awardOk']) return;
   $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
   foreach (array_slice($t['result'], 0, 3) as $i => $k) {
     if (!isset($ent[$k])) continue; // AIの順位にはバッジなし
-    $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, !empty($t['cfg']['official']) ? 1 : 0, time()]);
+    $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, $daily ? 2 : (!empty($t['cfg']['official']) ? 1 : 0), time()]);
     $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
     noteAdd($e['uid'], $e['pid'] ?? '', 'award', ['tid' => $t['id'], 'tname' => $t['cfg']['name'], 'place' => $i + 1, 'official' => !empty($t['cfg']['official'])]);
+  }
+  if (!empty($t['cfg']['official'])) { // 公式大会：入賞した人（AIは飛ばす）に総ポイント
+    $tp = $t['cfg']['tpts'] ?? OFFICIAL_TPTS; $j = 0;
+    foreach ($t['result'] as $k) { if (!isset($ent[$k])) continue; if ($j >= count($tp)) break; $e = $ent[$k];
+      if ($tp[$j] > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', 'official', $t['id'], $tp[$j], $e['name'], time()]); $j++; }
+  }
+}
+// ---------- デイリートーナメント（毎朝6時に作り、20:30に始まる）とシーズン（毎月前半・後半） ----------
+const DAILY_HOUR = 6, DAILY_PARTS = ['17:30', '18:30', '19:30', '20:30'], DAILY_GROUP = 15; // 1日4部。出られるのはどれか1部だけ
+const DAILY_FIN = [60, 40, 30, 20, 10];      // 決勝の順位で足すポイント（予選は「16−グループ内の順位」）
+const SEASON_BONUS = [100, 70, 50, 40, 20];  // シーズンの順位でもらえる総ポイント
+const SEASON_HALF = 10;                      // 参加者の上位半分まで
+const OFFICIAL_TPTS = [100, 70, 50, 40, 20]; // 公式大会の入賞（人だけで数えた順位）でもらえる総ポイント（はじめの値）
+function jstTz(): DateTimeZone { return new DateTimeZone('Asia/Tokyo'); }
+function seasonKey(int $ts): string { $d = (new DateTime('@' . $ts))->setTimezone(jstTz()); return $d->format('Y-m') . ((int)$d->format('j') <= 15 ? 'a' : 'b'); }
+function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' . (substr($k, -1) === 'a' ? '前半' : '後半'); }
+function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
+function dailyCfg(DateTime $d, int $part, int $start): array {
+  $sk = seasonKey($start);
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ）。15人（5人卓×3）・予選2セット×3ゲーム・上位5人で決勝。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
+    'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
+    'sets' => 2, 'games' => 3, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
+}
+function dailyEnsure(): void {
+  $d = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$d->format('G') < DAILY_HOUR) return;
+  foreach (DAILY_PARTS as $i => $hm) {
+    $id = 'D' . $d->format('ymd') . ($i + 1); $q = db()->prepare('SELECT 1 FROM tours WHERE id = ?'); $q->execute([$id]); if ($q->fetch()) continue;
+    $start = (new DateTime($d->format('Y-m-d') . ' ' . $hm, jstTz()))->getTimestamp();
+    $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => dailyCfg($d, $i + 1, $start), 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
+    db()->prepare('INSERT OR IGNORE INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
+  }
+}
+// 同じ日のデイリー（4部のどれか）に、もう出ているか（出られるのは1日1部だけ。取り消せば別の部に出られる）
+function dailyEnteredPart(array $t, string $uid, string $pid): ?int {
+  foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D%' AND st LIKE '%\"date\":\"" . $t['cfg']['date'] . "\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) {
+    $x = json_decode($raw, true); if (empty($x['cfg']['daily']) || $x['id'] === $t['id'] || ($x['cfg']['date'] ?? '') !== $t['cfg']['date'] || ($x['phase'] ?? '') === 'cancel') continue;
+    foreach ($x['entrants'] as $e) if ($e['uid'] === $uid && (string)($e['pid'] ?? '') === $pid) return (int)($x['cfg']['part'] ?? 0);
+  }
+  return null;
+}
+// デイリーのポイント：予選は 16−グループ内の順位（AIも順位に入れる）、決勝に出た人は決勝の順位で 60・40・30・20・10 を足す。AIはポイントを持たない
+function dailyPoints(array $t): void {
+  $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
+  $pre = obTourOrder($t); $fin = $t['finalists'] ?? []; $res = $t['result'] ?? [];
+  foreach ($pre as $i => $k) { if (!isset($ent[$k])) continue; $e = $ent[$k]; $p = max(1, 16 - ($i + 1));
+    if (in_array($k, $fin, true)) { $j = array_search($k, $res, true); if ($j !== false && $j < count(DAILY_FIN)) $p += DAILY_FIN[$j]; }
+    db()->prepare('INSERT OR REPLACE INTO dpoints (uid, pid, season, tid, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['cfg']['season'], $t['id'], $p, $e['name'], time()]); }
+}
+function seasonStand(string $sk): array {
+  $q = db()->prepare('SELECT d.uid, d.pid, SUM(d.pts) pts, COUNT(*) n, MAX(d.at) last, COALESCE(r.name, MAX(d.name)) name, r.avatar FROM dpoints d LEFT JOIN ranks r ON r.uid = d.uid AND r.pid = d.pid WHERE d.season = ? GROUP BY d.uid, d.pid ORDER BY pts DESC, last ASC'); $q->execute([$sk]);
+  return $q->fetchAll();
+}
+// 終わったシーズンを締める：順位を確定し、総ポイント（1位から100・70・50・40・20、参加者の上位半分まで10）と、上位3位に大会のバッジ（awards の official=3）
+function seasonClose(): void {
+  $cur = seasonKey(time());
+  foreach (db()->query('SELECT DISTINCT season FROM dpoints')->fetchAll(PDO::FETCH_COLUMN) as $sk) {
+    if ($sk >= $cur) continue; $q = db()->prepare('SELECT 1 FROM seasons WHERE season = ?'); $q->execute([$sk]); if ($q->fetch()) continue;
+    $live = db()->prepare("SELECT COUNT(*) FROM tours WHERE st LIKE ? AND (st LIKE '%\"phase\":\"prelim\"%' OR st LIKE '%\"phase\":\"final\"%')"); $live->execute(['%"season":"' . $sk . '"%']); if ((int)$live->fetchColumn() > 0) continue; // 最後のデイリーが終わってから
+    $L = seasonStand($sk); $n = count($L); $half = (int)ceil($n / 2); $top = [];
+    foreach ($L as $i => $r) {
+      $b = $i < count(SEASON_BONUS) ? SEASON_BONUS[$i] : ($i < $half ? SEASON_HALF : 0);
+      if ($b > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$r['uid'], $r['pid'], 'season', $sk, $b, $r['name'], time()]);
+      if ($i < 3) { db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$r['uid'], $r['pid'], 'S' . $sk, 'デイリー ' . seasonLabel($sk) . 'シーズン', $i + 1, 3, time()]);
+        noteAdd($r['uid'], $r['pid'], 'award', ['tid' => '', 'tname' => 'デイリー ' . seasonLabel($sk) . 'シーズン', 'place' => $i + 1, 'official' => false]); }
+      $top[] = ['name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)$r['n'], 'bonus' => $b, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null];
+    }
+    db()->prepare('INSERT OR REPLACE INTO seasons (season, closed, st) VALUES (?, ?, ?)')->execute([$sk, time(), json_encode(['label' => seasonLabel($sk), 'n' => $n, 'stand' => array_slice($top, 0, 50)], JSON_UNESCAPED_UNICODE)]);
   }
 }
 // 大会の設定を読む（ひらくときと、編集のときに使う）
@@ -423,6 +504,7 @@ function obTourCfg(array $b, array $u): array {
   $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))), 'aiMix' => in_array($b['aiMix'] ?? '', array_keys(OB_MIX), true) ? $b['aiMix'] : 'even',
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
   'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'points' => $pts ?: [10, 8, 5, 2, 0]];
+  if ($cfg['official']) { $tp = array_values(array_map(fn($x) => max(0, min(1000, (int)$x)), array_slice((array)($b['tpts'] ?? OFFICIAL_TPTS), 0, 10))); $cfg['tpts'] = $tp ?: OFFICIAL_TPTS; }
   return $cfg;
 }
 const OB_MIX = ['random' => [1, 1, 1, 1, 1], 'casual' => [3, 3, 2, 1, 0.3], 'even' => [1, 1.5, 2, 1.5, 1], 'strong' => [0.2, 0.5, 1.5, 3, 3], 'master' => [0, 0, 0, 0, 1]]; // ふつうの大会の「相手の強さ」と同じ割合（★1〜5）
@@ -454,7 +536,7 @@ function obCanOfficial(string $uid): bool { global $CFG; return in_array($uid, $
 function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
-    'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
+    'startAt' => $c['startAt'], 'entryAt' => !empty($c['daily']) ? ($t['openAt'] ?? 0) : $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
     'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
@@ -680,6 +762,7 @@ try {
 
     case 'on_tours': { // 大会の一覧（受付前・受付中・開催中と、終わって1日以内）
       $b = body(); $u = authUser($b); $now = microtime(true); $out = [];
+      try { dailyEnsure(); seasonClose(); } catch (Throwable $e) { }
       foreach (db()->query("SELECT id, st, ver FROM tours WHERE st NOT LIKE '%\"phase\":\"done\"%' AND st NOT LIKE '%\"phase\":\"cancel\"%' ORDER BY start_at")->fetchAll() as $r) {
         $t = json_decode($r['st'], true); $ver = (int)$r['ver'];
         if (in_array($t['phase'], ['entry', 'prelim', 'final'], true)) { db()->exec('BEGIN IMMEDIATE'); [$t, $ver] = obTourLoad($r['id']); if (obTourTick($t, $now)) { $ver++; obTourSave($r['id'], $t, $ver); } db()->exec('COMMIT'); }
@@ -754,7 +837,29 @@ try {
     }
     case 'on_awards': { // 自分（このアカウント）のオンライン大会の上位3位
       $b = body(); $u = authUser($b); $tp = (string)($u['tpid'] ?? ''); $q = db()->prepare('SELECT pid, tid, tname, place, official, at FROM awards WHERE uid = ?' . ($tp !== '' ? ' AND pid = ?' : '') . ' ORDER BY at DESC'); $q->execute($tp !== '' ? [$u['uid'], $tp] : [$u['uid']]);
-      out(['ok' => true, 'awards' => $q->fetchAll()]);
+      $dq = db()->prepare('SELECT COUNT(*) FROM dpoints WHERE uid = ?' . ($tp !== '' ? ' AND pid = ?' : '')); $dq->execute($tp !== '' ? [$u['uid'], $tp] : [$u['uid']]);
+      out(['ok' => true, 'awards' => $q->fetchAll(), 'daily' => (int)$dq->fetchColumn()]);
+    }
+    case 'daily_test': { // テストだけ：今日のデイリーを、すぐ始まる・短い設定で作り直す（season で過去のシーズンにもできる）
+      if (empty($CFG['test'])) fail('使えません', 403);
+      $b = body(); $d = (new DateTime('@' . time()))->setTimezone(jstTz()); $part = max(1, min(4, (int)($b['part'] ?? 1))); $id = 'D' . $d->format('ymd') . $part;
+      if (!empty($b['all'])) { db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute(['D' . $d->format('ymd') . '%']); }
+      db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute([$id . '%']);
+      $start = time() + (int)($b['startIn'] ?? 30); $cfg = dailyCfg($d, $part, $start); if (!empty($b['season'])) $cfg['season'] = (string)$b['season'];
+      $cfg = array_merge($cfg, ['limit' => 3, 'sets' => (int)($b['sets'] ?? 2), 'games' => (int)($b['games'] ?? 1)]);
+      $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
+      db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
+      out(['ok' => true, 'id' => $id]);
+    }
+    case 'daily_info': { // デイリー：今のシーズンの順位・総ポイントの順位・締めたシーズン（新しい順）
+      $b = body(); $u = authUser($b); $tp = (string)($u['tpid'] ?? ''); $pid = $tp !== '' ? $tp : cleanPid($b['pid'] ?? '');
+      try { dailyEnsure(); seasonClose(); } catch (Throwable $e) { }
+      $sk = seasonKey(time()); $av = fn($a) => $a ? json_decode($a, true) : null;
+      $row = fn($r, $i) => ['rank' => $i + 1, 'name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)($r['n'] ?? 0), 'avatar' => $av($r['avatar'] ?? null), 'me' => $r['uid'] === $u['uid'] && ($pid === '' || $r['pid'] === $pid)];
+      $S = seasonStand($sk); $season = array_map($row, $S, array_keys($S));
+      $T = db()->query('SELECT t.uid, t.pid, SUM(t.pts) pts, COUNT(*) n, COALESCE(r.name, MAX(t.name)) name, r.avatar FROM tpoints t LEFT JOIN ranks r ON r.uid = t.uid AND r.pid = t.pid GROUP BY t.uid, t.pid ORDER BY pts DESC LIMIT 100')->fetchAll(); $total = array_map($row, $T, array_keys($T));
+      $past = array_map(fn($r) => array_merge(['season' => $r['season']], json_decode($r['st'], true)), db()->query('SELECT season, st FROM seasons ORDER BY season DESC LIMIT 24')->fetchAll());
+      out(['ok' => true, 'season' => $sk, 'label' => seasonLabel($sk), 'ends' => seasonEnd($sk), 'stand' => array_slice($season, 0, 100), 'me' => current(array_filter($season, fn($x) => $x['me'])) ?: null, 'total' => $total, 'meTotal' => current(array_filter($total, fn($x) => $x['me'])) ?: null, 'past' => $past, 'rule' => ['fin' => DAILY_FIN, 'bonus' => SEASON_BONUS, 'half' => SEASON_HALF]]);
     }
     case 'on_test_seed': { // テスト版だけ：称号とバッジを持った仮のユーザーを入れる（何度呼んでも同じ）
       if (empty($CFG['stg']) && empty($CFG['test'])) fail('使えません', 403);
@@ -789,11 +894,12 @@ try {
     case 'on_tour_act': { // entry（エントリー）/ cancel（取り消し）/ startnow（主催者：受付中なら今すぐ開始）/ delete（主催者：始まる前なら中止）
       $b = body(); $u = authUser($b); $id = preg_replace('/[^0-9A-Z]/', '', (string)($b['id'] ?? '')); $act = (string)($b['act'] ?? ''); $now = microtime(true);
       [$t, $ver] = obTourLoad($id, true); obTourTick($t, $now); $err = null; $c = $t['cfg'];
-      $open = $t['phase'] === 'entry' && $now >= $c['startAt'] - 900;
+      $open = $t['phase'] === 'entry' && $now >= (!empty($c['daily']) ? ($t['openAt'] ?? 0) : $c['startAt'] - 900); // デイリーは作られたときから受付
       if ($act === 'entry') {
         if (!$open) $err = 'エントリーは開始の15分前からです';
         elseif (!obInvited($t, $u['uid'])) $err = '招待された人だけが出られる大会です';
         elseif (count($t['entrants']) >= $c['max']) $err = '満員です';
+        elseif (!empty($c['daily']) && ($pp = dailyEnteredPart($t, $u['uid'], (string)obSeatInfo($b)['pid'])) !== null) $err = 'きょうは第' . $pp . '部に出ています（デイリーは1日1部だけ。始まる前なら、そちらを取り消すと出られます）';
         elseif (!in_array($u['uid'], array_column($t['entrants'], 'uid'), true)) $t['entrants'][] = array_merge(obSeatInfo($b), ['uid' => $u['uid']]);
       } elseif ($act === 'cancel') {
         if ($t['phase'] !== 'entry') $err = 'もう始まっています'; else $t['entrants'] = array_values(array_filter($t['entrants'], fn($e) => $e['uid'] !== $u['uid']));

@@ -506,7 +506,7 @@ function hostRules() {
 // バッジの進み具合（回数で数える系統だけ。決まった条件のものは別に扱う）
 function advCount(g, k) { const c = g.cnt || {}; return k === 'sutemi' ? Math.min(c.aete || 0, 10) : k === 'set_low' ? (c.set_low || 0) : (c[k] || 0); }
 function advNearBadges(g) {
-  const out = [], skipK = ['rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
+  const out = [], skipK = ['daily_podium', 'season_podium', 'rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
   ACH.forEach(a => { const k = a[0]; if (skipK.includes(k)) return;
     for (let i = 0; i < a[2].length; i++) { const t = a[2][i]; if (g.ach[k + ':' + t]) continue; if (k === 'sutemi' && t > 10) break;
       const c = advCount(g, k); out.push({ k, i, t, c, left: Math.max(1, t - c), ratio: t ? c / t : 0, name: a[4][i], series: a[1], cond: a[3](t), bp: bpOf(k, i), tier: ['銅', '銀', '金'][a[5] ? a[5][i] : Math.min(i, 2)] }); break; } });
@@ -816,13 +816,17 @@ const ACH = [
   // オンライン大会（人が10人以上参加した大会の上位3位）。段階は3位以上（銅）・2位以上（銀）・優勝（金）。公式大会は別のバッジ
   ['on_podium', 'オンライン大会 表彰台', [1, 2, 3], n => n >= 3 ? 'オンライン大会（人が10人以上）で優勝' : n >= 2 ? 'オンライン大会（人が10人以上）で2位以上' : 'オンライン大会（人が10人以上）で3位以上', ['表彰台', '準優勝', 'オンライン王者'], [0, 1, 2]],
   ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
+  // デイリートーナメント（クラウド版）：参加回数・その日の3位以内・シーズン（毎月前半・後半）の3位以内。人数の条件なし
+  ['daily_play', 'デイリー 参加', [1, 10, 30], n => n === 1 ? 'デイリートーナメントに参加して最後まで' : `デイリートーナメントに${n}回参加`, ['デイリーデビュー', 'デイリー常連', '毎晩のチャレンジャー']],
+  ['daily_podium', 'デイリー 表彰台', [1, 2, 3], n => n >= 3 ? 'デイリートーナメントで優勝' : n >= 2 ? 'デイリートーナメントで2位以上' : 'デイリートーナメントで3位以上', ['デイリー表彰台', 'デイリー準優勝', 'デイリー王者'], [0, 1, 2]],
+  ['season_podium', 'シーズン 表彰台', [1, 2, 3], n => n >= 3 ? 'デイリーのシーズン（毎月前半・後半）で1位' : n >= 2 ? 'デイリーのシーズンで2位以上' : 'デイリーのシーズンで3位以上', ['シーズン表彰台', 'シーズン準優勝', 'シーズン王者'], [0, 1, 2]],
   // ライバル（クラウド版）：盛り上げ用の軽いバッジ。数は今までの最高で数える
   ['rival_out', 'ライバル視', [1, 3, 5], n => n === 1 ? 'だれかをライバル視する' : `${n}人をライバル視する（同時に）`, ['ライバル宣言', '負けず嫌い', '全方位ライバル']],
   ['rival_in', '被ライバル', [1, 5, 10], n => n === 1 ? 'だれかにライバル視される' : `${n}人にライバル視される（同時に）`, ['注目の的', '人気者', 'みんなの目標']],
   ['rival_mu', '宿敵', [1, 2, 3], n => n === 1 ? '宿敵ができる（お互いにライバル視）' : `宿敵が${n}人できる（同時に）`, ['宿命の出会い', 'ダブル宿敵', '宿敵トリオ']],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]], ["デイリー", ["daily_play", "daily_podium", "season_podium"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -958,7 +962,7 @@ function badgeSVG(a, i, got, size) {
   return `<svg class="bdg" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,1 37,10 37,30 20,39 3,30 3,10" fill="${c2}"/><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="${c1}"/>${tier >= 1 && got ? '<circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' : ''}<text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" fill="${got ? '#2a1c00' : '#6b7672'}">${esc(ch)}</text></svg>`;
 }
 // カテゴリーをすべて集めると付く特別バッジ
-const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証', 'ライバル': '宿命の好敵手' };
+const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証', 'ライバル': '宿命の好敵手', 'デイリー': '日輪の覇者' };
 function catProgress(g, gi) { const [gn, ks] = ACH_GROUPS[gi]; const list = ks.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); return { gn, have, all, done: all > 0 && have >= all, name: CAT_SPECIAL[gn] || gn }; }
 function emblemSVG(gi, got, size) {
   const z = size || 48, id = 'em' + gi + (got ? 'g' : 'n') + z;
@@ -1018,6 +1022,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
+  else if (key === 'daily_play' || key === 'daily_podium' || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！毎晩20:30のデイリートーナメント、ホームの「オンライン大会」から出られるで！` : 'ホームの「オンライン大会」のデイリートーナメントから狙えるで。毎晩20:30、シーズンは毎月前半と後半や！';
   else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
@@ -2189,7 +2194,7 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
+const BP_W = { daily_play: 0.5, daily_podium: 1.2, season_podium: 2.5, rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
 const BP_CAT = 500, BP_CAT_G = { 'ライバル': 300 }; // 冠は500BP（ライバルは盛り上げ用なので300BP）
 const catBp = gi => BP_CAT_G[(ACH_GROUPS[gi] || [])[0]] || BP_CAT;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
@@ -2977,7 +2982,7 @@ ${onlineHomeHTML()}
     ${pracFacts()}
     <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
-  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT</div><h2>大会モード</h2></div></div>${modeBadgeRows(MB_TOUR, true)}
+  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT PRACTICE</div><h2>大会練習モード</h2></div></div>${modeBadgeRows(MB_TOUR, true)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
     ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
@@ -3174,7 +3179,7 @@ function setupTourHTML() {
   const tables = `<div class="su-tables" id="t-tables" aria-label="卓分け">${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small></div>`;
   const size = suGroup('size', '🏟️', '大会の規模', `${c.nPlayers}人・${sizes.length}卓・${c.games}ゲーム・決勝${c.finalists}人`,
     `${step('tn', 't-n', c.nPlayers, 5, 40, '参加人数（あなたを含む）')}${step('tgames', 't-games', c.games, 1, 10, '1セットのゲーム数')}${step('tfin', 't-fin', c.finalists, 2, 5, '決勝に進める人数')}${tables}`);
-  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">大会モード</div><div></div></div>
+  return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">大会練習モード</div><div></div></div>
 <div class="su">
 ${suPresetHTML('tour')}
 <section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
@@ -5939,6 +5944,7 @@ function act(a, el) {
     case 'on-begin': onAct('start'); break;
     case 'on-back': onAct('back'); break;
     case 'on-chat': onChatModal(); break;
+    case 'daily-rank': dailyRankOpen(el && el.dataset.tab); break;
     case 'on-chat-send': onChatSend(($('#on-chat-in') || {}).value); break;
     case 'on-auto': { const r = ratingOf(G_().games), lv = r.ok ? Math.max(2, Math.min(4, Math.floor(r.r - 1))) : 2; onAct('auto', { lv }); toast(`AI★${lv}に任せました（「自分で打つ」でいつでも戻れます）`); break; }
     case 'on-draw': onAct('draw'); break;
@@ -6079,19 +6085,60 @@ function onlineHomeHTML() {
   // 状態ごとに色の帯とアイコン（受付中は緑・開催中は赤・受付前は金）。押せることが分かるように右に ›
   const kind = v => v.phase === 'entry' ? (v.now >= v.entryAt ? 'open' : 'soon') : v.phase === 'prelim' || v.phase === 'final' ? 'live' : 'end';
   const icon = v => ({ open: '🏆', live: '🔥', soon: '⏳', end: '🏁' })[kind(v)];
-  const rows = L ? (L.length ? L.map(v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
+  const D = (L || []).filter(v => v.daily), L2 = L ? L.filter(v => !v.daily) : L;
+  const rows = L2 ? (L2.length ? L2.map(v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}${v.phase === 'entry' ? `<br><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b>` : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
   return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
+    ${dailyCardHTML(D)}
     <div class="on-tlist">${rows}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
       <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
       <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
 }
+// 開始までの残り時間（すべての大会で同じ書き方）。画面の [data-cd] は30秒ごとに書きかえる
+function cdText(ts) { const s = Math.max(0, Math.round(ts - Date.now() / 1000)); if (!s) return 'まもなく開始'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.ceil(s % 3600 / 60); return '開始まで あと' + (d ? d + '日' : '') + (d || h ? h + '時間' : '') + (m === 60 ? '59分' : m + '分'); }
+setInterval(() => document.querySelectorAll('[data-cd]').forEach(e => { e.textContent = cdText(+e.dataset.cd); }), 30000);
+// ---- デイリートーナメント（毎日20:30・サーバーが朝6時に作る）とシーズン（毎月前半・後半） ----
+function dailyCardHTML(D) {
+  // 1日4部（17:30・18:30・19:30・20:30）。出られるのはどれか1部だけ。グループに分かれた部は、自分の入ったグループ（なければA）を代表に
+  const di = ON.dinfo, parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
+  const myPart = Object.keys(parts).find(k => parts[k].some(v => v.entered));
+  const rowOf = k => { const L = parts[k], v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0], d = new Date(v.startAt * 1000), hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+    const live = v.phase === 'prelim' || v.phase === 'final', n = L.reduce((a, x) => a + x.n, 0);
+    const st = v.phase === 'entry' ? `<b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small>` : live ? `<em class="on-st live">開催中</em>${L.length > 1 ? `<small>${L.length}グループ</small>` : ''}` : v.phase === 'cancel' ? '<small class="muted">中止（参加者なし）</small>' : '<small class="muted">終了</small>';
+    const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : myPart ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
+    return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}"><b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`; };
+  const rows = Object.keys(parts).sort().map(rowOf).join('') || '<p class="small muted" style="margin:0">きょうのデイリーは朝6時に受付が始まります</p>';
+  const me = di && di.me, sl = di ? `<div class="dl-season"><b>🗓 ${esc(di.label)}シーズン</b><span>${me ? `${esc(san(S.settings.name))}は <b>${me.rank}位</b>・<b>${me.pts}pt</b>（${me.n}回）` : 'まだポイントはありません'}</span><small class="muted">シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</small></div>` : '';
+  return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日4部（17:30・18:30・19:30・20:30）から1日1部だけ。15人・予選2セット×3ゲーム・上位5人で決勝・空きはAI</small></div></div>
+    <div class="dl-parts">${rows}</div>${myPart ? `<p class="small" style="margin:0">きょうは<b class="on-in">第${myPart}部</b>にエントリーしています（1日1部まで）</p>` : ''}
+    <div class="row"><button class="btn sm" data-act="daily-rank">📊 ランキング</button></div>
+    ${sl}<p class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</p></div>`;
+}
+async function dailyInfoLoad(force) {
+  if (!ON_ENABLED() || (!force && Date.now() - (ON.dinfoAt || 0) < 60000)) return; ON.dinfoAt = Date.now();
+  try { ON.dinfo = await onReq('daily_info', { pid: PID }); } catch (e) { return; }
+  const el = S.view === 'home' && $('.on-card .dl-card'); if (el) { el.outerHTML = dailyCardHTML((ON.tours || []).filter(v => v.daily)); document.querySelectorAll('.on-card .dl-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
+async function dailyRankOpen(tab) {
+  S.drTab = tab || S.drTab || 'season'; if (!ON.dinfo) { modal('<div class="stack"><p class="small muted">読み込んでいます…</p></div>'); await dailyInfoLoad(true); }
+  const di = ON.dinfo; if (!di) { modal('<div class="stack"><p>読み込めませんでした。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>'); return; }
+  const av = r => KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
+  const row = (r, unit) => `<button class="dr-row ${r.me ? 'me' : ''}" data-act="rank-card" data-rid="${esc(r.rid)}"><b class="dr-rk">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</b><span class="dr-av">${av(r)}</span><span class="dr-nm">${esc(r.name)}${r.me ? '<small class="pv-me">あなた</small>' : ''}</span><b class="dr-pt">${r.pts}<small>${unit}</small></b></button>`;
+  const tabs = [['season', `${di.label}シーズン`], ['total', '総ポイント'], ['past', '過去のシーズン']];
+  let body = '';
+  if (S.drTab === 'season') body = `<p class="small muted" style="margin:0">デイリーのポイント：予選は「16−グループ内の順位」（AIも順位に入る）、決勝に出たら決勝の順位で ${di.rule.fin.join('・')} を足す。シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</p>${di.stand.length ? di.stand.map(r => row(r, 'pt')).join('') : '<p class="small muted">まだだれもポイントを持っていません。今夜のデイリーに出てみよう！</p>'}`;
+  else if (S.drTab === 'total') body = `<p class="small muted" style="margin:0">総ポイント：シーズンの順位で 1位から ${di.rule.bonus.join('・')}、参加者の上位半分まで ${di.rule.half}。公式大会の入賞でも加算</p>${di.total.length ? di.total.map(r => row(r, 'pt')).join('') : '<p class="small muted">まだだれも総ポイントを持っていません（最初のシーズンが終わるとつきます）。</p>'}`;
+  else body = di.past.length ? di.past.map(p => `<div class="dr-past"><b>${esc(p.label)}シーズン</b><small class="muted">${p.n}人が参加</small>${p.stand.slice(0, 10).map((r, i) => row(Object.assign({}, r, { rank: i + 1 }), 'pt')).join('')}</div>`).join('') : '<p class="small muted">まだ終わったシーズンはありません。</p>';
+  modal(`<div class="stack dr-m"><h3 style="margin:0">📅 デイリートーナメント</h3><div class="su-seg">${tabs.map(([k, l]) => `<button class="${S.drTab === k ? 'on' : ''}" data-act="daily-rank" data-tab="${k}">${l}</button>`).join('')}</div>${body}
+    <p class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
 // 自分の上位3位をサーバーから読み、いまのプレイヤーのバッジに反映（公式と非公式は別のバッジ）
 async function onAwardsSync() {
   try { const j = await onReq('on_awards'); ON.myAwards = j.awards || [];
-    const mine = ON.myAwards.filter(a => a.pid === PID), best = off => Math.max(0, ...mine.filter(a => !!+a.official === off).map(a => 4 - a.place));
-    const b1 = best(false), b2 = best(true); if (b1) setMax('on_podium', b1); if (b2) setMax('off_podium', b2);
+    const mine = ON.myAwards.filter(a => a.pid === PID), best = kind => Math.max(0, ...mine.filter(a => (+a.official || 0) === kind).map(a => 4 - a.place)); // official：0 オンライン・1 公式・2 デイリー・3 シーズン
+    [['on_podium', 0], ['off_podium', 1], ['daily_podium', 2], ['season_podium', 3]].forEach(([k, kind]) => { const b = best(kind); if (b) setMax(k, b); });
+    if (j.daily) setMax('daily_play', j.daily);
   } catch (e) { }
 }
 async function onArchiveOpen() { go('oarch'); try { const j = await onReq('on_tours_archive'); ON.arch = j.tours; } catch (e) { ON.arch = []; toast('読み込めませんでした'); } if (S.view === 'oarch') render(); }
@@ -6102,7 +6149,7 @@ function oarchHTML() {
 }
 async function onToursLoad() {
   if (!ON_ENABLED() || ON.toursLoading) return; ON.toursLoading = true;
-  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
+  try { const j = await onReq('on_tours'); ON.tours = j.tours; ON.canOfficial = j.canOfficial; ON.uid = j.uid; onAwardsSync(); dailyInfoLoad(); } catch (e) { ON.tours = ON.tours || []; } finally { ON.toursLoading = false; }
   try { const mk = store.get('noteMark', {}) || {}, soon = mk.soon || {}, now = Date.now() / 1000; let ch = false; (ON.tours || []).forEach(t => { if (t.entered && t.phase === 'entry' && t.startAt - now < 1800 && t.startAt > now && !soon[t.id]) { soon[t.id] = 1; ch = true; noteAdd('soon', { tid: t.id, tname: t.name, at: t.startAt }); } }); if (ch) { mk.soon = soon; store.set('noteMark', mk); } } catch (e) { }
   const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }
@@ -6127,11 +6174,12 @@ function onTourNewModal() {
     <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
-    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>` : ''}
+    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>${c.official === true ? `<label class="su-row col"><b>入賞した人の総ポイント（1位から。AIは飛ばして数える）</b><input id="ot-tpts" class="su-in" value="${esc(c.tpts || '100,70,50,40,20')}"></label>` : ''}` : ''}
     <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（AIは数えません）。</p>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
   const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; };
   if (c.entry === 'invite') invInit(c);
+  { const tpi = $('#ot-tpts'); if (tpi) tpi.oninput = () => { c.tpts = tpi.value; }; }
   document.querySelectorAll('#modal [data-ot]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.ot, v = b.dataset.v; c[k] = v === 'true' ? true : v === 'false' ? false : isNaN(+v) ? v : +v; modalKeep(onTourNewModal); });
   document.querySelectorAll('#modal [data-otn]').forEach(b => b.onclick = () => { keep(); const k = b.dataset.otn; c[k] += +b.dataset.v; if (k === 'min' && c.max < c.min) c.max = c.min; if (k === 'max' && c.min > c.max) c.min = c.max; modalKeep(onTourNewModal); });
 }
@@ -6170,7 +6218,7 @@ async function onTourCreate() {
   if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
   if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
   try {
-    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, tpts: String(c.tpts || '100,70,50,40,20').split(/[,、\s]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x)), sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
     closeModal(); S.onTour = null; if (S.onTourEdit) toast('変更しました'); S.onTourEdit = null; onTourShow(j.tour);
   } catch (e) { toast(e.message || 'ひらけませんでした'); }
 }
@@ -6225,18 +6273,19 @@ function otourHTML() {
   const now = Date.now() / 1000, open = t.phase === 'entry' && now >= t.entryAt;
   const ph = { entry: open ? '受付中' : '受付前', prelim: `予選 第${t.set}/${t.sets}セット`, final: '決勝', done: '終了', cancel: '中止' }[t.phase];
   const av = e => KB.avatarSVG(Object.assign({}, e.avatar || AVATAR_DEF, { name: e.name }), { mood: 'happy' });
-  let body = '';
+  let body = t.daily ? '<p class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</p>' : '';
+  if (t.phase === 'entry') body += `<p class="on-cd big" data-cd="${t.startAt}">${cdText(t.startAt)}</p>`;
   if (t.phase === 'entry') {
-    body = `<div class="on-ent">${t.entrants.map(e => `<span class="on-e"><span class="on-av">${av(e)}</span>${esc(e.name)}</span>`).join('') || '<span class="small muted">まだエントリーした人はいません</span>'}</div>
+    body += `<div class="on-ent">${t.entrants.map(e => `<span class="on-e"><span class="on-av">${av(e)}</span>${esc(e.name)}</span>`).join('') || '<span class="small muted">まだエントリーした人はいません</span>'}</div>
       <div class="row" style="gap:8px;flex-wrap:wrap">${open ? (t.entered ? '<button class="btn" data-act="on-tour-cancel">エントリーを取り消す</button>' : t.invited ? `<button class="btn primary" data-act="on-tour-entry" ${t.n >= t.max ? 'disabled' : ''}>エントリーする</button>` : '<span class="small">招待された人だけが出られます</span>') : `<span class="small muted">エントリーは ${new Date(t.entryAt * 1000).getHours()}:${String(new Date(t.entryAt * 1000).getMinutes()).padStart(2, '0')} から（開始の15分前）</span>`}
       ${t.mine && open ? '<button class="btn" data-act="on-tour-startnow">今すぐ始める（主催者）</button>' : ''}${t.mine && !open ? '<button class="btn sm" data-act="on-tour-edit">✏️ 編集</button><button class="btn ghost sm" data-act="on-tour-delete">🗑 削除</button>' : t.mine ? '<button class="btn ghost sm" data-act="on-tour-delete">中止する</button>' : ''}</div>`;
   } else if (t.stand) {
     const isDone = t.phase === 'done';
     const W = t.wait, wLeft = W ? Math.max(0, Math.round(W.until - Date.now() / 1000)) : 0;
-    body = `${W ? `<div class="on-ready"><b>次は ${esc(W.label)}</b><span class="small">${W.need ? (W.ready ? `準備OK！ ほかの人を待っています（${W.nReady}/${W.n}人）` : 'そろったら始まります。準備ができたら押してください') : `出場する人の準備を待っています（${W.nReady}/${W.n}人）`}</span>${W.need && !W.ready ? '<button class="btn primary on-ready-btn" data-act="on-tour-ready">✋ 準備OK</button>' : ''}<span class="small muted" id="ot-wait" data-until="${W.until}">あと${Math.floor(wLeft / 60)}分${wLeft % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）</span></div>` : ''}${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.entered && !W && (t.phase === 'prelim' || t.phase === 'final') ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
+    body += `${W ? `<div class="on-ready"><b>次は ${esc(W.label)}</b><span class="small">${W.need ? (W.ready ? `準備OK！ ほかの人を待っています（${W.nReady}/${W.n}人）` : 'そろったら始まります。準備ができたら押してください') : `出場する人の準備を待っています（${W.nReady}/${W.n}人）`}</span>${W.need && !W.ready ? '<button class="btn primary on-ready-btn" data-act="on-tour-ready">✋ 準備OK</button>' : ''}<span class="small muted" id="ot-wait" data-until="${W.until}">あと${Math.floor(wLeft / 60)}分${wLeft % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）</span></div>` : ''}${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : t.entered && !W && (t.phase === 'prelim' || t.phase === 'final') ? '<p class="small muted" style="margin:0">ほかの卓が終わるのを待っています…</p>' : ''}
       ${onStandHTML(t)}
       ${(t.phase === 'prelim' || t.phase === 'final') && !t.wait && (t.rooms || []).length ? `<div class="on-rooms"><b class="small">👀 観戦する卓を選ぶ</b>${t.rooms.map(r => `<button class="on-room" data-act="on-watch" data-id="${r.id}" ${r.id === t.myRoom ? 'disabled' : ''}><b>${esc(r.label)}</b><span class="small muted">${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}・${(r.seats || r.names.map(x => ({ name: x }))).map(x => esc(onName(x))).join('・')}</span></button>`).join('')}</div>` : ''}`;
-  } else if (t.phase === 'cancel') body = `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
+  } else if (t.phase === 'cancel') body += `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
   if ((t.phase === 'done' || t.phase === 'cancel') && t.mine) body += '<div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="on-tour-remove">🗑 アーカイブから削除（主催者）</button></div>';
   return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
