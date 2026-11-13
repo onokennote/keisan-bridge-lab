@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="65a9126 2026-11-14 05:50"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_BUILD="5b9f85c6e241"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="51617ce 2026-11-14 06:02"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_BUILD="2431824d1ebd"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1635,6 +1635,8 @@ body.spectate .me .hand .card{cursor:default}
 /* ランキング・クラウド */
 .rk-tabs{display:flex;gap:6px;flex-wrap:wrap}
 .rk-list{display:flex;flex-direction:column;gap:4px}
+.rk-tabs{margin:2px 0 0}.rk-tabs button{font-size:12.5px;padding:7px 4px}
+.rk-more{align-self:center;margin-top:4px}
 .rk-row{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22)}
 .rk-row.me{outline:2px solid #f2b632;background:rgba(242,182,50,.12)}
 .rk-n{font-family:var(--f-display);color:#ffd43b;text-align:center}
@@ -2396,7 +2398,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='25758aeb4e';
+window.KB_BUILD='9eb0616fec';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7576,12 +7578,12 @@ function rankingHTML() {
   const val = (k, x) => k === 'season' ? `${x.pts}pt<small>${x.n}回</small>` : k === 'tpoints' ? `${x.pts}pt` : k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
   const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? (rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip mu" title="宿敵（お互いにライバル視）">⇄</em>' : '<em class="rv-chip" title="ライバル視している">→</em>') : (x.rid && rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip in" title="ライバル視されている">←</em>' : '')}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
-    <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.filter(rankMe).length ? '<div class="rk-gap">…</div>' + d.mine.filter(rankMe).map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
+    ${R && d ? rkTabs(k) : ''}<div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : rkRows(k, d.list.concat(d.mine.filter(rankMe)), x => rowH(k, x), d.total)}</div></section>`; };
   const withAi = rankWithAi();
   // デイリートーナメント：今のシーズンと総ポイント（人だけ。AI研究員はポイントを持たない）
   const di = ON.dinfo, dsec = (id, title, note, L0, extra) => { const L = L0 && (withAi ? L0 : L0.filter(x => !x.ai).map((x, i) => Object.assign({}, x, { rank: i + 1 }))), top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
     return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
-    <div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : (top.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') + (mine.length ? '<div class="rk-gap">…</div>' + mine.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
+    ${di && L ? rkTabs(id) : ''}<div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : rkRows(id, L || [], x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x), (L || []).length) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
   // ここから下は「大会ポイント」（デイリー・シーズン・公式大会）。上の部門とは別に集計する
   const dailyS = `<h2 class="rk-group-h" id="rk-cup">🏆 大会ポイント<small>デイリートーナメント・シーズン・公式大会（上のランキングとは別に集計）</small></h2>` + dsec('rk-tpoints', '総ポイント', `シーズンが終わるたびに、シーズンの順位でもらえるポイントの合計です。1位100pt・2位70pt・3位50pt・4位40pt・5位20pt、6位から下は参加者の上位半分まで10pt。公式大会で入賞してももらえます。`, di && di.total)
     + dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントの成績でたまるポイントです。予選はグループ（15人）の中の順位で、1位15pt・2位14pt…15位1pt。決勝に進むと、決勝の順位でさらに1位60pt・2位40pt・3位30pt・4位20pt・5位10pt。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`);
@@ -7589,8 +7591,20 @@ function rankingHTML() {
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
   <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
-    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは上位20人まで。20位より下のときは、自分の順位を下に出します。</p></div>`;
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」（はじめ10人。「もっと見る」で続き）・「自分のまわり」（上下5人ずつ）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
 }
+// ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位（はじめ10人・もっと見るで+20人）／自分のまわり（上下5人）／ライバル
+const RK_MODES = [['top', '🏆 上位'], ['near', '📍 自分のまわり'], ['rival', '⚔ ライバル']];
+function rkTabs(k) { const m = (S.rkMode || {})[k] || 'top'; return `<div class="su-seg rk-tabs">${RK_MODES.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" data-act="rk-mode" data-k="${k}" data-v="${v}">${l}</button>`).join('')}</div>`; }
+function rkRows(k, L, rowF, total) {
+  const m = (S.rkMode || {})[k] || 'top', gap = '<div class="rk-gap">…</div>', mi = L.findIndex(rankMe), empty = t => `<p class="small muted">${t}</p>`;
+  if (!L.length) return '';
+  if (m === 'near') { if (mi < 0) return empty('まだこのランキングに載っていません。'); const a = Math.max(0, mi - 5), z = Math.min(L.length, mi + 6); return L.slice(a, z).map(rowF).join('') + (z >= L.length && total > L.length ? gap : ''); }
+  if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? R.map(rowF).join('') : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
+  const n = (S.rkMore || {})[k] || 10, top = L.slice(0, n), more = L.length > n || total > L.length;
+  return top.map(rowF).join('') + (mi >= n ? gap + rowF(L[mi]) : '') + (more ? `<button class="btn sm ghost rk-more" data-act="rk-more" data-k="${k}">もっと見る（${Math.min(L.length, total) > n ? `あと${Math.min(L.length, total) - n}人` : '続き'}）</button>` : '');
+}
+function rkRepaint() { if (S.view !== 'ranking') return; const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); rankingLoad(); scrollTo(0, y); }
 const rankWithAi = () => raw.get('kb.rankAI', true) !== false; // 見る人ごとの設定（はじめはON）
 async function rankingLoad() {
   const c = (PID && plLink(PID)) || raw.get('kb.cloud', null);
@@ -7600,7 +7614,7 @@ async function rankingLoad() {
   if (S.rank && !S.rank.home && S.rank.ai === rankWithAi() && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
   try {
     await cloudPush();
-    const u = encodeURIComponent((c && c.uid) || ''), j = await (await fetch(CLOUD_API + '?a=rankings&uid=' + u + (rankWithAi() ? '' : '&ai=0'))).json();
+    const u = encodeURIComponent((c && c.uid) || ''), j = await (await fetch(CLOUD_API + '?a=rankings&all=1&uid=' + u + (rankWithAi() ? '' : '&ai=0'))).json();
     let R = j.rankings;
     if (!R) { // サーバーが古いとき：これまでのランキングを1つずつ読む（BPは出せない）
       R = {}; for (const k of ['rating', 'badges', 'attack']) { const x = await (await fetch(CLOUD_API + '?a=ranking&type=' + k + '&uid=' + u)).json(); if (x.ok) R[k] = { list: x.list.slice(0, 20), mine: x.list.slice(20).filter(y => y.me), total: x.total }; }
@@ -11861,6 +11875,8 @@ function act(a, el) {
     case 'av-save': { store.set('avatar', S.avDraft); if (S.T) { const h = S.T.players.find(p => p.human); if (h) Object.assign(h.ch, S.avDraft); } S.avDraft = null; closeModal(); toast('アバターを保存しました'); render(); break; }
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
+    case 'rk-mode': { S.rkMode = Object.assign({}, S.rkMode, { [el.dataset.k]: el.dataset.v }); rkRepaint(); break; }
+    case 'rk-more': { S.rkMore = Object.assign({}, S.rkMore, { [el.dataset.k]: ((S.rkMore || {})[el.dataset.k] || 10) + 20 }); rkRepaint(); break; }
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
