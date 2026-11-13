@@ -10,7 +10,7 @@ if [ -z "$KB_SKIP_JUDGE" ]; then
   (cd test && node judge.js quick) || { echo '判定チェックで失敗したので、本番には出しませんでした（test/out/judge_fail.json）'; exit 1; }
 fi
 # Googleでまもる：GoogleのOAuthクライアントID（公開してよい値。空ならボタンを出さない）。サーバー側は api.php の GOOGLE_CLIENT_ID
-GCID=${KB_GOOGLE_CLIENT_ID:-}
+GCID=${KB_GOOGLE_CLIENT_ID:-769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com}
 KB_CLOUD_API="$API" KB_GOOGLE_CLIENT_ID="$GCID" ./deploy.sh
 SRC=$(git rev-parse --short HEAD)
 WT=$(mktemp -d)

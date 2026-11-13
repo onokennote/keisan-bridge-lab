@@ -81,15 +81,16 @@ function noteInvites(array $t, array $names): void {
 }
 // Googleでまもる：ログインで受け取ったIDトークンをGoogleに確かめ、アカウントの番号（sub）をハッシュにして返す（メールアドレスなどは使わない・保存しない）
 // クライアントID は config.php の google_client_id（なければ GOOGLE_CLIENT_ID）。テストの設定では「test:番号」をそのまま通す
-const GOOGLE_CLIENT_ID = '';
+const GOOGLE_CLIENT_ID = '769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com';
 function gClientId(): string { global $CFG; return (string)($CFG['google_client_id'] ?? GOOGLE_CLIENT_ID); }
 function gVerify(string $idt): string {
   global $CFG;
   if (!empty($CFG['test']) && preg_match('/^test:([a-z0-9]{1,40})$/', $idt, $m)) return h('g:' . $m[1]);
   $cid = gClientId(); if ($cid === '') fail('Googleのログインはまだ準備中です', 503);
   if (strlen($idt) < 100 || strlen($idt) > 4096) fail('Googleのログインを確かめられませんでした', 401);
-  $ctx = stream_context_create(['http' => ['timeout' => 8, 'ignore_errors' => true]]);
-  $r = @file_get_contents('https://oauth2.googleapis.com/tokeninfo?id_token=' . rawurlencode($idt), false, $ctx);
+  $url = 'https://oauth2.googleapis.com/tokeninfo?id_token=' . rawurlencode($idt); $r = false;
+  if (function_exists('curl_init')) { $ch = curl_init($url); curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 8]); $r = curl_exec($ch); curl_close($ch); } // サーバーによっては URL を開く file_get_contents が使えないので、先に curl
+  if ($r === false) { $ctx = stream_context_create(['http' => ['timeout' => 8, 'ignore_errors' => true]]); $r = @file_get_contents($url, false, $ctx); }
   $j = $r ? json_decode($r, true) : null;
   if (!is_array($j) || ($j['aud'] ?? '') !== $cid || !in_array($j['iss'] ?? '', ['accounts.google.com', 'https://accounts.google.com'], true) || (int)($j['exp'] ?? 0) < time() || empty($j['sub'])) fail('Googleのログインを確かめられませんでした', 401);
   return h('g:' . $j['sub']);

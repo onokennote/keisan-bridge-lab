@@ -30,7 +30,7 @@ jobs:
         run: |
           php -l server/api.php
           ./build.sh
-          KB_CLOUD_API="https://$H/kb/stg/api.php" KB_STAGING=1 ./deploy.sh
+          KB_CLOUD_API="https://$H/kb/stg/api.php" KB_STAGING=1 KB_GOOGLE_CLIENT_ID=769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com ./deploy.sh
           # 検索に出さない・どの版か分かる印を入れる
           STAMP="$(git rev-parse --short HEAD) $(TZ=Asia/Tokyo date '+%Y-%m-%d %H:%M')"
           sed -i "s|<head>|<head><meta name=\"robots\" content=\"noindex,nofollow\"><meta name=\"kb-version\" content=\"staging $STAMP\">|" dist/index.html
