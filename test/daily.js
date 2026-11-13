@@ -45,7 +45,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
     return p;
   };
   const pa = await open('ケン'), pb = await open('ユイ');
-  ok(await pa.evaluate(() => { const c = document.querySelector('.dl-card'); return c && /デイリートーナメント/.test(c.innerText) && /開始まで あと/.test(c.innerText) && /テスト中/.test(c.innerText); }), 'ホームにデイリーのカード（開始までの残り時間・テスト中の注意）');
+  ok(await pa.evaluate(() => { const c = document.querySelector('.dl-card'); return c && /デイリートーナメント/.test(c.innerText) && /開始まで あと/.test(c.innerText); }), 'ホームにデイリーのカード（開始までの残り時間）');
   await pa.evaluate(() => document.querySelector('.dl-card').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_card.png') });
   for (const p of [pa, pb]) { await p.evaluate(id => document.querySelector(`.dl-card [data-id="${id}"]`).click(), j.id); await p.waitForTimeout(1000); await p.click('[data-act="on-tour-entry"]'); await p.waitForTimeout(800); }
   ok(await pa.evaluate(() => KBAPP.ON.t && KBAPP.ON.t.entered && KBAPP.ON.t.daily), 'デイリーにエントリーできる（作られたときから受付）');

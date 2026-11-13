@@ -2379,3 +2379,14 @@ body.rewinding #home-fab{display:none}
 
 .rk-group-h{margin:18px 2px 0;font-size:20px;display:flex;flex-direction:column;gap:2px;color:#ffd666}.rk-group-h small{font-size:12px;color:var(--muted);font-weight:500}
 .rk-hide-p{margin-top:16px}
+
+/* オンライン大会：いつの成績か・対局中の印・ほかの卓の終了待ち */
+.on-cap{margin:4px 0 6px;font-size:12px;color:var(--muted);padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.05);border-left:3px solid #ffd666}
+.on-live{font-style:normal;margin-left:6px;padding:0 6px;border-radius:6px;font-size:10px;font-weight:800;background:rgba(255,100,100,.15);color:#ff8787;border:1px solid rgba(255,120,120,.5)}
+.on-waitall{display:flex;flex-direction:column;gap:3px;padding:12px;border-radius:12px;background:linear-gradient(135deg,rgba(255,214,102,.18),rgba(255,140,60,.12));border:1px solid rgba(255,214,102,.7);animation:onWaitPulse 2s ease-in-out infinite}
+.on-waitall b{font-size:16px;color:#ffd666}.on-waitall span{font-size:13px}
+@keyframes onWaitPulse{0%,100%{box-shadow:0 0 0 rgba(255,214,102,0)}50%{box-shadow:0 0 14px rgba(255,214,102,.45)}}
+.on-stand-m{max-height:80vh;overflow:auto}
+
+.on-rres{display:flex;flex-direction:column;gap:2px;width:100%;font-size:12px}.on-rres small{color:#8ce99a;font-weight:800}
+.on-rres span{display:grid;grid-template-columns:2.6em 1fr auto;gap:6px;align-items:center}.on-rres i{font-style:normal;color:var(--muted)}

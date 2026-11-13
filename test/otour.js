@@ -54,6 +54,10 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pb.waitForTimeout(3500);
   ok(await pb.evaluate(() => KBAPP.S.view === 'online' && KBAPP.ON.v && KBAPP.ON.v.tour), 'ほかの参加者も自動で自分の卓に入る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_room.png') });
+  await pa.evaluate(() => KBAPP.act('on-stand-view')); await pa.waitForTimeout(1200);
+  ok(await pa.evaluate(() => { const m = document.querySelector('#modal'); return m && /まだ成績はありません|セットまでの成績/.test(m.innerText) && !!m.querySelector('.on-stand'); }), '対局中に「📋 順位」で順位（いつの成績か）を見られる');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_stand_view.png') });
+  await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // C（出ていない人）：大会の画面から卓を選んで観戦（手札は届かない・席を押すと手元が替わる）
   await pc.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pc.waitForTimeout(1200);
   await pc.evaluate(() => [...document.querySelectorAll('.on-trow')].find(b => /テスト杯/.test(b.innerText)).click()); await pc.waitForTimeout(1200);
@@ -72,15 +76,17 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const step = p => p.evaluate(() => { const S = KBAPP.S, v = KBAPP.ON.v; document.querySelectorAll('.whistle-ov').forEach(e => e.click()); if (S.view === 'otour') { const rb = document.querySelector('[data-act="on-tour-ready"]'); if (rb) { rb.click(); return 'ready'; } return 'tour:' + (KBAPP.ON.t && KBAPP.ON.t.phase); } if (S.view !== 'online' || !v || !v.game || v.phase !== 'play' || v.game.cur !== v.me || v.seats[v.me].sub) return 'wait';
     const h = v.game.hand.map(c => c[0]), ms = KB.findMoves(KB.countsOf(h), v.game.field[0], 'all', 3);
     if (ms.length) { KBAPP.ON.sel = []; const used = new Set(); for (const x of ms[0].vals) { const i = h.findIndex((y, k) => y === x && !used.has(k)); used.add(i); KBAPP.ON.sel.push(i); } KBAPP.act('on-play'); } else KBAPP.act('on-draw'); return 'acted'; });
-  let sawFinal = false, done = false, sawReady = false, t0 = Date.now();
+  let sawFinal = false, done = false, sawReady = false, sawWaitAll = false, sawLive = false, sawRres = false, t0 = Date.now();
   while (Date.now() - t0 < 300000) {
     const [sa, sb] = [await step(pa), await step(pb)]; if (sa === 'ready' || sb === 'ready') { if (!sawReady) await (sa === 'ready' ? pa : pb).screenshot({ path: path.join(__dirname, 'out', 'ot_ready.png') }); sawReady = true; }
     const ph = await pa.evaluate(() => KBAPP.ON.t && KBAPP.ON.t.phase);
     if (ph === 'final' || (await pa.evaluate(() => KBAPP.ON.v && /決勝/.test(KBAPP.ON.v.label || '')))) sawFinal = true;
+    for (const p of [pa, pb]) { const w = await p.evaluate(() => ({ wa: !!document.querySelector('.on-waitall'), lv: !!document.querySelector('.on-live'), rr: !!document.querySelector('.on-rres') })); if (w.rr) sawRres = true; if (w.wa && !sawWaitAll) { sawWaitAll = true; await p.screenshot({ path: path.join(__dirname, 'out', 'ot_waitall.png'), fullPage: true }); } if (w.lv) sawLive = true; }
     if (sa === 'tour:done' || sb === 'tour:done') { done = true; break; }
     await wait(400);
   }
   ok(sawReady, 'セットの合間は「準備OK」を押してそろってから次のセット');
+  console.log('（ほかの卓の終了待ちの表示：' + (sawWaitAll ? 'あり' : 'この回は出ず') + '・対局中の印：' + (sawLive ? 'あり' : 'この回は出ず') + '・終わった卓の結果：' + (sawRres ? 'あり' : 'この回は出ず') + '）');
   ok(sawFinal, '予選のあと、上位3人で決勝');
   ok(done, '大会が最後まで進み、結果が出る');
   await pa.waitForTimeout(800); await pb.waitForTimeout(800);
