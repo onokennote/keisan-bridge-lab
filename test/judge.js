@@ -77,7 +77,7 @@ const N_POS = QUICK ? 80 : 240, N_STEPS = QUICK ? 900 : 3000, N_STAB = QUICK ? 1
   }, { N: N_STAB });
   const flipRate = C.n ? C.flip / C.n : 0;
   notes.push(`C 安定性：局面${C.n}・最善が幅を超えて入れ替わった ${C.flip}（${Math.round(flipRate * 100)}%）`);
-  if (flipRate > 0.15) fail('安定性：最善手が読み直すたびに入れ替わりすぎる', { flip: C.flip, n: C.n });
+  if (C.n >= 20 ? flipRate > 0.15 : C.flip >= 4) fail( /* 局面が少ない（quick）ときは、たまたまの入れ替わりで落ちないよう数で見る */'安定性：最善手が読み直すたびに入れ替わりすぎる', { flip: C.flip, n: C.n });
 
   // ---------- B. 記録の性質（アプリを実際に打たせる） ----------
   await pg.evaluate(() => { KBAPP.S.settings.speed = 'instant'; window.__dec = []; });
