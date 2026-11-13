@@ -3760,7 +3760,8 @@ function renderPrev() {
 }
 
 // ---------- AIの読み ----------
-function stateKey(g) { return g.round + ':' + g.pos + ':' + g.hands.map(h => h.length).join(','); }
+// 「AIの読み」を使い回してよい局面かの目印。ゲーム番号・場札・手番の人の手札の中身まで入れる（枚数だけだと、別のゲームの同じ枚数の場面の読みを取り違える）
+function stateKey(g) { const me = g.current(); return (S.gameNo || 0) + ':' + g.round + ':' + g.pos + ':' + (g.field ? g.field.v : '') + ':' + g.hands.map(h => h.length).join(',') + ':' + (me >= 0 ? g.hands[me].map(c => c.v).sort((a, b) => a - b).join('.') : ''); }
 function computeHint(force) {
   if (S.attack) return;
   const g = S.game; const me = g.current(); if (me < 0 || !g.players[me].human) return;
@@ -5921,7 +5922,7 @@ function deepHint() {
   const g = S.game; const me = g.current(); const H = S.hint; if (!H || !H.ev) return;
   H.busy = true; renderHint();
   setTimeout(() => {
-    const cands = H.ev.slice(0, 5).map(e => e.m).filter(Boolean);
+    const cands = H.ev.slice(0, 5).map(e => e.m); // 「あえて引く」（null）も外さずに深く読む
     const ev = KB.evaluate(H.view, cands.length ? cands : [null], 12000, H.ctx);
     rankEv(ev, H.ctx);
     const rest = H.ev.slice(5);
