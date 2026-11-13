@@ -1656,8 +1656,10 @@ function rkRows(k, L, rowF, total) {
   if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? box(R) : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
   return box(L) + (mi >= 10 ? gap + rowF(L[mi]) : '') + (total > L.length ? `<p class="small muted" style="margin:0;text-align:center">上位${L.length}人まで表示しています</p>` : '');
 }
-// ランキングの枠を10人分の高さにして、「自分のまわり」は自分が真ん中に来るようにスクロール
-function rkFit() { document.querySelectorAll('.rk-scroll').forEach(bx => { const rows = bx.querySelectorAll('.rk-row'); bx.style.maxHeight = rows.length > 10 ? (rows[10].getBoundingClientRect().top - rows[0].getBoundingClientRect().top - 4) + 'px' : ''; if (bx.dataset.center) { const me = bx.querySelector('.rk-row.me'); if (me) bx.scrollTop += me.getBoundingClientRect().top - bx.getBoundingClientRect().top - (bx.clientHeight - me.offsetHeight) / 2; } }); }
+// ランキングの枠を10人分の高さにして、「自分のまわり」は自分が真ん中に来るようにスクロール。枠の端まで来たら画面全体がそのままスクロールする（overscroll を止めない）
+function rkFit() { document.querySelectorAll('.rk-scroll').forEach(bx => { const rows = bx.querySelectorAll('.rk-row'); bx.style.maxHeight = rows.length > 10 ? (rows[10].getBoundingClientRect().top - rows[0].getBoundingClientRect().top - 4) + 'px' : ''; if (bx.dataset.center) { const me = bx.querySelector('.rk-row.me'); if (me) bx.scrollTop += me.getBoundingClientRect().top - bx.getBoundingClientRect().top - (bx.clientHeight - me.offsetHeight) / 2; }
+    const fade = () => { bx.classList.toggle('ft', bx.scrollTop > 2); bx.classList.toggle('fb', bx.scrollTop + bx.clientHeight < bx.scrollHeight - 2); }; fade(); bx.onscroll = fade; // 続きがある側をうすくぼかす
+    const h = bx.nextElementSibling; if (bx.scrollHeight > bx.clientHeight + 2 && !(h && h.classList.contains('rk-scroll-hint'))) bx.insertAdjacentHTML('afterend', '<p class="rk-scroll-hint">↕ 枠の中をスクロールすると、ほかの順位も見られます</p>'); }); }
 function rkRepaint() { if (S.view !== 'ranking') return; const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); rkFit(); rankingLoad(); scrollTo(0, y); }
 const rankWithAi = () => raw.get('kb.rankAI', true) !== false; // 見る人ごとの設定（はじめはON）
 async function rankingLoad() {

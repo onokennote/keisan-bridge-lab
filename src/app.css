@@ -1633,7 +1633,9 @@ body.spectate .me .hand .card{cursor:default}
 .rk-tabs{display:flex;gap:6px;flex-wrap:wrap}
 .rk-list{display:flex;flex-direction:column;gap:4px}
 .rk-tabs{margin:2px 0 0}.rk-tabs button{font-size:12.5px;padding:7px 4px}
-.rk-scroll{display:flex;flex-direction:column;gap:4px;overflow-y:auto;overscroll-behavior:contain;border-radius:12px}
+.rk-scroll{display:flex;flex-direction:column;gap:4px;overflow-y:auto;border-radius:12px;--ft:0px;--fb:0px;-webkit-mask-image:linear-gradient(transparent,#000 var(--ft),#000 calc(100% - var(--fb)),transparent);mask-image:linear-gradient(transparent,#000 var(--ft),#000 calc(100% - var(--fb)),transparent)}
+.rk-scroll.ft{--ft:28px}.rk-scroll.fb{--fb:28px}
+.rk-scroll-hint{text-align:center;font-size:11.5px;color:#a9a28c;margin:-2px 0 0}
 .rk-row{display:grid;grid-template-columns:30px 34px 1fr auto;align-items:center;gap:8px;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22)}
 .rk-row.me{outline:2px solid #f2b632;background:rgba(242,182,50,.12)}
 .rk-n{font-family:var(--f-display);color:#ffd43b;text-align:center}
