@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="fd29037 2026-11-13 08:45"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="654bb50 2026-11-13 12:10"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -1999,7 +1999,7 @@ body.rewinding #home-fab{display:none}
 .pv-bh span b{color:var(--accent);font-size:18px}
 .pv-emb{display:flex;justify-content:space-between;gap:2px}
 .pv-emb span{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--muted)}
-.pv-badges{display:flex;flex-wrap:wrap;gap:3px;max-height:150px;overflow:auto;padding:6px;border-radius:10px;background:rgba(0,0,0,.25)}
+.pv-badges{display:flex;flex-wrap:wrap;gap:3px;padding:6px;border-radius:10px;background:rgba(0,0,0,.25)}
 .pv-badges svg{width:26px;height:26px}
 .rk-row[data-act]{cursor:pointer}.rk-row[data-act]:active{filter:brightness(1.15)}
 /* テスト版の帯 */
@@ -2206,7 +2206,6 @@ body.rewinding #home-fab{display:none}
 .rvc{white-space:nowrap}.pb-rv .pv-rvc{gap:4px}.pb-rv .rvc{font-size:11px;padding:1px 7px}.pb-rv .rvc b{font-size:12px}
 .rvc.mu{border-color:rgba(240,190,60,.6)}
 .rv-nm{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.rv-li .rv-nm{flex:1}.rv-mu{font-style:normal;font-weight:900;color:#f0be3c;margin-right:8px;flex:none}
 .rv-mu{font-style:normal;font-size:11px;background:rgba(240,190,60,.2);color:var(--trim);border-radius:999px;padding:1px 7px}
 /* 通知 */
 .pb-bell{position:relative}
@@ -2242,10 +2241,101 @@ body.rewinding #home-fab{display:none}
 .rvc small{margin-left:3px;font-size:10px;color:var(--muted)}
 .rv-chip.mu{background:#d4a017;color:#2a1c05}.rv-chip.in{background:#555;color:#fff}
 .rvc b{margin:0 0 0 4px}
+/* 式ハンターの弾：手元で大きく光り、小さくなりながら標的へ（遠近感）。残像と発射の光つき。命中以降の演出はそのぶん遅らせる */
+.hunt-cap{animation-duration:2s}
+.hc-bullet{width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#fff 0,#fff6c9 30%,#ffc94a 55%,rgba(255,140,40,.0) 72%);box-shadow:0 0 18px 6px rgba(255,200,80,.75);animation:hcBullet3d .5s cubic-bezier(.25,0,.85,.55) both}
+.hc-bullet.tr1{animation-delay:.04s;opacity:.55;filter:blur(1px)}
+.hc-bullet.tr2{animation-delay:.08s;opacity:.35;filter:blur(2px)}
+.hc-bullet.tr3{animation-delay:.12s;opacity:.2;filter:blur(3px)}
+.hc-muzzle{position:absolute;left:-36px;top:-36px;width:72px;height:72px;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffe08a 30%,rgba(255,150,40,0) 70%);transform:translate(var(--bx),var(--by));animation:hcMuzzle .25s ease-out both}
+@keyframes hcBullet3d{0%{opacity:1;transform:translate(var(--bx),var(--by)) scale(2.8)}80%{opacity:1}100%{opacity:0;transform:translate(0,0) scale(.4)}}
+@keyframes hcMuzzle{0%{opacity:1;transform:translate(var(--bx),var(--by)) scale(.4)}100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(1.6)}}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .5s both,hcFly .45s 1.45s cubic-bezier(.6,0,.8,.4) both}
+.hc-hit{animation:hcHit .45s .48s ease-out both}
+.hc-ring{animation:hcRing .45s .5s ease-out both}
+.hc-stamp{animation:hcStamp .35s .58s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.4s both}
+.hc-n{animation:ciTxt .3s .7s both,hcOut .3s 1.4s both}
+/* 弾：手元で0.15秒ほど溜めて光が大きくなり、そこから一気に加速して標的へ（全体0.4秒） */
+.hc-bullet{animation:hcBulletCharge .4s linear both}
+.hc-bullet.tr1{animation-delay:.03s}.hc-bullet.tr2{animation-delay:.06s}.hc-bullet.tr3{animation-delay:.09s}
+@keyframes hcBulletCharge{
+  0%{opacity:.6;transform:translate(var(--bx),var(--by)) scale(1)}
+  38%{opacity:1;transform:translate(var(--bx),var(--by)) scale(3.2);animation-timing-function:cubic-bezier(.8,0,1,.7)}
+  92%{opacity:1}
+  100%{opacity:0;transform:translate(0,0) scale(.4)}}
+.hc-muzzle{animation:hcMuzzle .25s .13s ease-out both}
+.hc-hit{animation:hcHit .45s .38s ease-out both}
+.hc-ring{animation:hcRing .45s .4s ease-out both}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .4s both,hcFly .45s 1.35s cubic-bezier(.6,0,.8,.4) both}
+.hc-stamp{animation:hcStamp .35s .48s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.3s both}
+.hc-n{animation:ciTxt .3s .6s both,hcOut .3s 1.3s both}
+/* 弾：0.2秒溜めて、0.14秒で一気に（飛ぶ間は進む向きに細長く伸ばして速さを見せる） */
+.hc-bullet{animation:hcBulletDash .34s linear both}
+@keyframes hcBulletDash{
+  0%{opacity:.6;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(1)}
+  58%{opacity:1;transform:translate(var(--bx),var(--by)) rotate(var(--ang)) scale(3.2);animation-timing-function:cubic-bezier(.9,0,1,.6)}
+  70%{transform:translate(calc(var(--bx) * .75),calc(var(--by) * .75)) rotate(var(--ang)) scale(3.6,1.1)}
+  96%{opacity:1}
+  100%{opacity:0;transform:translate(0,0) rotate(var(--ang)) scale(1.4,.4)}}
+.hc-muzzle{animation:hcMuzzle .25s .19s ease-out both}
+.hc-hit{animation:hcHit .45s .33s ease-out both}
+.hc-ring{animation:hcRing .45s .34s ease-out both}
+.hc-ex{animation:hcExIn .18s ease-out both,hcHitShake .3s .34s both,hcFly .45s 1.3s cubic-bezier(.6,0,.8,.4) both}
+.hc-stamp{animation:hcStamp .35s .42s cubic-bezier(.2,1.8,.4,1) both,hcOut .3s 1.25s both}
+.hc-n{animation:ciTxt .3s .55s both,hcOut .3s 1.25s both}
+/* ホームのプロフィール欄（作り直し）：上＝アイコン・名前・推定実力（星を大きく）、中＝順位とライバル視、下＝ボタン2×2 */
+.player-bar.pb2{display:flex;flex-wrap:wrap;gap:10px}
+.pb2 .pb-top{flex-basis:100%;display:flex;align-items:center;gap:14px}
+.pb2 .pb-avatar svg{width:84px;height:84px}
+.pb2 .pb-main{gap:2px}
+.pb2 .pb-nm{font-size:26px;line-height:1.15}
+.pb-rate{display:inline-flex;align-items:baseline;gap:6px;flex-wrap:wrap;align-self:flex-start;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left}
+.pb-stars{font-size:22px;letter-spacing:1px;color:#ffc93c;text-shadow:0 0 10px rgba(255,201,60,.55)}
+.pb-stars .half{opacity:.55}
+.pb-rate b{font-size:24px;font-weight:900;color:#ffc93c}
+.pb-rate small{font-size:12px;color:var(--accent);font-weight:800}
+.pb2 .pb-sub{font-size:12px}
+.pb-meta{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:space-between}
+.pb-meta .pb-rank{margin:0}
+.pb-meta .pv-rvc{margin:0}
+.pb-btns2{flex-basis:100%;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.pb-btns2 .btn{width:100%;padding:8px 6px;font-size:13px}
+.pb-btns2 .pb-grow{background:linear-gradient(180deg,#ffd76a,#e8a92a);color:#2a1c05;border-color:#e8a92a;font-weight:900}
+
+/* 成長記録のバッジ：カテゴリーごとに開く */
+.bdg-gh[data-bgt]{cursor:pointer;user-select:none}
+.bdg-group:not(.open) > .bdg-grid{display:none}
+.bdg-chev{font-style:normal;color:var(--muted,#8a8f98);transition:transform .15s;margin-left:4px}
+.bdg-group.open .bdg-chev{transform:rotate(90deg)}
+.bdg-all{align-self:flex-end}
+.bdg-gauge{position:relative;flex:0 0 auto;width:92px;height:24px;border-radius:99px;background:rgba(255,255,255,.08);border:1px solid rgba(255,214,102,.35);overflow:hidden;display:flex;align-items:center;justify-content:center}
+.bdg-gauge i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#b8862e,#ffd666);border-radius:99px 0 0 99px;opacity:.75}
+.bdg-gauge b{position:relative;font-size:13px;font-weight:900;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.7);letter-spacing:.02em}
+.bdg-gauge b small{font-size:11px;color:#fff;opacity:.85;font-weight:700}
+.complete-tag{flex:0 0 auto;min-width:92px;text-align:center;box-sizing:border-box}
+
+/* プロフィールのバッジ・冠の説明 */
+.pv-eb,.pv-bb{background:none;border:0;padding:0;margin:0;cursor:pointer;color:inherit;font:inherit;border-radius:8px;transition:transform .12s}
+.pv-eb{display:flex;flex-direction:column;align-items:center}
+.pv-eb.sel,.pv-bb.sel{transform:scale(1.18);filter:drop-shadow(0 0 6px rgba(255,214,102,.9))}
+.pv-info{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:rgba(255,214,102,.08);border:1px solid rgba(255,214,102,.4);margin:6px 0}
+.pv-info[hidden]{display:none}
+.pv-info svg{flex:0 0 auto;width:44px;height:44px}
+.pv-info b{display:block;font-size:15px}
+.pv-info small{display:block;color:var(--muted,#8a8f98);font-size:12px}
+.pv-info p{margin:4px 0 0;font-size:13px;line-height:1.5}
+.pv-info em{display:inline-block;margin-top:6px;font-style:normal;font-size:12px;color:var(--muted,#8a8f98)}
+.pv-info em.ok{color:#8ce99a}
+.pv-eb small{font-size:10px;color:var(--muted)}
+.pv-bb{display:inline-flex}
+
+/* 大会の順位：名前を押すとプロフィール */
+.on-pn{background:none;border:0;padding:0;margin:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-color:rgba(255,255,255,.25);text-underline-offset:3px}
+.on-sr .ai-chip{margin-left:6px}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='3f072c1b67';
+window.KB_BUILD='e19e0ed00b';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -3271,6 +3361,16 @@ KB.creatureSVG = function (ch, mood) {
     case 'tanuki': return body('#8a6a48') + `<circle cx="30" cy="32" r="8" fill="#6b4e33"/><circle cx="70" cy="32" r="8" fill="#6b4e33"/>` + head(c || '#a07850') + `<ellipse cx="40" cy="51" rx="9" ry="7" fill="#4a3424"/><ellipse cx="60" cy="51" rx="9" ry="7" fill="#4a3424"/><ellipse cx="50" cy="63" rx="10" ry="7" fill="#efe1c8"/><circle cx="50" cy="59" r="3" fill="${INK}"/><path d="M47 22q3 -6 8 -2q-2 4 -8 2Z" fill="#40c057"/>` + f(51, 66, 10, true);
     case 'fox': return body('#e8873a') + `<path d="M26 44L28 14L46 32Z M74 44L72 14L54 32Z" fill="${c || '#f08c3a'}"/><path d="M30 38L31 22L40 32Z M70 38L69 22L60 32Z" fill="#fff3e0"/>` + head(c || '#f08c3a') + `<path d="M34 58Q50 80 66 58Q58 66 50 66Q42 66 34 58Z" fill="#fff3e0"/><circle cx="50" cy="63" r="3" fill="${INK}"/><path d="M42 30l-3 8M58 30l3 8" stroke="#c92a2a" stroke-width="2"/>` + f(50, 69);
     case 'bear': return body('#e9e4d8') + `<circle cx="30" cy="32" r="9" fill="${c || '#f4f1e8'}"/><circle cx="70" cy="32" r="9" fill="${c || '#f4f1e8'}"/>` + head(c || '#f4f1e8', 26, 24) + `<ellipse cx="50" cy="62" rx="11" ry="8" fill="#fff"/><ellipse cx="50" cy="58" rx="4" ry="3" fill="${INK}"/><path d="M38 76h24" stroke="#c92a2a" stroke-width="4"/>` + f(49, 66);
+    case 'tiger': return body('#f08c00') + `<path d="M24 98l8 -8M76 98l-8 -8M40 104l3 -12M60 104l-3 -12" stroke="#1b1b1f" stroke-width="2.6" stroke-linecap="round"/><path d="M42 104Q44 88 50 86Q56 88 58 104Z" fill="#fff4e6"/>` + `<circle cx="29" cy="31" r="9" fill="#f59f00"/><circle cx="71" cy="31" r="9" fill="#f59f00"/><circle cx="29" cy="31" r="4.5" fill="#fff4e6"/><circle cx="71" cy="31" r="4.5" fill="#fff4e6"/>` + head(c || '#ffa94d', 26, 23) +
+      `<path d="M50 30v7M44 31l2 6M56 31l-2 6M25 46l8 2M25 52l7 1M75 46l-8 2M75 52l-7 1M28 60l6 -1M72 60l-6 -1" stroke="#1b1b1f" stroke-width="2.2" stroke-linecap="round"/>` +
+      `<path d="M36 58Q50 52 64 58Q66 72 50 75Q34 72 36 58Z" fill="#fff4e6"/><path d="M45 58h10l-5 4Z" fill="#e8798a" stroke="#1b1b1f" stroke-width=".8"/><path d="M41 64h-13M41 67h-12M59 64h13M59 67h12" stroke="#5c4033" stroke-width=".9"/>` + f(48, 67);
+    case 'dragon': return `<path d="M20 74Q2 50 8 26Q16 42 30 54Z M80 74Q98 50 92 26Q84 42 70 54Z" fill="#1f7a35"/><path d="M12 32Q18 46 28 54M88 32Q82 46 72 54" stroke="#69db7c" stroke-width="1.5" fill="none"/>` + body('#2f9e44') + `<path d="M38 104Q40 88 50 86Q60 88 62 104Z" fill="#d8f5a2"/>` + `<path d="M33 34L25 8L43 28Z M67 34L75 8L57 28Z" fill="#fff3bf" stroke="#e8c547" stroke-width="1"/>` + head(c || '#40c057', 25, 22, 46) + `<path d="M43 28l3 -9 3 9M51 28l3 -9 3 9" fill="#8ce99a"/><path d="M30 40q6 -4 12 -1M70 40q-6 -4 -12 -1" stroke="#1f7a35" stroke-width="2.2" fill="none" stroke-linecap="round"/>` +
+      // 長い鼻先：顔と同じ色でつなげて下へ張り出す（輪郭線なし）。先だけ明るく、鼻すじは顔から続く
+      `<path d="M30 54Q50 44 70 54Q70 70 64 77Q57 84 50 84Q43 84 36 77Q30 70 30 54Z" fill="${c || '#40c057'}"/><path d="M44 46Q43 60 41 70M56 46Q57 60 59 70" stroke="#2f9e44" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M43 58q7 2 14 0M42 64q8 2 16 0" stroke="#2f9e44" stroke-width="1" fill="none"/><ellipse cx="50" cy="74" rx="13" ry="8" fill="#8ce99a" opacity=".8"/>` +
+      `<ellipse cx="45" cy="72" rx="3" ry="2" fill="#1b4d2a" transform="rotate(-20 45 72)"/><ellipse cx="55" cy="72" rx="3" ry="2" fill="#1b4d2a" transform="rotate(20 55 72)"/>` +
+      // 金色の長いひげ（左右1本ずつ。鼻の横から大きく流れて先がくるり）
+      `<path d="M40 72Q22 66 14 78Q8 90 4 98Q2 104 8 104M60 72Q78 66 86 78Q92 90 96 98Q98 104 92 104" stroke="#fcc419" stroke-width="2.2" fill="none" stroke-linecap="round"/>` +
+      faceParts(mood, 50, 42, 11, 3.2, 79, false) + `<path d="M45 80l1.5 3.5 1.5 -3.5M52 80l1.5 3.5 1.5 -3.5" fill="#fff"/>`;
     case 'lion': return body('#d9a441') + `<circle cx="50" cy="52" r="34" fill="${ch.mane || '#a0522d'}"/><path d="M50 18l4 -8 4 8M30 24l-2 -8 7 5M70 24l2 -8 -7 5" fill="#f2c94c"/>` + head(c || '#e9b44c', 24, 23) + `<ellipse cx="50" cy="62" rx="11" ry="8" fill="#f7e0b0"/><path d="M46 57h8l-4 4Z" fill="${INK}"/>` + f(49, 66);
     case 'panda': return body('#fff') + `<circle cx="29" cy="31" r="8" fill="#222"/><circle cx="71" cy="31" r="8" fill="#222"/>` + head('#fff') + `<ellipse cx="40" cy="50" rx="7" ry="8" fill="#222" transform="rotate(-20 40 50)"/><ellipse cx="60" cy="50" rx="7" ry="8" fill="#222" transform="rotate(20 60 50)"/><ellipse cx="50" cy="60" rx="4" ry="3" fill="${INK}"/><path d="M62 76l12 -14" stroke="#40c057" stroke-width="3"/>` + f(51, 66, 10, true);
     case 'pig': return body('#f7a8b8') + `<path d="M30 36L28 22L42 30Z M70 36L72 22L58 30Z" fill="#f48ba3"/>` + head('#f7b5c4') + `<ellipse cx="50" cy="62" rx="9" ry="6.5" fill="#f48ba3"/><circle cx="47" cy="62" r="1.6" fill="#a13a55"/><circle cx="53" cy="62" r="1.6" fill="#a13a55"/>` + f(50, 70);
@@ -3327,6 +3427,9 @@ KB.glSVG = function (gl, eyY, ex) {
 // 手に持つもの（右下）
 KB.holdSVG = function (h) {
   switch (h) {
+    case 'glove': return `<g transform="translate(68 70) rotate(-15)"><rect x="4" y="20" width="14" height="8" rx="2" fill="#f8f9fa" stroke="#adb5bd"/><path d="M2 8Q2 -2 12 -2Q22 -2 22 9Q22 20 12 21Q2 20 2 8Z" fill="#e03131" stroke="#a51111"/><path d="M4 9Q-3 8 -2 14Q-1 18 5 16" fill="#e03131" stroke="#a51111"/><path d="M8 3q4 -2 8 0" stroke="#ff8787" stroke-width="1.5" fill="none"/></g>`;
+    case 'torch': return `<g transform="translate(74 66) rotate(12)"><path d="M-3 10L3 10L1.6 38H-1.6Z" fill="#adb5bd" stroke="#495057"/><rect x="-6" y="6" width="12" height="5" rx="1.5" fill="#fcc419" stroke="#e67700"/><path d="M0 6Q-9 -4 -2 -14Q-1 -6 3 -10Q9 -2 0 6Z" fill="#ff922b"/><path d="M0 5Q-4 -1 0 -7Q4 -1 0 5Z" fill="#ffe066"/></g>`;
+    case 'goldcup': return `<g transform="translate(66 68)"><path d="M2 0H24Q24 16 13 19Q2 16 2 0Z" fill="#fcc419" stroke="#e67700" stroke-width="1.2"/><path d="M2 3Q-5 3 -4 9Q-3 14 4 13M24 3Q31 3 30 9Q29 14 22 13" stroke="#e67700" stroke-width="2" fill="none"/><rect x="10.5" y="19" width="5" height="6" fill="#e67700"/><rect x="6" y="25" width="14" height="5" rx="1.5" fill="#8b5a2b"/><text x="13" y="11" text-anchor="middle" font-size="9" font-weight="900" fill="#7a4b00" font-family="sans-serif">1</text></g>`;
     case 'flag': return `<g transform="translate(70 62)"><rect x="0" y="0" width="2.4" height="40" fill="#8b5a2b"/><path d="M2.4 1h20l-4 6 4 6h-20Z" fill="#e03131"/><circle cx="10" cy="7" r="3" fill="#fff"/></g>`;
     case 'scepter': return `<g transform="translate(72 100) rotate(-25)"><rect width="3" height="-1" fill="none"/><rect x="0" y="-34" width="3.4" height="34" rx="1.5" fill="#e67700"/><circle cx="1.7" cy="-37" r="5" fill="#fcc419" stroke="#e67700"/><circle cx="1.7" cy="-37" r="2" fill="#e03131"/></g>`;
     case 'compass': return `<g transform="translate(76 70)"><circle cx="6" cy="2" r="3" fill="#495057"/><path d="M5 4L-2 26M7 4L14 26" stroke="#868e96" stroke-width="2.4" stroke-linecap="round"/><path d="M14 26l1 4" stroke="#1b1b1f" stroke-width="1.4"/></g>`;
@@ -3350,6 +3453,8 @@ KB.holdSVG = function (h) {
 // おとも（左下の小さな仲間）
 KB.petSVG = function (p) {
   switch (p) {
+    case 'hawk': return `<g transform="translate(4 74)"><path d="M0 10Q6 0 14 6Q22 0 28 10Q20 9 18 14Q14 20 10 14Q8 9 0 10Z" fill="#8b5a2b"/><circle cx="14" cy="6" r="5.5" fill="#f1f3f5"/><circle cx="12" cy="5" r="1.2" fill="#1b1b1f"/><circle cx="16" cy="5" r="1.2" fill="#1b1b1f"/><path d="M12.5 7.5h3l-1.5 3Z" fill="#fab005"/><path d="M11 18l-1 4M17 18l1 4" stroke="#fab005" stroke-width="1.5"/></g>`;
+    case 'goldbird': return `<g transform="translate(6 76)"><path d="M4 12Q-4 6 2 2Q6 8 10 9Z M22 12Q30 6 24 2Q20 8 16 9Z" fill="#f59f00"/><ellipse cx="13" cy="13" rx="10" ry="8" fill="#fcc419"/><circle cx="13" cy="4" r="6.5" fill="#ffd43b"/><path d="M11 -2l2 -5 2 5" fill="#e67700"/><circle cx="10.5" cy="3.5" r="1.2" fill="#1b1b1f"/><circle cx="15.5" cy="3.5" r="1.2" fill="#1b1b1f"/><path d="M11.5 6h3l-1.5 2.5Z" fill="#e8590c"/><path d="M6 10l1.5 1.5M20 10l-1.5 1.5" stroke="#fff3bf" stroke-width="1"/></g>`;
     case 'chick': return `<g transform="translate(8 80)"><ellipse cx="12" cy="11" rx="11" ry="9" fill="#ffe066"/><circle cx="12" cy="3" r="7" fill="#ffe066"/><circle cx="9" cy="2" r="1.3" fill="#1b1b1f"/><circle cx="15" cy="2" r="1.3" fill="#1b1b1f"/><path d="M10.5 5h3l-1.5 2.5Z" fill="#f59f00"/><path d="M11 -4l1 -3 1 3" stroke="#f59f00" fill="none"/></g>`;
     case 'phoenix': return `<g transform="translate(4 70)"><path d="M2 10Q8 -4 14 6Q20 -6 28 6Q22 8 20 14Q16 22 10 20Q4 18 2 10Z" fill="#fa5252"/><path d="M8 12Q14 4 22 10Q16 12 14 18Z" fill="#ffa94d"/><path d="M10 20l-6 8M14 21l0 8M18 20l5 7" stroke="#fcc419" stroke-width="2" stroke-linecap="round"/><circle cx="22" cy="7" r="1.3" fill="#1b1b1f"/><path d="M26 7l4 1-4 2Z" fill="#fcc419"/></g>`;
     case 'minirobo': return `<g transform="translate(8 76)"><path d="M12 0V-4" stroke="#495057" stroke-width="1.6"/><circle cx="12" cy="-5" r="2" fill="#ff6b6b"/><rect x="2" y="0" width="20" height="14" rx="4" fill="#adb5bd"/><rect x="5" y="3" width="14" height="7" rx="2" fill="#212529"/><circle cx="9" cy="6.5" r="1.6" fill="#51cf66"/><circle cx="15" cy="6.5" r="1.6" fill="#51cf66"/><rect x="5" y="15" width="14" height="9" rx="2" fill="#868e96"/></g>`;
@@ -3367,6 +3472,9 @@ KB.petSVG = function (p) {
 // 背景の柄
 KB.bgPatSVG = function (pat) {
   switch (pat) {
+    case 'vs': return `<rect x="0" y="0" width="100" height="100" fill="#c92a2a"/><path d="M58 0H100V100H38Z" fill="#1864ab"/><path d="M60 -2L44 46H56L40 102L70 38H57L72 -2Z" fill="#ffe066" opacity=".9"/>`;
+    case 'aurora': return `<rect x="0" y="0" width="100" height="100" fill="#0b1640"/><path d="M-5 40Q20 20 45 34T100 26V52Q75 40 50 54T-5 56Z" fill="rgba(105,219,124,.45)"/><path d="M-5 30Q25 12 55 26T105 18V34Q80 26 55 38T-5 42Z" fill="rgba(151,117,250,.4)"/>${[[12, 8], [80, 10], [92, 60], [6, 70], [60, 6]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="1.1" fill="#fff"/>`).join('')}`;
+    case 'podium': return `<rect x="0" y="0" width="100" height="100" fill="#1b1d2b"/><path d="M50 -10L20 100H80Z" fill="rgba(255,236,153,.22)"/><g font-family="sans-serif" font-weight="900" font-size="9" text-anchor="middle"><rect x="2" y="78" width="30" height="22" fill="#ced4da"/><text x="17" y="92" fill="#495057">2</text><rect x="35" y="70" width="30" height="30" fill="#fcc419"/><text x="50" y="86" fill="#7a4b00">1</text><rect x="68" y="84" width="30" height="16" fill="#e8a76a"/><text x="83" y="95" fill="#6b3d12">3</text></g>`;
     case 'fire': return `<rect x="0" y="0" width="100" height="100" fill="#3b0d0d"/><path d="M0 100V70q8 -14 14 0q4 -18 12 -4q6 -16 12 0q6 -20 14 -2q6 -14 12 2q6 -16 12 0q6 -12 14 4V100Z" fill="#e8590c"/><path d="M0 100V82q8 -10 14 0q6 -12 12 0q6 -10 12 0q6 -12 14 0q6 -10 12 0q6 -10 12 0q6 -8 14 2V100Z" fill="#fcc419"/>`;
     case 'void': return `<rect x="0" y="0" width="100" height="100" fill="#0a0820"/><g fill="none" stroke="rgba(170,150,255,.22)">${[14, 26, 38, 50, 62].map(r => `<circle cx="50" cy="52" r="${r}"/>`).join('')}</g>${[[12, 14], [86, 20], [20, 84], [80, 82], [52, 6], [6, 50], [94, 54]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 2 ? .8 : 1.3}" fill="#d0bfff"/>`).join('')}`;
     case 'stars': return `<rect x="0" y="0" width="100" height="100" fill="#1b1f4a"/>${[[14, 18], [30, 10], [80, 16], [88, 40], [10, 50], [70, 8], [20, 80], [86, 76], [50, 6], [94, 60]].map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${i % 3 ? 1 : 1.8}" fill="#fff3bf"/>`).join('')}`;
@@ -3414,6 +3522,10 @@ KB.accSVG = function (acc, fy, rx, top) {
     case 'apron': return { back: '', front: `<path d="M34 104V88h32v16Z" fill="#fff"/><path d="M34 88L40 80M66 88L60 80" stroke="#fff" stroke-width="2"/><rect x="${L - 1}" y="${top + 8}" width="${2 * rx + 2}" height="5" fill="#e03131"/>` };
     case 'flower': return { back: '', front: `<circle cx="${Rr - 8}" cy="${top + 4}" r="5" fill="#f783ac"/><circle cx="${Rr - 8}" cy="${top + 4}" r="2" fill="#ffd43b"/>` };
     case 'tie': return { back: '', front: `<path d="M46 82h8l-2 4l4 16h-12l4 -16Z" fill="#e03131"/>` };
+    case 'redband': return { back: `<path d="M${100 - L - 2} ${top + 12}l12 10l-3 4l-11 -8Z M${100 - L - 2} ${top + 12}l8 16l-4 2l-7 -14Z" fill="#c92a2a"/>`, front: `<path d="M${L - 1} ${top + 10}Q50 ${top + 2} ${100 - L + 1} ${top + 10}L${100 - L + 1} ${top + 17}Q50 ${top + 9} ${L - 1} ${top + 17}Z" fill="#e03131"/><g fill="#fff" opacity=".85"><circle cx="40" cy="${top + 11}" r="1.2"/><circle cx="50" cy="${top + 9}" r="1.2"/><circle cx="60" cy="${top + 11}" r="1.2"/></g>` };
+    case 'platcrown': return { back: '', front: `<path d="M${L + 1} ${top + 4}l3 -16l8 10l7 -14l7 14l8 -10l3 16Z" fill="#e9ecef" stroke="#868e96" stroke-width="1.2"/><path d="M${L + 2} ${top + 1}h${(50 - L) * 2 - 4}" stroke="#adb5bd" stroke-width="1.5"/><circle cx="50" cy="${top - 7}" r="2.6" fill="#4dabf7" stroke="#1971c2"/><circle cx="${L + 12}" cy="${top - 3}" r="1.6" fill="#da77f2"/><circle cx="${100 - L - 12}" cy="${top - 3}" r="1.6" fill="#da77f2"/>` };
+    case 'vsjacket': return { back: `<path d="M10 104Q12 70 34 64H66Q88 70 90 104Z" fill="#1c1c2e"/>`, front: `<path d="M12 104Q14 78 34 68L44 104Z" fill="#1c1c2e"/><path d="M88 104Q86 78 66 68L56 104Z" fill="#1c1c2e"/><path d="M34 68L44 104M66 68L56 104" stroke="#fcc419" stroke-width="1.8"/><path d="M15 100Q18 84 28 74" stroke="#e03131" stroke-width="3.5" fill="none"/><path d="M85 100Q82 84 72 74" stroke="#1c7ed6" stroke-width="3.5" fill="none"/><g font-family="sans-serif" font-weight="900" font-size="11" font-style="italic"><text x="25" y="92" fill="#ff6b6b">V</text><text x="66" y="92" fill="#4dabf7">S</text></g>` };
+    case 'gown': return { back: `<path d="M10 104Q12 70 34 64H66Q88 70 90 104Z" fill="#5f3dc4"/>`, front: `<path d="M38 66L44 104M62 66L56 104" stroke="#fcc419" stroke-width="3.2"/><path d="M34 66Q50 74 66 66" stroke="#fcc419" stroke-width="2.4" fill="none"/><circle cx="50" cy="86" r="5.5" fill="#fcc419" stroke="#e67700"/><text x="50" y="88.6" text-anchor="middle" font-size="6.5" font-weight="900" fill="#7a4b00" font-family="sans-serif">1</text>` };
     case 'crown': return { back: '', front: `<path d="M${L + 2} ${top + 4}l4 -14l8 9l6 -12l6 12l8 -9l4 14Z" fill="#fcc419" stroke="#e67700"/><circle cx="50" cy="${top - 4}" r="2" fill="#e03131"/>` };
     // ---- 追加の帽子・頭の小物 ----
     case 'kinhachi': return { back: '', front: `<path d="M${L - 2} ${top + 12}Q50 ${top + 4} ${Rr + 2} ${top + 12}L${Rr + 2} ${top + 18}Q50 ${top + 10} ${L - 2} ${top + 18}Z" fill="#fff"/><circle cx="50" cy="${top + 12}" r="3.6" fill="#e03131"/><path d="M${Rr} ${top + 14}l10 6l-3 4l-8 -6Z" fill="#fff" stroke="#dee2e6" stroke-width=".6"/>` };
@@ -5841,21 +5953,21 @@ function makeAI(id, level, style, used) {
 // アバター編集
 const AV_OPTS = {
   age: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア']],
-  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人']],
+  base: [['child', 'こども'], ['young', 'わかもの'], ['adult', 'おとな'], ['senior', 'シニア'], ['panda', 'パンダ'], ['lion', 'ライオン'], ['robot', 'ロボ'], ['cat', 'ねこ'], ['fox', 'キツネ'], ['ghost', 'おばけ'], ['skeleton', 'ガイコツ'], ['alien', '宇宙人'], ['dragon', 'ドラゴン'], ['tiger', 'トラ']],
   hs: [['short', 'ショート'], ['spiky', 'ツンツン'], ['side', '七三'], ['buzz', '坊主'], ['bald', 'つるつる'], ['mohawk', 'モヒカン'], ['afro', 'アフロ'], ['curly', 'くるくる'], ['bob', 'ボブ'], ['long', 'ロング'], ['pony', 'ポニー'], ['twin', 'ツイン'], ['bun', 'おだんご']],
   hair: ['#1b1b1f', '#2b2522', '#5a3a24', '#a8763e', '#d9b46a', '#e8e8e8', '#b0443a', '#e8590c', '#3d5a9e', '#7048e8', '#f06595', '#20c997'],
   skin: ['#f6d7bf', '#efc4a2', '#e2ab84', '#c98d65', '#9b6646'],
   shirt: ['#f0a020', '#e03131', '#4263eb', '#20c997', '#7950f2', '#e64980', '#212529', '#f8f9fa', '#868e96', '#15aabf', '#2f9e44', '#a0522d'],
   acc: [[null, 'なし'], ['cap', 'キャップ'], ['baseball', '野球帽'], ['beret', 'ベレー帽'], ['headband', 'はちまき'], ['ribbon', 'リボン'], ['flower', 'お花'], ['headphones', 'ヘッドホン'], ['goggles', 'ゴーグル'], ['nekomimi', 'ネコ耳'], ['bunny', 'ウサ耳'], ['chef', 'コック帽'], ['towel', '手ぬぐい'], ['ninja', '忍者'], ['helmet', 'ヘルメット'], ['pirate', '海賊帽'], ['horns', 'ツノ'], ['thief', '怪盗マスク'], ['clown', 'ピエロ帽'],
-    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと']],
+    ['crown', '王冠'], ['tophat', 'シルクハット'], ['wizard', '魔法使いの帽子'], ['halo', '天使の輪'], ['turban', 'ターバン'], ['laurel', '月桂冠'], ['cowboy', 'カウボーイハット'], ['divpin', '÷のヘアピン'], ['mortarboard', '博士の角帽'], ['kinhachi', '必勝はちまき'], ['antenna', 'アンテナ'], ['goldhelm', '金のかぶと'], ['platcrown', 'プラチナの王冠'], ['redband', '赤いバンダナ']],
   outfit: [[null, 'ふつう'], ['stripe', 'ボーダー'], ['hoodie', 'フード'], ['tie', 'ネクタイ'], ['bowtie', '蝶ネクタイ'], ['gakuran', '学ラン'], ['kimono', '着物'], ['judo', '柔道着'], ['coat', '白衣'], ['apron', 'エプロン'], ['armband', '腕章'], ['samurai', '侍'], ['butler', '執事'],
-    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服']],
+    ['medal', '金メダル'], ['cape', 'マント'], ['blackbelt', '黒帯の道着'], ['uniform', '背番号10'], ['sash', 'たすき'], ['royal', '王様のマント'], ['armor', '鎧'], ['racer', 'レーサースーツ'], ['goldjacket', '金のジャケット'], ['badgevest', 'バッジだらけのベスト'], ['champion', 'チャンピオンベルト'], ['suit', 'スーツ'], ['robe', '魔法のローブ'], ['shinobi', '忍び装束'], ['starrobe', '星のローブ'], ['spacesuit', '宇宙服'], ['gown', '表彰式のガウン'], ['vsjacket', 'VSジャケット']],
   face: [[null, 'なし'], ['freckles', 'そばかす'], ['blush', 'ほっぺ'], ['mustache', 'ちょびひげ'], ['beard', 'あごひげ'], ['bandage', 'ばんそうこう'], ['star', '星'], ['monocle', '片めがね'], ['kirakira', 'キラキラ'], ['flame', '炎のペイント'], ['scar', '歴戦の傷'], ['bolt', '稲妻ペイント']],
   gl: [[null, 'なし'], ['round', '丸めがね'], ['square', '四角めがね'], ['shades', 'サングラス'], ['gold', '金縁めがね'], ['star', '星めがね'], ['heart', 'ハートめがね'], ['visor', 'サイバーバイザー']],
-  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑']],
-  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO']],
+  hold: [[null, 'なし'], ['trophy', 'トロフィー'], ['ticket', '金のチケット'], ['scroll', '奥義の巻物'], ['soccer', 'サッカーボール'], ['bokken', '木刀'], ['wand', '魔法の杖'], ['abacus', 'そろばん'], ['magnifier', '虫めがね'], ['crystal', '水晶玉'], ['flag', '旗'], ['scepter', '王笏'], ['compass', 'コンパス'], ['calc', '電卓'], ['stopwatch', 'ストップウォッチ'], ['dice', 'サイコロ'], ['hourglass', '砂時計'], ['book', '式の図鑑'], ['torch', '聖火'], ['goldcup', '優勝カップ'], ['glove', 'グローブ']],
+  pet: [[null, 'なし'], ['hamster', 'ハムスター'], ['luckycat', '招き猫'], ['dragon', 'ミニドラゴン'], ['chick', 'ひよこ'], ['phoenix', '火の鳥'], ['minirobo', 'ミニロボ'], ['kitten', '黒ねこ'], ['swallow', 'つばめ'], ['bat', 'こうもり'], ['crow', 'からす'], ['ufo', 'ミニUFO'], ['goldbird', '金の小鳥'], ['hawk', 'たか']],
   bg: ['#8a9a93', '#1c7ed6', '#e8590c', '#2f9e44', '#ae3ec9', '#495057', '#e64980', '#f2b632'],
-  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河']]
+  bgpat: [[null, '柄なし'], ['pat:gold', 'ゴールド'], ['pat:fire', '炎'], ['pat:stars', '星空'], ['pat:rainbow', '虹'], ['pat:formula', '数式'], ['pat:sakura', '桜'], ['pat:spot', 'スポットライト'], ['pat:grid', '方眼'], ['pat:checker', 'チェック'], ['pat:speed', '集中線'], ['pat:moon', '月夜'], ['pat:clock', '時計'], ['pat:galaxy', '銀河'], ['pat:aurora', 'オーロラ'], ['pat:podium', '表彰台'], ['pat:vs', 'VS']]
 };
 // カテゴリーの冠（コンプリート）と、各系統の金（いちばん上）バッジでアイテムが増える
 // カテゴリーの冠（コンプリート）でまとめてもらえるセット
@@ -5867,10 +5979,13 @@ const CROWN_SETS = {
   '早撃ち': ['base:fox', 'acc:halo', 'outfit:shinobi', 'hold:stopwatch', 'pet:swallow', 'bgpat:pat:speed'],
   'アウツチャレンジ': ['base:ghost', 'acc:turban', 'outfit:starrobe', 'hold:dice', 'pet:bat', 'bgpat:pat:moon'],
   'バッジアタック': ['base:skeleton', 'acc:goldhelm', 'outfit:cape', 'hold:hourglass', 'pet:crow', 'bgpat:pat:clock'],
-  '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy']
+  '式の図鑑': ['base:alien', 'acc:tophat', 'outfit:spacesuit', 'hold:book', 'pet:ufo', 'bgpat:pat:galaxy'],
+  'オンライン大会': ['base:dragon', 'acc:platcrown', 'outfit:gown', 'hold:torch', 'pet:goldbird', 'bgpat:pat:aurora'],
+  'ライバル': ['base:tiger', 'acc:redband', 'outfit:vsjacket', 'hold:glove', 'pet:hawk', 'bgpat:pat:vs']
 };
 const AV_LOCK = {
   ...(() => { const o = {}; Object.entries(CROWN_SETS).forEach(([cat, items]) => items.forEach(k => o[k] = { cat })); return o; })(),
+  'hold:goldcup': { badge: 'on_podium' }, 'bgpat:pat:podium': { badge: 'off_podium' }, // オンライン大会：表彰台の金（オンライン王者）・公式の金（公式チャンピオン）
   'hold:trophy': { badge: 'games' }, 'outfit:blackbelt': { badge: 'practice_set' }, 'pet:hamster': { badge: 'tour_done' }, 'outfit:uniform': { badge: 'win' }, 'face:kirakira': { badge: 'set_low' },
   'acc:laurel': { badge: 'all_sets' }, 'outfit:sash': { badge: 'set_win' }, 'gl:star': { badge: 'qualify' }, 'outfit:royal': { badge: 'champion' }, 'hold:ticket': { badge: 'qualify_strong' }, 'pet:dragon': { badge: 'champion_strong' },
   'face:flame': { badge: 'streak5' }, 'bgpat:pat:fire': { badge: 'streak10' }, 'gl:gold': { badge: 'perfect' }, 'face:scar': { badge: 'sutemi' }, 'hold:scroll': { badge: 'perfect_set' }, 'outfit:armor': { badge: 'no_foul_set' },
@@ -6275,7 +6390,7 @@ function hostRules() {
 // バッジの進み具合（回数で数える系統だけ。決まった条件のものは別に扱う）
 function advCount(g, k) { const c = g.cnt || {}; return k === 'sutemi' ? Math.min(c.aete || 0, 10) : k === 'set_low' ? (c.set_low || 0) : (c[k] || 0); }
 function advNearBadges(g) {
-  const out = [], skipK = ['rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
+  const out = [], skipK = ['rival_out', 'rival_in', 'rival_mu', 'rating', 'on_podium', 'off_podium', 'qualify_strong', 'champion_strong', 'toushi', 'set_low', 'atk_bp', 'atk_badges'];
   ACH.forEach(a => { const k = a[0]; if (skipK.includes(k)) return;
     for (let i = 0; i < a[2].length; i++) { const t = a[2][i]; if (g.ach[k + ':' + t]) continue; if (k === 'sutemi' && t > 10) break;
       const c = advCount(g, k); out.push({ k, i, t, c, left: Math.max(1, t - c), ratio: t ? c / t : 0, name: a[4][i], series: a[1], cond: a[3](t), bp: bpOf(k, i), tier: ['銅', '銀', '金'][a[5] ? a[5][i] : Math.min(i, 2)] }); break; } });
@@ -6320,17 +6435,12 @@ function masaAdvice(more) {
     add(i < 2 ? 4 : 2, R([`「${b.name}」（${b.series}・${b.tier}）まで、あと${b.left}回や！条件は「${b.cond}」。${b.bp}BPもらえるで！`, `狙い目は「${b.name}」や。${b.cond}でもらえる${b.tier}バッジ、いま${b.c}/${b.t}やから、あと${b.left}回！ゴールは近いで！`]), w, [advB(b.k, b.i)]); });
   // 冠（カテゴリーの特別バッジ）：残りが少ない系統
   ACH_GROUPS.forEach(([gn, ks], gi) => { const cp = catProgress(g, gi); if (cp.done || !cp.have) return; const miss = []; ks.forEach(k => { const a = ACH.find(x => x[0] === k); if (a) a[2].forEach((t, i) => { if (!g.ach[k + ':' + t]) miss.push(advB(k, i)); }); });
-    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${BP_CAT}BPとアバターの特別セットやで！`, null, miss); });
+    if (miss.length <= 3) add(4, `冠「${cp.name}」（${gn}）まで、あと${miss.length}個や！残りは${miss.map(x => `「${x.name}」`).join('・')}。そろえたら${catBp(gi)}BPとアバターの特別セットやで！`, null, miss); });
   // ミニゲーム
   const c = g.cnt || {};
   if (!c.outs3) add(2, 'アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！', { a: 'drill', l: 'アウツチャレンジへ' });
   if ((c.chart || 0) < 10) add(2, `早見表、いま${c.chart || 0}行完成や。完成した行は対局中に見返せるから、作れば作るほど本番で得するで！`, { a: 'chart-open', l: '早見表へ' });
   if (!c.zukan || c.zukan < 50) add(2, '式ハンターで式を集めると、図鑑も早撃ちのバッジも進むで。3分だけでもええ、リフティングみたいなもんや！', { a: 'hunt-start', l: '式ハンターへ' });
-  // ご褒美アイテム「自動照準」：「図鑑の場」の銀（三場制覇）→ 大会の決勝進出でもらえる
-  const aimB = advB('zukan_cat', 1), cats = c.zukan_cat || 0;
-  if (!g.ach['zukan_cat:3']) { if (nG >= 3 || cats) add(cats ? 3 : 2, `式ハンターで図鑑の場を3つ制覇すると「三場制覇」や（いま${cats}つ）。これを持って大会の決勝に進んだら、ご褒美に便利アイテム「自動照準」がもらえるで！式ハンターで${HUNT_SEC / 60}分間ずっと自動で捕まえてくれるんや。サッカーで言うたら、勝ち上がったチームへの特別ボーナスやな！`, { a: 'hunt-start', l: '式ハンターへ' }, [aimB]); }
-  else if (!aimCount()) add(3, `「三場制覇」持っとるやん！${AIM_RULE}、ご褒美の「自動照準」がもらえるで。大会で決勝を狙お！`, { go: 'setup-tour', l: '大会へ' }, [aimB]);
-  else add(2, `自動照準が${aimCount()}発たまっとるで！式ハンターで使うと${HUNT_SEC / 60}分間ずっと自動で捕まえてくれるから、図鑑の残りを一気に埋めよ！`, { a: 'hunt-start', l: '式ハンターへ' });
   if (!c.atk_done) add(2, 'バッジアタック（15分）でどれだけBPを稼げるか、いっぺん挑戦してみ！ランキングにも載るで！', { a: 'attack-start', l: 'バッジアタックへ' });
   // 苦手な場面
   try { const cs = catStats(g.games || []).filter(x => x.n >= 5).sort((a, b) => b.bad - a.bad)[0]; if (cs && cs.bad >= 0.3) add(3, `データで見ると、苦手は「${cs.label}」の場面や（悪手の割合${Math.round(cs.bad * 100)}%）。次の練習はそこだけ意識してみ！弱点のサイドを固めたら失点は減るで！`, { go: 'growth', l: '成長記録へ' }); } catch (e) { }
@@ -6407,26 +6517,25 @@ function noteGo(i) {
 }
 // ライバル視の数を矢印で（重なりなし）：→ ライバル視している（片方）・← ライバル視されている（片方）・⇄ 宿敵（お互い）。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
 const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
+// ライバル系のバッジ：ライバル視・被ライバル・宿敵の数（いままでの最高）
+function rivalBadges() { try { if (S.attack || !PID) return; const R = rivalsOf(), B = rvByMine(), mu = R.filter(x => x.rid && B.some(y => y.rid === x.rid)).length; setMax('rival_out', R.length); if (S.rvByPid === PID) { setMax('rival_in', B.length); setMax('rival_mu', mu); } } catch (e) { } }
 async function rvByFetch(force) {
   if (!force && Date.now() - (S.rvByAt || 0) < 60000) return; S.rvByAt = Date.now();
   const l = PID && plLink(PID); if (!l) return;
-  try { const j = await cloudReq('rival_by', { token: l.token, pid: PID }); S.rvBy = j.list || (j.names || []).map(n => ({ name: n })); S.rvByPid = PID; } catch (e) { }
+  try { const j = await cloudReq('rival_by', { token: l.token, pid: PID }); S.rvBy = j.list || (j.names || []).map(n => ({ name: n })); S.rvByPid = PID; rivalBadges(); } catch (e) { }
 }
 function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
-  // ライバル視・被ライバルの数は宿敵も含む（宿敵はその中のお互いの人）
-  const mu = rivals.filter(x => x.rid && by.some(y => y.rid === x.rid)).length, out = rivals.length, inn = by.length;
+  const isMu = x => x.rid && by.some(y => y.rid === x.rid), mu = rivals.filter(isMu).length, out = rivals.length - mu, inn = by.filter(y => !rivals.some(x => x.rid === y.rid)).length;
   return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>→</i>ライバル視<b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>←</i>被ライバル<b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i>宿敵<b>${mu}</b></button></span>`;
 }
 function rvListModal(key) {
   const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;
   const back = $('#modal') ? $('#modal .modal').innerHTML : null;
   const isMu = x => x.rid && d.rivals.some(a => a.rid === x.rid) && d.by.some(b => b.rid === x.rid);
-  const mk = x => isMu(x) ? '<i class="rv-mu" title="宿敵">⇄</i>' : '';
-  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}">${mk(x)}<span class="rv-nm">${esc(x.name)}</span><span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
+  const row = x => x.rid ? `<button class="rv-li" data-act="rank-card" data-rid="${esc(x.rid)}"><span class="rv-nm">${esc(x.name)}</span><span>›</span></button>` : `<span class="rv-li">${esc(x.name)}</span>`;
   const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
-  const muFirst = L => L.filter(isMu).concat(L.filter(x => !isMu(x))); // 宿敵（⇄）を上に
-  const one = muFirst(d.rivals), oneBy = muFirst(d.by), both = d.rivals.filter(isMu);
+  const one = d.rivals.filter(x => !isMu(x)), oneBy = d.by.filter(x => !isMu(x)), both = d.rivals.filter(isMu);
   const A = sec(`→ ${esc(san(d.name))}がライバル視している`, one, 'いません'), B = sec(`← ${esc(san(d.name))}をライバル視している`, oneBy, 'いません'), M = sec('⇄ 宿敵（お互いにライバル視）', both, 'まだいません');
   modal(`<div class="stack rv-lm">${tab === 'm' ? M : tab === 'b' ? B : A}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
@@ -6436,7 +6545,7 @@ async function rivalToggle(rid, name) {
   if (on && L.length >= 5) { toast('ライバルは5人までです'); return; }
   const l = PID && plLink(PID);
   try { if (l) await cloudReq('rival_set', { token: l.token, pid: PID, rid, on: on ? 1 : 0 }); } catch (e) { toast(e.message || 'できませんでした'); return; }
-  store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid));
+  store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid)); rivalBadges();
   toast(on ? (rvByMine().some(x => x.rid === rid) ? `⇄ ${name}と宿敵になりました！` : `→ ${name}をライバル視しました`) : `${name}のライバル視をやめました`); KB.sfx('select');
   const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
   // 開いているプロフィールのライバル視の数も新しくする
@@ -6578,9 +6687,13 @@ const ACH = [
   // オンライン大会（人が10人以上参加した大会の上位3位）。段階は3位以上（銅）・2位以上（銀）・優勝（金）。公式大会は別のバッジ
   ['on_podium', 'オンライン大会 表彰台', [1, 2, 3], n => n >= 3 ? 'オンライン大会（人が10人以上）で優勝' : n >= 2 ? 'オンライン大会（人が10人以上）で2位以上' : 'オンライン大会（人が10人以上）で3位以上', ['表彰台', '準優勝', 'オンライン王者'], [0, 1, 2]],
   ['off_podium', '公式大会 表彰台', [1, 2, 3], n => n >= 3 ? '公式のオンライン大会（人が10人以上）で優勝' : n >= 2 ? '公式のオンライン大会（人が10人以上）で2位以上' : '公式のオンライン大会（人が10人以上）で3位以上', ['公式の表彰台', '公式準優勝', '公式チャンピオン'], [0, 1, 2]],
+  // ライバル（クラウド版）：盛り上げ用の軽いバッジ。数は今までの最高で数える
+  ['rival_out', 'ライバル視', [1, 3, 5], n => n === 1 ? 'だれかをライバル視する' : `${n}人をライバル視する（同時に）`, ['ライバル宣言', '負けず嫌い', '全方位ライバル']],
+  ['rival_in', '被ライバル', [1, 5, 10], n => n === 1 ? 'だれかにライバル視される' : `${n}人にライバル視される（同時に）`, ['注目の的', '人気者', 'みんなの目標']],
+  ['rival_mu', '宿敵', [1, 2, 3], n => n === 1 ? '宿敵ができる（お互いにライバル視）' : `宿敵が${n}人できる（同時に）`, ['宿命の出会い', 'ダブル宿敵', '宿敵トリオ']],
   ['atk_badges', 'アタック収集', [10, 20, 30], n => `1回のバッジアタックでバッジを${n}個以上`, ['収集家', 'コレクター', 'バッジマスター']]
 ];
-const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]]];
+const ACH_GROUPS = [["対局・継続", ["games", "practice_set", "tour_done"]], ["勝利", ["win", "set_win", "set_low", "all_sets", "qualify", "champion", "toushi", "qualify_strong", "champion_strong"]], ["判断の質", ["streak5", "streak10", "perfect", "sutemi", "perfect_set", "no_foul_set", "rating"]], ["手と計算", ["three", "div_paren", "bestpair", "miracle", "miss_lucky"]], ["早撃ち", ["quick5", "quick3", "snap", "quickdraw", "blitz"]], ["アウツチャレンジ", ["outs3", "outs4", "outs5"]], ["バッジアタック", ["atk_done", "atk_bp", "atk_badges"]], ["式の図鑑", ["zukan", "zukan_cat", "chart"]], ["オンライン大会", ["on_podium", "off_podium"]], ["ライバル", ["rival_out", "rival_in", "rival_mu"]]];
 const ACH_TOTAL = ACH.reduce((a, x) => a + x[2].length, 0);
 // バッジの対象になる条件（ゆるい設定でバッジが取れてしまわないように）
 // ゲーム：4人以上の卓で、相手の平均の強さ★2.5以上／セット：さらに1セット5ゲーム以上／大会：参加15人以上・予選3セット以上・1セット5ゲーム以上・参加AIの平均★2.5以上
@@ -6693,7 +6806,7 @@ function showAch() {
   if (S.view === 'hunt' && S.hunt && S.hunt.started) {
     const tier = a === 'cat' ? 3 : a[5] ? a[5][i] : a[2].length === 1 ? 2 : Math.min(i, 2);
     const d = document.createElement('div'); d.className = 'ach-big t' + tier; d.setAttribute('role', 'status');
-    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${BP_CAT} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
+    d.innerHTML = `<div class="ab-rays"></div><div class="ab-in"><div class="ab-k">${a === 'cat' ? 'カテゴリー コンプリート！' : 'バッジ獲得！'}</div><div class="ab-icon">${a === 'cat' ? emblemSVG(i, true, 96) : badgeSVG(a, i, true, 96)}</div><div class="ab-n">${esc(a === 'cat' ? CAT_SPECIAL[ACH_GROUPS[i][0]] : a[4][i])}</div><div class="ab-d">${esc(a === 'cat' ? `「${ACH_GROUPS[i][0]}」のバッジをすべて獲得` : a[3](a[2][i]))}</div>${a === 'cat' ? `<div class="ab-bp">+${catBp(i)} BP・アバターのセット</div>` : `<div class="ab-bp">${['銅', '銀', '金'][tier] || ''}バッジ・${bpOf(a[0], i)} BP</div>`}</div>`;
     document.body.appendChild(d); KB.sfx('best'); setTimeout(() => KB.sfx('combo'), 250); if (tier >= 2) setTimeout(confetti, 150);
     setTimeout(() => d.classList.add('out'), 2600);
     setTimeout(() => { d.remove(); ACH_Q.shift(); showAch(); }, 3000);
@@ -6701,7 +6814,7 @@ function showAch() {
   }
   const d = document.createElement('div'); d.className = 'ach-toast'; d.setAttribute('role', 'status');
   d.innerHTML = a === 'cat' ? `${emblemSVG(i, true, 30)}<span>「${esc(ACH_GROUPS[i][0])}」コンプリート！ <b>${esc(CAT_SPECIAL[ACH_GROUPS[i][0]])}</b></span>` : `${badgeSVG(a, i, true, 24)}<span>バッジ <b>${esc(a[4][i])}</b></span>`;
-  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? BP_CAT : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
+  if (S.attack && !(a !== 'cat' && /^zukan/.test(a[0]))) { d.insertAdjacentHTML('beforeend', `<b class="atk-bp" style="white-space:nowrap">+${a === 'cat' ? catBp(i) : bpOf(a[0], i)} BP</b>`); document.querySelectorAll('.atk-now').forEach(el => el.textContent = atkBP() + ' BP'); }
   if (a === 'cat') { d.classList.add('cat'); setTimeout(confetti, 100); }
   toastStack().appendChild(d); KB.sfx('best');
   setTimeout(() => d.classList.add('out'), 1800);
@@ -6716,7 +6829,7 @@ function badgeSVG(a, i, got, size) {
   return `<svg class="bdg" width="${z}" height="${z}" viewBox="0 0 40 40" aria-hidden="true"><polygon points="20,1 37,10 37,30 20,39 3,30 3,10" fill="${c2}"/><polygon points="20,4 34,12 34,28 20,36 6,28 6,12" fill="${c1}"/>${tier >= 1 && got ? '<circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/>' : ''}<text x="20" y="25.5" text-anchor="middle" font-size="15" font-weight="900" fill="${got ? '#2a1c00' : '#6b7672'}">${esc(ch)}</text></svg>`;
 }
 // カテゴリーをすべて集めると付く特別バッジ
-const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証' };
+const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証', 'ライバル': '宿命の好敵手' };
 function catProgress(g, gi) { const [gn, ks] = ACH_GROUPS[gi]; const list = ks.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); return { gn, have, all, done: all > 0 && have >= all, name: CAT_SPECIAL[gn] || gn }; }
 function emblemSVG(gi, got, size) {
   const z = size || 48, id = 'em' + gi + (got ? 'g' : 'n') + z;
@@ -6776,6 +6889,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
+  else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
@@ -7019,8 +7133,9 @@ function huntConquer(t) {
   document.body.appendChild(el);
   if (H.auto && !allDone) setTimeout(() => { const b = el.querySelector('[data-hq="go"],[data-hq="random"]'); if (b && el.isConnected) b.click(); }, 2600); // 自動照準の間は、制覇の演出を見せてから自動で続ける
   el.querySelectorAll('[data-hq]').forEach(b => b.onclick = () => {
+    if (el.dataset.done) return; el.dataset.done = '1'; // 自動で続けるのと手で押すのが重なっても1回だけ（2回目で時間がこわれないように）
     const k = b.dataset.hq; el.classList.add('out'); setTimeout(() => el.remove(), 350);
-    if (S.hunt !== H || H.over) return;
+    if (S.hunt !== H || H.over || !H.pausedAt) return;
     if (k === 'end') { H.end = Date.now(); huntFinish(); return; }
     if (k === 'random') { H.target = null; store.set('huntT', null); }
     H.end += Date.now() - H.pausedAt; H.fieldAt = Date.now(); H.pausedAt = null; H.blocked = false; huntDeal(H); render();
@@ -7073,11 +7188,11 @@ function huntCapture(expr, t, n, kind) {
   el.style.left = cx + 'px'; el.style.top = cy + 'px';
   el.style.setProperty('--tx', (to.left + to.width / 2 - cx) + 'px'); el.style.setProperty('--ty', (to.top + to.height / 2 - cy) + 'px');
   el.innerHTML = `<div class="hc-ex">${esc(expr)} = ${t}</div>
-    <div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
+    <div class="hc-muzzle" style="--bx:${fx - cx}px;--by:${fy - cy}px"></div>${[3, 2, 1].map(k => `<div class="hc-bullet tr${k}" style="--ang:${ang}deg;--bx:${fx - cx}px;--by:${fy - cy}px"></div>`).join('')}<div class="hc-bullet" style="--ang:${ang}deg;--dist:${dist}px;--bx:${fx - cx}px;--by:${fy - cy}px"></div>
     <div class="hc-hit"></div><div class="hc-ring"></div><div class="hc-stamp">${kind === 'out' ? '命中' : '捕獲！'}</div><div class="hc-n">${kind === 'reg' ? '登録済みの式' : kind === 'out' ? '図鑑外の式' : `図鑑 ${n}/${ZUKAN.length}`}</div>`;
   document.body.appendChild(el);
-  KB.sfx('shot'); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 200);
-  setTimeout(() => el.remove(), 1700);
+  setTimeout(() => KB.sfx('shot'), 190); setTimeout(() => KB.sfx(kind === 'out' ? 'play' : 'capture'), 330);
+  setTimeout(() => el.remove(), 2000);
 }
 // 演出：見送ったとき、手札に隠れていた式が姿を見せてから逃げていく（未登録＝獲物は大きく金色、ほかの式は小さく）
 function huntFlee(miss, others, t) {
@@ -7441,12 +7556,27 @@ function profHTML(D, o) {
         <div class="pv-rk" id="pv-rk"></div>${CLOUD_ON ? rvcHTML(D.rivals || [], D.rivalBy || [], NAME) : ''}</div></div>
     <div class="pv-tiles">${tiles.map(([l, v, sb]) => `<div class="pv-tile ${v === '—' ? 'none' : ''}"><small>${l}</small><b>${v}</b>${sb ? `<em>${sb}</em>` : ''}</div>`).join('')}</div>
     <div class="pv-bh"><b>バッジ</b><span><b>${got.length}</b>/${all.length}・${bpTotal(g)} BP</span></div>
-    <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<span title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></span>`; }).join('')}</div>
-    <div class="pv-badges">${got.length ? got.map(b => badgeSVG(b.a, b.i, true, 26)).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
+    <div class="pv-emb">${ACH_GROUPS.map((_, gi) => { const cp = catProgress(g, gi); return `<button type="button" class="pv-eb" data-pvi="c:${gi}:${cp.have}:${cp.all}:${cp.done ? 1 : 0}" title="${esc(cp.name)}">${emblemSVG(gi, cp.done, 30)}<small>${cp.have}/${cp.all}</small></button>`; }).join('')}</div>
+    <div class="pv-info" hidden></div>
+    <div class="pv-badges">${got.length ? got.map(b => `<button type="button" class="pv-bb" data-pvi="b:${b.a[0]}:${b.i}" aria-label="${esc(b.a[4][b.i])}">${badgeSVG(b.a, b.i, true, 26)}</button>`).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
     ${podiumHTML(D.awards)}
     ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${+a.official ? '<em class="on-off">公式</em> ' : ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
+}
+// プロフィールのバッジ・冠を押すと、その上に説明（プロフィールは閉じない）
+function pvInfoBind(box, name, me) {
+  const info = box.querySelector('.pv-info'); if (!info) return; const myG = G_(), TIER = ['銅', '銀', '金'];
+  box.querySelectorAll('[data-pvi]').forEach(el => el.onclick = () => {
+    const v = el.dataset.pvi; if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
+    box.querySelectorAll('[data-pvi].sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); info.dataset.cur = v;
+    const q = v.split(':'); let h = '';
+    if (q[0] === 'b') { const a = ACH.find(x => x[0] === q[1]), i = +q[2]; if (!a) return; const t = a[2][i], tier = a[5] ? a[5][i] : Math.min(i, 2), mine = !!myG.ach[a[0] + ':' + t];
+      h = `${badgeSVG(a, i, true, 44)}<div><b>${esc(a[4][i])}</b><small>${esc(a[1])}・${TIER[tier] || '金'}・${bpOf(a[0], i)}BP</small><p>${esc(a[3](t))}</p>${me ? '' : `<em class="${mine ? 'ok' : ''}">${mine ? '✓ あなたも持っています' : 'あなたはまだ持っていません'}</em>`}</div>`; }
+    else { const gi = +q[1], have = +q[2], all = +q[3], done = q[4] === '1', gn = ACH_GROUPS[gi][0], cs = (CROWN_SETS[gn] || []).length, mine = !!myG.ach['cat:' + gi];
+      h = `${emblemSVG(gi, done, 44)}<div><b>冠「${esc(CAT_SPECIAL[gn])}」</b><small>${esc(gn)}・${catBp(gi)}BP${cs ? `・アバター${cs}点セット` : ''}</small><p>「${esc(gn)}」のバッジを全部（${all}個）集めるともらえる冠。${done ? `${esc(name)}は獲得ずみ。` : `${esc(name)}はいま${have}/${all}。`}</p>${me ? '' : `<em class="${mine ? 'ok' : ''}">${mine ? '✓ あなたも持っています' : `あなたは${catProgress(myG, gi).have}/${all}`}</em>`}</div>`; }
+    info.innerHTML = h; info.hidden = false;
+  });
 }
 async function rankCardOpen(rid, me, el) {
   const isAi = !!((el && el.closest('.rk-row') && el.closest('.rk-row').querySelector('.ai-chip')) || (el && /AI研究員/.test(el.title || '')));
@@ -7461,7 +7591,7 @@ async function rankCardOpen(rid, me, el) {
       d = Object.assign({}, j.card, { ach: Object.fromEntries((j.card.ach || []).map(k => [k, 1])) });
     }
     const ai = isAi || !!d.ai, b = $('#modal .pv-box'); if (!b) return;
-    b.innerHTML = profHTML(d, { ai, me });
+    b.innerHTML = profHTML(d, { ai, me }); pvInfoBind(b, d.name || 'プレイヤー', me);
     // ライバル視：ほかの人は「→ ライバル視する／⇄ 宿敵になる」
     if (CLOUD_ON && PID && !me && rid) { const cl = $('#modal .rk-card > .row'); if (cl) { cl.insertAdjacentHTML('afterbegin', rivalBtnHTML(rid, d.name || 'プレイヤー')); bindModalActs(); } }
     if (CLOUD_ON && PID && me) rvByFetch(true).then(() => { const bx = $('#modal .pv-rvc'); if (bx) { bx.outerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); bindModalActs(); } });
@@ -7660,8 +7790,9 @@ function growthHTML() {
   </div>
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
-    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
-    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } return `<div class="bdg-group ${done ? 'complete' : ''}"><div class="bdg-gh"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${BP_CAT}BP・アバター${(CROWN_SETS[gn] || []).length}点セット）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<small>${have}/${all}</small>`}</div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
+    <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP（ライバルは${BP_CAT_G['ライバル']}BP）。カテゴリーを押すと開きます。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
+    <button class="btn ghost small bdg-all" data-bga="1">${(S.bdgOpen || new Set()).size >= ACH_GROUPS.length ? '▴ すべて閉じる' : '▾ すべて開く'}</button>
+    ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } const op = (S.bdgOpen || new Set()).has(gi); return `<div class="bdg-group ${done ? 'complete' : ''} ${op ? 'open' : ''}"><div class="bdg-gh" data-bgt="${gi}" role="button" aria-expanded="${op}"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${catBp(gi)}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<span class="bdg-gauge" role="img" aria-label="${have}/${all}"><i style="width:${Math.round(have / all * 100)}%"></i><b>${have}<small>/${all}</small></b></span>`}<i class="bdg-chev">▸</i></div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
   </div>
   <div class="panel stack">
     <div class="lbl">記録</div>
@@ -7925,13 +8056,14 @@ function zukanHTML() {
 // ---------- バッジポイント（BP） ----------
 // 段階ごとの基本点（銅10・銀30・金100）に、系統ごとの難しさの重みを掛ける。カテゴリーの特別バッジは500BP
 const BP_BASE = [10, 30, 100];
-const BP_W = { games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
-const BP_CAT = 500;
+const BP_W = { rival_out: 0.3, rival_in: 0.8, rival_mu: 0.6, games: 0.5, practice_set: 0.5, tour_done: 1, win: 1, set_win: 1.5, set_low: 2, all_sets: 3, qualify: 1.5, champion: 3, streak5: 1, streak10: 2, perfect: 1.5, perfect_set: 3, no_foul_set: 1.5, rating: 2, three: 0.5, div_paren: 1, bestpair: 2, miracle: 3, miss_lucky: 1.5, quick5: 0.5, quick3: 1, snap: 1.5, quickdraw: 2, blitz: 3, sutemi: 2.5, qualify_strong: 2, champion_strong: 3, toushi: 4, outs3: 1, outs4: 1.5, outs5: 2, atk_done: 1, atk_bp: 2, atk_badges: 1.5, zukan: 1.5, zukan_cat: 2, chart: 2 };
+const BP_CAT = 500, BP_CAT_G = { 'ライバル': 300 }; // 冠は500BP（ライバルは盛り上げ用なので300BP）
+const catBp = gi => BP_CAT_G[(ACH_GROUPS[gi] || [])[0]] || BP_CAT;
 const bpOf = (key, i) => { const a = ACH.find(x => x[0] === key), tier = a && a[5] ? a[5][i] : Math.min(i, 2); return Math.round(BP_BASE[tier] * (BP_W[key] || 1)); };
 function bpTotal(g) {
   let t = 0;
   ACH.forEach(a => a[2].forEach((tt, i) => { if (g.ach[a[0] + ':' + tt]) t += bpOf(a[0], i); }));
-  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += BP_CAT; });
+  ACH_GROUPS.forEach((_, gi) => { if (g.ach['cat:' + gi]) t += catBp(gi); });
   return t;
 }
 // ---------- バッジアタック：45分でどれだけバッジ（BP）を取れるか ----------
@@ -8084,7 +8216,7 @@ function attackCardHTML() {
 }
 // ホーム：バッジアタックの最高記録をそのまま表示
 function attackBadgeList(ach, size) {
-  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, size + 6)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   // カテゴリー順・段階順に並べる
   const order = ACH_GROUPS.flatMap(([, ks]) => ks);
   const list = ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); const i = a ? a[2].indexOf(+t) : -1; return { k, i, a }; }).filter(x => x.i >= 0)
@@ -8109,7 +8241,7 @@ function attackBestModal() {
 function attackResultHTML() {
   const R = S.attackResult || { bp: 0, badges: 0, ach: [] };
   const list = R.ach.filter(k => !k.startsWith('cat:')).map(id => { const [k, t] = id.split(':'); const a = ACH.find(x => x[0] === k); if (!a) return ''; const i = a[2].indexOf(+t); return i < 0 ? '' : `<div class="bdg-cell got">${badgeSVG(a, i, true, 34)}<b>${esc(a[4][i])}</b><small>${bpOf(k, i)} BP</small></div>`; }).join('');
-  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${BP_CAT} BP</small></div>`; }).join('');
+  const cats = R.ach.filter(k => k.startsWith('cat:')).map(id => { const gi = +id.split(':')[1]; return `<div class="bdg-cell got">${emblemSVG(gi, true, 40)}<b>${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}</b><small>${catBp(gi)} BP</small></div>`; }).join('');
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← ホーム</button><div class="where">バッジアタック 結果</div><div></div></div>
   <div class="panel stack" style="align-items:center;text-align:center">
     <div class="dq-title ok">${R.quit ? '途中で終了' : 'タイムアップ！'}</div>
@@ -8698,7 +8830,7 @@ function homeHTML() {
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${castHTML()}</div>
 </section>
-${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b>${esc(S.settings.name)}</b><span class="pb-sub">${r.ok ? `★${r.r.toFixed(1)}・` : ''}${g.games.length}ゲーム</span>${CLOUD_ON ? `<span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span>` : ''}</span><span class="pb-btns"><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・プレイヤー切り替え</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button></span>
+${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar pb2"><div class="pb-top"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b class="pb-nm">${esc(S.settings.name)}</b><button class="pb-rate" data-go="growth" aria-label="推定実力（成長記録へ）">${r.ok ? `<span class="pb-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<small>推定実力は測定中（あと${r.need}手）</small>`}</button><span class="pb-sub">${g.games.length}ゲーム・連続最善 最長${g.cnt.streakMax || 0}</span></span></div>${CLOUD_ON ? `<div class="pb-meta"><span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span></div>` : ''}<div class="pb-btns2"><button class="btn sm pb-grow" data-go="growth">📈 成長記録</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・切り替え</button></div>
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '公式・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
@@ -8721,7 +8853,7 @@ ${onlineHomeHTML()}
   ${outsCardHTML()}
   ${chartCardHTML()}
 </div>
-${growthCardHTML()}
+
 <div class="row" style="margin-top:14px">
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
@@ -9189,7 +9321,7 @@ function loop() {
     const setKey = S.T ? (S.T.phase || '') + ':' + (S.T.set || 0) : 'p', first = S.toushiSet !== setKey; S.toushiSet = setKey;
     S.thinking = p; if (first) { toushiFx(g, p); say('kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say('kanataAgain', { n: nm(pl) }); }
     renderGame();
-    S.timer = pt(loop, S.settings.speed === 'instant' ? 30 : first ? 3300 : 1100); return;
+    S.timer = pt(loop, first ? 3300 : 1100); return; // 演出を見せ終わってから打つ（速さに関係なく）
   }
   S.thinking = p; renderGame();
   S.timer = pt(() => {
@@ -9309,14 +9441,12 @@ function cutInFx(label, expr, t) {
   setTimeout(() => el.classList.add('out'), 1700); setTimeout(() => el.remove(), 2100);
 }
 // 奥義「絶対透視」の演出：画面が暗くなり、カナタが目を開く。全員の手札と山札が一瞬透けて、また伏せられる
-function toushiLite(g, p) {
-  if (S.settings.speed === 'instant') return;
+function toushiLite(g, p) { // 速さが「一瞬」でも見せる
   const el = document.createElement('div'); el.className = 'toushi-lite';
   el.innerHTML = `<span class="tl-eye">${KB.avatarSVG(g.players[p].ch, { open: true, level: 6 })}</span><b>絶対透視</b>`;
   document.body.appendChild(el); setTimeout(() => el.remove(), 1300);
 }
-function toushiFx(g, p) {
-  if (S.settings.speed === 'instant') return;
+function toushiFx(g, p) { // 速さが「一瞬」でも見せる
   // 札の中身はカナタにしか見えない：ほかの人には、裏向きの札が光って透けていく様子だけを見せる
   const pl = g.players[p], back = (_, k) => `<span class="tx-c" style="animation-delay:${0.5 + k * 0.06}s"></span>`;
   const rows = g.players.map((q, i) => i === p ? '' : `<div class="tx-row"><b>${esc(nm(q))}</b>${g.hands[i].map(back).join('')}</div>`).join('');
@@ -9516,7 +9646,8 @@ function renderPrev() {
 }
 
 // ---------- AIの読み ----------
-function stateKey(g) { return g.round + ':' + g.pos + ':' + g.hands.map(h => h.length).join(','); }
+// 「AIの読み」を使い回してよい局面かの目印。ゲーム番号・場札・手番の人の手札の中身まで入れる（枚数だけだと、別のゲームの同じ枚数の場面の読みを取り違える）
+function stateKey(g) { const me = g.current(); return (S.gameNo || 0) + ':' + g.round + ':' + g.pos + ':' + (g.field ? g.field.v : '') + ':' + g.hands.map(h => h.length).join(',') + ':' + (me >= 0 ? g.hands[me].map(c => c.v).sort((a, b) => a - b).join('.') : ''); }
 function computeHint(force) {
   if (S.attack) return;
   const g = S.game; const me = g.current(); if (me < 0 || !g.players[me].human) return;
@@ -10904,8 +11035,8 @@ function rvSetSolo(who) {
   sec = 'tour'; // 8. 大会の行方
   if (c.kind === 'tournament' && c.phase === 'prelim') {
     let line = '';
-    try { const s = standingsSorted(S.T), F2 = c.F, lp = s[F2 - 1], i = s.findIndex(p => p.id === 0), nb2 = i > 0 ? s[i - 1] : null; const a1 = lp && lp.id !== 0 ? `決勝ラインの${F2}位は${san(nm(P(lp.id)))}（${S.T.points[lp.id]}点）` : '', a2 = nb2 && nb2.id !== 0 && (!lp || nb2.id !== lp.id) ? `すぐ上の${i}位は${san(nm(P(nb2.id)))}（${S.T.points[nb2.id]}点）` : '';
-      line = rt ? (a1 ? a1 + '。' : '') + (a2 ? a2 + 'です。' : '') : (a1 || a2 ? [a1, a2].filter(Boolean).join('、') + 'や。まずはそこを抜いたろ！' : ''); } catch (e) { }
+    try { const s = standingsSorted(S.T), F2 = c.F, lp = s[F2 - 1], i = s.findIndex(p => p.id === 0), nb2 = i > 0 ? s[i - 1] : null; const a1 = lp && lp.id !== 0 ? `決勝ラインの${F2}位は${san(nm(P(lp.id)))}（${S.T.points[lp.id]}点）` : '', tie2 = nb2 && S.T.points[nb2.id] === S.T.points[0], a2 = nb2 && nb2.id !== 0 && (!lp || nb2.id !== lp.id) ? (tie2 ? `${i}位の${san(nm(P(nb2.id)))}とは同点（${S.T.points[nb2.id]}点）で、累計PPなどの差で後ろ` : `すぐ上の${i}位は${san(nm(P(nb2.id)))}（${S.T.points[nb2.id]}点）`) : '';
+      line = rt ? (a1 ? a1 + '。' : '') + (a2 ? a2 + 'です。' : '') : (a1 || a2 ? [a1, a2].filter(Boolean).join('、') + (tie2 ? 'や。次のセットで1点でも取れば前に出られるで！' : 'や。まずはそこを抜いたろ！') : ''); } catch (e) { }
     if (c.last) { if (c.qualified) B(c.tieRisk ? '決勝ライン上で同点です。決定戦に備えましょう。' : `予選${c.overall}位で決勝進出です。おめでとうございます。決勝でも同じ判断を続けましょう。`, c.tieRisk ? 'ライン上で同点や！PK戦やで、気合い入れていこか！' : `予選${c.overall}位で決勝進出や！ファイナルテーブルやで、おめでとう！`); else B(`予選${c.overall}位、決勝ラインまで${c.gap}点でした。${line}次の大会では、今回の課題を一つ潰して臨みましょう。`, `予選${c.overall}位、決勝まであと${c.gap}点やったな…${line}次こそファイナルテーブルや！`); }
     else B(`ここまでの総合は${c.overall}位${c.qualified ? '（決勝圏内）' : `（決勝ラインまで${c.gap}点）`}です。${line}`, (c.qualified ? `総合${c.overall}位、決勝圏内や！このまま逃げ切るで！` : `総合${c.overall}位、ラインまで${c.gap}点や。まだ巻き返せる！`) + line);
   }
@@ -11427,6 +11558,8 @@ function bind() {
   document.querySelectorAll('[data-dqc]').forEach(b => b.onclick = () => { const D = S.drill, i = +b.dataset.dqc, k = D.sel.indexOf(i); if (k >= 0) D.sel.splice(k, 1); else { if (D.sel.length >= 3) D.sel.shift(); D.sel.push(i); } KB.sfx(k >= 0 ? 'unselect' : 'select'); render(); });
   document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); S.advBack = null; badgeTalk(k, +i); });
   document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => catTalk(b.dataset.cat));
+  document.querySelectorAll('[data-bgt]').forEach(h => h.onclick = e => { if (e.target.closest('.emb-btn')) return; const gi = +h.dataset.bgt, o = S.bdgOpen || (S.bdgOpen = new Set()); o.has(gi) ? o.delete(gi) : o.add(gi); const on = o.has(gi); h.parentElement.classList.toggle('open', on); h.setAttribute('aria-expanded', on); const ab = document.querySelector('[data-bga="1"]'); if (ab) ab.textContent = o.size >= ACH_GROUPS.length ? '▴ すべて閉じる' : '▾ すべて開く'; });
+  document.querySelectorAll('[data-bga="1"]').forEach(b => b.onclick = () => { const o = S.bdgOpen || (S.bdgOpen = new Set()), all = o.size < ACH_GROUPS.length; o.clear(); if (all) ACH_GROUPS.forEach((_, i) => o.add(i)); document.querySelectorAll('[data-bgt]').forEach(h => { h.parentElement.classList.toggle('open', all); h.setAttribute('aria-expanded', all); }); b.textContent = all ? '▴ すべて閉じる' : '▾ すべて開く'; });
   document.querySelectorAll('[data-emb]').forEach(b => b.onclick = () => { const gi = +b.dataset.emb, g = G_(), cp = catProgress(g, gi), got = g.ach['cat:' + gi];
     const text = cp.done ? `「${cp.gn}」コンプリートや！特別バッジ「${cp.name}」、${got ? new Date(got).toLocaleDateString('ja-JP') + 'にゲット、' : ''}これは誇ってええで！` : `これは「${cp.gn}」の特別バッジ「${cp.name}」や！このカテゴリーのバッジを全部集めたらもらえるで。いま${cp.have}/${cp.all}、あと${cp.all - cp.have}個や！`;
     modal(`<div class="bdg-talk"><div class="bdg-big">${emblemSVG(gi, cp.done, 84)}<b>${esc(cp.name)}</b><small>${esc(cp.gn)}・特別バッジ</small></div><div class="commentary"><div class="cm-av">${KB.casterSVG('masa', cp.done ? 'happy' : 'normal')}</div><div class="cm-body"><span class="cm-name">実況・ナニワのマサ</span><span class="cm-text">${esc(text)}</span></div></div><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`); });
@@ -11675,7 +11808,7 @@ function deepHint() {
   const g = S.game; const me = g.current(); const H = S.hint; if (!H || !H.ev) return;
   H.busy = true; renderHint();
   setTimeout(() => {
-    const cands = H.ev.slice(0, 5).map(e => e.m).filter(Boolean);
+    const cands = H.ev.slice(0, 5).map(e => e.m); // 「あえて引く」（null）も外さずに深く読む
     const ev = KB.evaluate(H.view, cands.length ? cands : [null], 12000, H.ctx);
     rankEv(ev, H.ctx);
     const rest = H.ev.slice(5);
@@ -11906,7 +12039,7 @@ function onCeremony(t) {
 // 順位の表：決勝があるときは、上に決勝（決勝PPの少ない順）、下に予選（得点→累計PP）
 function onStandHTML(t) {
   const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
-  const nm = r => esc(r.ai ? onName(r) : r.name);
+  const nm = r => { if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
   const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
   let fin = '';
   if (hasFin) {
@@ -12280,7 +12413,7 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
 </script>
