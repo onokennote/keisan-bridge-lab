@@ -321,7 +321,7 @@ function obTick(array &$st, float $now): bool {
 // 各自に送る形（自分の手札だけ。ほかの人は枚数だけ）
 function obView(array $st, string $uid, string $id, int $ver): array {
   $me = -1; foreach ($st['seats'] as $i => $s) if (($s['uid'] ?? '') === $uid) $me = $i;
-  $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'lv' => (int)($s['lv'] ?? 2), 'slot' => $s['slot'] ?? null, 'sub' => empty($s['ai']) && (($s['miss'] ?? 0) >= 3 || !empty($s['auto'])), 'subLv' => ($s['miss'] ?? 0) < 3 && !empty($s['auto']) ? (int)($s['subLv'] ?? 2) : 2, 'auto' => !empty($s['auto']), 'miss' => $s['miss'] ?? 0], $st['seats']);
+  $seats = array_map(fn($s) => ['name' => $s['name'], 'avatar' => $s['avatar'] ?? null, 'ai' => !empty($s['ai']), 'lv' => (int)($s['lv'] ?? 2), 'slot' => $s['slot'] ?? null, 'char' => $s['char'] ?? null, 'sub' => empty($s['ai']) && (($s['miss'] ?? 0) >= 3 || !empty($s['auto'])), 'subLv' => ($s['miss'] ?? 0) < 3 && !empty($s['auto']) ? (int)($s['subLv'] ?? 2) : 2, 'auto' => !empty($s['auto']), 'miss' => $s['miss'] ?? 0], $st['seats']);
   $v = ['ok' => true, 'id' => $id, 'ver' => $ver, 'phase' => $st['phase'], 'cfg' => $st['cfg'], 'seats' => $seats, 'me' => $me, 'host' => empty($st['tour']) && ($st['seats'][0]['uid'] ?? '') === $uid, 'tour' => $st['tour'] ?? null, 'label' => $st['label'] ?? null, 'chat' => array_slice($st['chat'] ?? [], -12), 'gameNo' => $st['gameNo'], 'setPP' => $st['setPP'], 'now' => microtime(true)];
   if (isset($st['game'])) {
     $g = $st['game'];
@@ -341,7 +341,7 @@ function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $
   $d->prepare('INSERT INTO rooms (id, host, st, ver, updated, created) VALUES (?, ?, ?, 1, ?, ?)')->execute([$id, 'tour:' . $tid, json_encode($st, JSON_UNESCAPED_UNICODE), time(), time()]);
   return $id;
 }
-function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'slot' => $p['slot'] ?? null, 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
+function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'slot' => $p['slot'] ?? null, 'char' => $p['char'] ?? null, 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
@@ -361,6 +361,7 @@ function obTourStart(array &$t, float $now): void {
   }
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'pid' => $e['pid'] ?? '', 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
+  if (!empty($c['daily'])) $players = array_merge($players, dailyResearchers($t, max(0, DAILY_GROUP - count($players)))); // AI研究員（ランキングの「AI」）が空席に参加
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
   $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
   $cap = OB_AI_CAP; $total = array_sum($cap);
@@ -466,10 +467,25 @@ function dailyEnteredPart(array $t, string $uid, string $pid): ?int {
 // デイリーのポイント：予選は 16−グループ内の順位（AIも順位に入れる）、決勝に出た人は決勝の順位で 60・40・30・20・10 を足す。AIはポイントを持たない
 function dailyPoints(array $t): void {
   $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
+  foreach ($t['players'] as $p) if (!empty($p['char'])) $ent[$p['key']] = ['uid' => 'ai', 'pid' => $p['char'], 'name' => $p['name']]; // AI研究員もポイントを持つ（シーズン順位にも入る）
   $pre = obTourOrder($t); $fin = $t['finalists'] ?? []; $res = $t['result'] ?? [];
   foreach ($pre as $i => $k) { if (!isset($ent[$k])) continue; $e = $ent[$k]; $p = max(1, 16 - ($i + 1));
     if (in_array($k, $fin, true)) { $j = array_search($k, $res, true); if ($j !== false && $j < count(DAILY_FIN)) $p += DAILY_FIN[$j]; }
     db()->prepare('INSERT OR REPLACE INTO dpoints (uid, pid, season, tid, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['cfg']['season'], $t['id'], $p, $e['name'], time()]); }
+}
+const DAILY_AI_FROM = 1794562200; // AI研究員がデイリーに出はじめる日時（2026-11-13 18:30 日本時間）
+const DAILY_AI_RATE = 0.5;         // 各部ごとに、まだ今日出ていないAI研究員が出る確率（空席があるときだけ）
+function dailyResearchers(array $t, int $room): array {
+  $c = $t['cfg']; if ($room <= 0 || ($c['startAt'] < DAILY_AI_FROM && empty($c['aiTest']))) return []; $rate = isset($c['aiTest']) ? (float)$c['aiTest'] : DAILY_AI_RATE;
+  $used = []; // 今日すでにどこかの部（グループ）に出たAI研究員
+  foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D%' AND st LIKE '%\"date\":\"" . $c['date'] . "\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) { $x = json_decode($raw, true); foreach ($x['players'] ?? [] as $p) if (!empty($p['char'])) $used[$p['char']] = 1; }
+  $out = [];
+  foreach (db()->query("SELECT pid, name, rating, avatar FROM ranks WHERE uid = 'ai' AND shown = 1")->fetchAll() as $r) {
+    if (count($out) >= $room) break; if (isset($used[$r['pid']]) || mt_rand() / mt_getrandmax() >= $rate) continue;
+    $lv = max(1, min(5, (int)round($r['rating'] !== null ? (float)$r['rating'] : 3)));
+    $out[] = ['key' => 'r:' . $r['pid'], 'ai' => true, 'lv' => $lv, 'char' => $r['pid'], 'name' => $r['name'], 'aiUid' => 'ai'];
+  }
+  shuffle($out); return $out;
 }
 function seasonStand(string $sk): array {
   $q = db()->prepare('SELECT d.uid, d.pid, SUM(d.pts) pts, COUNT(*) n, MAX(d.at) last, COALESCE(r.name, MAX(d.name)) name, r.avatar FROM dpoints d LEFT JOIN ranks r ON r.uid = d.uid AND r.pid = d.pid WHERE d.season = ? GROUP BY d.uid, d.pid ORDER BY pts DESC, last ASC'); $q->execute([$sk]);
@@ -481,15 +497,16 @@ function seasonClose(): void {
   foreach (db()->query('SELECT DISTINCT season FROM dpoints')->fetchAll(PDO::FETCH_COLUMN) as $sk) {
     if ($sk >= $cur) continue; $q = db()->prepare('SELECT 1 FROM seasons WHERE season = ?'); $q->execute([$sk]); if ($q->fetch()) continue;
     $live = db()->prepare("SELECT COUNT(*) FROM tours WHERE st LIKE ? AND (st LIKE '%\"phase\":\"prelim\"%' OR st LIKE '%\"phase\":\"final\"%')"); $live->execute(['%"season":"' . $sk . '"%']); if ((int)$live->fetchColumn() > 0) continue; // 最後のデイリーが終わってから
-    $L = seasonStand($sk); $n = count($L); $half = (int)ceil($n / 2); $top = [];
+    $L = seasonStand($sk); $n = count($L); $half = (int)ceil($n / 2); $top = []; // 総ポイントと表彰は、AI研究員も入れた順位のまま（人が少ないと、人が取れないこともある）
     foreach ($L as $i => $r) {
+      $ai = $r['uid'] === 'ai';
       $b = $i < count(SEASON_BONUS) ? SEASON_BONUS[$i] : ($i < $half ? SEASON_HALF : 0);
       if ($b > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$r['uid'], $r['pid'], 'season', $sk, $b, $r['name'], time()]);
-      if ($i < 3) { db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$r['uid'], $r['pid'], 'S' . $sk, 'デイリー ' . seasonLabel($sk) . 'シーズン', $i + 1, 3, time()]);
+      if ($i < 3 && !$ai) { db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$r['uid'], $r['pid'], 'S' . $sk, 'デイリー ' . seasonLabel($sk) . 'シーズン', $i + 1, 3, time()]);
         noteAdd($r['uid'], $r['pid'], 'award', ['tid' => '', 'tname' => 'デイリー ' . seasonLabel($sk) . 'シーズン', 'place' => $i + 1, 'official' => false]); }
-      $top[] = ['name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)$r['n'], 'bonus' => $b, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null];
+      $top[] = ['name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)$r['n'], 'bonus' => $b, 'ai' => $ai, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null];
     }
-    db()->prepare('INSERT OR REPLACE INTO seasons (season, closed, st) VALUES (?, ?, ?)')->execute([$sk, time(), json_encode(['label' => seasonLabel($sk), 'n' => $n, 'stand' => array_slice($top, 0, 50)], JSON_UNESCAPED_UNICODE)]);
+    db()->prepare('INSERT OR REPLACE INTO seasons (season, closed, st) VALUES (?, ?, ?)')->execute([$sk, time(), json_encode(['label' => seasonLabel($sk), 'n' => $n, 'nHuman' => count(array_filter($L, fn($r) => $r['uid'] !== 'ai')), 'stand' => array_slice($top, 0, 50)], JSON_UNESCAPED_UNICODE)]);
   }
 }
 // 大会の設定を読む（ひらくときと、編集のときに使う）
@@ -544,9 +561,9 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
       $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
       $pidOf = array_column($t['entrants'], 'pid', 'uid'); // プロフィールを開くための公開用の番号（人だけ）
       $ridOf = function ($p) use ($pidOf) { if (!empty($p['ai']) || empty($p['uid'])) return null; $pd = (string)($p['pid'] ?? ($pidOf[$p['uid']] ?? '')); return $pd !== '' ? rid($p['uid'], $pd) : null; };
-      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'rid' => $ridOf($byKey[$k]), 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'lv' => $byKey[$k]['lv'] ?? null, 'slot' => $byKey[$k]['slot'] ?? null, 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
+      $v['stand'] = array_map(fn($k) => ['name' => $byKey[$k]['name'], 'rid' => !empty($byKey[$k]['char']) ? rid('ai', $byKey[$k]['char']) : $ridOf($byKey[$k]), 'char' => $byKey[$k]['char'] ?? null, 'avatar' => $byKey[$k]['avatar'] ?? null, 'ai' => !empty($byKey[$k]['ai']), 'lv' => $byKey[$k]['lv'] ?? null, 'slot' => $byKey[$k]['slot'] ?? null, 'me' => $k === $me, 'pts' => $t['stand'][$k]['pts'], 'pp' => $t['stand'][$k]['pp'], 'fin' => in_array($k, $t['finalists'] ?? [], true), 'fpp' => $t['finalPP'][$k] ?? null], $t['phase'] === 'done' ? $t['result'] : obTourOrder($t));
       $v['myRoom'] = null; $v['rooms'] = [];
-      foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name'), 'seats' => array_map(fn($x) => ['name' => $x['name'], 'ai' => !empty($x['ai']), 'lv' => $x['lv'] ?? null, 'slot' => $x['slot'] ?? null], $st['seats'])]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
+      foreach ($t['rooms'] ?? [] as $rid) { [$st] = obLoadRaw($rid); if (!$st) continue; $v['rooms'][] = ['id' => $rid, 'label' => $st['label'] ?? '', 'phase' => $st['phase'], 'gameNo' => $st['gameNo'], 'names' => array_column($st['seats'], 'name'), 'seats' => array_map(fn($x) => ['name' => $x['name'], 'ai' => !empty($x['ai']), 'lv' => $x['lv'] ?? null, 'slot' => $x['slot'] ?? null, 'char' => $x['char'] ?? null], $st['seats'])]; foreach ($st['seats'] as $s) if (($s['key'] ?? '') === $me && in_array($t['phase'], ['prelim', 'final'], true) && $st['phase'] !== 'done') $v['myRoom'] = $rid; }
     }
   }
   return $v;
@@ -846,7 +863,8 @@ try {
       if (!empty($b['all'])) { db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute(['D' . $d->format('ymd') . '%']); }
       db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute([$id . '%']);
       $start = time() + (int)($b['startIn'] ?? 30); $cfg = dailyCfg($d, $part, $start); if (!empty($b['season'])) $cfg['season'] = (string)$b['season'];
-      $cfg = array_merge($cfg, ['limit' => 3, 'sets' => (int)($b['sets'] ?? 2), 'games' => (int)($b['games'] ?? 1)]);
+      $cfg = array_merge($cfg, ['limit' => 3, 'sets' => (int)($b['sets'] ?? 2), 'games' => (int)($b['games'] ?? 1)]); if (isset($b['aiTest'])) $cfg['aiTest'] = (float)$b['aiTest'];
+      foreach ((array)($b['ais'] ?? []) as $k => $cid) db()->prepare("INSERT OR REPLACE INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, updated, bio, card, streak, ai) VALUES ('ai', ?, ?, 1, ?, 0, 0, 0, NULL, ?, '', NULL, 0, 1)")->execute([$cid, '研究員' . $cid, 2 + $k % 3, time()]); // 仮のAI研究員
       $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
       db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
       out(['ok' => true, 'id' => $id]);
@@ -855,7 +873,7 @@ try {
       $b = body(); $u = authUser($b); $tp = (string)($u['tpid'] ?? ''); $pid = $tp !== '' ? $tp : cleanPid($b['pid'] ?? '');
       try { dailyEnsure(); seasonClose(); } catch (Throwable $e) { }
       $sk = seasonKey(time()); $av = fn($a) => $a ? json_decode($a, true) : null;
-      $row = fn($r, $i) => ['rank' => $i + 1, 'name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)($r['n'] ?? 0), 'avatar' => $av($r['avatar'] ?? null), 'me' => $r['uid'] === $u['uid'] && ($pid === '' || $r['pid'] === $pid)];
+      $row = fn($r, $i) => ['rank' => $i + 1, 'name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)($r['n'] ?? 0), 'ai' => $r['uid'] === 'ai', 'avatar' => $av($r['avatar'] ?? null), 'me' => $r['uid'] === $u['uid'] && ($pid === '' || $r['pid'] === $pid)];
       $S = seasonStand($sk); $season = array_map($row, $S, array_keys($S));
       $T = db()->query('SELECT t.uid, t.pid, SUM(t.pts) pts, COUNT(*) n, COALESCE(r.name, MAX(t.name)) name, r.avatar FROM tpoints t LEFT JOIN ranks r ON r.uid = t.uid AND r.pid = t.pid GROUP BY t.uid, t.pid ORDER BY pts DESC LIMIT 100')->fetchAll(); $total = array_map($row, $T, array_keys($T));
       $past = array_map(fn($r) => array_merge(['season' => $r['season']], json_decode($r['st'], true)), db()->query('SELECT season, st FROM seasons ORDER BY season DESC LIMIT 24')->fetchAll());

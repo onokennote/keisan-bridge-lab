@@ -34,7 +34,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   ok(r2.ok === false && /1日1部/.test(r2.error || ''), '同じ日にほかの部には出られない（' + (r2.error || '') + '）');
 
   // 2. 画面：ホームのデイリーのカード → エントリー → 最後まで（過去のシーズンとして作り、終わったら締めを確かめる）
-  j = await api('daily_test', { startIn: 25, season: '2026-10b', sets: 2, games: 1, part: 3 });
+  j = await api('daily_test', { startIn: 25, season: '2026-10b', sets: 2, games: 1, part: 3, aiTest: 1, ais: ['zero', 'shota', 'tome'] });
   const b = await chromium.launch(), errs = [];
   const open = async (name) => {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(name + ': ' + e.message));
@@ -60,12 +60,14 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   await wait(1500);
   const info = await pa.evaluate(async () => { const c = KBAPP.plLink(KBAPP.S.profileId || JSON.parse(localStorage.getItem('kb.profile'))); return (await fetch(KB_CLOUD_API + '?a=daily_info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token }) })).json(); });
   const past = (info.past || []).find(x => x.season === '2026-10b');
-  ok(!!past && past.stand.length === 2 && past.stand.every(r => r.pts >= 1), `終わったシーズンは締められ、過去のシーズンに残る（${past ? past.stand.map(r => r.name + ' ' + r.pts + 'pt').join('・') : 'なし'}）`);
-  ok(past && past.stand[0].bonus === 100 && past.stand[1].bonus === 70, 'シーズンの順位で総ポイント（1位100・2位70）');
-  ok((info.total || []).length === 2 && info.total[0].pts === 100, '総ポイントのランキング');
+  ok(!!past && past.stand.filter(r => r.ai).length === 3 && past.stand.filter(r => !r.ai).length === 2, `AI研究員もデイリーに出てシーズン順位に入る（${past ? past.stand.map(r => r.name + (r.ai ? '(AI)' : '')).join('・') : ''}）`);
+  ok(!!past && past.stand.map(r => r.bonus).join() === '100,70,50,40,20', '総ポイントのボーナスはAIも入れた順位のまま（1位から100・70・50・40・20）');
+  ok(!!past && past.stand.length === 5 && past.stand.every(r => r.pts >= 1), `終わったシーズンは締められ、過去のシーズンに残る（${past ? past.stand.map(r => r.name + ' ' + r.pts + 'pt').join('・') : 'なし'}）`);
+  
+  ok((info.total || []).length === 5 && info.total[0].pts === 100 && info.total.some(r => r.ai), '総ポイントのランキング（AI研究員も入る）');
   await pa.evaluate(() => KBAPP.onAwardsSync()); await pa.waitForTimeout(1500);
   const bd = await pa.evaluate(() => { const g = KBAPP.G(); return { play: !!g.ach['daily_play:1'], dpod: Object.keys(g.ach).some(k => /^daily_podium:/.test(k)), spod: Object.keys(g.ach).some(k => /^season_podium:/.test(k)) }; });
-  ok(bd.play && bd.spod, `バッジ：デイリー参加・シーズン表彰台（デイリー表彰台はAIより上の3位以内のときだけ）（${JSON.stringify(bd)}）`);
+  ok(bd.play, `バッジ：デイリー参加（表彰台はAIも入れた順位で3位以内のときだけ）（${JSON.stringify(bd)}）`);
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.ON.dinfoAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
   await pa.evaluate(() => { const e = document.createElement('b'); e.dataset.tab = 'past'; KBAPP.act('daily-rank', e); }); await pa.waitForTimeout(1200);
   ok(await pa.evaluate(() => /10月後半シーズン/.test(document.querySelector('#modal').innerText)), 'ランキングの「過去のシーズン」に出る');
@@ -74,7 +76,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_total.png') });
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
   await pa.click('.dl-card [data-act="daily-rank"]'); await pa.waitForTimeout(3000);
-  ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length === 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
+  ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length >= 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank.png') });
   await pa.evaluate(() => document.querySelector('#rk-tpoints').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank2.png') });
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));

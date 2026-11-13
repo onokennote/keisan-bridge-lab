@@ -2380,7 +2380,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='5c0f24934a';
+window.KB_BUILD='0c06afe37e';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -7555,11 +7555,11 @@ function rankingHTML() {
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.filter(rankMe).length ? '<div class="rk-gap">…</div>' + d.mine.filter(rankMe).map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   const withAi = rankWithAi();
   // デイリートーナメント：今のシーズンと総ポイント（人だけ。AI研究員はポイントを持たない）
-  const di = ON.dinfo, dsec = (id, title, note, L, extra) => { const top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
+  const di = ON.dinfo, dsec = (id, title, note, L0, extra) => { const L = L0 && (withAi ? L0 : L0.filter(x => !x.ai).map((x, i) => Object.assign({}, x, { rank: i + 1 }))), top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
     return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : (top.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') + (mine.length ? '<div class="rk-gap">…</div>' + mine.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
-  const dailyS = dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。AI研究員は載りません。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`)
-    + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。AI研究員は載りません。`, di && di.total);
+  const dailyS = dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。デイリーに出たAI研究員も載り、総ポイントとシーズンの表彰もこの順位のまま（AIが上なら、人は繰り上がりません）。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`)
+    + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。デイリーに出たAI研究員も載ります。`, di && di.total);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
@@ -12064,7 +12064,7 @@ async function dailyRankOpen(tab) {
   S.drTab = tab || S.drTab || 'season'; if (!ON.dinfo) { modal('<div class="stack"><p class="small muted">読み込んでいます…</p></div>'); await dailyInfoLoad(true); }
   const di = ON.dinfo; if (!di) { modal('<div class="stack"><p>読み込めませんでした。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>'); return; }
   const av = r => KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
-  const row = (r, unit) => `<button class="dr-row ${r.me ? 'me' : ''}" data-act="rank-card" data-rid="${esc(r.rid)}"><b class="dr-rk">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</b><span class="dr-av">${av(r)}</span><span class="dr-nm">${esc(r.name)}${r.me ? '<small class="pv-me">あなた</small>' : ''}</span><b class="dr-pt">${r.pts}<small>${unit}</small></b></button>`;
+  const row = (r, unit) => `<button class="dr-row ${r.me ? 'me' : ''}" data-act="rank-card" data-rid="${esc(r.rid)}"><b class="dr-rk">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</b><span class="dr-av">${av(r)}</span><span class="dr-nm">${esc(r.name)}${r.ai ? '<em class="ai-chip">AI</em>' : ''}${r.me ? '<small class="pv-me">あなた</small>' : ''}${r.bonus ? `<small class="muted"> +${r.bonus}</small>` : ''}</span><b class="dr-pt">${r.pts}<small>${unit}</small></b></button>`;
   const tabs = [['season', `${di.label}シーズン`], ['total', '総ポイント'], ['past', '過去のシーズン']];
   let body = '';
   if (S.drTab === 'season') body = `<p class="small muted" style="margin:0">デイリーのポイント：予選は「16−グループ内の順位」（AIも順位に入る）、決勝に出たら決勝の順位で ${di.rule.fin.join('・')} を足す。シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</p>${di.stand.length ? di.stand.map(r => row(r, 'pt')).join('') : '<p class="small muted">まだだれもポイントを持っていません。今夜のデイリーに出てみよう！</p>'}`;
@@ -12196,7 +12196,8 @@ function onCeremony(t) {
 // 順位の表：決勝があるときは、上に決勝（決勝PPの少ない順）、下に予選（得点→累計PP）
 function onStandHTML(t) {
   const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
-  const nm = r => { if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
+  const nm = r => { if (r.ai && r.char && r.rid) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(c.name)}</button><em class="ai-chip" title="AI研究員">AI研究員</em>`; }
+    if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
   const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
   let fin = '';
   if (hasFin) {
@@ -12473,6 +12474,7 @@ function onlineHTML() {
 const ON_AI_BASE = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
 function onAiChar(s) { // AIの席：サーバーが同じ強さのAIに付けた番号（slot）で、重ならないようにキャラを割り当てる
   if (typeof s === 'string') s = { name: s };
+  if (s.char) { const rc = KB.charById(s.char); if (rc) return rc; } // AI研究員（デイリーに出たランキングのAI）は、そのキャラ
   const name = String(s.name || ''), lv = +(s.lv || (name.match(/AI★(\d)/) || [])[1] || 2), pool = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero');
   let idx;
   if (s.slot != null) idx = +s.slot;
