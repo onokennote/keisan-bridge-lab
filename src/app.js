@@ -1032,7 +1032,10 @@ function badgeTalk(key, i) {
   else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！毎晩20:30のデイリートーナメント、ホームの「オンライン大会」から出られるで！` : 'ホームの「オンライン大会」のデイリートーナメントから狙えるで。毎晩20:30、シーズンは毎月前半と後半や！';
   else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
-  else if (key === 'rating') text += R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
+  else if (key === 'rating') { // 目安：直近100手の最善率と、1手の平均損失（RATE_BEST・RATE_LOSS から）
+    const L = { 3: [63, 2.2, 'ポカ（疑問手・悪手）を減らすのが先や'], 4: [79, 1.2, '外すときも好手（差5pt以内）で止めるんやで'], 4.5: [86, 0.8, '外してええのは100手で14手まで、疑問手・悪手は5〜6回までや'] }[t], r = ratingOf(g.games);
+    text += L ? `目安は、直近100手で最善（最善扱いも入れて）が${L[0]}%！これが最低ラインや！1手の損失の平均も${L[1]}pt以内にしときたい。${L[2]}！` : R(['推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！', '最善手を重ねていけば届くで！焦らんでええ！']);
+    if (L && r.ok) text += `いまの${san(S.settings.name)}は最善率${Math.round(r.best * 100)}%・平均損失${r.avg.toFixed(1)}ptや。${r.best * 100 >= L[0] && r.avg <= L[1] ? 'どっちも届いとる！この調子で手数を重ねたら付いてくるで！' : r.best * 100 >= L[0] ? '最善率は届いとる、あとは外したときの損失を抑えたら来るで！' : `最善率があと${Math.ceil(L[0] - r.best * 100)}%や、最善を積み上げていこ！`}AIの読みを見た手や待ったは★2くらいで数えるから、狙う時期は控えめにな！`; }
   else text += R([`いまは${c}回、あと${Math.max(0, t - c)}回やで！がんばりや！`, `あと${Math.max(0, t - c)}回！ゴールは見えとるで！`, `いま${c}回や。コツコツいこ、ローマは一日にして成らずや！`]);
   if (['win','perfect','three','div_paren','miss_lucky','miracle','bestpair','set_win','set_low','perfect_set','no_foul_set','all_sets','qualify','champion','toushi','qualify_strong','champion_strong'].includes(key)) text += ' ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！';
   else if (['quick5', 'quick3', 'snap', 'quickdraw', 'blitz'].includes(key)) text += ' 時間は自分の番になった瞬間から数えるで。速さだけやなくて、最善手（即断即決は好手以上）やないとアカンからな！AIの読みを見た手は数えへんで。';
