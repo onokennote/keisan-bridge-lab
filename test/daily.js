@@ -64,12 +64,16 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   const bd = await pa.evaluate(() => { const g = KBAPP.G(); return { play: !!g.ach['daily_play:1'], dpod: Object.keys(g.ach).some(k => /^daily_podium:/.test(k)), spod: Object.keys(g.ach).some(k => /^season_podium:/.test(k)) }; });
   ok(bd.play && bd.spod, `バッジ：デイリー参加・シーズン表彰台（デイリー表彰台はAIより上の3位以内のときだけ）（${JSON.stringify(bd)}）`);
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.ON.dinfoAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(1500);
-  await pa.evaluate(() => KBAPP.act('daily-rank')); await pa.waitForTimeout(1200);
-  await pa.click('#modal [data-tab="past"]'); await pa.waitForTimeout(500);
+  await pa.evaluate(() => { const e = document.createElement('b'); e.dataset.tab = 'past'; KBAPP.act('daily-rank', e); }); await pa.waitForTimeout(1200);
   ok(await pa.evaluate(() => /10月後半シーズン/.test(document.querySelector('#modal').innerText)), 'ランキングの「過去のシーズン」に出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_rank.png') });
   await pa.click('#modal [data-tab="total"]'); await pa.waitForTimeout(400);
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_total.png') });
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
+  await pa.click('.dl-card [data-act="daily-rank"]'); await pa.waitForTimeout(3000);
+  ok(await pa.evaluate(() => KBAPP.S.view === 'ranking' && !!document.querySelector('#rk-season') && document.querySelectorAll('#rk-tpoints .rk-row').length === 2), 'デイリーのカードの「ランキング」で、ランキング画面のシーズン・総ポイントの欄へ');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank.png') });
+  await pa.evaluate(() => document.querySelector('#rk-tpoints').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_in_rank2.png') });
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();

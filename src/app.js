@@ -1619,14 +1619,20 @@ const RANK_DEFS = [['total', '総合', '推定実力・BP・連続最善・バ�
 const rankMe = x => !!x.me && (x.pid == null || x.pid === PID);
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
-  const val = (k, x) => k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
+  const val = (k, x) => k === 'season' ? `${x.pts}pt<small>${x.n}回</small>` : k === 'tpoints' ? `${x.pts}pt` : k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
   const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip" title="倶楽部のAI研究員">AI</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? (rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip mu" title="宿敵（お互いにライバル視）">⇄</em>' : '<em class="rv-chip" title="ライバル視している">→</em>') : (x.rid && rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip in" title="ライバル視されている">←</em>' : '')}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
     <div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : (d.list.map(x => rowH(k, x)).join('') + (d.mine.filter(rankMe).length ? '<div class="rk-gap">…</div>' + d.mine.filter(rankMe).map(x => rowH(k, x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div></section>`; };
   const withAi = rankWithAi();
+  // デイリートーナメント：今のシーズンと総ポイント（人だけ。AI研究員はポイントを持たない）
+  const di = ON.dinfo, dsec = (id, title, note, L, extra) => { const top = (L || []).slice(0, 20), mine = (L || []).slice(20).filter(x => x.me);
+    return `<section class="panel stack rk-sec" id="${id}"><div class="rk-h"><h2>${title}</h2>${L ? `<small>全${L.length}人</small>` : ''}</div><p class="small muted" style="margin:0">${note}</p>
+    <div class="rk-list">${!di ? `<p class="small muted">${ON_ENABLED() ? '読み込み中…' : 'クラウド版で表示されます。'}</p>` : (top.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') + (mine.length ? '<div class="rk-gap">…</div>' + mine.map(x => rowH(id === 'rk-season' ? 'season' : 'tpoints', x)).join('') : '')) || '<p class="small muted">まだだれも載っていません。</p>'}</div>${extra || ''}</section>`; };
+  const dailyS = dsec('rk-season', `🗓 ${di ? esc(di.label) : ''}シーズン`, `デイリートーナメントのポイント（予選は「16−グループ内の順位」、決勝に出たら決勝の順位で ${di ? di.rule.fin.join('・') : '60・40・30・20・10'} を足す）。AI研究員は載りません。${di ? `シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}` : ''}`, di && di.stand, `<div class="row" style="justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><span class="dl-test">🧪 テスト中：不具合や、ルール・ポイントの変更があります</span><button class="btn sm" data-act="daily-rank" data-tab="past">🗂 過去のシーズン</button></div>`)
+    + dsec('rk-tpoints', '総ポイント', `シーズンの順位でもらえるポイント（1位から ${di ? di.rule.bonus.join('・') : '100・70・50・40・20'}、参加者の上位半分まで ${di ? di.rule.half : 10}）と、公式大会の入賞でもらえるポイントの合計。AI研究員は載りません。`, di && di.total);
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
-  <div class="rk-all">${RANK_DEFS.map(sec).join('')}</div>
+  <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
   <div class="panel stack"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
     <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは上位20人まで。20位より下のときは、自分の順位を下に出します。</p></div>`;
 }
@@ -1635,6 +1641,7 @@ async function rankingLoad() {
   const c = (PID && plLink(PID)) || raw.get('kb.cloud', null);
   const bindHide = () => { const h = $('#rk-hide'); if (h) h.onchange = () => { raw.set('kb.p.' + PID + '.rankHide', h.checked); clearTimeout(CLOUD.timer); cloudPush().then(() => { S.rank = null; if (S.view === 'ranking') render(); }); }; };
   bindHide();
+  if (ON_ENABLED()) dailyInfoLoad(true).then(() => { if (S.view === 'ranking') { const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); bindHide(); rankJumpDo(y); } }); // デイリー（シーズン・総ポイント）
   if (S.rank && !S.rank.home && S.rank.ai === rankWithAi() && Date.now() - S.rank.at < 30000) return; // ホームで読んだ分は、保存の前のものなので読み直す
   try {
     await cloudPush();
@@ -1645,8 +1652,10 @@ async function rankingLoad() {
     }
     S.rank = { rankings: R, at: Date.now(), ai: rankWithAi() };
   } catch (e) { S.rank = { rankings: {}, at: Date.now(), ai: rankWithAi() }; toast('ランキングを読み込めませんでした'); }
-  if (S.view === 'ranking') { $('#app').innerHTML = rankingHTML(); bind(); bindHide(); }
+  if (S.view === 'ranking') { const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); bindHide(); rankJumpDo(y); }
 }
+// デイリーのカードから来たときは、シーズンの欄まで動かす（それ以外は読み直しの前の位置のまま）
+function rankJumpDo(y) { if (S.rankJump && ON.dinfo) { const el = $('#' + S.rankJump); S.rankJump = null; if (el) el.scrollIntoView({ block: 'start' }); } else if (y != null) window.scrollTo(0, y); }
 // ランキングでアイコンを押すと、その人の成績カード（Xの共有画像と同じもの）と自己紹介を出す
 // ランキング・タイトルのアイコンを押したときのプロフィール（スマホで見やすい独自の表示。X用の画像とは別）
 // 上にアイコンと名前を大きく＋推定実力・総合の順位（AI込み・人だけ）、その下に成績のタイル・カテゴリーの紋章・バッジ・自己紹介
@@ -5944,7 +5953,7 @@ function act(a, el) {
     case 'on-begin': onAct('start'); break;
     case 'on-back': onAct('back'); break;
     case 'on-chat': onChatModal(); break;
-    case 'daily-rank': dailyRankOpen(el && el.dataset.tab); break;
+    case 'daily-rank': if (el && el.dataset.tab) dailyRankOpen(el.dataset.tab); else { S.rankJump = 'rk-season'; go('ranking'); } break;
     case 'on-chat-send': onChatSend(($('#on-chat-in') || {}).value); break;
     case 'on-auto': { const r = ratingOf(G_().games), lv = r.ok ? Math.max(2, Math.min(4, Math.floor(r.r - 1))) : 2; onAct('auto', { lv }); toast(`AI★${lv}に任せました（「自分で打つ」でいつでも戻れます）`); break; }
     case 'on-draw': onAct('draw'); break;
