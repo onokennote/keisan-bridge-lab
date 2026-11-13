@@ -442,7 +442,7 @@ function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' .
 function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
 function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
-  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ）。15人（5人卓×3）・予選2セット×3ゲーム・上位5人で決勝。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選2セット×3ゲーム・上位5人で決勝。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
     'sets' => 2, 'games' => 3, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
@@ -536,7 +536,7 @@ function obCanOfficial(string $uid): bool { global $CFG; return in_array($uid, $
 function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
-    'startAt' => $c['startAt'], 'entryAt' => !empty($c['daily']) ? ($t['openAt'] ?? 0) : $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
+    'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
     'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
@@ -894,7 +894,7 @@ try {
     case 'on_tour_act': { // entry（エントリー）/ cancel（取り消し）/ startnow（主催者：受付中なら今すぐ開始）/ delete（主催者：始まる前なら中止）
       $b = body(); $u = authUser($b); $id = preg_replace('/[^0-9A-Z]/', '', (string)($b['id'] ?? '')); $act = (string)($b['act'] ?? ''); $now = microtime(true);
       [$t, $ver] = obTourLoad($id, true); obTourTick($t, $now); $err = null; $c = $t['cfg'];
-      $open = $t['phase'] === 'entry' && $now >= (!empty($c['daily']) ? ($t['openAt'] ?? 0) : $c['startAt'] - 900); // デイリーは作られたときから受付
+      $open = $t['phase'] === 'entry' && $now >= $c['startAt'] - 900; // エントリーは開始の15分前から（デイリーも同じ）
       if ($act === 'entry') {
         if (!$open) $err = 'エントリーは開始の15分前からです';
         elseif (!obInvited($t, $u['uid'])) $err = '招待された人だけが出られる大会です';

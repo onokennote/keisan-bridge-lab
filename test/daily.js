@@ -27,7 +27,10 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   const A = await api('on_tour', { token: reg[0].token, id: did }), B = await api('on_tour', { token: reg[0].token, id: did + 'B' });
   ok(A.tour.stand.length === 15 && B.tour.stand.length === 15 && A.tour.stand.filter(s => !s.ai).length + B.tour.stand.filter(s => !s.ai).length === 17, `どのグループも15人（人は ${A.tour.stand.filter(s => !s.ai).length}＋${B.tour.stand.filter(s => !s.ai).length}、空きはAI）`);
   ok(A.tour.sets === 2, '予選2セット');
-  const r2 = await api('on_tour_act', { token: reg[0].token, id: did.slice(0, -1) + '2', act: 'entry', name: '参加1', pid: 'p1' });
+  const p2 = await api('daily_test', { startIn: 600, part: 2 }); // 受付中（15分前より後）の第2部
+  const r0 = await api('on_tour_act', { token: reg[0].token, id: (await api('daily_test', { startIn: 3600, part: 4 })).id, act: 'entry', name: '参加1', pid: 'p1' });
+  ok(r0.ok === false && /15分前/.test(r0.error || ''), 'エントリーは開始の15分前から（' + (r0.error || '') + '）');
+  const r2 = await api('on_tour_act', { token: reg[0].token, id: p2.id, act: 'entry', name: '参加1', pid: 'p1' });
   ok(r2.ok === false && /1日1部/.test(r2.error || ''), '同じ日にほかの部には出られない（' + (r2.error || '') + '）');
 
   // 2. 画面：ホームのデイリーのカード → エントリー → 最後まで（過去のシーズンとして作り、終わったら締めを確かめる）
