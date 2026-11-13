@@ -1802,14 +1802,16 @@ async function shareCard(data, opt) {
   x.fillStyle = '#f2b632'; x.font = `22px ${DISP}`; x.fillText('計算ブリッジ 作戦研究所', NX, 70);
   x.fillStyle = '#fbf3dc'; x.font = `54px ${DISP}`; x.fillText(NAME, NX, 138, 270);
   const nameW = Math.min(270, x.measureText(NAME).width);
+  let topEnd = NX + nameW; // 名前・推定実力の右端（紋章がここにかぶらないように）
   if (r.ok) {
     const full = Math.floor(r.r + 1e-9), half = r.r % 1 >= 0.5 && r.r < 5; let sx = NX + nameW + 26;
     x.font = `30px ${DISP}`;
     for (let i = 0; i < 5; i++) { x.fillStyle = i < full ? '#f2b632' : (i === full && half) ? 'rgba(242,182,50,.55)' : 'rgba(255,255,255,.15)'; x.fillText('★', sx, 112); sx += 32; }
-    x.fillStyle = '#fbf3dc'; x.font = `34px ${DISP}`; x.fillText(r.r.toFixed(1), sx + 8, 114);
-    x.fillStyle = '#f2b632'; x.font = `900 20px ${BODY}`; x.fillText(`推定実力 ${rateLabel(r.r)}相当`, NX + nameW + 26, 140);
+    x.fillStyle = '#fbf3dc'; x.font = `34px ${DISP}`; x.fillText(r.r.toFixed(1), sx + 8, 114); topEnd = Math.max(topEnd, sx + 8 + x.measureText(r.r.toFixed(1)).width);
+    x.fillStyle = '#f2b632'; x.font = `900 20px ${BODY}`; x.fillText(`推定実力 ${rateLabel(r.r)}相当`, NX + nameW + 26, 140); topEnd = Math.max(topEnd, NX + nameW + 26 + x.measureText(`推定実力 ${rateLabel(r.r)}相当`).width);
   }
-  for (let gi = 0; gi < ACH_GROUPS.length; gi++) { const done = catProgress(g, gi).done, im = await svgToImg(emblemSVG(gi, done, 60)); const X = W - 52 - (ACH_GROUPS.length - gi) * 54; if (im) { if (done) { x.save(); x.shadowColor = 'rgba(217,164,255,.8)'; x.shadowBlur = 16; } x.globalAlpha = done ? 1 : 0.35; x.drawImage(im, X, 44, 50, 50); x.globalAlpha = 1; if (done) x.restore(); } x.fillStyle = done ? '#e9c8ff' : 'rgba(255,255,255,.35)'; x.font = `700 11px ${BODY}`; x.textAlign = 'center'; x.fillText(ACH_GROUPS[gi][0], X + 25, 108, 52); x.textAlign = 'left'; }
+  const NG = ACH_GROUPS.length, ST = Math.max(36, Math.min(54, Math.floor((W - 52 - (topEnd + 18)) / NG))), ES = ST - 4; // 紋章の間隔：右端から名前・推定実力の手前まで（カテゴリーが増えても重ならない）
+  for (let gi = 0; gi < NG; gi++) { const done = catProgress(g, gi).done, im = await svgToImg(emblemSVG(gi, done, 60)); const X = W - 52 - (NG - gi) * ST; if (im) { if (done) { x.save(); x.shadowColor = 'rgba(217,164,255,.8)'; x.shadowBlur = 16; } x.globalAlpha = done ? 1 : 0.35; x.drawImage(im, X, 44 + (50 - ES) / 2, ES, ES); x.globalAlpha = 1; if (done) x.restore(); } x.fillStyle = done ? '#e9c8ff' : 'rgba(255,255,255,.35)'; x.font = `700 11px ${BODY}`; x.textAlign = 'center'; x.fillText(ACH_GROUPS[gi][0], X + ES / 2, 108, ST - 2); x.textAlign = 'left'; }
   // 右上（紋章の下）：総合ランキングの順位（AI込み・人だけ）
   if (opt && opt.ranks && (opt.ranks.a || opt.ranks.h)) {
     const parts = [opt.ranks.a ? ['AI込み', opt.ranks.a] : null, opt.ranks.h ? ['人だけ', opt.ranks.h] : null].filter(Boolean);
