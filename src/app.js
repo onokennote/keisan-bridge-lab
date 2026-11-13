@@ -1172,8 +1172,9 @@ function huntGo(aim) {
 const aimCount = () => G_().aim || 0;
 // 大会のご褒美：決勝進出で「まんべんなく」以下は1発、「強豪ぞろい」「全員達人」は2発。優勝でさらに2発（「図鑑の場」の銀バッジを持っているとき）
 const AIM_RULE = '大会で決勝に進んだら1発（強豪ぞろい・全員達人なら2発）、優勝したらさらに2発';
+const zukanDone = () => zukanCount(zukanGet()) >= ZUKAN.length; // 式ハンター（図鑑）をすべて制覇した
 function aimReward(T, kind) {
-  const g = G_(); if (!g.ach['zukan_cat:3']) return 0;
+  const g = G_(); if (!g.ach['zukan_cat:3'] || zukanDone()) return 0; // 図鑑を制覇したら、もう自動照準はもらえない（手渡しのイベントもなし）
   const n = kind === 'champion' ? 2 : (T.cfg && ['strong', 'master'].includes(T.cfg.mix) ? 2 : 1);
   g.aim = (g.aim || 0) + n; G_save(g); T.aimGot = (T.aimGot || 0) + n;
   return n;
@@ -1190,7 +1191,7 @@ function aimHandover(n, kind, then) {
 }
 // 式ハンターの最初に、マサが自動照準のことを教える（条件の「図鑑の場」銀バッジを持っているときだけ）
 function aimTalk() {
-  const g = G_(); if (!g.ach['zukan_cat:3']) return '';
+  const g = G_(); if (!g.ach['zukan_cat:3'] || zukanDone()) return '';
   const n = g.aim || 0;
   const t = n ? `自動照準が${n}発あるで！下のボタンで使えるわ。${AIM_RULE}もらえるで！` : `「図鑑の場」の銀バッジ持っとるやん！${AIM_RULE}、ご褒美に自動照準がもらえるで！${HUNT_SEC / 60}分間ずっと、自動で捕まえてくれるんや！`;
   return `<div class="op-line masa aim-talk"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(t)}</div></div>`;
