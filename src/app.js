@@ -1643,17 +1643,17 @@ function rankingHTML() {
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です</span></div>
   <div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
   <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
-    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」（はじめ10人。「もっと見る」で続き）・「自分のまわり」（上下5人ずつ）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
+    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」（はじめ20人。「もっと見る」で続き）・「自分のまわり」（上下10人ずつ）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
 }
-// ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位（はじめ10人・もっと見るで+20人）／自分のまわり（上下5人）／ライバル
+// ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位（はじめ20人・もっと見るで+20人）／自分のまわり（上下10人）／ライバル
 const RK_MODES = [['top', '🏆 上位'], ['near', '📍 自分のまわり'], ['rival', '⚔ ライバル']];
 function rkTabs(k) { const m = (S.rkMode || {})[k] || 'top'; return `<div class="su-seg rk-tabs">${RK_MODES.map(([v, l]) => `<button class="${m === v ? 'on' : ''}" data-act="rk-mode" data-k="${k}" data-v="${v}">${l}</button>`).join('')}</div>`; }
 function rkRows(k, L, rowF, total) {
   const m = (S.rkMode || {})[k] || 'top', gap = '<div class="rk-gap">…</div>', mi = L.findIndex(rankMe), empty = t => `<p class="small muted">${t}</p>`;
   if (!L.length) return '';
-  if (m === 'near') { if (mi < 0) return empty('まだこのランキングに載っていません。'); const a = Math.max(0, mi - 5), z = Math.min(L.length, mi + 6); return L.slice(a, z).map(rowF).join('') + (z >= L.length && total > L.length ? gap : ''); }
+  if (m === 'near') { if (mi < 0) return empty('まだこのランキングに載っていません。'); const a = Math.max(0, mi - 10), z = Math.min(L.length, mi + 11); return L.slice(a, z).map(rowF).join('') + (z >= L.length && total > L.length ? gap : ''); }
   if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? R.map(rowF).join('') : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
-  const n = (S.rkMore || {})[k] || 10, top = L.slice(0, n), more = L.length > n || total > L.length;
+  const n = (S.rkMore || {})[k] || 20, top = L.slice(0, n), more = L.length > n || total > L.length;
   return top.map(rowF).join('') + (mi >= n ? gap + rowF(L[mi]) : '') + (more ? `<button class="btn sm ghost rk-more" data-act="rk-more" data-k="${k}">もっと見る（${Math.min(L.length, total) > n ? `あと${Math.min(L.length, total) - n}人` : '続き'}）</button>` : '');
 }
 function rkRepaint() { if (S.view !== 'ranking') return; const y = scrollY; $('#app').innerHTML = rankingHTML(); bind(); rankingLoad(); scrollTo(0, y); }
@@ -5928,7 +5928,7 @@ function act(a, el) {
     case 'zk-t': S.zkT = +el.dataset.t; render(); break;
     case 'share-open': shareOpen(); break;
     case 'rk-mode': { S.rkMode = Object.assign({}, S.rkMode, { [el.dataset.k]: el.dataset.v }); rkRepaint(); break; }
-    case 'rk-more': { S.rkMore = Object.assign({}, S.rkMore, { [el.dataset.k]: ((S.rkMore || {})[el.dataset.k] || 10) + 20 }); rkRepaint(); break; }
+    case 'rk-more': { S.rkMore = Object.assign({}, S.rkMore, { [el.dataset.k]: ((S.rkMore || {})[el.dataset.k] || 20) + 20 }); rkRepaint(); break; }
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
