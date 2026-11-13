@@ -34,7 +34,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   ok(r2.ok === false && /1日1部/.test(r2.error || ''), '同じ日にほかの部には出られない（' + (r2.error || '') + '）');
 
   // 2. 画面：ホームのデイリーのカード → エントリー → 最後まで（過去のシーズンとして作り、終わったら締めを確かめる）
-  j = await api('daily_test', { startIn: 25, season: '2026-10b', sets: 2, games: 1, part: 3, aiTest: 1, ais: ['zero', 'shota', 'tome'] });
+  j = await api('daily_test', { startIn: 25, season: '2026-10b', sets: 2, games: 1, part: 3, aiTest: 1, ais: ['zero', 'shota', 'tome'], finalGames: 2 });
   const b = await chromium.launch(), errs = [];
   const open = async (name) => {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(name + ': ' + e.message));
@@ -55,8 +55,10 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
     const h = v.game.hand.map(c => c[0]), ms = KB.findMoves(KB.countsOf(h), v.game.field[0], 'all', 3);
     if (ms.length) { KBAPP.ON.sel = []; const used = new Set(); for (const x of ms[0].vals) { const i = h.findIndex((y, k) => y === x && !used.has(k)); used.add(i); KBAPP.ON.sel.push(i); } KBAPP.act('on-play'); } else KBAPP.act('on-draw'); return 'acted'; });
   let done = false; const t0 = Date.now();
-  while (Date.now() - t0 < 420000) { const [sa, sb] = [await step(pa), await step(pb)]; if (sa === 'tour:done' || sb === 'tour:done') { done = true; break; } await wait(400); }
-  ok(done, 'デイリーが最後まで進む（予選2セット→決勝）');
+  let finG = null;
+  while (Date.now() - t0 < 600000) { const [sa, sb] = [await step(pa), await step(pb)]; for (const p of [pa, pb]) { const g = await p.evaluate(() => KBAPP.ON.v && /決勝/.test(KBAPP.ON.v.label || '') ? KBAPP.ON.v.cfg.games : null); if (g) finG = g; } if (sa === 'tour:done' || sb === 'tour:done') { done = true; break; } await wait(400); }
+  ok(done, 'デイリーが最後まで進む（予選→決勝）');
+  ok(finG === null || finG === 2, `決勝は決勝だけのゲーム数（${finG}ゲーム）`);
   await wait(1500);
   const info = await pa.evaluate(async () => { const c = KBAPP.plLink(KBAPP.S.profileId || JSON.parse(localStorage.getItem('kb.profile'))); return (await fetch(KB_CLOUD_API + '?a=daily_info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token }) })).json(); });
   const past = (info.past || []).find(x => x.season === '2026-10b');

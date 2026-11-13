@@ -345,7 +345,7 @@ function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
-  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3'];
+  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3'];
   foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }
 function obTourStart(array &$t, float $now): void {
@@ -443,14 +443,18 @@ function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' .
 function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
 function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
-  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選2セット×3ゲーム・上位5人で決勝。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります。テスト中のため、不具合やルール・ポイントの変更があります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
-    'sets' => 2, 'games' => 3, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
+    'sets' => 3, 'games' => 3, 'finalGames' => 5, 'finalists' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
 function dailyEnsure(): void {
   $d = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$d->format('G') < DAILY_HOUR) return;
   foreach (DAILY_PARTS as $i => $hm) {
-    $id = 'D' . $d->format('ymd') . ($i + 1); $q = db()->prepare('SELECT 1 FROM tours WHERE id = ?'); $q->execute([$id]); if ($q->fetch()) continue;
+    $id = 'D' . $d->format('ymd') . ($i + 1); $q = db()->prepare('SELECT st FROM tours WHERE id = ?'); $q->execute([$id]); $old = $q->fetchColumn();
+    if ($old) { $o = json_decode($old, true); if (($o['phase'] ?? '') === 'entry' && empty($o['cfg']['test']) && (($o['cfg']['sets'] ?? 0) !== 3 || empty($o['cfg']['finalGames']))) { // 形式を変えた日：まだ始まっていない部を新しい形式に
+        $nc = dailyCfg($d, $i + 1, (int)$o['cfg']['startAt']); $o['cfg'] = array_merge($o['cfg'], ['sets' => $nc['sets'], 'games' => $nc['games'], 'finalGames' => $nc['finalGames'], 'desc' => $nc['desc']]);
+        db()->prepare('UPDATE tours SET st = ?, updated = ? WHERE id = ?')->execute([json_encode($o, JSON_UNESCAPED_UNICODE), time(), $id]); }
+      continue; }
     $start = (new DateTime($d->format('Y-m-d') . ' ' . $hm, jstTz()))->getTimestamp();
     $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => dailyCfg($d, $i + 1, $start), 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
     db()->prepare('INSERT OR IGNORE INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
@@ -554,7 +558,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
@@ -863,7 +867,7 @@ try {
       if (!empty($b['all'])) { db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute(['D' . $d->format('ymd') . '%']); }
       db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute([$id . '%']);
       $start = time() + (int)($b['startIn'] ?? 30); $cfg = dailyCfg($d, $part, $start); if (!empty($b['season'])) $cfg['season'] = (string)$b['season'];
-      $cfg = array_merge($cfg, ['limit' => 3, 'sets' => (int)($b['sets'] ?? 2), 'games' => (int)($b['games'] ?? 1)]); if (isset($b['aiTest'])) $cfg['aiTest'] = (float)$b['aiTest'];
+      $cfg = array_merge($cfg, ['limit' => 3, 'sets' => (int)($b['sets'] ?? 2), 'games' => (int)($b['games'] ?? 1), 'finalGames' => (int)($b['finalGames'] ?? 1), 'test' => 1]); if (isset($b['aiTest'])) $cfg['aiTest'] = (float)$b['aiTest'];
       foreach ((array)($b['ais'] ?? []) as $k => $cid) db()->prepare("INSERT OR REPLACE INTO ranks (uid, pid, name, shown, rating, badges, bp, atk, avatar, updated, bio, card, streak, ai) VALUES ('ai', ?, ?, 1, ?, 0, 0, 0, NULL, ?, '', NULL, 0, 1)")->execute([$cid, '研究員' . $cid, 2 + $k % 3, time()]); // 仮のAI研究員
       $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
       db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
