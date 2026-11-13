@@ -96,6 +96,10 @@ async function play(b, c, data, sets, minis, form) {
   if (MODE === 'seed' || MODE === 'reseed') {
     // 最初の投入：強い人は経験を積んだ状態、弱い人は始めたばかり
     for (const [lv, a, z] of [[5, 4, 6], [5, 3, 5], [4, 3, 5], [4, 2, 4], [3, 2, 3], [3, 1, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, z));
+  } else if (MODE === 'recruit') {
+    // 新メンバーをまとめて5人（手で動かす）：ゼロ（★5）は必ず、ほかは★4・★3・★2・★1から1人ずつ。強い人は少し経験を積んだ状態で入る
+    const z = roster.find(c => c.id === 'zero'); if (z && !have.has('zero')) jobs.push({ c: z, data: null, sets: rnd(3, 4), minis: mini(2) });
+    for (const [lv, a, zz] of [[4, 2, 3], [3, 2, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, zz));
   } else if (MODE === 'fix') {
     // 記録の直しだけ（対局もミニゲームもしない。開いて保存し直す）
     for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c) jobs.push({ c, data: x.data, sets: 0, minis: [] }); }

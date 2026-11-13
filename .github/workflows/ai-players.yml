@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'daily（いつもの1日）・seed（最初の投入）・catchup（ミニゲームだけ追いつき）・reseed（全員やり直し）・attack（バッジアタックの日）・fix（記録の直しだけ）'
+        description: 'daily（いつもの1日）・seed（最初の投入）・catchup（ミニゲームだけ追いつき）・reseed（全員やり直し）・attack（バッジアタックの日）・fix（記録の直しだけ）・recruit（新メンバー5人。ゼロを含む）'
         default: daily
         required: true
 concurrency: ai-players
