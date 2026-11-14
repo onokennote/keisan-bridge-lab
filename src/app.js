@@ -3879,7 +3879,8 @@ const decOk = d => d.mine === d.best || d.loss <= 0.015 || !!(BEST_LOOSE[d.round
 function prevBtnHTML() {
   const d = prevDec(); if (!d) return '';
   const ok = decOk(d), [v, c] = verdict(d);
-  return `<button class="btn sm ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open">📝 前回の判断${ok ? '' : `<span class="verdict ${c}">${v}</span>`}</button>`;
+  const lab = ok && c !== 'v-best' ? '最善扱い' : v, cls = ok ? 'v-best' : c;
+  return `<button class="btn sm ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open">📝 前回の判断<span class="verdict ${cls}">（${lab}）</span></button>`;
 }
 function renderPrev() { const el = $('#prevpanel'); if (el) { el.hidden = true; el.innerHTML = ''; } } // 前は「AIの読み」の下に出していた（いまはボタン）
 function prevOpen() {
