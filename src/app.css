@@ -2460,3 +2460,10 @@ body.rewinding #home-fab{display:none}
 .prev-best{margin-left:8px;font-size:11.5px;font-weight:500;opacity:.9}.prev-best b{font-size:13px;margin-left:2px}
 .prev-btn{display:inline-flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 6px;max-width:100%;text-align:left}.prev-btn>span{white-space:nowrap}.prev-btn .verdict,.prev-btn .prev-best{margin-left:0}
 .ws-pp{font-size:15px;font-weight:700;color:#e9dfc0;margin-top:4px}.ws-pp b{font-size:24px;color:#ffd666;margin:0 2px}
+
+/* セットの結果発表（表の前） */
+.set-ann{display:flex;flex-direction:column;gap:6px;text-align:center;border:1.5px solid rgba(255,214,102,.45);background:linear-gradient(180deg,rgba(255,214,102,.12),rgba(255,214,102,.02))}
+.set-ann.top{border-color:#ffd666;box-shadow:0 0 18px rgba(255,214,102,.25)}
+.sa-big{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-size:40px;line-height:1.15;color:#ffd666;letter-spacing:1px}
+.sa-sub{font-size:16px;font-weight:700;color:#e9dfc0}
+.set-ann .op-lines{text-align:left;margin-top:6px}

@@ -5444,7 +5444,29 @@ function setEndHTML() {
   else if (T.phase === 'final') { title = '決勝 終了'; btn = '<button class="btn primary" data-act="final-result">最終結果へ</button>'; }
   else { title = `第${T.set}セット ${mine.rank}位（+${mine.pts}点）`; btn = T.set < T.cfg.sets ? '<button class="btn primary" data-act="next-set">次のセットへ（席替え）</button>' : '<button class="btn primary" data-act="to-final">予選結果と決勝進出者へ</button>'; }
   return `<div class="topbar"><div class="where">${esc(title)}</div><div></div></div>
-  <div class="stack">${mine && (S.T.setLog || []).length ? `<div class="panel" id="review-wrap" data-scope="set">${reviewHTML('set')}</div>` : ''}${T.cfg.kind === 'tournament' && T.phase === 'prelim' ? standingsHTML(T) : ''}${tablesHTML.join('')}<div class="row" style="justify-content:flex-end">${btn}</div></div>`;
+  <div class="stack">${mine ? setAnnounceHTML(T, mine) : ''}${T.cfg.kind === 'tournament' && T.phase === 'prelim' ? standingsHTML(T) : ''}${tablesHTML.join('')}${mine && (S.T.setLog || []).length ? `<div class="panel" id="review-wrap" data-scope="set">${reviewHTML('set')}</div>` : ''}<div class="row" style="justify-content:flex-end">${btn}</div></div>`;
+}
+// セットの結果発表（表の前）：大きな文字で順位とPP、博士が結果を読み上げ、マサが次にやることを案内（練習・予選・決勝で変える）
+function setAnnounceHTML(T, mine) {
+  const nmY = rvName(), n = (T.tables[mine.table] || []).length, prac = T.cfg.kind === 'practice', fin = T.phase === 'final';
+  let big = fin ? `決勝 ${mine.rank}位` : `卓内 ${mine.rank}位`, sub = `セットPP ${mine.pp}${!fin ? `・得点 +${mine.pts}` : ''}`, root, masa;
+  const R = arr => RVP(arr);
+  if (fin) {
+    root = mine.rank === 1 ? R([`結果発表です。決勝は${nmY}が${n}人中1位、優勝です！`, `決勝の結果です。${nmY}、${n}人中1位で優勝です。おめでとうございます。`]) : R([`結果発表です。決勝は${n}人中${mine.rank}位、決勝PPは${mine.pp}でした。`, `決勝の結果です。${nmY}は${n}人中${mine.rank}位でした。`]);
+    masa = R(['ほな「最終結果へ」で、表彰式と大会の振り返りを見にいこか！', '最終結果で、大会ぜんぶの成績を確かめよか！']);
+  } else if (prac) {
+    root = mine.rank === 1 ? R([`結果発表です。${nmY}は${n}人中1位、セットPP${mine.pp}でした。`, `このセットは${nmY}が1位です。セットPPは${mine.pp}でした。`]) : R([`結果発表です。${nmY}は${n}人中${mine.rank}位、セットPP${mine.pp}でした。`, `このセットの結果は${n}人中${mine.rank}位、セットPPは${mine.pp}です。`]);
+    masa = R(['下の表で各ゲームの失点を確かめたら、総評で分かれ道をチェックや！同じ設定でもう1セットもいけるで！', '表で失点の流れを見て、いちばん下の総評で振り返りや。もう1セット行くなら下のボタンや！', 'まずは表で、どのゲームで点を取られたか見てみ。総評で次の課題もわかるで！']);
+  } else {
+    const s = standingsSorted(T), i = s.findIndex(p => p.id === 0), F = T.cfg.finalists, last = T.set >= T.cfg.sets, line = s[F - 1] ? T.points[s[F - 1].id] : 0, gap = Math.max(0, line - T.points[0]);
+    sub += ` ／ 総合 ${i + 1}位（${T.points[0]}点）`;
+    root = R([`結果発表です。第${T.set}セットは卓内${mine.rank}位、${mine.pts}点を獲得しました。総合は${i + 1}位です。`, `第${T.set}セットの結果です。卓内${mine.rank}位で+${mine.pts}点、ここまでの総合は${i + 1}位です。`]);
+    masa = last ? (i < F ? R([`予選終了や！総合${i + 1}位、決勝圏内で終えたで！次は予選結果と決勝進出者の発表や！`, `予選ぜんぶ終わったで！${i + 1}位、決勝進出の発表を見にいこか！`]) : R([`予選終了や。総合${i + 1}位、決勝ラインまで${gap}点やった…。予選結果を見にいこか。`, `予選はここまでや。${i + 1}位、決勝進出者の発表を確かめよか。`]))
+      : (i < F ? R([`次は第${T.set + 1}セット、席替えや！総合${i + 1}位で決勝圏内、このまま逃げ切るで！`, `第${T.set + 1}セットへ行こか！いまは決勝圏内の${i + 1}位や、守りすぎず攻めていこ！`]) : R([`次は第${T.set + 1}セット、席替えや！決勝ラインまであと${gap}点、まだ巻き返せるで！`, `第${T.set + 1}セットで取り返そ！決勝ラインの${F}位まで${gap}点差や！`]));
+  }
+  return `<div class="panel set-ann ${mine.rank === 1 ? 'top' : ''}"><div class="sa-big">${esc(big)}</div><div class="sa-sub">${esc(sub)}</div>
+    <div class="op-lines"><div class="op-line root"><div class="cm-av">${KB.casterSVG('root', mine.rank === 1 ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">解説・ルート博士</span>${esc(root)}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(masa)}</div></div></div></div>`;
 }
 function standingsHTML(T) {
   const s = standingsSorted(T); const F = T.cfg.finalists;
