@@ -103,6 +103,14 @@ function nextPlayableProb(counts, unseen) { // unseen: counts array of unseen va
   return tot ? ok / tot : 0;
 }
 KB.nextPlayableProb = nextPlayableProb;
+// アウツ：残りの札（3枚以下）をぜんぶ使って作れる場＝その場が来たら上がれる数。unseen（見えていない札の枚数）から、その札の枚数と割合も
+function outsOf(counts, unseen) {
+  const n = nCounts(counts), vals = []; let ok = 0, tot = 0;
+  if (n < 1 || n > 3) return null;
+  for (let t = 1; t <= 13; t++) { const w = unseen ? unseen[t] : 4; tot += w; if (findMoves(counts, t, 'all', 3).some(m => m.n === n)) { vals.push(t); ok += w; } }
+  return { vals, cards: ok, total: tot, p: tot ? ok / tot : 0 };
+}
+KB.outsOf = outsOf;
 function sumCounts(c) { let s = 0; for (let v = 1; v <= 13; v++) s += c[v] * v; return s; }
 function nCounts(c) { let s = 0; for (let v = 1; v <= 13; v++) s += c[v]; return s; }
 KB.sumCounts = sumCounts; KB.nCounts = nCounts;
@@ -401,6 +409,8 @@ KB.reasons = function (counts, m, unseen, ev, best) {
   const p = nextPlayableProb(rest, unseen);
   const mask = reachMask(rest); let k = 0; for (let t = 1; t <= 13; t++) if (mask & (1 << t)) k++;
   out.push(`次の場で出せる確率 ${Math.round(p * 100)}%（作れる数 ${k}/13）`);
+  const o = outsOf(rest, unseen);
+  if (o) out.push(o.vals.length ? `アウツ（来たら上がれる場）：${o.vals.map(KB.vname).join('・')} の${o.vals.length}つ。見えていない札のうち${o.cards}枚（約${Math.round(o.p * 100)}%）` : `アウツ：0（この${left}枚をぜんぶ使って作れる場がないので、次の場で上がることはできません）`);
   if (ev && best && ev !== best) {
     const d = ev.goal - best.goal;
     if (Math.abs(d) < 0.01) out.push('最善手とほぼ同等');
