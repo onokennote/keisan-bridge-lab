@@ -3876,14 +3876,24 @@ function renderSide() {
 // 前回の判断：早見表の横のボタン（最善でなかったら目立たせる）→ 押すと画面に重ねて、直前の自分の判断と考えられた手を復習できる
 const prevDec = () => { const g = S.game, d = S.decisions && S.decisions[S.decisions.length - 1]; return d && g && !g.over ? d : null; };
 const decOk = d => d.mine === d.best || d.loss <= 0.015 || !!(BEST_LOOSE[d.round] && d.loss <= BEST_LOOSE[d.round].loss); // 最善・最善扱い
+// いちばん最近の自分の手が、判定のない手（出せる手がなく引いた・お手つき）か、判定を待っている手か
+const lastActOther = () => { const a = S.lastAct, g = S.game; if (!a || !g || g.over || a.gameNo !== S.gameNo) return null; if (a.k === 'dec') return S.decisions.length < a.n && Date.now() - a.at < 20000 ? a : null; return a; };
 function prevBtnHTML() {
+  const o = lastActOther();
+  if (o) return o.k === 'foul' ? '<button class="btn sm prev-btn prev-warn" data-act="prev-open"><span class="nw">📝 前回の判断</span><span class="verdict v-bad">（お手つき）</span></button>'
+    : `<button class="btn sm prev-btn ghost" data-act="prev-open" ${o.k === 'dec' ? 'disabled' : ''}><span class="nw">📝 前回の判断</span><span class="verdict">${o.k === 'dec' ? '（判定中…）' : '（ー）'}</span></button>`;
   const d = prevDec(); if (!d) return '';
   const ok = decOk(d), [v, c] = verdict(d);
   const lab = ok && c !== 'v-best' ? '最善扱い' : v, cls = ok ? 'v-best' : c;
-  return `<button class="btn sm prev-btn ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open"><span class="nw">📝 前回の判断</span><span class="verdict ${cls}">（${lab}）</span><span class="prev-best">最善 <b class="mono">${esc(d.best)}</b></span></button>`;
+  return `<button class="btn sm prev-btn ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open"><span class="nw">📝 前回の判断</span><span class="verdict ${cls}">（${lab}）</span><span class="prev-best">あなた <b class="mono">${esc(d.mine)}</b></span></button>`;
 }
 function renderPrev() { const el = $('#prevpanel'); if (el) { el.hidden = true; el.innerHTML = ''; } } // 前は「AIの読み」の下に出していた（いまはボタン）
 function prevOpen() {
+  const o = lastActOther();
+  if (o && o.k !== 'dec') { modal(`<div class="prev-modal stack"><div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">📝 前回の判断</h3><span class="dr-r">第${o.round}巡・場${o.t}</span><span class="verdict ${o.k === 'foul' ? 'v-bad' : ''}">${o.k === 'foul' ? 'お手つき' : '判断なし'}</span></div>
+    <p style="margin:0">${o.k === 'foul' ? `「${o.vals.map(KB.vname).join('・')}」では場の${o.t}が作れず、お手つきで${o.n}枚引きました。${esc(o.alt || '')}` : `出せる手がなかったので、引くしかありませんでした。選べる手がなかったので、判断の記録（最善手・推定実力）には入りません。`}</p>
+    <p class="small muted" style="margin:0">${o.k === 'foul' ? 'お手つきは推定実力で差し引かれます（お手つき1割で−0.5）。式を出す前に、もう一度計算を確かめよう。' : 'ここを見ても評価には影響しません。'}</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`); return; }
   const d = prevDec(); if (!d) return;
   const [v, c] = verdict(d), ok = decOk(d);
   modal(`<div class="prev-modal stack"><div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">📝 前回の判断</h3><span class="dr-r">第${d.round}巡・場${d.t}</span><span class="verdict ${ok && c !== 'v-best' ? 'v-best' : c}">${ok && c !== 'v-best' ? '最善扱い' : v}</span><span class="dr-loss">損失 ${(d.loss * 100).toFixed(1)}pt</span></div>
@@ -4030,6 +4040,7 @@ function recordDecision(move) {
   const counts = g.counts(me), t = g.field.v;
   const all = KB.findMoves(counts, t, 'all', 3);
   if (!all.length) return; // 選択肢なし
+  S.lastAct = { k: 'dec', gameNo: S.gameNo, n: S.decisions.length + 1, at: Date.now() }; // 前回の判断のボタン：判定が付くまでは「判定中」
   const key = stateKey(g);
   let ev, ctx = ctxFor(me);
   let view = viewFor(g, me);
@@ -4316,6 +4327,7 @@ function humanFoul(vals) {
   { const wasRetry = S.undoRetry; S.undoRetry = false; if (!wasRetry && undoAllowed()) try { S.undoSnap = undoTake(); } catch (e) { } } // お手つきも「待った」で取り消せる（やり直した手のお手つきは除く）
   const got = g.foul(N, vals);
   (S.fouls = S.fouls || []).push({ round: r0, t, vals: vals.slice(), n: got.length, alt });
+  S.lastAct = { k: 'foul', gameNo: S.gameNo, round: r0, t, vals: vals.slice(), n: got.length, alt };
   S.foulCount = (S.foulCount || 0) + 1;
   { const pv = G_().cnt.streakNow || 0; if (pv >= 3) setTimeout(() => comboFx(pv, true), 600); }
   S.bestStreak = 0; S.recordRun = false; { const g = G_(); g.cnt.streakNow = 0; G_save(g); } // お手つきで連続最善は途切れる
@@ -4350,7 +4362,7 @@ function humanDraw(force) {
   const playable = KB.findMoves(g.counts(me), g.field.v, 'all', 3).length > 0;
   if (playable && S.settings.warnMiss && !force) { S.confirmDraw = true; renderGame(); return; }
   const nd = S.decisions.length; // 判定を記録する前の件数
-  if (playable) recordDecision(null); else S.undoRetry = false; // 出せずに引いただけの手でも、やり直しは終わり
+  if (playable) recordDecision(null); else { S.undoRetry = false; S.lastAct = { k: 'forced', gameNo: S.gameNo, round: g.round, t: g.field.v }; } // 出せずに引いただけの手でも、やり直しは終わり
   const before = new Set(g.hands[me].map(c => c.id));
   const r0 = g.round;
   g.apply(null);
@@ -4418,7 +4430,7 @@ function undoGo() {
     if (u.growth !== 'null') store.set('growth', JSON.parse(u.growth));
     const g = Object.assign(Object.create(KB.Game.prototype), JSON.parse(u.g)); g.players = u.ids.map(id => P(id));
     S.game = g; S.gameNo = (S.gameNo || 0) + 1; // 古いタイマー（セリフ・演出）は gameNo で止まる
-    S.decisions = JSON.parse(u.dec); S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak; S.foulCount = u.foulCount;
+    S.decisions = JSON.parse(u.dec); S.lastAct = null; S.fouls = JSON.parse(u.fouls); S.bestStreak = u.bestStreak; S.foulCount = u.foulCount;
     S.gameHinted = true; S.T.setHinted = true; S.T.tourHinted = true; S.undoRetry = true;
     S.qual = (S.T.cfg.kind === 'tournament' && S.T.phase === 'prelim') ? qualifyTable(S.T) : null;
     S.sel = []; S.hint = null; S.bubbles = {}; S.thinking = null; S.justActed = null; S.winShow = null; S.holdTurn = null; S.roundHeld = false; S.showRound = false; S.confirmDraw = false; S.ask = null; S.lastField = g.field;
@@ -4532,10 +4544,9 @@ function winOverlay(then) {
 }
 function winStripHTML(g, me) {
   const w = g.winner; const wp = w >= 0 ? g.players[w] : null;
-  const lp = w >= 0 ? g.played[w][g.played[w].length - 1] : null;
   return `<div class="win-strip" role="status">
     <div class="ws-main"><div class="ws-title">${wp ? esc(w === me ? 'あなた' : nm(wp)) + 'が上がりました！' : '規定の巡数で終了しました'}</div>
-    ${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(miniCard).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
+    ${me >= 0 && g.pp ? `<div class="ws-pp">${w === me ? 'あなたのPP：<b>0</b>（上がり！）' : `あなたのPP：<b>${g.pp[me]}</b>`}</div>` : ''}</div>
     <div class="ws-btns"><button class="btn primary" data-act="win-ok">${S.attack ? '次のゲームへ' : '結果を見る'}</button>${undoOk() ? '<button class="btn undo-btn" data-act="undo">⏪ 待った</button>' : ''}</div></div>`;
 }
 // カードが飛ぶ演出（山札→人、人→場）
