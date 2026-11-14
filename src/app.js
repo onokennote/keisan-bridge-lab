@@ -124,8 +124,12 @@ function checkAvUnlocks(g) {
   const seen0 = store.get('avUnl', null), now = Object.keys(AV_LOCK).filter(k => avUnlocked(k, g));
   if (seen0 === null) { store.set('avUnl', now); return; } // 初めては黙って記録（今までの分は編集画面で確認できる）
   const seen = seen0, fresh = now.filter(k => !seen.includes(k));
-  if (!fresh.length) return; store.set('avUnl', now);
-  const groups = []; fresh.forEach(k => { const c = AV_LOCK[k] && AV_LOCK[k].cat; const gq = c && groups.find(x => x.cat === c); if (gq) gq.keys.push(k); else groups.push({ cat: c, keys: [k] }); });
+  // 一度知らせたものは消さない（待ったでバッジが取り消された・古い記録を読み込んだなどで一時的に外れても、もう一度知らせない）
+  if (!fresh.length) return; store.set('avUnl', [...new Set(seen.concat(now))]);
+  // 知らせるのは、いま取ったバッジ・冠で使えるようになったものだけ（前に取ったものが記録の行き違いで「新しい」に見えても黙って記録する）
+  const gotAt = k => { const L = AV_LOCK[k] || {}; if (L.cat) { const gi = ACH_GROUPS.findIndex(x => x[0] === L.cat); return g.ach['cat:' + gi] || 0; } if (L.badge) { const tb = topBadge(L.badge); return tb ? g.ach[L.badge + ':' + tb.t] || 0 : 0; } return Date.now(); };
+  const recent = fresh.filter(k => Date.now() - gotAt(k) < 10 * 60000); if (!recent.length) return;
+  const groups = []; recent.forEach(k => { const c = AV_LOCK[k] && AV_LOCK[k].cat; const gq = c && groups.find(x => x.cat === c); if (gq) gq.keys.push(k); else groups.push({ cat: c, keys: [k] }); });
   groups.forEach((gq, i) => setTimeout(() => toast(gq.cat ? `👑 冠「${CAT_SPECIAL[gq.cat]}」でアバターのセット${gq.keys.length}点：${gq.keys.map(avItemName).join('・')}` : `アバターに新しいアイテム：${gq.keys.map(avItemName).join('・')}`), 2600 + i * 3200));
 }
 function avatarEditor() {
