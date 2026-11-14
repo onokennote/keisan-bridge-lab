@@ -2456,3 +2456,5 @@ body.rewinding #home-fab{display:none}
 .tl-row{gap:6px;flex-wrap:wrap}
 .tl-note{margin:0;font-size:11.5px;line-height:1.55;color:var(--muted,#9a9)}
 .tl-hint{border-color:rgba(255,154,60,.6)}
+.prev-best{margin-left:8px;font-size:11.5px;font-weight:500;opacity:.9}.prev-best b{font-size:13px;margin-left:2px}
+.prev-btn{display:inline-flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:2px 6px;max-width:100%;text-align:left}.prev-btn>span{white-space:nowrap}.prev-btn .verdict,.prev-btn .prev-best{margin-left:0}

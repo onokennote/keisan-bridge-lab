@@ -3880,7 +3880,7 @@ function prevBtnHTML() {
   const d = prevDec(); if (!d) return '';
   const ok = decOk(d), [v, c] = verdict(d);
   const lab = ok && c !== 'v-best' ? '最善扱い' : v, cls = ok ? 'v-best' : c;
-  return `<button class="btn sm ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open">📝 前回の判断<span class="verdict ${cls}">（${lab}）</span></button>`;
+  return `<button class="btn sm prev-btn ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open"><span class="nw">📝 前回の判断</span><span class="verdict ${cls}">（${lab}）</span><span class="prev-best">最善 <b class="mono">${esc(d.best)}</b></span></button>`;
 }
 function renderPrev() { const el = $('#prevpanel'); if (el) { el.hidden = true; el.innerHTML = ''; } } // 前は「AIの読み」の下に出していた（いまはボタン）
 function prevOpen() {
