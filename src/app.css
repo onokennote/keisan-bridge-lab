@@ -2446,3 +2446,13 @@ body.rewinding #home-fab{display:none}
 .prev-warn .verdict,.btn .verdict{margin-left:6px;font-size:11px;padding:1px 6px}
 @keyframes prevPulse{50%{box-shadow:0 0 0 4px rgba(255,154,60,.25)}}
 .prev-modal .dr-moves{margin:0}
+
+/* 対局画面の道具：上＝評価に影響しない・下＝使うと評価の対象外 */
+.tools{display:flex;flex-direction:column;gap:10px}
+.tl-g{display:flex;flex-direction:column;gap:6px;padding:10px;border-radius:12px}
+.tl-free{background:rgba(90,200,120,.06);border:1px solid rgba(90,200,120,.3)}
+.tl-cost{background:rgba(255,150,60,.07);border:1px solid rgba(255,154,60,.4)}
+.tl-h{font-size:12.5px;font-weight:800}.tl-free .tl-h{color:#8fe3a6}.tl-cost .tl-h{color:#ffbf7a}
+.tl-row{gap:6px;flex-wrap:wrap}
+.tl-note{margin:0;font-size:11.5px;line-height:1.55;color:var(--muted,#9a9)}
+.tl-hint{border-color:rgba(255,154,60,.6)}

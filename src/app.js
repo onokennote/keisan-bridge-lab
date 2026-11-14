@@ -3777,8 +3777,6 @@ function renderGame0() {
       <div class="actions" ${g.over ? 'hidden' : ''}>
         <button class="btn primary" data-act="play" ${valid ? '' : 'disabled'}>出す</button>
         <button class="btn felt-btn" data-act="draw" ${myTurn ? '' : 'disabled'}>引く</button>
-        ${S.attack ? '' : `<button class="btn felt-btn" data-act="hint" ${myTurn ? '' : 'disabled'}>AIの読み</button>`}
-        ${undoOk() ? `<button class="btn felt-btn sm undo-btn" data-act="undo" title="直前の自分の手まで巻き戻す">⏪ 待った</button>` : ''}
       </div>
     </div></div>`;
   if (oldCm) { const nc = document.querySelector('#tablewrap .commentary'); if (nc && nc.dataset.key === oldCm.dataset.key) { oldCm.classList.remove('fresh'); nc.replaceWith(oldCm); } }
@@ -3862,8 +3860,10 @@ function renderSide() {
     else if (e.type === 'draw') lines.push(`<div class="muted">${esc(nm(g.players[e.p]))}：引いた（残${e.left}）</div>`);
     else if (e.type === 'reshuffle') lines.push(`<div class="muted">捨て札を切り直して山札に</div>`);
   }
-  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button>${prevBtnHTML()}</div>
-    ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>`;
+  const meI = g.players.findIndex(p => p.human), myTurnS = meI >= 0 && g.current() === meI && !g.over && !S.spectate;
+  const toolsB = (S.attack || S.spectate) ? '' : `<div class="tl-g tl-cost"><div class="tl-h">⚠ 使うと評価の対象外</div><div class="row tl-row"><button class="btn sm tl-hint" data-act="hint" ${myTurnS ? '' : 'disabled'}>🤖 AIの読み</button>${undoOk() ? '<button class="btn sm undo-btn" data-act="undo" title="直前の自分の手まで巻き戻す">⏪ 待った</button>' : ''}</div><p class="tl-note">AIの読みを見た手・待ったでやり直した手は、最善手・連続最善に入らず、推定実力では★2くらいとして数えます。そのゲーム・セット（大会は大会）の結果のバッジも対象外です。</p></div>`;
+  $('#unseenpanel').innerHTML = `<div class="tools"><div class="tl-g tl-free"><div class="tl-h">✅ 評価に影響しない</div><div class="row tl-row"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button>${prevBtnHTML()}</div>
+    ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>${toolsB}</div>`;
   renderPrev();
   $('#sidepanel').innerHTML = `<div><div class="lbl" style="margin-bottom:4px">記録</div><div class="log" id="log">${lines.join('')}</div></div>`;
   const lg = $('#log'); if (lg) lg.scrollTop = lg.scrollHeight;
@@ -3943,7 +3943,7 @@ function renderHint() {
   let body = '';
   if (S.attack) { el.innerHTML = '<div class="stack"><div class="hint-head"><h3>AIの読み</h3></div><p class="small muted" style="margin:0">バッジアタック中は、AIの読みは使えません。自分の読みで勝負！</p></div>'; return; }
   if (!myTurn) body = `<p class="muted small" style="margin:0">あなたの番になったら「AIの読み」で、最善手・次善手とその理由を確認できます。予選中は「決勝進出率」、決勝では「優勝率」で手を比べます。</p>`;
-  else if (!H || H.key !== stateKey(g)) body = `<p class="muted small" style="margin:0">まず自分で考えてから「AIの読み」を押すのがおすすめです。選んだカードの評価も一緒に表示します。</p><button class="btn sm" data-act="hint">AIの読みを見る</button>${S.T && !S.tiebreak && !badgeElig(S.T).game ? `<p class="small muted hint-note" style="margin:0">この卓はバッジの条件（${ELIG.table}人以上・相手の平均★${ELIG.oppAvg}以上）を満たしていないので、結果のバッジは数えません。</p>` : ''}<p class="small muted hint-note" style="margin:0">${S.gameHinted ? 'このゲームはAIの読みを見たので、判断の評価と結果のバッジの対象外です。' : '※見た手は判断の評価に入らず、そのゲーム・セット・大会は結果のバッジ（上がり・セット優勝など）の対象外になります。'}</p>`;
+  else if (!H || H.key !== stateKey(g)) body = `<p class="muted small" style="margin:0">まず自分で考えてから、上の「🤖 AIの読み」（使うと評価の対象外）を押すのがおすすめです。選んだカードの評価も一緒にここに出ます。</p>${S.T && !S.tiebreak && !badgeElig(S.T).game ? `<p class="small muted hint-note" style="margin:0">この卓はバッジの条件（${ELIG.table}人以上・相手の平均★${ELIG.oppAvg}以上）を満たしていないので、結果のバッジは数えません。</p>` : ''}<p class="small muted hint-note" style="margin:0">${S.gameHinted ? 'このゲームはAIの読みを見たので、判断の評価と結果のバッジの対象外です。' : '※見た手は判断の評価に入らず、そのゲーム・セット・大会は結果のバッジ（上がり・セット優勝など）の対象外になります。'}</p>`;
   else if (H.busy) body = `<p class="muted">シミュレーション中…（相手の手札を何千通りも想定して最後まで打ち切っています）</p>`;
   else {
     const hand = g.hands[me];
