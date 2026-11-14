@@ -996,7 +996,9 @@ function catTalk(k) {
 // モードごとの関連バッジ（各系統の今の段階。未獲得は影で）
 const MB_TOUR = ['tour_done', 'all_sets', 'qualify', 'champion', 'toushi', 'qualify_strong', 'champion_strong'];
 const MB_ATK = ['atk_done', 'atk_bp', 'atk_badges'], MB_HUNT = ['zukan', 'zukan_cat'], MB_OUTS = ['outs3', 'outs4', 'outs5'], MB_CHART = ['chart'];
-const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS).includes(k));
+// 1セット練習のカードには、練習で取れるバッジだけ（大会・ミニゲーム・早見表、オンライン大会・ライバル・デイリーの系統は出さない）
+const MB_NOT_PRAC_G = ['オンライン大会', 'ライバル', 'デイリー'];
+const MB_PRAC = ACH.map(a => a[0]).filter(k => !MB_TOUR.concat(MB_ATK, MB_HUNT, MB_OUTS, MB_CHART).includes(k) && !ACH_GROUPS.some(gr => MB_NOT_PRAC_G.includes(gr[0]) && gr[1].includes(k)));
 // 各系統の全段階（銅・銀・金）を並べる。未獲得は影
 function tierBadges(keys) {
   const g = G_();
