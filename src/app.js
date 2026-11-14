@@ -4752,8 +4752,8 @@ function missHit(g, me) {
   return null;
 }
 function luckInfo(g, me) {
-  const ds = S.decisions; if (!ds.length) return null;
-  const last = ds[ds.length - 1];
+  const ds = S.decisions.filter(d => !d.viewedHint); if (!ds.length) return null; // AIの読みを見て打った手だけのゲームは「内容最善」などと判定しない
+  const last = S.decisions[S.decisions.length - 1];
   const exp = Math.round(last.mineStats.pp * 10) / 10, pp = g.pp[me];
   const avg = ds.reduce((s, d) => s + d.loss, 0) / ds.length;
   const judge = ds.every(d => d.loss <= 0.015) ? 'best' : avg <= 0.05 ? 'ok' : 'bad';
@@ -5298,7 +5298,7 @@ function rvSetSolo(who) {
       if (Lg.length > 1 && bestG !== worstG) {
         const bi = Lg.indexOf(bestG), wi2 = Lg.indexOf(worstG), fw = F[wi2];
         mz += bestG.won ? RVP([`ベストゲームは上がった第${bestG.game}ゲームや！`, `いちばんの見せ場は、上がり切った第${bestG.game}ゲームやな！`, `MVPは第${bestG.game}ゲーム、きっちり上がったやつや！`]) : RVP([`いちばん粘れたんは第${bestG.game}ゲーム、PP${bestG.pp}で${bestG.rank}位や。`, `いちばん傷が浅かったんは第${bestG.game}ゲーム、PP${bestG.pp}の${bestG.rank}位やな。`]);
-        mz += RVP([`逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。`, `痛かったんは第${worstG.game}ゲームのPP${worstG.pp}やな。`, `いちばん失点したんは第${worstG.game}ゲーム、PP${worstG.pp}や。`]) + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : fw && fw.nDec ? '大きな判断ミスはなかった、巡り合わせのゲームや。' : worstG.nHint ? 'AIの読みを見ながら打ったゲームやな。' : '選ぶ場面がほとんどなかったゲームや。');
+        mz += RVP([`逆に苦しかったんは第${worstG.game}ゲーム、PP${worstG.pp}や。`, `痛かったんは第${worstG.game}ゲームのPP${worstG.pp}やな。`, `いちばん失点したんは第${worstG.game}ゲーム、PP${worstG.pp}や。`]) + (fw && fw.worst ? `第${fw.worst.round}巡の「${fw.worst.mine}」が分かれ目やったで（最善は「${fw.worst.best}」${fw.worst.gf && fw.worst.gf.sh ? `、${fw.worst.gf.sh}` : ''}）。` : worstG.luck === 'resultUnlucky' ? '判断は最善やったのに札運で失点したゲームや、気にせんでええ！' : fw && fw.nDec ? '大きな判断ミスはなかった、巡り合わせのゲームや。' : worstG.nHint ? 'AIの読みを見ながら打ったゲームやな。' : '選ぶ場面がほとんどなかったゲームや。');
       }
     }
     B(RVP([`ゲームごとに振り返ると、${lines.join('。')}。`, `順に見ていくと、${lines.join('。')}。`, `各ゲームの内容は次のとおりです。${lines.join('。')}。`]), mz);
