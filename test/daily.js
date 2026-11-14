@@ -58,6 +58,8 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   let finG = null;
   while (Date.now() - t0 < 600000) { const [sa, sb] = [await step(pa), await step(pb)]; for (const p of [pa, pb]) { const g = await p.evaluate(() => KBAPP.ON.v && /決勝/.test(KBAPP.ON.v.label || '') ? KBAPP.ON.v.cfg.games : null); if (g) finG = g; } if (sa === 'tour:done' || sb === 'tour:done') { done = true; break; } await wait(400); }
   ok(done, 'デイリーが最後まで進む（予選→決勝）');
+  { const r = await pa.evaluate(() => { const t = KBAPP.ON.t || {}, rows = t.stand || [], nm = rows.map(x => KBAPP.onName(x)); const dup = ['ゼロ', 'ショウタ', 'トメさん'].filter(n => nm.filter(y => y === n).length > 1); return { avoid: (t.aiAvoid || []).length, dup, n: rows.length }; });
+    ok(r.avoid >= 3 && !r.dup.length && r.n > 0, `AI研究員と同じ名前のただのAIは出ない（避ける一覧${r.avoid}人・重複${r.dup.join('・') || 'なし'}）`); }
   ok(finG === null || finG === 2, `決勝は決勝だけのゲーム数（${finG}ゲーム）`);
   await wait(1500);
   const info = await pa.evaluate(async () => { const c = KBAPP.plLink(KBAPP.S.profileId || JSON.parse(localStorage.getItem('kb.profile'))); return (await fetch(KB_CLOUD_API + '?a=daily_info', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token }) })).json(); });

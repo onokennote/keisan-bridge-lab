@@ -362,7 +362,7 @@ function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
-  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3'];
+  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3', 'aiAvoid' => $t['aiAvoid'] ?? []];
   foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }
 function obTourStart(array &$t, float $now): void {
@@ -379,6 +379,7 @@ function obTourStart(array &$t, float $now): void {
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'pid' => $e['pid'] ?? '', 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   if (!empty($c['daily'])) $players = array_merge($players, dailyResearchers($t, max(0, DAILY_GROUP - count($players)))); // AI研究員（ランキングの「AI」）が空席に参加
+  $t['aiAvoid'] = db()->query("SELECT pid FROM ranks WHERE uid = 'ai'")->fetchAll(PDO::FETCH_COLUMN); // AI研究員のキャラは、ただのAIとしては出さない（画面がこの一覧を避けて顔と名前を選ぶ）
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
   $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
   $cap = OB_AI_CAP; $total = array_sum($cap);
@@ -504,14 +505,17 @@ function dailyPoints(array $t): void {
     db()->prepare('INSERT OR REPLACE INTO dpoints (uid, pid, season, tid, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['cfg']['season'], $t['id'], $p, $e['name'], time()]); }
 }
 const DAILY_AI_FROM = 1794562200; // AI研究員がデイリーに出はじめる日時（2026-11-13 18:30 日本時間）
-const DAILY_AI_RATE = 0.5;         // 各部ごとに、まだ今日出ていないAI研究員が出る確率（空席があるときだけ）
+const DAILY_AI_RATE = 0.5;         // AI研究員がその日のデイリーに出る確率（出る部は dailyAiPart で前もって1つ決まる）（空席があるときだけ）
+// AI研究員がその日に出る部（0＝出ない）。日付とキャラで決まるので、朝の時点で決まっていて、1日に1部だけ（DAILY_AI_RATE の確率で出る）
+function dailyAiPart(string $date, string $pid): int { $h = crc32('daily|' . $date . '|' . $pid); if (($h % 1000) / 1000 >= DAILY_AI_RATE) return 0; return 1 + intdiv($h, 1000) % count(DAILY_PARTS); }
 function dailyResearchers(array $t, int $room): array {
   $c = $t['cfg']; if ($room <= 0 || ($c['startAt'] < DAILY_AI_FROM && empty($c['aiTest']))) return []; $rate = isset($c['aiTest']) ? (float)$c['aiTest'] : DAILY_AI_RATE;
   $used = []; // 今日すでにどこかの部（グループ）に出たAI研究員
   foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D%' AND st LIKE '%\"date\":\"" . $c['date'] . "\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) { $x = json_decode($raw, true); foreach ($x['players'] ?? [] as $p) if (!empty($p['char'])) $used[$p['char']] = 1; }
   $out = [];
   foreach (db()->query("SELECT pid, name, rating, avatar FROM ranks WHERE uid = 'ai' AND shown = 1")->fetchAll() as $r) {
-    if (count($out) >= $room) break; if (isset($used[$r['pid']]) || mt_rand() / mt_getrandmax() >= $rate) continue;
+    if (count($out) >= $room) break; if (isset($used[$r['pid']])) continue;
+    if (isset($c['aiTest'])) { if (mt_rand() / mt_getrandmax() >= $rate) continue; } elseif (dailyAiPart($c['date'], $r['pid']) !== (int)$c['part']) continue; // 出る部は前もって決まっている（1日1部まで）
     $lv = max(1, min(5, (int)round($r['rating'] !== null ? (float)$r['rating'] : 3)));
     $out[] = ['key' => 'r:' . $r['pid'], 'ai' => true, 'lv' => $lv, 'char' => $r['pid'], 'name' => $r['name'], 'aiUid' => 'ai'];
   }
@@ -584,7 +588,7 @@ function obCanOfficial(string $uid): bool { global $CFG; return in_array($uid, $
 // 一覧・詳細に出す形（招待されているか・自分が出ているか・自分の卓）
 function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
-  $v = ['id' => $t['id'], 'ver' => $ver, 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
+  $v = ['id' => $t['id'], 'ver' => $ver, 'aiAvoid' => $t['aiAvoid'] ?? [], 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
     'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {

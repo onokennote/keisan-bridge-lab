@@ -6739,7 +6739,7 @@ const ON_AI_BASE = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', '
 function onAiChar(s) { // AIの席：サーバーが同じ強さのAIに付けた番号（slot）で、重ならないようにキャラを割り当てる
   if (typeof s === 'string') s = { name: s };
   if (s.char) { const rc = KB.charById(s.char); if (rc) return rc; } // AI研究員（デイリーに出たランキングのAI）は、そのキャラ
-  const name = String(s.name || ''), lv = +(s.lv || (name.match(/AI★(\d)/) || [])[1] || 2), pool = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero');
+  const name = String(s.name || ''), lv = +(s.lv || (name.match(/AI★(\d)/) || [])[1] || 2), av0 = [].concat(s.avoid || [], (ON.v && ON.v.cfg && ON.v.cfg.aiAvoid) || [], (ON.t && ON.t.aiAvoid) || []), pool0 = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero'), pool1 = pool0.filter(c => !av0.includes(c.id)), pool = pool1.length ? pool1 : pool0; // AI研究員のキャラは、ただのAIには使わない（混乱しないように）
   let idx;
   if (s.slot != null) idx = +s.slot;
   else { const base = name.replace(/（AI★\d）$/, ''), m = base.match(/^(.*?)(\d*)$/), bi = ON_AI_BASE.indexOf(m[1]); if (bi >= 0) idx = bi + (m[2] ? +m[2] : 0); else { idx = 0; for (const ch of base) idx = (idx * 31 + ch.charCodeAt(0)) >>> 0; } }
