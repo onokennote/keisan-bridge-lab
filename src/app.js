@@ -3862,29 +3862,31 @@ function renderSide() {
     else if (e.type === 'draw') lines.push(`<div class="muted">${esc(nm(g.players[e.p]))}：引いた（残${e.left}）</div>`);
     else if (e.type === 'reshuffle') lines.push(`<div class="muted">捨て札を切り直して山札に</div>`);
   }
-  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button></div>
+  $('#unseenpanel').innerHTML = `<div><div class="row" style="gap:6px;flex-wrap:wrap"><button class="btn sm ghost" data-act="toggle-unseen" aria-expanded="${!!S.showUnseen}">${S.showUnseen ? '▾ まだ見えていないカードを隠す' : '▸ まだ見えていないカードを見る'}</button><button class="btn sm ghost" data-act="chart-view">📋 早見表（完成${chartFullRows().length}行）</button>${prevBtnHTML()}</div>
     ${S.showUnseen ? `<div class="unseen" style="margin-top:8px">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13].map(v => `<div class="${uc[v] ? '' : 'zero'}">${KB.vname(v)}<b>${uc[v]}</b></div>`).join('')}</div><div class="small muted" style="margin-top:4px">あなたの手札・場札・捨て札（出た札）を除いた、各数字の残り枚数</div>` : ''}</div>`;
   renderPrev();
   $('#sidepanel').innerHTML = `<div><div class="lbl" style="margin-bottom:4px">記録</div><div class="log" id="log">${lines.join('')}</div></div>`;
   const lg = $('#log'); if (lg) lg.scrollTop = lg.scrollHeight;
   document.querySelectorAll('#sidepanel [data-act], #unseenpanel [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b));
 }
-// 前回の判断：2巡目以降、AIの読みの下で、直前の自分の判断と考えられた手を復習できる
-function renderPrev() {
-  const el = $('#prevpanel'); if (!el) return;
-  const g = S.game, d = S.decisions[S.decisions.length - 1];
-  if (!d || g.over) { el.hidden = true; el.innerHTML = ''; S.prevKey = null; return; }
-  const key = S.gameNo + ':' + S.decisions.length;
-  if (S.prevKey === key) { el.hidden = false; return; } // 同じ内容なら作り直さない（開閉状態を保つ）
-  S.prevKey = key;
-  const [v, c] = verdict(d);
-  el.hidden = false;
-  el.innerHTML = `<details class="prev-dec" ${S.prevOpen ? 'open' : ''}><summary><span class="lbl" style="margin:0">前回の判断</span> <span class="dr-r">第${d.round}巡・場${d.t}</span> <span class="verdict ${c}">${v}</span> <span class="dr-loss">損失 ${(d.loss * 100).toFixed(1)}pt</span></summary>
-    <div class="dr-moves" style="margin-top:6px">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>${d.near ? `<span class="lab">ほぼ互角</span><span class="mono">${esc(d.near)}</span>` : ''}` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
-    <div style="margin-top:6px">${whyHTML(d)}</div></details>`;
-  const det = el.querySelector('details'); det.addEventListener('toggle', () => { S.prevOpen = det.open; });
+// 前回の判断：早見表の横のボタン（最善でなかったら目立たせる）→ 押すと画面に重ねて、直前の自分の判断と考えられた手を復習できる
+const prevDec = () => { const g = S.game, d = S.decisions && S.decisions[S.decisions.length - 1]; return d && g && !g.over ? d : null; };
+const decOk = d => d.mine === d.best || d.loss <= 0.015 || !!(BEST_LOOSE[d.round] && d.loss <= BEST_LOOSE[d.round].loss); // 最善・最善扱い
+function prevBtnHTML() {
+  const d = prevDec(); if (!d) return '';
+  const ok = decOk(d), [v, c] = verdict(d);
+  return `<button class="btn sm ${ok ? 'ghost' : 'prev-warn'}" data-act="prev-open">📝 前回の判断${ok ? '' : `<span class="verdict ${c}">${v}</span>`}</button>`;
 }
-
+function renderPrev() { const el = $('#prevpanel'); if (el) { el.hidden = true; el.innerHTML = ''; } } // 前は「AIの読み」の下に出していた（いまはボタン）
+function prevOpen() {
+  const d = prevDec(); if (!d) return;
+  const [v, c] = verdict(d), ok = decOk(d);
+  modal(`<div class="prev-modal stack"><div class="row" style="align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0">📝 前回の判断</h3><span class="dr-r">第${d.round}巡・場${d.t}</span><span class="verdict ${ok && c !== 'v-best' ? 'v-best' : c}">${ok && c !== 'v-best' ? '最善扱い' : v}</span><span class="dr-loss">損失 ${(d.loss * 100).toFixed(1)}pt</span></div>
+    <div class="dr-moves">${d.mine === d.best ? `<span class="lab">あなた＝最善</span><span class="mono">${esc(d.mine)}</span>${d.near ? `<span class="lab">ほぼ互角</span><span class="mono">${esc(d.near)}</span>` : ''}` : `<span class="lab">あなた</span><span class="mono">${esc(d.mine)}</span><span class="lab">最善</span><span class="mono">${esc(d.best)}</span>`}</div>
+    <div>${whyHTML(d)}</div>
+    <p class="small muted" style="margin:0">前回の手はもう記録してあるので、ここを見ても評価（最善手・連続最善・推定実力・バッジ）には影響しません。いまの手のヒントにはならないので、安心して復習してください。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
 // ---------- AIの読み ----------
 // 「AIの読み」を使い回してよい局面かの目印。ゲーム番号・場札・手番の人の手札の中身まで入れる（枚数だけだと、別のゲームの同じ枚数の場面の読みを取り違える）
 // 読みに渡す局面（ヒント・判定で同じものを使う。強さ・性格を見せない設定では、その分は中くらいの相手として扱う）
@@ -5980,6 +5982,7 @@ function act(a, el) {
     case 'watch-quit': closeModal(); watchEnd(); go('home'); break;
     case 'watch-again': closeModal(); watchStart(); break;
     case 'watch-play': closeModal(); watchEnd(); go('setup-practice'); break;
+    case 'prev-open': prevOpen(); break;
     case 'chart-view': chartOpen(true); break;
     case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }

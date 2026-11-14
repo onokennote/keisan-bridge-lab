@@ -2440,3 +2440,9 @@ body.rewinding #home-fab{display:none}
 /* モーダルの中のマサ・博士のふきだしは、横いっぱいに（対局画面の実況欄は右側の幅のまま） */
 #modal .commentary{max-width:none;justify-self:stretch;width:100%;box-sizing:border-box}
 #modal .commentary .cm-text{font-size:14px;line-height:1.7}
+
+/* 前回の判断のボタン：最善でなかったら目立たせる */
+.prev-warn{background:rgba(255,150,60,.16);border:1.5px solid #ff9a3c;color:#ffd2a6;font-weight:700;animation:prevPulse 1.6s ease-in-out 3}
+.prev-warn .verdict,.btn .verdict{margin-left:6px;font-size:11px;padding:1px 6px}
+@keyframes prevPulse{50%{box-shadow:0 0 0 4px rgba(255,154,60,.25)}}
+.prev-modal .dr-moves{margin:0}
