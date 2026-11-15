@@ -145,7 +145,7 @@ function safeBio(string $s): string {
 // 成績カード（ランキングでアイコンを押すと見られる）。決まった項目だけを、ありえない値ははじいて残す
 function safeCard($c): ?string {
   if (!is_array($c)) return null;
-  $ach = array_values(array_slice(array_filter((array)($c['ach'] ?? []), fn($k) => is_string($k) && preg_match('/^[a-z0-9_]{1,40}:\d{1,3}$/i', $k)), 0, 400));
+  $ach = array_values(array_slice(array_filter((array)($c['ach'] ?? []), fn($k) => is_string($k) && preg_match('/^[a-z0-9_]{1,40}:\d{1,5}$/i', $k)), 0, 400));
   $n = fn($k, $max) => max(0, min($max, (int)($c[$k] ?? 0)));
   $title = preg_replace('/[^0-9A-Z]/', '', (string)($c['title'] ?? ''));
   return json_encode(['title' => substr($title, 0, 12), 'ach' => $ach, 'champion' => $n('champion', 100000), 'qualify' => $n('qualify', 100000), 'atkBadges' => $n('atkBadges', 500), 'hunt' => $n('hunt', 5000), 'zukan' => $n('zukan', 5000), 'streak' => $n('streak', 100000), 'outs5' => $n('outs5', 100000), 'rateBest' => isset($c['rateBest']) && is_numeric($c['rateBest']) ? round(max(0, min(6, (float)$c['rateBest'])), 1) : null], JSON_UNESCAPED_UNICODE);
@@ -676,7 +676,7 @@ try {
           $oldBp = (int)$old['bp']; $newBp = max(0, min(20000, (int)($b['stats']['bp'] ?? 0))); $me = rid($u['uid'], $pid); $nm = (string)($b['stats']['name'] ?? $old['name']); $av = is_array($b['stats']['avatar'] ?? null) ? array_slice($b['stats']['avatar'], 0, 20) : null;
           if ($newAch || $newBp > $oldBp) { $w = $d->prepare('SELECT v.uid, v.pid, r.bp FROM rivals v JOIN ranks r ON r.uid = v.uid AND r.pid = v.pid WHERE v.rid = ?'); $w->execute([$me]);
             foreach ($w->fetchAll() as $x) {
-              if ($newAch && count($newAch) <= 20) noteAdd($x['uid'], $x['pid'], 'rv_badge', ['who' => $nm, 'rid' => $me, 'ach' => array_slice($newAch, 0, 5), 'n' => count($newAch), 'av' => $av]);
+              if ($newAch && count($newAch) <= 20) noteAdd($x['uid'], $x['pid'], 'rv_badge', ['who' => $nm, 'rid' => $me, 'ach' => array_slice($newAch, 0, 5), 'n' => count($newAch), 'av' => $av], '"rid":"' . $me . '","ach":' . json_encode(array_slice($newAch, 0, 5), JSON_UNESCAPED_UNICODE)); // 同じ人の同じバッジは1日1回まで
               if ($oldBp <= (int)$x['bp'] && $newBp > (int)$x['bp']) noteAdd($x['uid'], $x['pid'], 'rv_bp', ['who' => $nm, 'rid' => $me, 'bp' => $newBp, 'av' => $av], '"rid":"' . $me . '"');
             } }
         }
@@ -890,6 +890,8 @@ try {
     case 'notes': { // 自分（このプレイヤー）への通知。新しい順に60件（30日より前のものは消す）
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
       db()->prepare('DELETE FROM notes WHERE at < ?')->execute([time() - 30 * 86400]);
+      // 同じ中身の通知が重なっていたら1つにまとめる（前の版で、4けたの段階のバッジ（得点王＝atk_bp:1000）が保存のたびに「新しい」と通知されていた）
+      db()->prepare('DELETE FROM notes WHERE uid = ? AND pid = ? AND id NOT IN (SELECT MIN(id) FROM notes WHERE uid = ? AND pid = ? GROUP BY kind, data)')->execute([$u['uid'], $pid, $u['uid'], $pid]);
       $q = db()->prepare('SELECT id, kind, data, at FROM notes WHERE uid = ? AND pid = ? ORDER BY id DESC LIMIT 60'); $q->execute([$u['uid'], $pid]);
       out(['ok' => true, 'notes' => array_map(fn($x) => ['id' => (int)$x['id'], 'kind' => $x['kind'], 'data' => json_decode((string)$x['data'], true), 'at' => (int)$x['at']], $q->fetchAll())]);
     }
