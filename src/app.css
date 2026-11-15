@@ -2471,3 +2471,5 @@ body.rewinding #home-fab{display:none}
 .ver-x{background:none;border:0;color:#cfc6ad;font-size:18px;line-height:1;padding:0 4px;cursor:pointer}
 .season-ann{text-align:center}.season-ann .op-lines{text-align:left}.sa-top{list-style:none;margin:6px 0 0;padding:0;text-align:left;display:flex;flex-direction:column;gap:4px}
 .season-ann .sa-big{font-size:28px}
+.rk-toc{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:4px 0 10px}.rk-tc{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 4px;border-radius:12px;border:1px solid rgba(255,214,102,.35);background:rgba(255,214,102,.06);color:inherit;font:inherit;cursor:pointer}.rk-tc span{font-size:11.5px;color:#cfc6ad;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.rk-tc b{font-size:17px;color:#ffd666;line-height:1.1}
+@media(min-width:700px){.rk-toc{grid-template-columns:repeat(8,minmax(0,1fr))}}
