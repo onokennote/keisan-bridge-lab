@@ -6183,14 +6183,26 @@ function evalMine() {
 
 // 新しい版が出ていたら知らせる（開きっぱなしのページは古いまま動き続けるので）。公開版（KB_BUILD がある）だけ、画面に戻ったとき・10分ごとに確かめる
 const verCheck = { at: 0, told: false }; window.__kbLoadAt = Date.now();
-async function checkNewVersion() {
-  if (!window.KB_BUILD || verCheck.told || Date.now() - verCheck.at < 60000) return; verCheck.at = Date.now();
-  const asked = (location.search.match(/[?&]v=([0-9a-f]+)/) || [])[1]; if (asked && asked !== window.KB_BUILD && verCheck.at - (window.__kbLoadAt || 0) < 120000) return; // 開き直した直後に、まだ配信が古いときは出し続けない
-  try { const t = await (await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })).text(); const m = t.match(/KB_BUILD="([0-9a-f]+)"/);
-    if (m && m[1] !== window.KB_BUILD) { verCheck.told = true; const d = document.createElement('div'); d.className = 'ver-bar'; d.innerHTML = '🆕 新しい版があります <button class="btn sm primary">再読み込み</button>'; d.querySelector('button').onclick = () => location.replace(location.pathname + '?v=' + m[1] + location.hash); /* 「?v=新しい版」を付けて開き直す（ふつうの再読み込みだと、ブラウザや配信の控え（キャッシュ）から古い版が出ることがある） */ document.body.appendChild(d); } } catch (e) { }
+// 新しい版の知らせ：30分ごと（画面に戻ったときは10分たっていれば）に公開中の版を確かめる。対局中は出さない。
+// 開き直すときは毎回ちがうアドレス（?v=版.時刻）にする：同じアドレスだと、配信の控え（キャッシュ）に古い版が残っていて、何度開き直しても古いままになることがあった。
+// 開き直しても古いままだったら（配信がまだ行き渡っていない）、その版についてはこの間（タブを閉じるまで）知らせない。
+async function checkNewVersion(force) {
+  if (!window.KB_BUILD || verCheck.told || Date.now() - verCheck.at < (force ? 600000 : 60000)) return;
+  if (['game', 'online', 'attack', 'hunt', 'drill'].includes(S.view)) return; // 対局中・ミニゲーム中は、あとで
+  verCheck.at = Date.now();
+  try { const t = await (await fetch(location.pathname + '?v=' + Date.now(), { cache: 'no-store' })).text(); const m = t.match(/KB_BUILD='([0-9a-f]{10})'/); // 画面が使う版の番号は build.sh が本体に書く方（'…'・10けた）。deploy.sh が頭に書く方（"…"）は本体に上書きされるので比べない（前はこれと比べていて、いつも「新しい版」と出ていた）
+    if (!m || m[1] === window.KB_BUILD) return;
+    let tried = null; try { tried = sessionStorage.getItem('kb.verTried'); } catch (e) { }
+    if (tried === m[1]) return; // 開き直したのに古いままだった版：しつこく出さない
+    verCheck.told = true; const d = document.createElement('div'); d.className = 'ver-bar'; d.innerHTML = '🆕 新しい版があります <button class="btn sm primary">再読み込み</button><button class="ver-x" aria-label="閉じる">×</button>';
+    d.querySelector('.btn').onclick = () => { try { sessionStorage.setItem('kb.verTried', m[1]); } catch (e) { } location.replace(location.pathname + '?v=' + m[1] + '.' + Date.now().toString(36) + location.hash); };
+    d.querySelector('.ver-x').onclick = () => { d.remove(); try { sessionStorage.setItem('kb.verTried', m[1]); } catch (e) { } };
+    document.body.appendChild(d); } catch (e) { }
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewVersion(); });
-setInterval(checkNewVersion, 600000);
+// 新しい版で開き直せたら、アドレスの ?v=… を消しておく
+try { const av = (location.search.match(/[?&]v=([0-9a-f]+)/) || [])[1]; if (av && window.KB_BUILD && av === window.KB_BUILD) history.replaceState(null, '', location.pathname + location.hash); } catch (e) { }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkNewVersion(true); });
+setInterval(() => checkNewVersion(true), 1800000);
 // 吹き出しを時間で消す
 setInterval(() => {
   if (S.view !== 'game' || S.winShow) return;

@@ -2344,7 +2344,7 @@ body.rewinding #home-fab{display:none}
 .rest-cards .mc{min-width:20px;height:25px;font-size:13px}
 
 /* 新しい版のお知らせ */
-.ver-bar{white-space:nowrap;position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:9999;background:#1b3a2c;border:1px solid #f2b632;color:#fff;border-radius:99px;padding:6px 8px 6px 14px;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}
+.ver-bar{white-space:nowrap;position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:9999;background:#1b3a2c;border:1px solid #f2b632;color:#fff;border-radius:99px;padding:6px 8px 6px 14px;font-size:13px;font-weight:700;display:flex;gap:8px;align-items:center;box-shadow:0 6px 20px rgba(0,0,0,.5)}
 
 /* ライバル比較：バッジ・冠の差分 */
 .rv-r.tap{cursor:pointer}.rv-r.tap span{color:var(--gold,#f2b632)}
@@ -2467,3 +2467,5 @@ body.rewinding #home-fab{display:none}
 .sa-big{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-size:40px;line-height:1.15;color:#ffd666;letter-spacing:1px}
 .sa-sub{font-size:16px;font-weight:700;color:#e9dfc0}
 .set-ann .op-lines{text-align:left;margin-top:6px}
+
+.ver-x{background:none;border:0;color:#cfc6ad;font-size:18px;line-height:1;padding:0 4px;cursor:pointer}
