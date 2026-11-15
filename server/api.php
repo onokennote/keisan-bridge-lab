@@ -449,7 +449,7 @@ function obTourAward(array &$t): void {
       if ($tp[$j] > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', 'official', $t['id'], $tp[$j], $e['name'], time()]); $j++; }
   }
 }
-// ---------- デイリートーナメント（毎朝6時に作り、20:30に始まる）とシーズン（毎月前半・後半） ----------
+// ---------- デイリートーナメント（毎朝6時に作る。17:30・18:30・19:30・20:30の4部）とシーズン（毎月前半・後半） ----------
 const DAILY_HOUR = 6, DAILY_PARTS = ['17:30', '18:30', '19:30', '20:30'], DAILY_GROUP = 15; // 1日4部。出られるのはどれか1部だけ
 const DAILY_FIN = [60, 40, 30, 20, 10];      // 決勝の順位で足すポイント（予選は「16−グループ内の順位」）
 const SEASON_BONUS = [100, 70, 50, 40, 20];  // シーズンの順位でもらえる総ポイント

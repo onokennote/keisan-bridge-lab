@@ -1035,7 +1035,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
-  else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！毎晩20:30のデイリートーナメント、ホームの「オンライン大会」から出られるで！` : 'ホームの「オンライン大会」のデイリートーナメントから狙えるで。毎晩20:30、シーズンは毎月前半と後半や！';
+  else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！デイリートーナメントは毎日17:30・18:30・19:30・20:30の4部から、都合のええ1部に出られるで。ホームの「オンライン大会」の上のカードからや！` : key === 'season_podium' ? 'シーズンは毎月前半（1〜15日）と後半や。デイリートーナメントで貯めたポイントで、シーズンの最終順位が3位以内で銅、2位以内で銀、1位で金や！毎日4部のうち1部、コツコツ出るのが近道や！' : 'ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日17:30・18:30・19:30・20:30の4部から1部選んで出られる。決勝の順位で決まるんや！';
   else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') { // 目安：直近100手の最善率と、1手の平均損失（RATE_BEST・RATE_LOSS から）
@@ -6299,7 +6299,7 @@ function onlineHomeHTML() {
 // 開始までの残り時間（すべての大会で同じ書き方）。画面の [data-cd] は30秒ごとに書きかえる
 function cdText(ts) { const s = Math.max(0, Math.round(ts - Date.now() / 1000)); if (!s) return 'まもなく開始'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.ceil(s % 3600 / 60); return '開始まで あと' + (d ? d + '日' : '') + (d || h ? h + '時間' : '') + (m === 60 ? '59分' : m + '分'); }
 setInterval(() => document.querySelectorAll('[data-cd]').forEach(e => { e.textContent = cdText(+e.dataset.cd); }), 30000);
-// ---- デイリートーナメント（毎日20:30・サーバーが朝6時に作る）とシーズン（毎月前半・後半） ----
+// ---- デイリートーナメント（毎日4部 17:30・18:30・19:30・20:30・サーバーが朝6時に作る）とシーズン（毎月前半・後半） ----
 function dailyCardHTML(D) {
   // 1日4部（17:30・18:30・19:30・20:30）。出られるのはどれか1部だけ。グループに分かれた部は、自分の入ったグループ（なければA）を代表に
   const di = ON.dinfo, parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
