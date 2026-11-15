@@ -414,7 +414,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); else if (PID && !S.homeGreetDone) setTimeout(homeGreet, 2200); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -6086,6 +6086,7 @@ function act(a, el) {
     case 'rank-ai': { raw.set('kb.rankAI', !rankWithAi()); S.rank = null; render(); break; }
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
+    case 'season-rank': S.drTab = 'past'; closeModal(); dailyRankOpen('past'); break;
     case 'host-masa': try { localStorage.setItem('kb.masaUsed', '1'); } catch (e) { } S.masaBeckoned = true; masaAdvice(); break;
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; if (f) f(); else closeModal(); break; }
@@ -6321,6 +6322,29 @@ async function dailyInfoLoad(force) {
   if (!ON_ENABLED() || (!force && Date.now() - (ON.dinfoAt || 0) < 60000)) return; ON.dinfoAt = Date.now();
   try { ON.dinfo = await onReq('daily_info', { pid: PID }); } catch (e) { return; }
   const el = S.view === 'home' && $('.on-card .dl-card'); if (el) { el.outerHTML = dailyCardHTML((ON.tours || []).filter(v => v.daily)); document.querySelectorAll('.on-card .dl-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
+// ホームを開いたときのひと声：①締めたシーズンに出ていたら、博士とマサがシーズンの結果を発表（シーズンごとに1回）②その日はじめて開いたら、マサのアドバイスを出す（①があればそちらを優先し、その日は②を出さない）
+async function homeGreet() {
+  if (S.homeGreetDone || S.view !== 'home' || !PID || $('#modal')) return;
+  let force = false; try { force = localStorage.getItem('kb.forceGreet') === '1'; } catch (e) { } if ((window.KB_TEST || navigator.webdriver) && !force) return; // 自動テストでは出さない（テストで確かめるときは kb.forceGreet）
+  S.homeGreetDone = true;
+  const today = new Date().toLocaleDateString('sv-SE'), advKey = plKey(PID, 'advDay');
+  if (ON_ENABLED()) { await dailyInfoLoad(); const L = ON.dinfo && ON.dinfo.myLast; if (L && raw.get(plKey(PID, 'seasonSeen'), '') !== L.season && S.view === 'home' && !$('#modal')) { plSetLocal(PID, 'seasonSeen', L.season); plSetLocal(PID, 'advDay', today); seasonAnnounce(L); return; } }
+  if (raw.get(advKey, '') === today || S.view !== 'home' || $('#modal') || !profiles().length) return;
+  plSetLocal(PID, 'advDay', today); act('host-masa');
+}
+function seasonAnnounce(L) {
+  const nmY = rvName(), top3 = L.rank <= 3, medal = ['🥇', '🥈', '🥉'][L.rank - 1] || '', R = RVP;
+  const root = `${L.label}シーズンのデイリートーナメントが終わりました。結果発表です。${nmY}は${L.n}人中${L.rank}位、シーズンポイントは${L.pts}pt（${L.games}回出場）でした。` + (L.bonus ? `順位に応じて、総ポイント${L.bonus}ptが入ります。` : '') + (top3 ? 'シーズン表彰台のバッジも獲得です。' : '');
+  const masa = top3 ? R([`${medal}表彰台や〜！${L.label}シーズン${L.rank}位、胸張ってええで！次のシーズンも頂点狙っていこ！`, `${L.rank}位で表彰台や！シーズン通して積み上げた結果や、リーグ戦を戦い抜いたチームの勲章やで！`])
+    : L.rank <= Math.ceil(L.n / 2) ? R([`${L.rank}位、上位半分に入ったで！新しいシーズンもまた毎日コツコツいこか！`, `上位半分でフィニッシュや！長いリーグ戦、よう走り切ったな。次のシーズンは表彰台や！`])
+    : R([`${L.rank}位やったな。出場${L.games}回、新しいシーズンは出る回数を増やしたら順位も上がるで！`, `今シーズンは${L.rank}位。リーグ戦は1試合ずつの積み重ねや、新しいシーズンで巻き返そ！`]);
+  const top = (L.top || []).map((x, i) => `<li>${['🥇', '🥈', '🥉'][i]} ${esc(x.name)}${x.ai ? '<em class="ai-chip">AI</em>' : ''} <span class="muted">${x.pts}pt</span></li>`).join('');
+  modal(`<div class="stack season-ann"><div class="sa-big">${esc(L.label)}シーズン ${medal}${L.rank}位</div><div class="sa-sub">${L.n}人中 ・ ${L.pts}pt${L.bonus ? ` ・ 総ポイント +${L.bonus}` : ''}</div>
+    <div class="op-lines"><div class="op-line root"><div class="cm-av">${KB.casterSVG('root', top3 ? 'happy' : 'normal')}</div><div class="op-bubble"><span class="cm-name">解説・ルート博士</span>${esc(root)}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(masa)}</div></div></div>
+    ${top ? `<div class="panel"><div class="lbl">シーズンの表彰台</div><ul class="sa-top">${top}</ul></div>` : ''}
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="season-rank">📊 最終順位を見る</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 async function dailyRankOpen(tab) {
   S.drTab = tab || S.drTab || 'season'; if (!ON.dinfo) { modal('<div class="stack"><p class="small muted">読み込んでいます…</p></div>'); await dailyInfoLoad(true); }

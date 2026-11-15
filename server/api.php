@@ -961,7 +961,11 @@ try {
       $S = seasonStand($sk); $season = array_map($row, $S, array_keys($S));
       $T = db()->query('SELECT t.uid, t.pid, SUM(t.pts) pts, COUNT(*) n, COALESCE(r.name, MAX(t.name)) name, r.avatar FROM tpoints t LEFT JOIN ranks r ON r.uid = t.uid AND r.pid = t.pid GROUP BY t.uid, t.pid ORDER BY pts DESC LIMIT 100')->fetchAll(); $total = array_map($row, $T, array_keys($T));
       $past = array_map(fn($r) => array_merge(['season' => $r['season']], json_decode($r['st'], true)), db()->query('SELECT season, st FROM seasons ORDER BY season DESC LIMIT 24')->fetchAll());
-      out(['ok' => true, 'season' => $sk, 'label' => seasonLabel($sk), 'ends' => seasonEnd($sk), 'stand' => array_slice($season, 0, 100), 'me' => current(array_filter($season, fn($x) => $x['me'])) ?: null, 'total' => $total, 'meTotal' => current(array_filter($total, fn($x) => $x['me'])) ?: null, 'past' => $past, 'rule' => ['fin' => DAILY_FIN, 'bonus' => SEASON_BONUS, 'half' => SEASON_HALF]]);
+      // 締めたばかりのシーズンの、自分の成績（出ていなければ null）：ホームを開いたときに博士とマサが発表する
+      $myLast = null; if ($past) { $lk = $past[0]['season']; $LS = seasonStand($lk);
+        foreach ($LS as $i => $r) if ($r['uid'] === $u['uid'] && ($pid === '' || $r['pid'] === $pid)) { $bq = db()->prepare("SELECT pts FROM tpoints WHERE uid = ? AND pid = ? AND src = 'season' AND ref = ?"); $bq->execute([$r['uid'], $r['pid'], $lk]);
+          $myLast = ['season' => $lk, 'label' => seasonLabel($lk), 'rank' => $i + 1, 'n' => count($LS), 'pts' => (int)$r['pts'], 'games' => (int)$r['n'], 'bonus' => (int)($bq->fetchColumn() ?: 0), 'top' => array_map(fn($x) => ['name' => $x['name'], 'pts' => $x['pts'], 'ai' => !empty($x['ai'])], array_slice($past[0]['stand'] ?? [], 0, 3))]; break; } }
+      out(['ok' => true, 'myLast' => $myLast, 'season' => $sk, 'label' => seasonLabel($sk), 'ends' => seasonEnd($sk), 'stand' => array_slice($season, 0, 100), 'me' => current(array_filter($season, fn($x) => $x['me'])) ?: null, 'total' => $total, 'meTotal' => current(array_filter($total, fn($x) => $x['me'])) ?: null, 'past' => $past, 'rule' => ['fin' => DAILY_FIN, 'bonus' => SEASON_BONUS, 'half' => SEASON_HALF]]);
     }
     case 'on_test_seed': { // テスト版だけ：称号とバッジを持った仮のユーザーを入れる（何度呼んでも同じ）
       if (empty($CFG['stg']) && empty($CFG['test'])) fail('使えません', 403);

@@ -93,6 +93,14 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
     window.fetch = async (u, o) => /a=on_awards/.test(String(u)) ? new Response(JSON.stringify({ ok: true, daily: 6, awards: [1, 1, 2, 3, 3, 3].map((pl, i) => ({ pid, tid: 'X' + i, tname: 'デイリー', place: pl, official: 2 })) })) : f0(u, o);
     await KBAPP.onAwardsSync(); window.fetch = f0; const g = KBAPP.G(); return ['daily_win:2', 'daily_2nd:1', 'daily_3rd:3'].map(k => !!g.ach[k]).concat([!g.ach['daily_win:3'], !g.ach['daily_2nd:2']]); });
   ok(bd2.every(Boolean), 'デイリーの順位ごとのバッジ（優勝2回で銀・2位1回で銅・3位3回で金）：' + bd2.join());
+  // シーズンが締まったあと、はじめてホームを開くと博士とマサがシーズンの結果を発表（その日はマサのアドバイスより優先）
+  await pa.evaluate(() => { localStorage.setItem('kb.forceGreet', '1'); document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.homeGreetDone = false; KBAPP.ON.dinfoAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(4000);
+  ok(await pa.evaluate(() => { const m = document.querySelector('#modal .season-ann'); return !!m && /シーズン/.test(m.innerText) && /位/.test(m.innerText); }), 'シーズンが終わったあと、はじめてホームを開くと博士とマサがシーズンの結果を発表');
+  await pa.screenshot({ path: path.join(__dirname, 'out', 'season_ann.png') });
+  await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.homeGreetDone = false; KBAPP.go('home'); }); await pa.waitForTimeout(3500);
+  ok(await pa.evaluate(() => !document.querySelector('#modal')), '発表は1回だけ・その日はアドバイスも出さない');
+  await pa.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); localStorage.removeItem('kb.p.' + id + '.advDay'); document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.homeGreetDone = false; KBAPP.go('home'); }); await pa.waitForTimeout(3500);
+  ok(await pa.evaluate(() => !!document.querySelector('#modal .adv-list')), 'その日はじめてホームを開くと、マサのアドバイスが出る');
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
