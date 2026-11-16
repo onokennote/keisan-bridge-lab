@@ -359,11 +359,15 @@ function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $
   return $id;
 }
 function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'slot' => $p['slot'] ?? null, 'char' => $p['char'] ?? null, 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
+// AI研究員のシャドー（pshadow）：その卓でいちばん強いAIの★で打つ（★1しかいなければ★1）
+function obShadowSeats(array &$seats): void {
+  foreach ($seats as $i => $s) { if (empty($s['ai']) || ($s['char'] ?? '') !== 'pshadow') continue; $mx = 1; foreach ($seats as $j => $o) if ($j !== $i && !empty($o['ai']) && ($o['char'] ?? '') !== 'pshadow') $mx = max($mx, (int)$o['lv']); $seats[$i]['lv'] = min(5, $mx); }
+}
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
   shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
   $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3', 'aiAvoid' => $t['aiAvoid'] ?? []];
-  foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
+  foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } obShadowSeats($seats); $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }
 function obTourStart(array &$t, float $now): void {
   $c = $t['cfg']; $ent = $t['entrants'];

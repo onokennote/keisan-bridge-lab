@@ -45,7 +45,7 @@ async function play(b, c, data, sets, minis, form) {
     await pg.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.go('home'); });
     await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(200);
     for (let step = 0; step < 60000; step++) {
-      const st = await pg.evaluate(([lv0, style, form]) => {
+      const st = await pg.evaluate(([lv0, style, form, shadow]) => {
         const lv = Math.random() < form.p ? Math.max(1, lv0 - (Math.random() < form.by2 ? 2 : 1)) : lv0; // 調子の波（ときどき2段落ちる）
         const S = KBAPP.S;
         const wk = document.querySelector('[data-act="win-ok"]'); if (wk) { wk.click(); return 'modal'; }
@@ -56,13 +56,16 @@ async function play(b, c, data, sets, minis, form) {
         const p = g.current(); if (!g.players[p].human) return 'ai';
         // 人が考えるくらいの時間をかけたことにする（一瞬で打つと「早撃ち」のバッジばかり増えるため）
         S.turnStart = Date.now() - (6000 + Math.random() * 20000); S.stateTs = S.turnStart;
-        const pl = g.players[p], sv = { level: pl.level, style: pl.style, human: pl.human };
-        pl.level = lv; pl.style = style; pl.human = false; let mv; try { mv = KB.aiMove(g, p); } finally { Object.assign(pl, sv); }
+        const pl = g.players[p], sv = { level: pl.level, style: pl.style, human: pl.human, peek: pl.peek };
+        let lvx = lv, stx = style, pk = false;
+        if (shadow) { const o = g.players.filter(q => q !== pl && !q.human), mx = Math.max(1, ...o.map(q => q.level || 1)), t = o.filter(q => (q.level || 1) === mx)[0]; // シャドー：卓でいちばん強いAIを写す（調子の波もそこから）
+          if (t && mx > 1) { lvx = Math.random() < form.p ? Math.max(1, mx - (Math.random() < form.by2 ? 2 : 1)) : mx; stx = t.style; pk = !!t.peek; } }
+        pl.level = Math.min(lvx, 5); pl.style = stx; pl.peek = pk; pl.human = false; let mv; try { mv = KB.aiMove(g, p); } finally { Object.assign(pl, sv); }
         if (!mv) { KBAPP.act('draw'); return 'draw'; }
         const hand = g.hands[p], used = new Set(); S.sel = [];
         for (const v of mv.vals) { const cd = hand.find(x => x.v === v && !used.has(x.id)); used.add(cd.id); S.sel.push(cd.id); }
         KBAPP.act('play'); return 'play';
-      }, [c.lv, c.st, f]);
+      }, [c.lv, c.st, f, !!c.shadow && !c.noMimic]);
       if (st === 'end' && step > 5) break;
       await pg.waitForTimeout(st === 'ai' || st === 'wait' ? 25 : 8);
     }
@@ -86,7 +89,7 @@ async function play(b, c, data, sets, minis, form) {
   if (!KEY) { console.log('KB_ADMIN_KEY がないので何もしません'); return; }
   const b = await chromium.launch();
   const pg0 = await b.newPage(); await pg0.goto(PAGE); await pg0.waitForTimeout(300);
-  const roster = await pg0.evaluate(() => KB.ROSTER.filter(c => !c.shadow).map(c => ({ id: c.id, name: c.name, lv: c.lv, st: c.st }))); // シャドーは卓の最強を写すので、研究員にはしない await pg0.close();
+  const roster = await pg0.evaluate(() => KB.ROSTER.map(c => ({ id: c.id, name: c.name, lv: c.lv, st: c.st, shadow: !!c.shadow }))); await pg0.close();
   if (MODE === 'reseed') { for (const x of (await api('ai_list')).list) await api('ai_del', { cid: x.cid }); console.log('いったん全員を引退させて、最初から投入し直します'); }
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }
@@ -100,6 +103,9 @@ async function play(b, c, data, sets, minis, form) {
     // 新メンバーをまとめて5人（手で動かす）：ゼロ（★5）は必ず、ほかは★4・★3・★2・★1から1人ずつ。強い人は少し経験を積んだ状態で入る
     const z = roster.find(c => c.id === 'zero'); if (z && !have.has('zero')) jobs.push({ c: z, data: null, sets: rnd(3, 4), minis: mini(2) });
     for (const [lv, a, zz] of [[4, 2, 3], [3, 2, 2], [2, 1, 2], [1, 1, 1]]) if (cur.length + jobs.length < MAX) add(lv, rnd(a, zz));
+  } else if (MODE === 'shadow') {
+    // シャドーを1人だけ入れる（手で動かす。★1から始める）
+    const c = roster.find(r => r.id === 'shadow'); if (c && !have.has('shadow') && cur.length < MAX) jobs.push({ c: Object.assign({}, c, { noMimic: true }), data: null, sets: 1, minis: [] }); // 最初の1セットは写さずに★1で打つ（推定実力は★1から。翌日から写しはじめて伸びていく）
   } else if (MODE === 'fix') {
     // 記録の直しだけ（対局もミニゲームもしない。開いて保存し直す）
     for (const x of cur) { const c = roster.find(r => r.id === x.cid); if (c) jobs.push({ c, data: x.data, sets: 0, minis: [] }); }
