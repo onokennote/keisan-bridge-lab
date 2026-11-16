@@ -5322,9 +5322,13 @@ function rvSetSolo(who) {
       if (f && f.worst && (!note || f.worst.loss > 0.1)) note = x.won ? `ただ第${f.worst.round}巡の「${f.worst.mine}」は改善の余地` : `第${f.worst.round}巡の「${f.worst.mine}」が痛手`;
       else if (f && f.worst && note && f.worst.loss > 0.03) note += `。ただ第${f.worst.round}巡の「${f.worst.mine}」は${x.won ? '改善の余地' : '痛手'}`; // 光った手と大きく外した手が同じゲームにあるときは両方（片方だけだと、マサの「分かれ目」と食い違って見える）
       if (!note && x.luck === 'resultUnlucky') note = '内容最善も不運';
-      return `第${x.game}ゲームは${res}${note ? '、' + note : ''}`;
+      if (x.won && /^速攻の上がり$/.test(note)) return { g: x.game, t: '速攻で上がり' }; // 「上がり、速攻の上がり」と重ねない
+      return { g: x.game, t: `${res}${note ? '、' + note : ''}` };
     };
-    const lines = Lg.map((x, i) => one(x, F[i]));
+    // 同じ内容が続くゲームはまとめる（「第3〜5ゲームは3連続で速攻で上がり」）
+    const raw = Lg.map((x, i) => one(x, F[i])), lines = [];
+    for (let i = 0; i < raw.length;) { let j = i; while (j + 1 < raw.length && raw[j + 1].t === raw[i].t && raw[j + 1].g === raw[j].g + 1) j++;
+      const n = j - i + 1; lines.push(n > 1 ? `第${raw[i].g}〜${raw[j].g}ゲームは${n}連続で${raw[i].t}` : `第${raw[i].g}ゲームは${raw[i].t}`); i = j + 1; }
     // マサは博士と同じ一覧を繰り返さず、スコアボード＋いちばん良かった／苦しかったゲームだけを語る
     let mz = null;
     if (!rt) {
