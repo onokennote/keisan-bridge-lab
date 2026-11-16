@@ -368,7 +368,7 @@ function obTourDeal(array &$t, array $keys, string $label, float $now, array $ab
 function obTourStart(array &$t, float $now): void {
   $c = $t['cfg']; $ent = $t['entrants'];
   if (!empty($c['daily'])) {
-    if (!$ent) { $t['phase'] = 'cancel'; $t['note'] = '参加者がいなかったため中止'; return; }
+    if (!$ent) $t['aiOnly'] = true; // 人が0人でも開催する（AI研究員がポイントを取り合う。開始と同時に最後まで進める）
     if (empty($c['group']) && count($ent) > DAILY_GROUP) { // 15人ずつのグループに分ける（人はなるべく均等に。空きは「まんべんなく」のAI）
       shuffle($ent); $G = (int)ceil(count($ent) / DAILY_GROUP); $chunks = array_fill(0, $G, []); foreach ($ent as $i => $e) $chunks[$i % $G][] = $e;
       for ($g = 1; $g < $G; $g++) { $L = chr(65 + $g); $ct = $t; $ct['id'] = $t['id'] . $L; $ct['cfg']['group'] = $L; $ct['cfg']['name'] = $c['name'] . '・' . $L . 'グループ'; $ct['entrants'] = $chunks[$g]; $ct['phase'] = 'entry';
@@ -388,6 +388,7 @@ function obTourStart(array &$t, float $now): void {
     $slot = $slots[$lv] = ($slots[$lv] ?? -1) + 1; $players[] = ['key' => 'ai:' . $i, 'ai' => true, 'lv' => $lv, 'slot' => $slot, 'name' => $names[$i % 10] . ($i >= 10 ? $i : '') . '（AI★' . $lv . '）']; }
   $t['players'] = $players; $t['phase'] = 'prelim'; $t['set'] = 1; $t['stand'] = []; foreach ($players as $p) $t['stand'][$p['key']] = ['pts' => 0, 'pp' => 0];
   obTourDeal($t, array_column($players, 'key'), '予選 第1セット', $now);
+  if (!empty($t['aiOnly'])) for ($i = 1; $i <= 400 && in_array($t['phase'], ['prelim', 'final'], true); $i++) obTourTick($t, $now + $i * 100000); // AIだけの大会：時計を進めて最後まで打つ
 }
 // 進める：受付の締め切りで開始、卓がぜんぶ終わったら次のセット・決勝・結果へ
 function obTourTick(array &$t, float $now): bool {
@@ -930,7 +931,8 @@ try {
     case 'on_tours_archive': { // 終わった大会（新しい順に50件）
       $b = body(); $u = authUser($b); $out = [];
       foreach (db()->query("SELECT id, st, ver FROM tours WHERE st LIKE '%\"phase\":\"done\"%' OR st LIKE '%\"phase\":\"cancel\"%' ORDER BY start_at DESC LIMIT 200")->fetchAll() as $r) {
-        $t = json_decode($r['st'], true); $vw = obTourView($t, $u['uid'], (int)$r['ver'], false);
+        $t = json_decode($r['st'], true); if (!empty($t['cfg']['daily'])) continue; // デイリーはシーズンごとの「大会の結果」（daily_tours）へ
+        $vw = obTourView($t, $u['uid'], (int)$r['ver'], false);
         if ($t['cfg']['entry'] === 'invite' && !$vw['invited'] && !$vw['entered']) continue;
         $out[] = $vw; if (count($out) >= 50) break;
       }
@@ -952,6 +954,20 @@ try {
       $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
       db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
       out(['ok' => true, 'id' => $id]);
+    }
+    case 'daily_tours': { // デイリーの大会ごとの結果（シーズンごと・新しい順）
+      $b = body(); $u = authUser($b); $cur = seasonKey(time()); $G = [];
+      foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D%' ORDER BY start_at DESC, id ASC LIMIT 600")->fetchAll(PDO::FETCH_COLUMN) as $raw) {
+        $t = json_decode($raw, true); $c = $t['cfg'] ?? []; if (empty($c['daily']) || (!empty($c['test']) && empty($CFG['test']))) continue;
+        if (($t['phase'] ?? '') === 'entry' && (int)$c['startAt'] > time()) continue; // まだ始まっていない部は出さない
+        $sk = $c['season'] ?? seasonKey((int)$c['startAt']); $by = []; foreach ($t['players'] ?? [] as $p) $by[$p['key']] = $p;
+        $wk = $t['result'][0] ?? null; $w = $wk && isset($by[$wk]) ? array_intersect_key($by[$wk], array_flip(['name', 'ai', 'lv', 'slot', 'char'])) : null;
+        $mine = null; foreach ($t['result'] ?? [] as $i => $k) if ($k === 'u:' . $u['uid']) $mine = $i + 1;
+        $d = new DateTime('@' . (int)$c['startAt']); $d->setTimezone(jstTz());
+        $G[$sk][] = ['id' => $t['id'], 'short' => $d->format('n/j') . ' 第' . ($c['part'] ?? '?') . '部' . (!empty($c['group']) ? '・' . $c['group'] : ''), 'phase' => $t['phase'] ?? '', 'n' => count($t['entrants'] ?? []), 'win' => $w, 'mine' => $mine];
+      }
+      krsort($G); $out = []; foreach ($G as $sk => $L) $out[] = ['season' => $sk, 'label' => seasonLabel($sk), 'cur' => $sk === $cur, 'tours' => $L];
+      out(['ok' => true, 'seasons' => array_slice($out, 0, 12), 'aiAvoid' => db()->query("SELECT pid FROM ranks WHERE uid = 'ai'")->fetchAll(PDO::FETCH_COLUMN)]);
     }
     case 'daily_info': { // デイリー：今のシーズンの順位・総ポイントの順位・締めたシーズン（新しい順）
       $b = body(); $u = authUser($b); $tp = (string)($u['tpid'] ?? ''); $pid = $tp !== '' ? $tp : cleanPid($b['pid'] ?? '');

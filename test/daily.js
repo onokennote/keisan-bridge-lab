@@ -104,6 +104,15 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   ok(await pa.evaluate(() => !document.querySelector('#modal')), '発表は1回だけ・その日はアドバイスも出さない');
   await pa.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); localStorage.removeItem('kb.p.' + id + '.advDay'); document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.homeGreetDone = false; KBAPP.go('home'); }); await pa.waitForTimeout(3500);
   ok(await pa.evaluate(() => !!document.querySelector('#modal .adv-list')), 'その日はじめてホームを開くと、マサのアドバイスが出る');
+  // 人が0人の部も開催：AI研究員とAIだけで最後まで進み、結果とポイントが付く。オンライン大会の「過去の大会」には出ず、「大会の結果」にシーズンごとに出る
+  { const z = await api('daily_test', { startIn: 1, part: 4, aiTest: 1, ais: ['zero', 'shota', 'tome'], sets: 2, games: 1, finalGames: 1 }); await wait(2500);
+    await pa.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(3000); // ホームを開く＝大会の一覧を読む＝始まる時刻を過ぎた部が動く
+    await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); }); await pa.evaluate(() => { const b = document.createElement('button'); b.dataset.tab = 'games'; KBAPP.act('daily-rank', b); }); await pa.waitForTimeout(2500);
+    const g = await pa.evaluate(id => { const b = document.querySelector(`#modal [data-act="dr-tour"][data-id="${id}"]`); return b ? b.innerText.replace(/\n/g, ' ') : null; }, z.id);
+    ok(!!g && /終了/.test(g) && /🏆/.test(g), `人が0人の部もAIだけで開催して結果が付く（${g}）`);
+    await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_games.png') });
+    const arch = await pa.evaluate(async () => { const c = KBAPP.plLink(JSON.parse(localStorage.getItem('kb.profile'))); const j = await (await fetch(KB_CLOUD_API + '?a=on_tours_archive', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token, pid: JSON.parse(localStorage.getItem('kb.profile')) }) })).json(); return (j.tours || []).filter(t => t.daily).length; });
+    ok(arch === 0, `デイリーはオンライン大会の「過去の大会」に出ない（${arch}件）`); }
   ok(!errs.length, 'ページのエラーなし ' + errs.slice(0, 3).join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();

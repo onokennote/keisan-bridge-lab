@@ -6131,6 +6131,7 @@ function act(a, el) {
     case 'on-tour-remove-go': onReq('on_tour_act', { id: ON.t.id, act: 'remove' }).then(() => { closeModal(); clearInterval(ON.ttimer); ON.t = null; toast('削除しました'); onArchiveOpen(); }).catch(e => toast(e.message)); break;
     case 'title-set': store.set('title', el.dataset.id); closeModal(); try { cloudDirty('kb.p.' + PID + '.title'); } catch (e) { } toast(el.dataset.id ? '称号をつけました' : '称号を外しました'); render(); break;
     case 'on-tour-create': onTourCreate(); break;
+    case 'dr-tour': closeModal(); ON.ttab = null; onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
     case 'on-tour-open': ON.ttab = null; onReq('on_tour', { id: el.dataset.id }).then(j => onTourShow(j.tour)).catch(e => toast(e.message)); break;
     case 'on-tour-home': clearInterval(ON.ttimer); ON.t = null; ON.toursAt = 0; go('home'); break;
     case 'on-tour-entry': case 'on-tour-cancel': case 'on-tour-startnow': case 'on-tour-delete': case 'on-tour-ready': onReq('on_tour_act', Object.assign(onMe(), { id: ON.t.id, act: a.slice(8) })).then(j => { ON.t = j.tour; if (j.tour.myRoom) { S.onAutoRoom = j.tour.myRoom; onRoomOpen(j.tour.myRoom); } else render(); }).catch(e => toast(e.message)); break;
@@ -6365,13 +6366,22 @@ async function dailyRankOpen(tab) {
   const di = ON.dinfo; if (!di) { modal('<div class="stack"><p>読み込めませんでした。</p><div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>'); return; }
   const av = r => KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
   const row = (r, unit) => `<button class="dr-row ${r.me ? 'me' : ''}" data-act="rank-card" data-rid="${esc(r.rid)}"><b class="dr-rk">${r.rank <= 3 ? ['🥇', '🥈', '🥉'][r.rank - 1] : r.rank}</b><span class="dr-av">${av(r)}</span><span class="dr-nm">${esc(r.name)}${r.ai ? '<em class="ai-chip">AI</em>' : ''}${r.me ? '<small class="pv-me">あなた</small>' : ''}${r.bonus ? `<small class="muted"> +${r.bonus}</small>` : ''}</span><b class="dr-pt">${r.pts}<small>${unit}</small></b></button>`;
-  const tabs = [['season', `${di.label}シーズン`], ['total', '総ポイント'], ['past', '過去のシーズン']];
+  const tabs = [['season', `${di.label}シーズン`], ['games', '大会の結果'], ['total', '総ポイント'], ['past', '過去のシーズン']];
   let body = '';
   if (S.drTab === 'season') body = `<p class="small muted" style="margin:0">デイリーのポイント：予選は「16−グループ内の順位」（AIも順位に入る）、決勝に出たら決勝の順位で ${di.rule.fin.join('・')} を足す。シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</p>${di.stand.length ? di.stand.map(r => row(r, 'pt')).join('') : '<p class="small muted">まだだれもポイントを持っていません。今夜のデイリーに出てみよう！</p>'}`;
+  else if (S.drTab === 'games') body = await dailyGamesHTML();
   else if (S.drTab === 'total') body = `<p class="small muted" style="margin:0">総ポイント：シーズンの順位で 1位から ${di.rule.bonus.join('・')}、参加者の上位半分まで ${di.rule.half}。公式大会の入賞でも加算</p>${di.total.length ? di.total.map(r => row(r, 'pt')).join('') : '<p class="small muted">まだだれも総ポイントを持っていません（最初のシーズンが終わるとつきます）。</p>'}`;
   else body = di.past.length ? di.past.map(p => `<div class="dr-past"><b>${esc(p.label)}シーズン</b><small class="muted">${p.n}人が参加</small>${p.stand.slice(0, 10).map((r, i) => row(Object.assign({}, r, { rank: i + 1 }), 'pt')).join('')}</div>`).join('') : '<p class="small muted">まだ終わったシーズンはありません。</p>';
   modal(`<div class="stack dr-m"><h3 style="margin:0">📅 デイリートーナメント</h3><div class="su-seg">${tabs.map(([k, l]) => `<button class="${S.drTab === k ? 'on' : ''}" data-act="daily-rank" data-tab="${k}">${l}</button>`).join('')}</div>${body}
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
+}
+// デイリーの大会ごとの結果（シーズンごとにまとめる。今のシーズンは開いた状態、前のシーズンはたたむ）。オンライン大会の「過去の大会」には入れない
+async function dailyGamesHTML() {
+  let j = null; try { j = await onReq('daily_tours', { pid: PID }); } catch (e) { return '<p class="small muted">読み込めませんでした。</p>'; }
+  const av = (j.aiAvoid || []), nmOf = p => p ? onName(Object.assign({ avoid: av }, p)) : '', chip = p => !p || !p.ai ? '' : p.char ? '<em class="ai-chip ai-res">AI研究員</em>' : '<em class="ai-chip ai-fill">AI補充</em>';
+  const ph = { done: ['終了', ''], cancel: ['中止', 'off'], prelim: ['予選中', 'live'], final: ['決勝中', 'live'], entry: ['受付', 'live'] };
+  const row = x => { const [pl, pc] = ph[x.phase] || ['', '']; return `<button class="dg-row" data-act="dr-tour" data-id="${esc(x.id)}"><span class="dg-n"><b>${esc(x.short)}</b><em class="dg-ph ${pc}">${pl}</em></span><span class="dg-w">${x.win ? `🏆 ${esc(nmOf(x.win))}${chip(x.win)}` : x.phase === 'cancel' ? '<span class="muted">中止</span>' : ''}</span><span class="dg-m">${x.mine ? `<b>あなた ${x.mine}位</b>` : `<span class="muted">${x.n}人</span>`}</span></button>`; };
+  return j.seasons && j.seasons.length ? j.seasons.map((g, i) => `<details class="dg-s" ${i === 0 ? 'open' : ''}><summary><b>${esc(g.label)}シーズン</b>${g.cur ? '<small>開催中</small>' : ''}<small class="muted">${g.tours.length}大会</small></summary>${g.tours.map(row).join('')}</details>`).join('') : '<p class="small muted">まだデイリートーナメントの結果はありません。</p>';
 }
 // 自分の上位3位をサーバーから読み、いまのプレイヤーのバッジに反映（公式と非公式は別のバッジ）
 async function onAwardsSync() {
@@ -6504,8 +6514,8 @@ async function onStandView() {
 }
 function onStandHTML(t) {
   const isDone = t.phase === 'done', hasFin = !!t.finalists && (t.phase === 'final' || isDone) && t.stand.some(r => r.fin);
-  const nm = r => { if (r.ai && r.char && r.rid) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(c.name)}</button><em class="ai-chip" title="AI研究員">AI研究員</em>`; }
-    if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip">AI</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
+  const nm = r => { if (r.ai && r.char && r.rid) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(c.name)}</button><em class="ai-chip ai-res" title="ポイントを持つAI研究員（ランキングの競走相手）">AI研究員</em>`; }
+    if (r.ai) { const c = onAiChar(r); return `<button type="button" class="on-pn" data-char="${c.id}">${esc(c.name)}</button><em class="ai-chip ai-fill" title="空いた席をうめるAI（ポイント・ランキングなし）">AI補充</em>`; } return r.rid ? `<button type="button" class="on-pn" data-act="rank-card" data-rid="${esc(r.rid)}">${esc(r.name)}</button>` : esc(r.name); };
   const medal = (k, on) => on && k < 3 ? ['🥇', '🥈', '🥉'][k] : k + 1;
   const live = r => r.live && !isDone ? '<em class="on-live">対局中</em>' : '';
   // この順位表がいつの成績か（予選の得点・累計PPは、そのセットの全部の卓が終わったときにまとめて反映される）
@@ -6830,7 +6840,7 @@ function onTableHTML(v) {
     return `<div data-pi="${i}" ${spec ? `data-onpov="${i}" role="button" title="${esc(onName(s))}の席から見る"` : ''} class="seat ${i === order[0] ? 'dealer' : ''} ${cur === i && v.phase === 'play' ? 'turn' : ''} ${ON.acted === i ? 'acted' : ''} ${g.over ? (g.winner === i ? 'out winner' : 'loser') : ''}">${i === order[0] ? dealerChip('dbtn seat-chip') : ''}
       <div class="av">${onAv(s, mood)}${b ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''}${g.over && g.winner === i ? confettiHTML() : ''}</div>
       <div class="nm"><span>${esc(onName(s))}</span><span class="ord">${ordIn(i)}番手</span></div>
-      <div class="meta">${s.ai ? `<span class="chip lvchip">AI★${s.lv || 2}</span>` : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
+      <div class="meta">${s.ai ? (s.char ? `<span class="chip on-reschip" title="ポイントを持つAI研究員（ランキングの競走相手）">AI研究員★${s.lv || 2}</span>` : `<span class="chip lvchip" title="空いた席をうめるAI">AI補充★${s.lv || 2}</span>`) : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
       <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
       ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}${onPlayedHTML(g, i)}</div>`;
   };
