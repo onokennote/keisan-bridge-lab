@@ -474,11 +474,13 @@ function jstTz(): DateTimeZone { return new DateTimeZone('Asia/Tokyo'); }
 function seasonKey(int $ts): string { $d = (new DateTime('@' . $ts))->setTimezone(jstTz()); return $d->format('Y-m') . ((int)$d->format('j') <= 15 ? 'a' : 'b'); }
 function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' . (substr($k, -1) === 'a' ? '前半' : '後半'); }
 function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
+// 予選のゲーム数：第1部（17:30）と第3部（19:30）は5ゲームのじっくり予選（運の波がならされる）、第2部・第4部は3ゲーム（2026-11-17から）
+function dailyGames(int $part): int { return in_array($part, [1, 3], true) ? 5 : 3; }
 function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
-  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×3ゲーム・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります',
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×' . dailyGames($part) . 'ゲーム（第1部・第3部は5ゲームのじっくり予選、第2部・第4部は3ゲーム）・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
-    'sets' => 3, 'games' => 3, 'finalGames' => 5, 'finalists' => 5, 'waitMin' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
+    'sets' => 3, 'games' => dailyGames($part), 'finalGames' => 5, 'finalists' => 5, 'waitMin' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
 function dailyEnsure(): void {
   $d = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$d->format('G') < DAILY_HOUR) return;
