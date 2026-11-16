@@ -2374,7 +2374,7 @@ body.rewinding #home-fab{display:none}
 .dr-past{display:flex;flex-direction:column;gap:2px;margin-top:8px}
 
 .dl-parts{display:flex;flex-direction:column;gap:4px}
-.dl-part{display:grid;grid-template-columns:5.4em 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
+.dl-part{display:grid;grid-template-columns:4.6em 1fr auto;gap:8px;align-items:center;padding:6px 8px;border-radius:10px;background:rgba(0,0,0,.22);border:1px solid var(--line)}
 .dl-part.mine{border-color:#ffd666;background:rgba(255,214,102,.12)}.dl-part.live{border-color:rgba(255,100,100,.6)}
 .dl-pn{display:flex;flex-direction:column;line-height:1.1}.dl-pn small{color:var(--muted);font-size:12px;font-weight:700}
 .dl-ps{display:flex;flex-direction:column;gap:1px;font-size:12px}.dl-ps .on-cd{font-size:13px}
@@ -2495,8 +2495,7 @@ body.rewinding #home-fab{display:none}
 @keyframes tiFade{0%{opacity:0;transform:translateY(6px);letter-spacing:.6em}100%{opacity:1;transform:none;letter-spacing:.3em}}
 @media (prefers-reduced-motion: reduce){ .title.intro .fan .card,.title.intro .logo .lg-main,.title.intro .logo .lg-main::after,.title.intro .logo small{animation:none} }
 .shchip{background:rgba(151,117,250,.28);color:#d0bfff;border:1px solid rgba(151,117,250,.5)}
-/* デイリーの部の形式（5ゲームのじっくり予選を目立たせる） */
-.dl-fmt{display:inline-block;margin-top:4px;padding:2px 6px;border-radius:6px;font-style:normal;font-size:10px;font-weight:800;line-height:1.25;background:rgba(255,255,255,.07);color:var(--muted);border:1px solid rgba(255,255,255,.14);white-space:nowrap}
-.dl-fmt.long{background:rgba(64,192,87,.18);color:#b2f2bb;border-color:rgba(64,192,87,.6)}
-.dl-part.long{border-color:rgba(64,192,87,.55)!important;box-shadow:inset 3px 0 0 #40c057}
-.dl-long-t{color:#b2f2bb}
+/* デイリーの部の形式（🐢 予選5ゲーム×3セット／⚡ 予選3ゲーム×3セット。同じ重みで） */
+.dl-part>.btn{white-space:nowrap}.dl-ps{min-width:0}
+.dl-fmt{display:inline-block;align-self:flex-start;max-width:100%;margin-bottom:2px;padding:1px 6px;border-radius:6px;font-style:normal;font-size:10.5px;letter-spacing:0;font-weight:800;line-height:1.4;white-space:nowrap;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:var(--ink)}
+.dl-part>.dl-fmt{grid-column:1/-1;justify-self:start;margin:0 0 -2px}
