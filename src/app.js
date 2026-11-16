@@ -62,7 +62,7 @@ function pickW(w, r) { const t = w.reduce((a, b) => a + b, 0); let x = r() * t; 
 // AIはごちゃまぜ倶楽部の固定キャラから選ぶ（強さ・性格・名前・見た目はキャラごとに決まっている）
 function makeAI(id, level, style, used) {
   const c = KB.pickChar(level, style || null, used);
-  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c), peek: !!c.peek };
+  return { id, human: false, level: c.lv, style: style && c.lv === level ? style : c.st, ch: KB.charToCh(c), peek: !!c.peek, shadow: !!c.shadow };
 }
 // アバター編集
 const AV_OPTS = {
@@ -177,12 +177,14 @@ const san = s => /(さん|くん|君|ちゃん|様|先生|博士|大将|師匠|�
 function av(p, mood, small) {
   const lvShow = S.settings.showLevel || S.T && S.T.revealAll;
   const stShow = S.settings.showStyle || S.T && S.T.revealAll;
-  const me = p.human && !p.spectator; return KB.avatarSVG(p.ch, { mood: mood || 'normal', level: me ? 0 : (lvShow ? p.level : 0), style: me ? null : (stShow ? p.style : null) });
+  const me = p.human && !p.spectator; return KB.avatarSVG(p.ch, { mood: mood || 'normal', level: me ? 0 : (lvShow ? dispLv(p) : 0), style: me ? null : (stShow ? p.style : null) });
 }
+const dispLv = p => p.shadow ? 1 : p.level; // シャドーは写していても★1と表示する
 function lvChip(p) {
   if (p.human && !p.spectator) return '';
-  let s = '';
-  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(p.level)}${'☆'.repeat(Math.max(0, 5 - p.level))} ${esc(p.level >= 6 ? '奥義使い' : KB.levelCfg(p.level).label)}</span><span class="lv-short">★${p.level}</span></span>`;
+  let s = ''; const L = dispLv(p);
+  if (S.settings.showLevel) s += `<span class="chip lvchip"><span class="lv-full">${'★'.repeat(L)}${'☆'.repeat(Math.max(0, 5 - L))} ${esc(L >= 6 ? '奥義使い' : KB.levelCfg(L).label)}</span><span class="lv-short">★${L}</span></span>`;
+  if (p.shadow && p.mimic) s += `<span class="chip shchip" title="この卓でいちばん強い${esc(p.mimic.name)}の打ち方を写している"><span class="lv-full">🪞${esc(p.mimic.name)}を写す★${p.mimic.lv}</span><span class="lv-short">🪞★${p.mimic.lv}</span></span>`;
   if (S.settings.showStyle) { const st = KB.style(p.style); s += `<span class="chip stchip" style="background:${esc(st.color)}"><span class="lv-full">${esc(st.label)}</span><span class="lv-short">${esc(st.label.slice(0, 4))}</span></span>`; }
   return s;
 }
@@ -2682,7 +2684,7 @@ const WATCH_FIRST = ['zero', 'shota', 'tome', 'tama'];
 function watchStart(first) {
   watchEnd(true);
   KB.resetNames(); const used = new Set();
-  const fromChar = (id, i) => { const c = KB.charById(id); used.add(id); return { id: i, human: false, level: c.lv, style: c.st, ch: KB.charToCh(c), peek: !!c.peek }; };
+  const fromChar = (id, i) => { const c = KB.charById(id); used.add(id); return { id: i, human: false, level: c.lv, style: c.st, ch: KB.charToCh(c), peek: !!c.peek, shadow: !!c.shadow }; };
   const lv = KB.shuffle([1, 2, 3, 4]).slice(0, 3).sort((a, b) => b - a);
   const ais = first ? WATCH_FIRST.map(fromChar) : [makeAI(0, 5, null, used)].concat(lv.map((l, k) => makeAI(k + 1, l, null, used)));
   // 本戦と同じ画面で見せる：手元（画面の下）は達人。達人の席は「人の席」を借りて、AIが打つ（spectator）
@@ -2727,7 +2729,7 @@ function watchDiff(g, p, m) {
 function watchGameSummary() {
   const g = S.game, T = S.T; if (!g || !S.spectate) return;
   const rv = watchReview(g, S.spectate.diffs.splice(0)), last = T.game >= T.cfg.games;
-  const ppRow = g.players.map((p, i) => ({ p, i })).sort((a, b) => g.pp[a.i] - g.pp[b.i]).map(({ p, i }) => `<div class="ws-pp ${g.winner === i ? 'win' : ''}"><span class="av">${av(p, g.winner === i ? 'happy' : moodOf(g, i), true)}</span><div><b>${esc(nm(p))}</b><small>${'★'.repeat(p.level)}</small><span>${g.winner === i ? '上がり' : `PP <b class="tnum">${g.pp[i]}</b>`}</span></div></div>`).join('');
+  const ppRow = g.players.map((p, i) => ({ p, i })).sort((a, b) => g.pp[a.i] - g.pp[b.i]).map(({ p, i }) => `<div class="ws-pp ${g.winner === i ? 'win' : ''}"><span class="av">${av(p, g.winner === i ? 'happy' : moodOf(g, i), true)}</span><div><b>${esc(nm(p))}</b><small>${'★'.repeat(dispLv(p))}</small><span>${g.winner === i ? '上がり' : `PP <b class="tnum">${g.pp[i]}</b>`}</span></div></div>`).join('');
   const cm = who => `<div class="w-cm ${who}"><div class="cm-av">${KB.casterSVG(who, 'happy')}</div><div><span class="cm-name">${who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span>${esc(rv[who])}</div></div>`;
   modal(`<div class="stack watch-sum"><div class="gs-head"><span class="small">達人の観戦</span><b>第${T.game}ゲームの感想</b></div><div class="ws-pps">${ppRow}</div>${cm('root')}${cm('masa')}
     <div class="row" style="justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn ghost" data-act="watch-quit">観戦をやめる</button><button class="btn primary" data-act="watch-next">${last ? 'セットの結果へ' : `第${T.game + 1}ゲームへ`}</button></div></div>`);
@@ -3318,7 +3320,12 @@ function startSet() { S.T.setT0 = Date.now(); S.T.pbSnap = rvSnap(); seatSet(S.T
 function introStars() {
   const T = S.T; if (!T || S.view !== 'game' || !S.settings.commentary || S.settings.commentary === 'off') return;
   const tb = (T.tables && T.tables[T.myTable]) || [];
-  const stars = tb.map(id => T.players.find(p => p.id === id)).filter(p => p && !p.human && p.ch && p.ch.charId && p.level >= 5);
+  const tbp = tb.map(id => T.players.find(p => p.id === id)), sh = tbp.find(p => p && p.shadow && p.mimic);
+  if (sh) { const m = sh.mimic, n = sh.ch.name, K = m.id === 'kanata', L = [
+    { root: `${san(n)}は★1ですが、この卓でいちばん強い${san(m.name)}（★${m.lv}）の打ち方をそっくり写しています。${K ? '絶対透視まで写すので、透視する人が二人いると思って構えましょう。' : `実質、★${m.lv}が二人いる卓です。`}`, masa: `出たで、影の${n}！ ${m.name}の打ち方をまるごとコピーや！${K ? 'カナタの絶対透視まで写すんかい！' : `★1や思て油断したらあかんで、中身は★${m.lv}や！`}` },
+    { root: `${san(n)}は自分ではほとんど計算できません。そのかわり、同じ卓の最強の${san(m.name)}の打ち方を写します。表示は★1でも、読みは★${m.lv}です。`, masa: `${n}、また${m.name}のマネしとるで！ サッカーで言うたら、エースのマンマークどころか分身や！` }];
+    sayInsight(L[(Math.random() * L.length) | 0], 'normal'); renderGame(); return; }
+  const stars = tbp.filter(p => p && !p.human && !p.shadow && p.ch && p.ch.charId && p.level >= 5);
   if (!stars.length) return;
   const p = stars[(Math.random() * stars.length) | 0], t = p.ch.title || '達人', n = p.ch.name;
   const L = [
@@ -3575,11 +3582,11 @@ function loop() {
   const levelF = [1.35, 1.2, 1.0, 0.95, 1.1, 1.2][(pl.level || 3) - 1];
   const optF = nOpts === 0 ? 1.15 : 0.85 + Math.min(nOpts, 12) * 0.03;
   const think = base === 30 ? 30 : base * styleF * levelF * optF * (0.8 + Math.random() * 0.4);
-  if (KB.kanataReady(g, p)) { // 奥義・絶対透視
-    KB.kanataStart(g); if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
+  if (KB.kanataReady(g, p)) { // 奥義・絶対透視（シャドーがカナタを写したときも）
+    KB.kanataStart(g, p); if (S.T && S.T.phase === 'final') S.T.kanataClear = true;
     // 大きな演出はそのセットの最初の1回だけ。2回目からは軽く光るだけ
     const setKey = S.T ? (S.T.phase || '') + ':' + (S.T.set || 0) : 'p', first = S.toushiSet !== setKey; S.toushiSet = setKey;
-    S.thinking = p; if (first) { toushiFx(g, p); say('kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say('kanataAgain', { n: nm(pl) }); }
+    S.thinking = p; if (first) { toushiFx(g, p); say(pl.shadow ? 'shadowClear' : 'kanataOn', { n: nm(pl) }); } else { toushiLite(g, p); say(pl.shadow ? 'shadowClear' : 'kanataAgain', { n: nm(pl) }); }
     renderGame();
     S.timer = pt(loop, first ? 3300 : 1100); return; // 演出を見せ終わってから打つ（速さに関係なく）
   }
@@ -6810,7 +6817,7 @@ const ON_AI_BASE = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', '
 function onAiChar(s) { // AIの席：サーバーが同じ強さのAIに付けた番号（slot）で、重ならないようにキャラを割り当てる
   if (typeof s === 'string') s = { name: s };
   if (s.char) { const rc = KB.charById(s.char); if (rc) return rc; } // AI研究員（デイリーに出たランキングのAI）は、そのキャラ
-  const name = String(s.name || ''), lv = +(s.lv || (name.match(/AI★(\d)/) || [])[1] || 2), av0 = [].concat(s.avoid || [], (ON.v && ON.v.cfg && ON.v.cfg.aiAvoid) || [], (ON.t && ON.t.aiAvoid) || []), pool0 = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero'), pool1 = pool0.filter(c => !av0.includes(c.id)), pool = pool1.length ? pool1 : pool0; // AI研究員のキャラは、ただのAIには使わない（混乱しないように）
+  const name = String(s.name || ''), lv = +(s.lv || (name.match(/AI★(\d)/) || [])[1] || 2), av0 = [].concat(s.avoid || [], (ON.v && ON.v.cfg && ON.v.cfg.aiAvoid) || [], (ON.t && ON.t.aiAvoid) || []), pool0 = KB.ROSTER.filter(c => c.lv === lv && c.id !== 'zero' && !c.shadow), pool1 = pool0.filter(c => !av0.includes(c.id)), pool = pool1.length ? pool1 : pool0; // AI研究員のキャラは、ただのAIには使わない（混乱しないように）
   let idx;
   if (s.slot != null) idx = +s.slot;
   else { const base = name.replace(/（AI★\d）$/, ''), m = base.match(/^(.*?)(\d*)$/), bi = ON_AI_BASE.indexOf(m[1]); if (bi >= 0) idx = bi + (m[2] ? +m[2] : 0); else { idx = 0; for (const ch of base) idx = (idx * 31 + ch.charCodeAt(0)) >>> 0; } }

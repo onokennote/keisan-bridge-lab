@@ -86,7 +86,7 @@ async function play(b, c, data, sets, minis, form) {
   if (!KEY) { console.log('KB_ADMIN_KEY がないので何もしません'); return; }
   const b = await chromium.launch();
   const pg0 = await b.newPage(); await pg0.goto(PAGE); await pg0.waitForTimeout(300);
-  const roster = await pg0.evaluate(() => KB.ROSTER.map(c => ({ id: c.id, name: c.name, lv: c.lv, st: c.st }))); await pg0.close();
+  const roster = await pg0.evaluate(() => KB.ROSTER.filter(c => !c.shadow).map(c => ({ id: c.id, name: c.name, lv: c.lv, st: c.st }))); // シャドーは卓の最強を写すので、研究員にはしない await pg0.close();
   if (MODE === 'reseed') { for (const x of (await api('ai_list')).list) await api('ai_del', { cid: x.cid }); console.log('いったん全員を引退させて、最初から投入し直します'); }
   const cur = (await api('ai_list')).list; const have = new Set(cur.map(x => x.cid));
   const jobs = []; // { c, data, sets }

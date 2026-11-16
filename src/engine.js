@@ -538,11 +538,25 @@ KB.Game = class {
 
 // ★6カナタの奥義「絶対透視」：全員の手札と山札の順番まで見通して読む
 // 第1巡から、カナタの番が来るたびに50%の確率で発動する。発動したら、そのゲームの最後まで見通したまま（1ゲーム1回）。kanataAt は発動した巡
-KB.kanataRoll = function (game) {
-  game.kanataIdx = game.players.findIndex(pl => pl.clairvoyant); game.kanataAt = 0; game.kanataOn = false;
+// シャドー：ゲームの始まりに、卓でいちばん★の高いAI（同じ★なら抽選）の強さ・性格・力を写す。カナタを写すと絶対透視も使う（★は1のまま表示）
+KB.shadowRoll = function (game) {
+  game.players.forEach(pl => {
+    if (!pl.shadow) return;
+    const others = game.players.filter(o => o !== pl && !o.human && !o.shadow);
+    const mx = Math.max(1, ...others.map(o => o.level || 1)), top = others.filter(o => (o.level || 1) === mx), t = top.length ? top[(Math.random() * top.length) | 0] : null;
+    if (!t || mx <= 1) { Object.assign(pl, { level: 1, style: pl.baseStyle || pl.style, peek: false, clairvoyant: false, mimic: null }); return; }
+    if (!pl.baseStyle) pl.baseStyle = pl.style;
+    Object.assign(pl, { level: Math.min(mx, 6), style: t.style || 'keisan', peek: !!t.peek, clairvoyant: !!t.clairvoyant, mimic: { name: (t.ch && t.ch.name) || '', id: (t.ch && t.ch.charId) || '', lv: mx } });
+  });
 };
-KB.kanataReady = (game, p) => p === game.kanataIdx && game.kanataIdx >= 0 && !game.kanataOn && (G.KB_KANATA_AT ? game.round >= G.KB_KANATA_AT : Math.random() < 0.5); // KB_KANATA_AT はテスト用（その巡で必ず発動）
-KB.kanataStart = (game) => { game.kanataOn = true; game.kanataAt = game.round; };
+KB.kanataRoll = function (game) {
+  KB.shadowRoll(game);
+  game.kanataIdx = game.players.findIndex(pl => pl.clairvoyant && !pl.shadow); game.kanataAt = 0; game.kanataOn = false; game.clearOn = {};
+};
+// 絶対透視を使える人（カナタと、カナタを写したシャドー）ごとに、番が来るたび50%で発動（1ゲーム1回）
+KB.kanataReady = (game, p) => !!game.players[p].clairvoyant && !(game.clearOn && game.clearOn[p] != null) && (G.KB_KANATA_AT ? game.round >= G.KB_KANATA_AT : Math.random() < 0.5); // KB_KANATA_AT はテスト用（その巡で必ず発動）
+KB.kanataStart = (game, p) => { if (p == null) p = game.kanataIdx; (game.clearOn = game.clearOn || {})[p] = game.round; if (p === game.kanataIdx) { game.kanataOn = true; game.kanataAt = game.round; } };
+KB.isClear = (game, p) => !!game.players[p].clairvoyant && ((!!game.clearOn && game.clearOn[p] != null) || (p === game.kanataIdx && game.kanataOn)); // 前の版で保存した対局は kanataOn だけ
 function aiMoveClear(game, p, rollouts) {
   const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
   const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
@@ -582,7 +596,7 @@ function makePeek(game, p) {
 // AIが1手選ぶ（実ゲーム）
 KB.aiMove = function (game, p, ctx) {
   const pl = game.players[p];
-  if (pl.clairvoyant && game.kanataOn) return aiMoveClear(game, p);
+  if (KB.isClear(game, p)) return aiMoveClear(game, p);
   const lv = KB.levelCfg(pl.level), st = KB.style(pl.style);
   const counts = game.counts(p), t = game.field.v;
   const unseen = game.unseenCounts(p);
@@ -611,8 +625,8 @@ KB.autoGame = function (players, starter) {
   let guard = 0;
   while (!g.over && guard++ < 5000) {
     const p = g.current(); const pl = players[p];
-    if (KB.kanataReady(g, p)) KB.kanataStart(g);
-    if (pl.clairvoyant && g.kanataOn) { g.apply(aiMoveClear(g, p, 16)); continue; }
+    if (KB.kanataReady(g, p)) KB.kanataStart(g, p);
+    if (KB.isClear(g, p)) { g.apply(aiMoveClear(g, p, 16)); continue; }
     let lv = KB.levelCfg(pl.level); if (lv.mode === 'mc') lv = Object.assign({}, lv, { mode: 'heuristic', flexScale: 1 });
     const m = aiChoose(g.counts(p), g.field.v, lv, KB.style(pl.style), g.unseenCounts(p));
     g.apply(m);

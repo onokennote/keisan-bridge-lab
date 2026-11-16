@@ -2494,3 +2494,4 @@ body.rewinding #home-fab{display:none}
 .title.intro .logo small{animation:tiFade .5s ease-out both;animation-delay:calc(var(--el,0ms) + 1000ms)}
 @keyframes tiFade{0%{opacity:0;transform:translateY(6px);letter-spacing:.6em}100%{opacity:1;transform:none;letter-spacing:.3em}}
 @media (prefers-reduced-motion: reduce){ .title.intro .fan .card,.title.intro .logo .lg-main,.title.intro .logo .lg-main::after,.title.intro .logo small{animation:none} }
+.shchip{background:rgba(151,117,250,.28);color:#d0bfff;border:1px solid rgba(151,117,250,.5)}
