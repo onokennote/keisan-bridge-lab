@@ -365,7 +365,14 @@ function obShadowSeats(array &$seats): void {
 }
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
-  shuffle($keys); $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
+  $byKey = []; foreach ($t['players'] as $p) $byKey[$p['key']] = $p;
+  // 卓分け：なるべく同じ人と当たらないように。何通りか作って、これまで同じ卓になった回数（2乗で重く）の合計がいちばん少ない分け方を選ぶ（$t['met']）
+  $sizes = obTableSizes(count($keys)); $met = $t['met'] ?? []; $pk = fn($a, $b) => strcmp($a, $b) < 0 ? $a . '|' . $b : $b . '|' . $a;
+  $cost = function (array $ks) use ($sizes, $met, $pk) { $c = 0; $k = 0; foreach ($sizes as $sz) { $tb = array_slice($ks, $k, $sz); $k += $sz; for ($i = 0; $i < $sz; $i++) for ($j = $i + 1; $j < $sz; $j++) { $m = $met[$pk($tb[$i], $tb[$j])] ?? 0; $c += $m * $m; } } return $c; };
+  $best = $keys; shuffle($best); $bc = $cost($best);
+  for ($tr = 0; $tr < (count($sizes) > 1 ? 200 : 0) && $bc > 0; $tr++) { $ks = $keys; shuffle($ks); $c = $cost($ks); if ($c < $bc) { $bc = $c; $best = $ks; } }
+  $keys = $best; $k = 0; foreach ($sizes as $sz) { $tb = array_slice($keys, $k, $sz); $k += $sz; for ($i = 0; $i < $sz; $i++) for ($j = $i + 1; $j < $sz; $j++) { $x = $pk($tb[$i], $tb[$j]); $met[$x] = ($met[$x] ?? 0) + 1; } }
+  if (count($sizes) > 1) $t['met'] = $met;
   $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3', 'aiAvoid' => $t['aiAvoid'] ?? []];
   foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } obShadowSeats($seats); $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }

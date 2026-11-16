@@ -220,9 +220,14 @@ function seatSet(T) {
   if (T.phase === 'final') { T.tables = [KB.shuffle(T.finalists.slice())]; }
   else if (T.cfg.kind === 'practice') { T.tables = [KB.shuffle(ids.slice())]; }
   else {
-    const sizes = KB.splitTables(ids.length, 5);
-    KB.shuffle(ids); T.tables = []; let k = 0;
-    for (const s of sizes) { T.tables.push(ids.slice(k, k + s)); k += s; }
+    // 卓分け：なるべく同じ人と当たらないように。何通りか作って、これまで同じ卓になった回数（2乗で重く）の合計がいちばん少ない分け方を選ぶ（T.met）
+    const sizes = KB.splitTables(ids.length, 5), met = T.met = T.met || {}, key = (a, b) => a < b ? a + ':' + b : b + ':' + a;
+    const cut = arr => { const tb = []; let k = 0; for (const s of sizes) { tb.push(arr.slice(k, k + s)); k += s; } return tb; };
+    const cost = tb => tb.reduce((c, t) => { for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) { const m = met[key(t[i], t[j])] || 0; c += m * m; } return c; }, 0);
+    let best = null, bc = Infinity;
+    for (let tr = 0; tr < (sizes.length > 1 ? 300 : 1) && bc > 0; tr++) { const tb = cut(KB.shuffle(ids.slice())), c = cost(tb); if (c < bc) { bc = c; best = tb; } }
+    T.tables = best;
+    for (const t of T.tables) for (let i = 0; i < t.length; i++) for (let j = i + 1; j < t.length; j++) { const kk = key(t[i], t[j]); met[kk] = (met[kk] || 0) + 1; }
   }
   T.myTable = T.tables.findIndex(t => t.includes(0));
   T.setPP = {}; for (const t of T.tables) for (const id of t) T.setPP[id] = [];
