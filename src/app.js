@@ -3768,7 +3768,7 @@ function renderGame0() {
       <div class="nm"><span>${esc(nm(p))}</span><span class="ord">${ordInRound}番手</span>${pvr ? `<span class="prov"><span class="lv-full">暫定</span>${pvr.rank[p.id]}位</span>` : ''}</div>
       <div class="meta">${lvChip(p)}${p.ch.ageJa ? `<span class="chip tagchip" title="肩書き">${esc(p.ch.ageJa)}</span>` : ''}</div>
       <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n}</b>${g.over || S.spectate ? '' : handBacks(n)}</span>
-        <span>${g.over ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${setpp}</b>`}</span></div>
+        <span>${g.over ? `<small>このゲーム</small> PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${setpp}</b>`}</span></div>
       ${S.spectate && !g.over && n ? `<div class="open-hand">${g.hands[i].map(c => `<i class="oh ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>`).join('')}</div>` : ''}${act}${g.over && n ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${g.hands[i].map(miniCard).join('')}</span></div>` : ''}${playedHTML(g, i)}</div>`);
   }
   const fieldsAll = g.log.filter(e => e.type === 'field');
@@ -6866,7 +6866,7 @@ function onTableHTML(v) {
       <div class="av">${onAv(s, mood)}${b ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''}${g.over && g.winner === i ? confettiHTML() : ''}</div>
       <div class="nm"><span>${esc(onName(s))}</span><span class="ord">${ordIn(i)}番手</span></div>
       <div class="meta">${s.ai ? (s.char ? `<span class="chip on-reschip" title="ポイントを持つAI研究員（ランキングの競走相手）">AI研究員★${s.lv || 2}</span>` : `<span class="chip lvchip" title="空いた席をうめるAI">AI補充★${s.lv || 2}</span>`) : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
-      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
+      <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `<small>このゲーム</small> PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
       ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}${onPlayedHTML(g, i)}</div>`;
   };
   const opp = []; for (let k = 1; k < n; k++) opp.push(seat(order[(myPos + k) % n]));
@@ -6877,7 +6877,7 @@ function onTableHTML(v) {
   if (g.over) {
     const w = g.winner, lp = w >= 0 && g.played[w].length ? g.played[w][g.played[w].length - 1] : null;
     const left = v.phase === 'between' && v.game.nextAt ? Math.max(0, Math.ceil(v.game.nextAt - now)) : null;
-    win = `<div class="win-strip" role="status"><div class="ws-main"><div class="ws-title">${w >= 0 ? esc(w === me ? 'あなた' : onName(v.seats[w])) + 'が上がりました！' : '規定の巡数で終了しました'}</div>${lp ? `<div class="ws-play"><span class="pg big">${lp.cards.map(c => miniCard({ v: c[0], s: c[1] })).join('')}</span><span class="mono">${esc(lp.expr)} = ${lp.t}</span></div>` : ''}</div>
+    win = `<div class="win-strip" role="status"><div class="ws-main"><div class="ws-title">${w >= 0 ? esc(w === me ? 'あなた' : onName(v.seats[w])) + 'が上がりました！' : '規定の巡数で終了しました'}</div>${g.pp ? `<div class="ws-pp">${spec ? `${esc(onName(v.seats[pov]))}のPP` : 'あなたのPP'}：<b>${g.pp[pov]}</b>${w === pov ? '（上がり！）' : ''}<small class="muted"> ・セットPP ${tot(pov)}</small></div>` : ''}</div>
       <div class="ws-btns">${v.phase === 'done' ? (v.tour ? '<button class="btn primary" data-act="on-to-tour">大会の順位へ</button>' : '<button class="btn primary" data-act="on-quit">ホームへ</button>') : `<span class="small" id="on-next">次のゲームまで ${left != null ? left : ''}秒</span>`}</div></div>`;
   }
   // 手元（自分。観戦なら選んだ席の人。手札は見えない）
