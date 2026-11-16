@@ -359,9 +359,9 @@ function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $
   return $id;
 }
 function obPlayerSeat(array $p): array { return !empty($p['ai']) ? ['name' => $p['name'], 'ai' => true, 'lv' => $p['lv'], 'slot' => $p['slot'] ?? null, 'char' => $p['char'] ?? null, 'key' => $p['key'], 'miss' => 0] : ['name' => $p['name'], 'avatar' => $p['avatar'] ?? null, 'uid' => $p['uid'], 'key' => $p['key'], 'miss' => 0]; }
-// AI研究員のシャドー（pshadow）：その卓でいちばん強いAIの★で打つ（★1しかいなければ★1）
+// AI研究員のシャドー（shadow）：その卓でいちばん強いAIの★で打つ（★1しかいなければ★1）
 function obShadowSeats(array &$seats): void {
-  foreach ($seats as $i => $s) { if (empty($s['ai']) || ($s['char'] ?? '') !== 'pshadow') continue; $mx = 1; foreach ($seats as $j => $o) if ($j !== $i && !empty($o['ai']) && ($o['char'] ?? '') !== 'pshadow') $mx = max($mx, (int)$o['lv']); $seats[$i]['lv'] = min(5, $mx); }
+  foreach ($seats as $i => $s) { if (empty($s['ai']) || ($s['char'] ?? '') !== 'shadow') continue; $mx = 1; foreach ($seats as $j => $o) if ($j !== $i && !empty($o['ai']) && ($o['char'] ?? '') !== 'shadow') $mx = max($mx, (int)$o['lv']); $seats[$i]['lv'] = min(5, $mx); }
 }
 // 卓を作って対局を始める（keys の人を席替えして卓に分ける）
 function obTourDeal(array &$t, array $keys, string $label, float $now, array $absent = []): void {
@@ -383,6 +383,7 @@ function obTourStart(array &$t, float $now): void {
   if (count($ent) < $c['min'] && empty($c['aiFill'])) { $t['phase'] = 'cancel'; $t['note'] = '参加者が最少人数に届かなかったため中止'; return; }
   $players = array_map(fn($e) => ['key' => 'u:' . $e['uid'], 'uid' => $e['uid'], 'pid' => $e['pid'] ?? '', 'name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $ent);
   if (!empty($c['daily'])) $players = array_merge($players, dailyResearchers($t, max(0, DAILY_GROUP - count($players)))); // AI研究員（ランキングの「AI」）が空席に参加
+  elseif (!empty($c['aiFill']) && !empty($c['aiRes'])) $players = array_merge($players, tourResearchers($c, max(0, $c['min'] - count($players)))); // ふつうの大会：「AI研究員を呼ぶ」なら、空席をまず研究員で（主催者が選んだ強さの範囲だけ）
   $t['aiAvoid'] = db()->query("SELECT pid FROM ranks WHERE uid = 'ai'")->fetchAll(PDO::FETCH_COLUMN); // AI研究員のキャラは、ただのAIとしては出さない（画面がこの一覧を避けて顔と名前を選ぶ）
   $names = ['ロボ太', 'ピコ', 'メカ子', 'ボルト', 'ギア', 'ネジ丸', 'コイル', 'ドット', 'ビット', 'チップ'];
   $slots = []; // 同じ強さのAIに、重ならない番号（画面はこの番号でキャラを割り当てる）
@@ -442,7 +443,9 @@ function obTourAward(array &$t): void {
   $t['awardOk'] = $daily || count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
   if (!$t['awardOk']) return;
   $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
-  foreach (array_slice($t['result'], 0, 3) as $i => $k) {
+  $podAi = $daily || !array_key_exists('podAi', $t['cfg']) || !empty($t['cfg']['podAi']); // 表彰台にAIを含む（はじめ）：AIも順位に数え、AIの順位にはバッジなし。含まない：人だけで数え直す
+  $order = $podAi ? array_slice($t['result'], 0, 3) : array_slice(array_values(array_filter($t['result'], fn($k) => isset($ent[$k]))), 0, 3);
+  foreach ($order as $i => $k) {
     if (!isset($ent[$k])) continue; // AIの順位にはバッジなし
     $e = $ent[$k]; db()->prepare('INSERT OR REPLACE INTO awards (uid, pid, tid, tname, place, official, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', $t['id'], $t['cfg']['name'], $i + 1, $daily ? 2 : (!empty($t['cfg']['official']) ? 1 : 0), time()]);
     $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
@@ -526,6 +529,22 @@ function dailyResearchers(array $t, int $room): array {
   }
   shuffle($out); return $out;
 }
+// ふつうのオンライン大会に呼ぶAI研究員：主催者が選んだ強さの範囲（OB_RES_RANGE）に入る人だけ。いま別の大会で打っている研究員は呼ばない。シャドーは★1として数える（卓では最強を写す）
+const OB_RES_RANGE = ['random' => [1, 5], 'casual' => [1, 3], 'even' => [1, 5], 'strong' => [3, 5], 'master' => [5, 5]];
+function tourResearchers(array $c, int $room): array {
+  if ($room <= 0) return [];
+  [$lo, $hi] = isset($c['aiMix']) ? (OB_RES_RANGE[$c['aiMix']] ?? [1, 5]) : [(int)$c['aiLv'], (int)$c['aiLv']];
+  $busy = [];
+  foreach (db()->query("SELECT st FROM tours WHERE st LIKE '%\"phase\":\"prelim\"%' OR st LIKE '%\"phase\":\"final\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) { $x = json_decode($raw, true); foreach ($x['players'] ?? [] as $p) if (!empty($p['char'])) $busy[$p['char']] = 1; }
+  $out = [];
+  foreach (db()->query("SELECT pid, name, rating FROM ranks WHERE uid = 'ai' AND shown = 1")->fetchAll() as $r) {
+    if (isset($busy[$r['pid']])) continue;
+    $lv = $r['pid'] === 'shadow' ? 1 : max(1, min(5, (int)round($r['rating'] !== null ? (float)$r['rating'] : 3)));
+    if ($lv < $lo || $lv > $hi) continue;
+    $out[] = ['key' => 'r:' . $r['pid'], 'ai' => true, 'lv' => $lv, 'char' => $r['pid'], 'name' => $r['name'], 'aiUid' => 'ai'];
+  }
+  shuffle($out); return array_slice($out, 0, $room);
+}
 function seasonStand(string $sk): array {
   $q = db()->prepare('SELECT d.uid, d.pid, SUM(d.pts) pts, COUNT(*) n, MAX(d.at) last, COALESCE(r.name, MAX(d.name)) name, r.avatar FROM dpoints d LEFT JOIN ranks r ON r.uid = d.uid AND r.pid = d.pid WHERE d.season = ? GROUP BY d.uid, d.pid ORDER BY pts DESC, last ASC'); $q->execute([$sk]);
   return $q->fetchAll();
@@ -560,6 +579,8 @@ function obTourCfg(array $b, array $u): array {
   $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))), 'aiMix' => in_array($b['aiMix'] ?? '', array_keys(OB_MIX), true) ? $b['aiMix'] : 'even',
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
   'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'waitMin' => in_array((int)($b['waitMin'] ?? 15), OB_WAITS, true) ? (int)$b['waitMin'] : 15, 'points' => $pts ?: [10, 8, 5, 2, 0]];
+  $cfg['aiRes'] = array_key_exists('aiRes', $b) ? !empty($b['aiRes']) : $cfg['entry'] === 'open'; // AI研究員を呼ぶ（はじめは、誰でもの大会はON・招待だけの大会はOFF）
+  $cfg['podAi'] = array_key_exists('podAi', $b) ? !empty($b['podAi']) : true; // 表彰台の順位にAIを含む（はじめは含む）
   if ($cfg['official']) { $tp = array_values(array_map(fn($x) => max(0, min(1000, (int)$x)), array_slice((array)($b['tpts'] ?? OFFICIAL_TPTS), 0, 10))); $cfg['tpts'] = $tp ?: OFFICIAL_TPTS; }
   return $cfg;
 }
@@ -595,7 +616,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'aiAvoid' => $t['aiAvoid'] ?? [], 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'aiRes' => !empty($c['aiRes']), 'podAi' => !array_key_exists('podAi', $c) || !empty($c['podAi']), 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
