@@ -3060,19 +3060,30 @@ function tourFacts() {
   const c = store.get('cfgTour', null); if (!c) return '';
   return `<div class="facts my-facts"><span>${c.nPlayers}人・${KB.splitTables(c.nPlayers, 5).length}卓</span><span>${c.games}ゲーム×${c.sets}セット</span><span>上位${c.finalists}名が決勝</span><span>相手：${esc((MIX[c.mix] || MIX.random).label)}</span></div>`;
 }
+// タイトルの登場の動き：その日はじめてホームを開いたときだけ（端末ごと）。動きを減らす設定・自動テストでは出さない（確かめるときは kb.forceIntro）
+function titleIntro() {
+  if (S.introChecked !== undefined) return S.introChecked; S.introChecked = false;
+  let force = false; try { force = localStorage.getItem('kb.forceIntro') === '1'; } catch (e) { }
+  if ((window.KB_TEST || navigator.webdriver) && !force) return false;
+  try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return false; } catch (e) { }
+  const today = new Date().toLocaleDateString('sv-SE');
+  if (!force && raw.get('kb.introDay', '') === today) return false;
+  raw.set('kb.introDay', today); S.introChecked = true; S.introAt = Date.now(); setTimeout(() => { S.introChecked = false; S.introAt = 0; const t = $('.title.intro'); if (t) t.classList.remove('intro'); }, 2200); // 描き直しても途中から続ける（--el）
+  return true;
+}
 function homeHTML() {
   const saved = store.get('session', null);
   KB.resetNames();
   const sts = KB.getStrategy().styles;
   const fanCards = [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
-  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
-  return `<section class="title">
+  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="--r:${(i - 1.5) * 14}deg;--i:${i};transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
+  return `<section class="title ${titleIntro() ? 'intro' : ''}" ${S.introAt ? `style="--el:${-Math.min(3000, Date.now() - S.introAt)}ms"` : ''}>
   <div class="title-stage">
     <button class="host host-l host-btn" data-act="host-root" aria-label="ルート博士：公式ルールを見る"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span><span class="host-tag">📖 ルール</span></button>
     <div class="fan" aria-hidden="true">${fan}</div>
     <button class="host host-r host-btn ${masaBeckon() ? 'beckon' : ''}" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">${masaBeckon() ? R0(['アドバイスするで〜！', '押してみ！教えたる！', '迷ったらおれや！']) : 'ほな、いこか！'}</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
-  <div class="logo">計算ブリッジ<small>作戦研究所</small></div>
+  <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><small>作戦研究所</small></div>
   <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
