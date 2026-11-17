@@ -23,6 +23,17 @@ const shot = n => path.join(__dirname, 'out', n);
   // 子どものプレイヤーを保護者のGoogleでまもる
   await p.evaluate(() => KBAPP.act('g-protect')); await p.waitForTimeout(300); await p.click('#g-test'); await p.waitForTimeout(800);
   const me = await p.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); return { token: KBAPP.plLink(id).token, pid: id }; });
+  // 「おうちの人（大人）」にしたプレイヤーには、ホームにおうちの人メニュー＋おしらせマーク。開くにはGoogle
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await p.waitForTimeout(300);
+  await p.check('#pm-adult'); await p.waitForTimeout(200);
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !!document.querySelector('.pb-fam .nb')), 'おうちの人にしたプレイヤーのホームに「おうちの人メニュー」とおしらせマーク');
+  await (await p.$('.pb-fam')).screenshot({ path: shot('fam_btn.png') });
+  await p.evaluate(() => { KBAPP.S.gIdt = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(300);
+  ok(await p.evaluate(() => !!document.querySelector('#modal #g-test') && !document.querySelector('#modal .fam-list')), '開くにはGoogleでのログインが必要');
+  await p.click('#g-test'); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !!document.querySelector('#modal .fam-list [data-fam="xmas"] .fam-new') && !document.querySelector('.pb-fam .nb')), 'ログインすると、しかけの一覧（サンタからの挑戦状 NEW）。おしらせマークは消える');
+  await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_menu.png') });
   // 保護者メニュー：Googleでログイン→子どもが一覧に出る
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.gIdt = null; KBAPP.act('xm-parent'); }); await p.waitForTimeout(300); await p.click('#g-test'); await p.waitForTimeout(800);
   ok(await p.evaluate(() => /ユウ/.test(document.querySelector('#modal').innerText) && /まだ仕込んでいません/.test(document.querySelector('#modal').innerText)), '保護者メニューに、まもっている子ども（ユウ）が出る');
@@ -48,7 +59,7 @@ const shot = n => path.join(__dirname, 'out', n);
   await p.evaluate(() => KBAPP.act('xm-open')); await p.waitForTimeout(300); await (await p.$('#modal .xm-intro')).screenshot({ path: shot('xm_intro.png') });
   await p.evaluate(() => KBAPP.act('xm-go')); await p.waitForTimeout(800);
   let T = await p.evaluate(() => { const T = KBAPP.S.T; return { n: T.players.length, santa: T.players.find(x => x.santa), lv: T.players.filter(x => !x.human && !x.santa).map(x => x.level), xm: T.xmas }; });
-  ok(T.n === 5 && T.santa && T.santa.clairvoyant && T.santa.level === 6 && T.lv.every(l => l === 5), 'サンタ・カナタ（★6・絶対透視）と★5の3人：' + JSON.stringify(T.lv));
+  ok(T.n === 5 && T.santa && T.santa.ch.name === 'サンタ？？' && T.santa.ch.acc === 'santa' && T.santa.clairvoyant && T.santa.level === 6 && T.lv.every(l => l === 5), 'サンタ・カナタ（★6・絶対透視）と★5の3人：' + JSON.stringify(T.lv));
   await p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove())); await p.waitForTimeout(400); await p.screenshot({ path: shot('xm_table.png') });
   // 3回負けると手加減
   for (let i = 0; i < 3; i++) g = await post('xm_result', { token: me.token, pid: me.pid, won: false });

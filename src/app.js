@@ -2575,6 +2575,7 @@ function profileModal() {
       <button class="pm-av" data-act="avatar-edit" aria-label="アバターを変える">${face(PID, cur.name)}<span>🎨</span></button>
       <div class="pm-id"><b>${esc(cur.name)}</b><small>${statOf(PID)}</small><span class="pm-now">いま遊んでいる人</span></div>
       <div class="pm-acts"><button class="btn sm" data-act="rename-profile">✏️ 名前</button><button class="btn sm" data-act="bio-edit">📝 自己紹介</button><button class="btn sm" data-act="avatar-edit">🎨 アバター</button></div>
+      ${CLOUD_ON ? `<label class="pm-adult"><input type="checkbox" id="pm-adult" ${store.get('adult', false) ? 'checked' : ''}> 👪 このプレイヤーはおうちの人（大人）<small>おうちの人メニュー（子ども向けのしかけを用意する画面）のおしらせが届きます。開くにはGoogleでのログインが必要です</small></label>` : ''}
       <p class="pm-bio ${bio ? '' : 'none'}">${bio ? esc(bio).replace(/\n/g, '<br>') : '自己紹介はまだありません（140文字まで）'}</p>
     </section>` : ''}
     ${CLOUD_ON ? `<section class="pm-sec">
@@ -2582,7 +2583,7 @@ function profileModal() {
       <p class="small muted pm-p">記録はクラウドに保存されています。スマホを替えたり、ブラウザのデータを消したりしたときは、<b>復活の呪文</b>${G_ON ? 'か<b>Google</b>' : ''}で戻れます。</p>
       ${code ? `<div class="pm-code"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 カード</button></div><p class="small muted pm-p">呪文は人に教えないでね（おうちの人はOK）。</p>` : '<p class="small muted pm-p">復活の呪文は、少し遊んでクラウドに保存されると出ます。</p>'}
       ${G_ON ? (gLinked() ? '<button class="pm-link" data-act="g-unlink">Googleでまもるのをやめる</button>' : '<button class="btn g-pro pm-g" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted pm-p">Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>') : ''}
-      ${G_ON ? '<button class="pm-link xm-parent-btn" data-act="xm-parent">🎄 おうちの人へ：クリスマスのしかけ</button>' : ''}
+      ${G_ON ? '<button class="pm-link xm-parent-btn" data-act="fam-menu">👪 おうちの人メニュー（Googleでログイン）</button>' : ''}
     </section>` : ''}
     <section class="pm-sec">
       <div class="pm-h">👥 この端末のプレイヤー</div>
@@ -3122,6 +3123,7 @@ function homeHTML() {
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar pb2"><div class="pb-top"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b class="pb-nm" style="--nl:${[...S.settings.name].length}">${esc(S.settings.name)}</b><button class="pb-rate" data-go="growth" aria-label="推定実力（成長記録へ）">${r.ok ? `<span class="pb-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<small>推定実力は測定中（あと${r.need}手）</small>`}</button><span class="pb-sub">${gamesN(g)}ゲーム・連続最善 最長${g.cnt.streakMax || 0}</span></span></div>${CLOUD_ON ? `<div class="pb-meta"><span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span></div>` : ''}<div class="pb-btns2"><button class="btn sm pb-grow" data-go="growth">📈 成長記録</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・切り替え</button></div>
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID && titleOk(a)) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID && titleOk(x)); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? ttlTag(a) + '・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
+    ${CLOUD_ON && G_ON && store.get('adult', false) ? `<button class="pb-fam" data-act="fam-menu">👪 おうちの人メニュー${famUnseen() ? '<i class="nb">!</i>' : ''}</button>` : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
@@ -3158,7 +3160,7 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  ${G_ON ? '<p class="small"><button class="pm-link" data-act="xm-parent">🎄 おうちの人へ：クリスマスのしかけ（保護者のGoogleでログインして開きます）</button></p>' : ''}
+  ${G_ON ? '<p class="small"><button class="pm-link" data-act="fam-menu">👪 おうちの人メニュー（保護者のGoogleでログインして開きます）</button></p>' : ''}
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
@@ -6181,6 +6183,7 @@ function act(a, el) {
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
     case 'g-protect': gProtect(); break;
     case 'xm-parent': xmParent(); break;
+    case 'fam-menu': famMenu(); break;
     case 'xm-edit': xmEdit(el.dataset.k); break;
     case 'xm-save': xmSave(el.dataset.k); break;
     case 'xm-del': xmDel(el.dataset.k); break;
@@ -6485,7 +6488,7 @@ async function dailyInfoLoad(force) {
 // 子どもは期間中（はじめは12/25の朝7時〜夜9時）、サンタ・カナタ（★6・絶対透視）と達人3人の5ゲームで優勝するとメッセージを受け取れる。3回負けると手加減（絶対透視なし・相手が1段弱く）。
 // メッセージはサーバーにだけあり、優勝するまで子どもの端末には届かない。同じプレイヤーなら別の端末でも同じ挑戦状
 const XM_LV = [[5, '達人ぞろい（★5×3）'], [4, '強豪（★4×3）'], [3, 'ふつう（★3×3）']];
-function santaCh() { return Object.assign(KB.charToCh(KB.KANATA), { name: 'サンタ・カナタ', acc: 'santa', shirt: '#c92a2a', bgpat: 'pat:stars' }); }
+function santaCh() { return Object.assign(KB.charToCh(KB.KANATA), { name: 'サンタ？？', acc: 'santa', shirt: '#c92a2a', bgpat: 'pat:stars' }); }
 function xmDef() { const y = new Date().getFullYear(), d = new Date(y, 11, 25, 7, 0), e = new Date(y, 11, 25, 21, 0); return { start: d, end: e }; }
 const xmLoc = d => { const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
 const xmActive = () => { const x = ON.xm; if (!x) return false; const now = Date.now() / 1000 + (ON.xmSkew || 0); return now >= x.start && now <= x.end; };
@@ -6498,10 +6501,10 @@ async function xmCheck() {
 }
 function xmCardHTML() {
   const x = ON.xm; if (!x || !CLOUD_ON) return '<div id="xm-card" hidden></div>';
-  if (x.won) return `<div id="xm-card" class="xm-card won"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</span><div><b>🎁 サンタからのメッセージ</b><small>サンタ・カナタに勝って受け取ったメッセージです</small></div><button class="btn primary sm" data-act="xm-read">ひらく</button></div>`;
+  if (x.won) return `<div id="xm-card" class="xm-card won"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</span><div><b>🎁 サンタからのメッセージ</b><small>謎のサンタに勝って受け取ったメッセージです</small></div><button class="btn primary sm" data-act="xm-read">ひらく</button></div>`;
   if (!xmActive()) return '<div id="xm-card" hidden></div>';
   const easy = x.losses >= 3;
-  return `<div id="xm-card" class="xm-card"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'normal', level: 6 })}</span><div><b>🎄 サンタからの挑戦状</b><small>サンタ・カナタと達人たちの5ゲームで優勝すると、サンタからのメッセージが届く！${x.losses ? `（${x.losses}回挑戦${easy ? '・サンタが少し手加減中' : ''}）` : ''}</small></div><button class="btn primary sm" data-act="xm-open">挑戦する</button></div>`;
+  return `<div id="xm-card" class="xm-card"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'normal', level: 6 })}</span><div><b>🎄 サンタからの挑戦状</b><small>謎のサンタと達人たちの5ゲームで優勝すると、サンタからのメッセージが届く！${x.losses ? `（${x.losses}回挑戦${easy ? '・サンタが少し手加減中' : ''}）` : ''}</small></div><button class="btn primary sm" data-act="xm-open">挑戦する</button></div>`;
 }
 function xmIntro() {
   const x = ON.xm; if (!x) return; const easy = x.losses >= 3, nm = rvName();
@@ -6529,7 +6532,7 @@ async function xmAfter(won) {
 }
 function xmLose(losses, test) {
   const left = Math.max(0, 3 - losses);
-  modal(`<div class="stack"><div class="xm-hero sm">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</div><h3 style="margin:0;text-align:center">サンタ・カナタ「……まだまだ」</h3>
+  modal(`<div class="stack"><div class="xm-hero sm">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</div><h3 style="margin:0;text-align:center">サンタ？？「……まだまだ」</h3>
     <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(test ? '（テストプレイ）負けたときは、こんなふうに声をかけるで。3回負けると、サンタが手加減してくれる仕組みや。' : left ? `惜しかったな！あと${left}回負けたら、サンタがちょっと手加減してくれるらしいで。でも今のうちに勝ったらカッコええで！何回でも挑戦できる！` : '大丈夫や、次からサンタが手加減してくれるで！絶対透視もなしや。何回でも挑戦できる！')}</div></div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button>${test ? '' : '<button class="btn primary" data-act="xm-go">もう一度挑戦</button>'}</div></div>`);
 }
@@ -6541,6 +6544,21 @@ function xmReveal(msg, test) {
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button></div></div>`);
   try { confetti && confetti(); } catch (e) { }
 }
+// プロフィールの「おうちの人（大人）」のチェック（プレイヤーごと・クラウドにも保存）
+document.addEventListener('change', e => { if (e.target && e.target.id === 'pm-adult') { store.set('adult', !!e.target.checked); toast(e.target.checked ? '👪 おうちの人にしました。ホームに「おうちの人メニュー」が出ます' : 'おうちの人の設定を外しました'); } });
+// おうちの人メニュー：子ども向けのしかけを、ここに順に足していく（いまはサンタからの挑戦状）。
+// プロフィールで「おうちの人（大人）」にしたプレイヤーには、まだ見ていないしかけがあるとホームにおしらせマーク。開くにはGoogleでのログインが必要
+const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの5ゲームで優勝すると届くようにします', open: () => xmParent() }];
+const famUnseen = () => { const sn = store.get('famSeen', []); return FAM_FEATURES.some(f => !sn.includes(f.id)); };
+async function famMenu() {
+  try { await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
+  const sn = store.get('famSeen', []);
+  modal(`<div class="stack xm-par"><h3 style="margin:0">👪 おうちの人メニュー</h3><p class="small" style="margin:0">子ども向けのしかけを用意できます。しかけは順に増えていきます。</p>
+    <div class="fam-list">${FAM_FEATURES.map(f => `<button class="fam-f" data-fam="${f.id}"><span class="fam-ic">${f.ic}</span><span><b>${esc(f.name)}${sn.includes(f.id) ? '' : '<em class="fam-new">NEW</em>'}</b><small>${esc(f.desc)}</small></span></button>`).join('')}</div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
+  store.set('famSeen', FAM_FEATURES.map(f => f.id)); const pb = $('.pb-fam .nb'); if (pb) pb.remove();
+  document.querySelectorAll('#modal [data-fam]').forEach(b => b.onclick = () => { const f = FAM_FEATURES.find(x => x.id === b.dataset.fam); if (f) f.open(); });
+}
 // 保護者メニュー（Googleでログイン）
 async function xmParent() {
   let idt; try { idt = await gSignIn('🎄 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
@@ -6549,8 +6567,8 @@ async function xmParent() {
 }
 function xmParentModal() {
   const L = S.xmList || [], fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
-  modal(`<div class="stack xm-par"><h3 style="margin:0">🎄 サンタからの挑戦状（おうちの人向け）</h3>
-    <p class="small" style="margin:0">サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもがサンタ・カナタ（★6・絶対透視）と達人たちの5ゲームで優勝すると、メッセージが届きます。メッセージは優勝するまで子どもの端末には届きません。</p>
+  modal(`<div class="stack xm-par"><h3 style="margin:0">🎄 サンタからの挑戦状</h3>
+    <p class="small" style="margin:0">サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもが謎のサンタ（正体はカナタ・★6・絶対透視）と達人たちの5ゲームで優勝すると、メッセージが届きます。メッセージは優勝するまで子どもの端末には届きません。</p>
     ${L.length ? `<div class="xm-kids">${L.map(x => `<div class="xm-kid"><span class="xm-kav">${KB.avatarSVG(Object.assign({}, x.avatar || AVATAR_DEF, { name: x.name }), { mood: 'happy' })}</span><div><b>${esc(x.name)}</b><small>${x.xm ? `仕込み済み・${fmt(x.xm.start)}〜${fmt(x.xm.end)}・挑戦${x.xm.losses}回${x.xm.won ? '・🎁 受け取り済み' : ''}` : 'まだ仕込んでいません'}</small></div><button class="btn sm ${x.xm ? '' : 'primary'}" data-act="xm-edit" data-k="${esc(x.k)}">${x.xm ? '編集' : '仕込む'}</button></div>`).join('')}</div>` : '<p class="small muted" style="margin:0">このGoogleアカウントでまもっているプレイヤーがいません。子どものプレイヤーで「🛡 Googleでまもる」をしてから、もう一度開いてください。</p>'}
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="xm-test">🎮 演出をためす</button><button class="btn sm" data-act="xm-about">📖 使い方・うちの使い方</button></div>
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
@@ -6561,7 +6579,7 @@ function xmEdit(k) {
     <label class="su-row col"><b>サンタからのメッセージ（200文字まで）</b><textarea id="xm-msg" rows="4" maxlength="200" placeholder="例）メリークリスマス！プレゼントは、本棚のいちばん上の段の奥にあるよ。">${esc(c ? c.msg : '')}</textarea></label>
     <label class="su-row col"><b>挑戦できる期間（はじめ）</b><input id="xm-st" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.start * 1000) : d.start)}"></label>
     <label class="su-row col"><b>挑戦できる期間（おわり）</b><input id="xm-en" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.end * 1000) : d.end)}"></label>
-    <div class="su-row col"><b>サンタ・カナタといっしょに打つ3人</b><div class="su-seg" id="xm-lv">${XM_LV.map(([v, l]) => `<button class="${(c ? c.lv : 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div><small class="muted">3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）</small></div>
+    <div class="su-row col"><b>謎のサンタといっしょに打つ3人</b><div class="su-seg" id="xm-lv">${XM_LV.map(([v, l]) => `<button class="${(c ? c.lv : 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div><small class="muted">3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）</small></div>
     ${c ? `<label class="small"><input type="checkbox" id="xm-reset"> 挑戦の回数と受け取りを最初に戻す（${c.losses}回挑戦${c.won ? '・受け取り済み' : ''}）</label>` : ''}
     <div class="row" style="justify-content:space-between;gap:8px">${c ? `<button class="btn" data-act="xm-del" data-k="${esc(k)}">取り消す</button>` : '<span></span>'}<span class="row" style="gap:8px"><button class="btn" data-act="xm-parent-back">もどる</button><button class="btn primary" data-act="xm-save" data-k="${esc(k)}">仕込む</button></span></div></div>`);
   document.querySelectorAll('#xm-lv button').forEach(b => b.onclick = () => { document.querySelectorAll('#xm-lv button').forEach(o => o.classList.toggle('on', o === b)); });
@@ -6584,7 +6602,7 @@ function xmTestMenu() {
 }
 function xmAbout() {
   modal(`<div class="stack xm-par"><h3 style="margin:0">📖 サンタからの挑戦状　使い方</h3>
-    <ol class="small xm-steps"><li>子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。</li><li>「🎄 おうちの人へ」からGoogleでログインし、子どもを選んで、サンタからのメッセージと期間（はじめは12/25の朝7時〜夜9時）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。</li><li>「🎮 演出をためす」で、子どもと同じ流れを先にためせます。</li><li>当日、子どもがホームを開くと、サンタ・カナタから挑戦状が届きます。サンタ・カナタ（★6・奥義「絶対透視」）と達人3人の5ゲームで卓内1位になると、メッセージが届きます。</li><li>3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）。何回でも挑戦できます。</li></ol>
+    <ol class="small xm-steps"><li>子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。</li><li>「🎄 おうちの人へ」からGoogleでログインし、子どもを選んで、サンタからのメッセージと期間（はじめは12/25の朝7時〜夜9時）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。</li><li>「🎮 演出をためす」で、子どもと同じ流れを先にためせます。</li><li>当日、子どもがホームを開くと、謎のサンタ「サンタ？？」から挑戦状が届きます。サンタ（正体はカナタ・★6・奥義「絶対透視」。白いあごひげとサンタ帽）と達人3人の5ゲームで卓内1位になると、メッセージが届きます。</li><li>3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）。何回でも挑戦できます。</li></ol>
     <p class="small muted" style="margin:0">メッセージはサーバーにだけ置き、優勝するまで子どもの端末には届きません。同じプレイヤーなら、別の端末で開いても同じ挑戦状です。</p>
     <h4 style="margin:4px 0 0">🏠 うちではこんな使い方</h4>
     <p class="small" style="margin:0">わが家では毎年、サンタがプレゼントの隠し場所をクイズにしたカードを仕込んでいます。上の子が小さいころは、Scratchで冒険ゲームを作り、とらわれたサンタを救い出すとプレゼントのありかが分かるようにしました。今年は、カナタがふんするサンタを含む達人ぞろいのセットで優勝すると、隠し場所のメッセージを受け取れるようにしています。このしかけを、ほかのおうちでも使えるようにお裾分けしました。</p>
