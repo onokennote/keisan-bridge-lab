@@ -2559,3 +2559,6 @@ body.rewinding #home-fab{display:none}
 .fam-f{display:grid;grid-template-columns:40px 1fr;gap:10px;align-items:center;text-align:left;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--ink);cursor:pointer}
 .fam-ic{font-size:28px;text-align:center}.fam-f b{display:block}.fam-f small{color:var(--muted);font-size:12px;line-height:1.5}
 .fam-new{display:inline-block;margin-left:6px;padding:0 6px;border-radius:6px;background:#e03131;color:#fff;font-style:normal;font-size:10px;vertical-align:middle}
+.xm-card.soon{opacity:.95}.xm-card .on-cd{display:block;margin-top:2px;font-size:13px}
+.xm-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(255,214,102,.18);color:#ffd666;border:1px solid rgba(255,214,102,.5);white-space:nowrap}
+.on-card .xm-card{margin:0 0 10px}

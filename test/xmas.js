@@ -32,6 +32,9 @@ const shot = n => path.join(__dirname, 'out', n);
   await p.evaluate(() => { KBAPP.S.gIdt = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(300);
   ok(await p.evaluate(() => !!document.querySelector('#modal #g-test') && !document.querySelector('#modal .fam-list')), '開くにはGoogleでのログインが必要');
   await p.click('#g-test'); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !!document.querySelector('#modal #fam-pw2') && !document.querySelector('#modal .fam-list')), 'Googleのあと、はじめはパスワードを決める（決めるまでメニューは出ない）');
+  await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_pw.png') });
+  await p.fill('#fam-pw', 'santa2026'); await p.fill('#fam-pw2', 'santa2026'); await p.click('#fam-ok'); await p.waitForTimeout(500);
   ok(await p.evaluate(() => !!document.querySelector('#modal .fam-list [data-fam="xmas"] .fam-new') && !document.querySelector('.pb-fam .nb')), 'ログインすると、しかけの一覧（サンタからの挑戦状 NEW）。おしらせマークは消える');
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_menu.png') });
   // 保護者メニュー：Googleでログイン→子どもが一覧に出る
@@ -48,11 +51,20 @@ const shot = n => path.join(__dirname, 'out', n);
   // 子ども：メッセージはまだ届かない
   let g = await post('xm_get', { token: me.token, pid: me.pid });
   ok(g.xm && g.xm.msg === null && g.xm.lv === 5, '優勝するまでメッセージはサーバーから届かない');
-  ok(!(await post('xm_list', { idt: 'test:other' })).list.length, 'ほかのGoogleには子どもが出ない');
-  ok(!(await post('xm_set', { idt: 'test:other', k: 'x', msg: 'a', start: 1, end: 2 })).ok, 'まもっていないGoogleでは仕込めない');
+  ok(!(await post('xm_list', { idt: 'test:u1', pw: 'wrong' })).ok, 'パスワードがちがうと、保護者メニューは開けない');
+  ok(!(await post('xm_list', { idt: 'test:other' })).ok, 'ほかのGoogleでは開けない（パスワードもない）');
+  await post('fam_auth', { idt: 'test:other', newPw: 'otherpw' });
+  ok(!(await post('xm_set', { idt: 'test:other', pw: 'otherpw', k: 'x', msg: 'a', start: 1, end: 2 })).ok, 'まもっていないGoogleでは仕込めない');
+  // 開始の3日前から、オンライン大会の一覧に「受付前」で出る
+  const L0 = await post('xm_list', { idt: 'test:u1', pw: 'santa2026' }), kk = L0.list[0].k, now = Math.round(Date.now() / 1000);
+  await post('xm_set', { idt: 'test:u1', pw: 'santa2026', k: kk, msg: L0.list[0].xm.msg, start: now + 2 * 86400, end: now + 3 * 86400, lv: 5 });
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1800);
+  ok(await p.evaluate(() => { const c = document.querySelector('.on-card #xm-card.soon'); return !!c && /開始まで/.test(c.innerText) && !c.querySelector('[data-act="xm-open"]'); }), '3日前から、オンライン大会の一覧に「受付前」（開始までの残り時間）');
+  await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove())); await (await p.$('#xm-card')).screenshot({ path: shot('xm_card_soon.png') });
+  await post('xm_set', { idt: 'test:u1', pw: 'santa2026', k: kk, msg: L0.list[0].xm.msg, start: now - 120, end: now + 3600, lv: 5 });
   // ホームに挑戦状のカード
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(2600);
-  ok(await p.evaluate(() => !!document.querySelector('#xm-card:not([hidden])')), 'ホームに「サンタからの挑戦状」のカード');
+  ok(await p.evaluate(() => !!document.querySelector('.on-card #xm-card [data-act="xm-open"]')), '期間中は、オンライン大会の一覧の「サンタからの挑戦状」からエントリーできる');
   await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   await (await p.$('#xm-card')).screenshot({ path: shot('xm_card.png') });
   // 挑戦：サンタ・カナタ（絶対透視）＋達人3人
@@ -79,6 +91,9 @@ const shot = n => path.join(__dirname, 'out', n);
   await (await p.$('#modal .xm-reveal')).screenshot({ path: shot('xm_reveal.png') });
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('xm-about'); }); await p.waitForTimeout(300);
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('xm_about.png') });
+  // パスワードを作り直すと、そのGoogleで仕込んだ挑戦状は消える（子どもが作り直して見る、はできない）
+  await post('fam_auth', { idt: 'test:u1', reset: 1 });
+  ok((await post('xm_get', { token: me.token, pid: me.pid })).xm === null, 'パスワードを作り直すと、仕込んだ挑戦状は消える');
   ok(!errs.length, 'ページのエラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();

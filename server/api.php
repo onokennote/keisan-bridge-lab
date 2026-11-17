@@ -45,6 +45,7 @@ function db(): PDO {
   $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS glinks (g TEXT NOT NULL, uid TEXT NOT NULL, pid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (g, uid, pid))'); // Googleでまもる：Googleのアカウントの番号（sub）をハッシュにしたもの g と、プレイヤー
   $pdo->exec('CREATE TABLE IF NOT EXISTS xmas (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // サンタからの挑戦状：保護者（Googleでまもっている人）が子どものプレイヤーに仕込む。メッセージは優勝するまで子どもの端末に送らない
+  $pdo->exec('CREATE TABLE IF NOT EXISTS famauth (g TEXT PRIMARY KEY, pw TEXT NOT NULL, fails INTEGER NOT NULL DEFAULT 0, lock_until INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL)'); // おうちの人メニューのパスワード（Googleのアカウントごと。ハッシュだけ持つ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
@@ -95,6 +96,14 @@ function gVerify(string $idt): string {
   $j = $r ? json_decode($r, true) : null;
   if (!is_array($j) || ($j['aud'] ?? '') !== $cid || !in_array($j['iss'] ?? '', ['accounts.google.com', 'https://accounts.google.com'], true) || (int)($j['exp'] ?? 0) < time() || empty($j['sub'])) fail('Googleのログインを確かめられませんでした', 401);
   return h('g:' . $j['sub']);
+}
+// おうちの人メニューのパスワードを確かめる（5回まちがえると10分待つ）
+function famPw(string $g, array $b): void {
+  $q = db()->prepare('SELECT pw, fails, lock_until FROM famauth WHERE g = ?'); $q->execute([$g]); $r = $q->fetch();
+  if (!$r) fail('おうちの人メニューのパスワードが、まだ決まっていません', 428);
+  if ((int)$r['lock_until'] > time()) fail('パスワードを何度もまちがえたので、しばらく待ってからためしてください', 429);
+  if (!password_verify((string)($b['pw'] ?? ''), $r['pw'])) { $f = (int)$r['fails'] + 1; db()->prepare('UPDATE famauth SET fails = ?, lock_until = ? WHERE g = ?')->execute([$f >= 5 ? 0 : $f, $f >= 5 ? time() + 600 : 0, $g]); fail('パスワードがちがいます', 403); }
+  if ((int)$r['fails']) db()->prepare('UPDATE famauth SET fails = 0 WHERE g = ?')->execute([$g]);
 }
 function cleanPid($p): string { return substr(preg_replace('/[^a-z0-9]/i', '', (string)$p), 0, 24); }
 // 記録を読み書きするプレイヤー：プレイヤーの鍵ならそのプレイヤーだけ、端末の鍵ならその端末で作ったプレイヤー
@@ -752,15 +761,24 @@ try {
       db()->prepare('INSERT OR REPLACE INTO glinks (g, uid, pid, at) VALUES (?, ?, ?, ?)')->execute([$g, $u['uid'], $pid, time()]);
       out(['ok' => true]);
     }
+    // ---------- おうちの人メニュー：Google＋パスワード（パスワードを忘れたら作り直せるが、そのGoogleで仕込んだしかけは消える） ----------
+    case 'fam_auth': {
+      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
+      if (!empty($b['reset'])) { db()->prepare('DELETE FROM famauth WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM xmas WHERE g = ?')->execute([$g]); out(['ok' => true, 'has' => false]); }
+      $q = db()->prepare('SELECT pw FROM famauth WHERE g = ?'); $q->execute([$g]); $has = $q->fetchColumn() !== false;
+      if (isset($b['newPw']) && !$has) { $np = (string)$b['newPw']; if (mb_strlen($np) < 4 || mb_strlen($np) > 32) fail('パスワードは4〜32文字にしてください'); db()->prepare('INSERT INTO famauth (g, pw, updated) VALUES (?, ?, ?)')->execute([$g, password_hash($np, PASSWORD_DEFAULT), time()]); out(['ok' => true, 'has' => true, 'pass' => true]); }
+      if (isset($b['pw'])) { famPw($g, $b); out(['ok' => true, 'has' => true, 'pass' => true]); }
+      out(['ok' => true, 'has' => $has]);
+    }
     // ---------- サンタからの挑戦状（保護者がGoogleでログインして仕込む。子どもは優勝するとメッセージを受け取る） ----------
     case 'xm_list': { // 保護者：まもっているプレイヤーと、仕込んだ挑戦状
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
+      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b);
       $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, x.msg, x.start_at, x.end_at, x.lv, x.losses, x.won_at FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid LEFT JOIN xmas x ON x.uid = l.uid AND x.pid = l.pid WHERE l.g = ? ORDER BY l.at'); $q->execute([$g]);
       $L = []; foreach ($q->fetchAll() as $r) $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: 'プレイヤー', 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'xm' => $r['msg'] !== null ? ['msg' => $r['msg'], 'start' => (int)$r['start_at'], 'end' => (int)$r['end_at'], 'lv' => (int)$r['lv'], 'losses' => (int)$r['losses'], 'won' => $r['won_at'] ? (int)$r['won_at'] : null] : null];
       out(['ok' => true, 'list' => $L]);
     }
     case 'xm_set': case 'xm_del': { // 保護者：挑戦状を仕込む／取り消す（まもっているプレイヤーだけ）
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); $k = (string)($b['k'] ?? ''); $hit = null;
+      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
       $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
       if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
       if ($a === 'xm_del') { db()->prepare('DELETE FROM xmas WHERE uid = ? AND pid = ?')->execute([$hit['uid'], $hit['pid']]); out(['ok' => true]); }
