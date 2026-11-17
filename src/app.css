@@ -2511,3 +2511,5 @@ body.rewinding #home-fab{display:none}
 .rvd-more summary{cursor:pointer;font-size:12.5px;color:var(--muted);padding:4px 2px;list-style:none}
 .rvd-more summary::-webkit-details-marker{display:none}
 .rvd-more[open] summary{color:var(--accent)}
+/* 大会ポイントの見出しは、PCの2列でも1行まるごと使う（下に区切り線） */
+.rk-all>.rk-group-h{grid-column:1/-1;margin:22px 2px 2px;padding:14px 4px 8px;border-top:1px solid rgba(255,214,102,.35);flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:12px}
