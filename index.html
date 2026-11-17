@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="8d6831b 2026-11-17 17:14"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="23deb745874d"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="c3a5bfc 2026-11-17 17:25"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="20bf9c5fe923"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2517,7 +2517,7 @@ body.rewinding #home-fab{display:none}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='ccafbf8100';
+window.KB_BUILD='bc9cb94e2f';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -10791,6 +10791,7 @@ function showGameSummary(keep) {
   const resultGood = g.winner === me || (lastD && lastD.mineStats ? g.pp[me] <= lastD.mineStats.pp : g.pp[me] <= 8);
   if (!ds.length && dsAll.length) comment = '判断した手はすべてAIの読みを見たため、このゲームは評価していません。';
   else if (!ds.length) comment = fouls.length ? 'このゲームは判定できる場面がありませんでした（「引く」しかない局面とお手つきのみ）。' : 'このゲームは選択肢のある場面がありませんでした（すべて「引く」しかない局面）。';
+  else if (avgLoss < 0.02 && fouls.length) comment = `選んだ手はAIの最善手どおりでした（${ds.length}回中${nBest}回が最善）。ただ、お手つきで札が増えたのが響きました。出す前に、式が場の数になるかを確かめましょう。`;
   else if (avgLoss < 0.02) comment = resultGood ? `判断はほぼAIの最善手どおりで、結果もついてきました（${ds.length}回中${nBest}回が最善）。` : `判断はほぼAIの最善手どおりでした（${ds.length}回中${nBest}回が最善）。結果は振るいませんでしたが、確率的には正しい打ち方です。`;
   else if (avgLoss < 0.06) comment = `おおむね良い判断です（${ds.length}回中${nBest}回が最善）。差がついた場面を表で確認しましょう。`;
   else comment = `改善の余地があります（${ds.length}回中${nBest}回が最善）。「損失」が大きい巡を見直すのがおすすめです。`;
@@ -10889,7 +10890,7 @@ function luckInfo(g, me) {
   const last = S.decisions[S.decisions.length - 1];
   const exp = Math.round(last.mineStats.pp * 10) / 10, pp = g.pp[me];
   const avg = ds.reduce((s, d) => s + d.loss, 0) / ds.length;
-  const judge = ds.every(d => d.loss <= 0.015) ? 'best' : avg <= 0.05 ? 'ok' : 'bad';
+  const nf = (S.fouls || []).length, judge = ds.every(d => d.loss <= 0.015) && !nf ? 'best' : avg <= 0.05 && !nf ? 'ok' : 'bad'; // お手つきがあれば「判断は最善」とは言わない
   const diff = pp - exp, won = g.winner === me;
   let kind = null;
   if (judge !== 'best' && (won || diff <= -3)) kind = 'resultLucky';
@@ -11162,7 +11163,7 @@ function rvGameFacts() {
     else if ((d.cats || []).includes('bestOne')) hl.push({ k: 'one', p: 3, d });
     else if ((d.cats || []).includes('oppNear')) hl.push({ k: 'defend', p: 2, d });
   });
-  if (f.nDec >= 3 && f.nBest === f.nDec) hl.push({ k: 'perfect', p: 6 });
+  if (f.nDec >= 3 && f.nBest === f.nDec && !(S.fouls || []).length) hl.push({ k: 'perfect', p: 6 }); // お手つきがあればパーフェクトとは言わない（バッジと同じ）
   else if (f.run >= 4) hl.push({ k: 'run', p: 4 });
   if (f.won && g.round <= 3) hl.push({ k: 'fast', p: 4 });
   hl.sort((a, b) => b.p - a.p);
@@ -11190,6 +11191,7 @@ function rvGameFacts() {
   f.winnerRound = g.winner >= 0 ? g.round : null;
   f.beatStar = !!(f.won && g.players.some(p => !p.human && p.level >= 5));
   f.finalHand = g.hands[me].map(c => KB.vname(c.v)).join('・');
+  const fl = S.fouls || []; f.fouls = fl.map(x => ({ round: x.round, t: x.t, cards: (x.vals || []).map(v => KB.vname(v)).join('・'), n: x.n || 0, alt: String(x.alt || '').replace(/^例）/, '').replace(/ = \d+$/, '') })); // お手つき（評価に入れる）
   return f;
 }
 // 最近の自分との比較（今回の分を除いた直近20ゲーム）
@@ -11274,7 +11276,7 @@ function rvGameSolo(who) {
   let sec = 'result'; const B = (r, m) => { let t = rt ? r : m; if (Array.isArray(t)) t = RVP(t); if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t) L.push({ sec, t, neta: !rt }); };
   // 1. 結果
   // 結果と判断は分けて評価する（大事なのは確率に基づいて選べたか）
-  const q = rvQual(f.nDec, f.nBest, f.nGood);
+  let q = rvQual(f.nDec, f.nBest, f.nGood); if ((f.fouls || []).length && q === 'good') q = 'mid'; // お手つきがあれば「確率どおり」とは言わない
   if (f.won && !f.nDec && f.nHint) B(RVP([`上がりでPP0です。今回はAIの読みを見ながらの上がりでした。次は同じ形を、自分の読みで作れるか試してみましょう。`, `${nmY}の上がりです。PP0。AIの読みを参考にしたゲームなので、どの手が上がりにつながったかを見直しておくと、次は自分の力で再現できます。`]), RVP([`上がりや！PP0！今回はAIの読みと二人三脚のゴールやな。次は自分の読みで決めたろ！`, `PP0で上がりや！AIの読みを見ながらやったから、今回は練習試合のゴールやな。次は自分の読みで決めたろ！`]));
   else if (f.won && (q === 'good' || q === 'none')) B(RVP([`上がりでPP0。${nmY}、見事なゲームでした。`, `${nmY}の上がりです。PP0、完璧な締めくくりでした。`, `第${f.round}巡で上がり切りました。PP0です。`]) + (q === 'good' ? '結果だけでなく、判断も確率に沿っていました。' : ''), RVP([`${nmY}、上がりや！PP0、ゴール決めたで！`, `よっしゃ、${nmY}の上がりや！文句なしや！`, `PP0や！${nmY}、今日の主役はあんたや！`]) + (q === 'good' ? '中身もちゃんと伴っとる、これがほんまの勝ちや！' : ''));
   else if (f.won && q === 'poor') B(RVP([`上がりでPP0。結果は満点です。ただ、最善を外した手が多く、上がれたのには運の後押しもありました。`, `${nmY}の上がりです。結果は良かったのですが、判断には課題が残りました。結果と判断は分けて振り返りましょう。`]), RVP([`${nmY}、上がりや！PP0！…せやけど最善外した手も多いで。ラッキーやった分もあるな！`, `上がりや！運も実力のうちやからな！ただ中身はまだ伸ばせるで！`]));
@@ -11329,7 +11331,9 @@ function rvGameSolo(who) {
     B(rHead + (gf ? gf.root : `最善は「${w.best}」でした。`) + why, mHead2 + (gf ? gf.masa : `そこは「${w.best}」やろ！`) + why);
     if (i === 0) N(rvBadNeta(w));
   });
-  if (!f.misses.length && f.nDec >= 2) B(['大きく外した手はなく、判断は安定していました。', '目立った取りこぼしはありませんでした。安定した内容です。', '差のつく場面でも、大きく外すことなく選べていました。'], ['大きなミスはなしや。ええディフェンスやったで！', 'でかいミスなしや！守備が安定しとったな！', 'ポカなしで走り切ったな、堅いプレーやったで！', '大崩れなしや。チップを守る打ち方ができとる！']);
+  if (!f.misses.length && f.nDec >= 2 && !(f.fouls || []).length) B(['大きく外した手はなく、判断は安定していました。', '目立った取りこぼしはありませんでした。安定した内容です。', '差のつく場面でも、大きく外すことなく選べていました。'], ['大きなミスはなしや。ええディフェンスやったで！', 'でかいミスなしや！守備が安定しとったな！', 'ポカなしで走り切ったな、堅いプレーやったで！', '大崩れなしや。チップを守る打ち方ができとる！']);
+  if ((f.fouls || []).length) { const x = f.fouls[0], tot = f.fouls.reduce((a, y) => a + y.n, 0), alt = x.alt && !/^引く/.test(x.alt) ? `「${x.alt}」なら出せていました。` : '';
+    B(`お手つきが${f.fouls.length}回ありました（ペナルティで計${tot}枚）。第${x.round}巡、場${x.t}に${x.cards}を出しましたが、場の数になりませんでした。${alt}出す前に、式が場の数になるかを一度確かめましょう。`, `それと、お手つき${f.fouls.length}回や！第${x.round}巡の場${x.t}で${x.cards}、計算合うてへんかったで。${alt.replace('なら出せていました。', 'なら出せとったで！')}ペナルティで${tot}枚、ハンドの反則みたいなもんや。出す前に一回検算や！`); }
   sec = 'danger'; // 5. 相手の動き
   if (f.danger && !f.won) B(`第${f.danger.round}巡には${f.danger.who}が残り${f.danger.h}枚になりました。そのとき${nmY === 'あなた' ? 'あなた' : nmY}の手札の合計は${f.danger.sum}。${f.danger.n ? `そこからの判断${f.danger.n}回のうち、最善は${f.danger.best}回です。` : 'そこからは選ぶ余地のない手番が続きました。'}相手が残り少ないときは、上がりより失点を減らす手が優先になりやすい局面です。`, `第${f.danger.round}巡で${f.danger.who}が残り${f.danger.h}枚、リーチや！そのとき手札の合計${f.danger.sum}やったからな。${f.danger.n ? `そこからの${f.danger.n}回で最善は${f.danger.best}回や。` : 'そこからは選べる手がなかったな。'}相手がゴール前におるときは、まず失点を防ぐんやで！`);
   else if (f.danger && f.won) B(`第${f.danger.round}巡には${f.danger.who}が残り${f.danger.h}枚でしたが、競り勝ちました。`, `${f.danger.who}が残り${f.danger.h}枚まで迫っとったのに、競り勝ったな！`);
@@ -11377,7 +11381,7 @@ function rvGameSolo(who) {
   const pr = tc && RV_PRACTICE[tc.k];
   if (pr) { B(pr[2], `${pr[1]}で鍛えてみよか！`); N('practice'); }
   else B(RVP(['次のゲームでも、残す札の形と手札の合計を意識していきましょう。', '結果に一喜一憂せず、判断の質を積み重ねることが、セットの順位につながります。', '次は、出す札より「残す札」で選ぶ意識を持つと、さらに精度が上がります。', '次のゲームでは、相手の残り枚数にも目を配ってみましょう。', '一手ごとに「上がる確率」と「失点の見込み」の両方を比べる習慣を続けましょう。', '迷ったら、次の場で出せる形が残るかどうかを確かめてみてください。']), RVP(['次はでかい札、早めにベンチに下げていこか！', '読みと我慢や！次いくで！', '切り替えていこ！次のキックオフや！', '次のハンドや！ええカード来るまで腐らんとこ！', 'ほな次や！立ち上がりから集中していこ！', '次も確率どおりに打つだけや、ブレたらあかんで！', '相手の残り枚数、チラ見しながら次いこか！']));
-  return rvAssemble(L, who, RV_W_GAME, ['result', 'miss', 'badges', 'next']);
+  return rvAssemble(L, who, RV_W_GAME, ['result', 'miss', 'badges', 'next']); // お手つきは miss の節に入れて必ず触れる
 }
 // なぜ最善手が良いのか：残る札の形で比べる
 function rvWhy(w, who) {
@@ -11404,7 +11408,7 @@ function rvSetSolo(who) {
   // 1. 結果
   if (c.phase === 'final') B([`決勝戦、お疲れさまでした。${c.finalists}人中${c.finalRank}位、決勝PPは${c.finalPP}でした。`, `決勝の結果は${c.finalists}人中${c.finalRank}位、PP${c.finalPP}です。お疲れさまでした。`, `決勝戦を終えて、${c.finalists}人中${c.finalRank}位。決勝PPは${c.finalPP}でした。`], c.finalRank === 1 ? [`優勝や〜！${nmY}、ワールドカップ掲げたれ！`, `${nmY}、優勝やで〜！決勝PP${c.finalPP}、ファイナルテーブルを制したな！`, `てっぺん取ったで、${nmY}！決勝で勝ち切るんはホンマもんや！`] : [`決勝お疲れさん！${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}や！`, `決勝は${c.finalists}人中${c.finalRank}位、PP${c.finalPP}やったな。ファイナルの舞台、お疲れさんや！`, `ファイナルテーブル、${c.finalRank}位でフィニッシュや。決勝PPは${c.finalPP}やで！`]);
   else B([`このセットは卓内${c.rank}位、セットPPは${c.pp}でした。`, `セットの結果は卓内${c.rank}位、PP${c.pp}です。`, `セットを終えて卓内${c.rank}位。セットPPは${c.pp}でした。`, `卓内${c.rank}位、セットPP${c.pp}という結果になりました。`], c.rank === 1 ? [`${nmY}、このセット卓内1位や！セットPP${c.pp}、ええ仕事したな！`, `卓内1位やで、${nmY}！セットPP${c.pp}、首位でタイムアップや！`, `${nmY}、このセットはトップ通過や！セットPP${c.pp}、チップリーダーやで！`] : [`このセット、卓内${c.rank}位でセットPP${c.pp}やな。`, `セット終了や。卓内${c.rank}位、セットPPは${c.pp}やったで。`, `卓内${c.rank}位、セットPP${c.pp}でフルタイムや。`]);
-  const sq = rvQual(nDec, nBest, nGood), top1 = c.rank === 1 || c.finalRank === 1;
+  const sq0 = rvQual(nDec, nBest, nGood), sq = Lg.some(x => (x.fouls || []).length) && sq0 === 'good' ? 'mid' : sq0, top1 = c.rank === 1 || c.finalRank === 1; // お手つきがあれば「確率どおり」とは言わない
   if (top1 && sq === 'poor') B(['ただ、最善を外した手も多く、順位には運の後押しもありました。結果と判断は分けて振り返りましょう。', 'ただし、内容を見ると最善を外した手が目立ちます。順位は順位として、判断は別に見直しておきましょう。', '結果は上々ですが、最善を外した場面も少なくありません。運に助けられた分は、次に判断で取りにいきましょう。'], ['…せやけど最善外した手も多いで。運も実力のうちやからな！中身はここから伸ばそ！', '…とはいえ最善を外した手も多かったな。ラッキーやっただけのとこもあるで、中身も磨いていこ！', '…ただ、内容は荒かったで。勝ってるときこそ、判断を見直すチャンスや！']);
   else if (!top1 && sq === 'good') B(['順位は伸びませんでしたが、判断は確率に沿っていました。結果はばらつきます。大事なのは、選び方が正しかったかどうかです。', '順位こそ伸びませんでしたが、選び方は確率どおりでした。同じ判断を続ければ、結果は後から付いてきます。', '結果は振るいませんでしたが、内容は良好です。判断の正しさと一回ごとの結果は、分けて考えましょう。'], ['せやけど判断はしっかり確率どおりや。結果は気にせんでええで！', 'せやけど内容はええ。確率どおりに打てとる、気を取り直して前に進むのみや！', 'でもな、選び方は合うとった。結果は気にせんでええ、打ち方はこのままでいこ！']);
   if (!rt) N(top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose'));
@@ -11465,6 +11469,7 @@ function rvSetSolo(who) {
       (i ? RVP([`ほんで第${w.game}ゲーム第${w.round}巡の「${w.mine}」もな！`, `もう一個、第${w.game}ゲーム第${w.round}巡の「${w.mine}」も言わせて！`]) : RVP([`せやけど第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」はなんでやねん！`, `このセットの分かれ目は第${w.game}ゲーム第${w.round}巡や。場${w.t}で「${w.mine}」はちゃうやろ〜！`, `VARで見直したいんは第${w.game}ゲーム第${w.round}巡、場${w.t}の「${w.mine}」や！`])) + (w.gf ? w.gf.masa : `「${w.best}」やろ！`) + why);
     if (i === 0) N(rvBadNeta(w));
   });
+  { const nF = Lg.reduce((a, x) => a + ((x.fouls || []).length), 0); if (nF) B(`このセットではお手つきが${nF}回ありました（${Lg.filter(x => (x.fouls || []).length).map(x => '第' + x.game + 'ゲーム').join('・')}）。ペナルティの札は失点に直結します。出す前に、式が場の数になるかを確かめましょう。`, `お手つき${nF}回や！ハンドの反則でPK献上しとるようなもんやで。出す前に一回検算や！`); }
   sec = 'tend'; // 6. 傾向とクセ（セット全体）、最近の自分との比較
   const mc = {}; F.forEach(f => f && Object.entries(f.missCats || {}).forEach(([k, n]) => mc[k] = (mc[k] || 0) + n));
   const tc = rvTopCat(mc, 2);
@@ -11538,7 +11543,7 @@ function rvDialog(scope) {
   if (scope === 'set') {
     const c = setContext(), Lg = S.T.setLog || [], F = Lg.map(x => x.rv);
     const nDec = Lg.reduce((a, x) => a + (x.nDec || 0), 0), nBest = Lg.reduce((a, x) => a + (x.nBest || 0), 0), nGood = Lg.reduce((a, x) => a + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length, nHint = Lg.reduce((a, x) => a + (x.nHint || 0), 0);
-    const sq = rvQual(nDec, nBest, nGood), top1 = c.rank === 1 || c.finalRank === 1;
+    const nFoul = Lg.reduce((a, x) => a + ((x.fouls || []).length), 0), sq0 = rvQual(nDec, nBest, nGood), sq = nFoul && sq0 === 'good' ? 'mid' : sq0, top1 = c.rank === 1 || c.finalRank === 1;
     R((c.phase === 'final' ? `決勝は${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}。` : `卓内${c.rank}位、セットPP${c.pp}。`) + (nDec ? `最善は${nDec}回中${nBest}回${wins ? `、上がり${wins}回` : ''}でした。` : nHint ? `判断はすべてAIの読みを見て打ったので、採点はしていません。` : `上がりは${wins}回でした。`));
     const allHl = []; F.forEach((f, i) => f && (f.hl || []).forEach(h => allHl.push(Object.assign({ game: Lg[i].game }, h))));
     const order = ['perfect', 'sutemi', 'divParen', 'run', 'fast', 'aete', 'one', 'div', 'defend', 'three'], top = allHl.sort((a, b) => order.indexOf(a.k) - order.indexOf(b.k))[0];
@@ -11549,6 +11554,7 @@ function rvDialog(scope) {
     else if (nDec >= 3) { R('大きく外した手はなく、判断は安定していました。'); M(NM(sq === 'good' && !top1 ? 'goodLose' : 'defend')); }
     const mc = {}; F.forEach(f => f && Object.entries(f.missCats || {}).forEach(([k, n]) => mc[k] = (mc[k] || 0) + n)); const tc = rvTopCat(mc, 2);
     if (tc) R(`外した手は「${CATS[tc.k]}」の場面に${tc.n}回かたまっています。`);
+    if (nFoul) R(`お手つきも${nFoul}回ありました。出す前に、式が場の数になるかを確かめましょう。`);
     const unl = Lg.filter(x => x.luck === 'resultUnlucky').length, lk = Lg.filter(x => x.luck === 'resultLucky').length;
     let m2 = '';
     if (c.kind === 'tournament' && c.phase === 'prelim') m2 = c.last ? (c.qualified ? `予選${c.overall}位で決勝進出や！` : `予選${c.overall}位、決勝には届かんかった…次の大会で取り返そ！`) : (c.qualified ? `総合${c.overall}位、決勝圏内や！` : `総合${c.overall}位、ラインまで${c.gap}点や。まだ行ける！`);
@@ -11561,12 +11567,14 @@ function rvDialog(scope) {
     R(pr ? pr[2] : RVP(['次のセットも、大きい札の早めの処分と、相手の残り枚数を意識しましょう。', '判断の質を積み重ねれば、順位は後から付いてきます。', '次は「残す札」で選ぶ意識を持つと、もう一段精度が上がります。']));
     return out;
   }
-  const f = S.lastFacts || rvGameFacts(), q = rvQual(f.nDec, f.nBest, f.nGood);
+  const f = S.lastFacts || rvGameFacts(), fo = f.fouls || [], q0 = rvQual(f.nDec, f.nBest, f.nGood), q = fo.length && q0 === 'good' ? 'mid' : q0;
   R((f.won ? `上がりでPP0、第${f.round}巡で上がり切りました。` : `PP${f.pp}で${f.n}人中${f.rank}位。` + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられました。` : '')) + (f.nDec ? `最善は${f.nDec}回中${f.nBest}回。` : f.nHint ? 'AIの読みを見て打ったので採点はなしです。' : '') + (f.luck === 'resultUnlucky' ? '判断は最善、札運が悪かっただけです。' : ''));
   const react = f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : f.luck === 'resultUnlucky' ? 'luckBad' : 'lose');
   const h = (f.hl || [])[0];
-  M(h ? `第${h.round || f.round}巡の` + RVD_HL_M[h.k].replace('{m}', h.mine || '') : `${nmY}、` + NM(react));
-  if (f.worst) { R(miss(f.worst, `分かれ道は第${f.worst.round}巡、場${f.worst.t}の`)); M(NM(rvBadNeta(f.worst))); }
+  M(h ? (h.round ? `第${h.round}巡の` : '') + RVD_HL_M[h.k].replace('{m}', h.mine || '') : `${nmY}、` + NM(react));
+  const foulTxt = x => `第${x.round}巡、場${x.t}のお手つき。${x.cards}では場の数にならず、ペナルティで${x.n}枚引きました。` + (x.alt && !/^引く/.test(x.alt) ? `「${x.alt}」なら出せていました。` : '');
+  if (f.worst) { R(miss(f.worst, `分かれ道は第${f.worst.round}巡、場${f.worst.t}の`)); M(NM(rvBadNeta(f.worst))); if (fo.length) R(`それと、お手つきが${fo.length}回（計${fo.reduce((a, y) => a + y.n, 0)}枚）。`); }
+  else if (fo.length) { R('分かれ道は' + foulTxt(fo[0])); M('ハンドの反則でPK献上みたいなもんや！出す前に一回検算やで！'); neta = true; }
   else if (f.nDec >= 2) R('大きく外した手はなく、判断は安定していました。');
   if (f.kanata && !f.won) R(`第${f.kanata.round}巡からカナタの絶対透視。上がりも狙えますが、失点の見込みに備えて大きい札から処分するのが有力です。`);
   let m2 = '';
@@ -11577,7 +11585,7 @@ function rvDialog(scope) {
   if (!neta) m2 += NM(react);
   M(m2);
   const tc = rvTopCat(f.missCats, 2), pr = tc && RV_PRACTICE[tc.k];
-  R(tc ? `外した手は「${CATS[tc.k]}」の場面に${tc.n}回。` + (pr ? pr[2] : '') : f.danger && !f.won ? `第${f.danger.round}巡に${f.danger.who}が残り${f.danger.h}枚。相手が残り少ないときは、上がりより失点を減らす手が優先になりやすい局面です。` : RVP(['次のゲームも、残す札の形と手札の合計を意識しましょう。', '次は相手の残り枚数にも目を配ってみましょう。', '大きい札は早めに処分。次のゲームも続けましょう。']));
+  if (fo.length && !tc) R('次は、出す前に式が場の数になるかを確かめる習慣をつけましょう。早見表で式の形に慣れておくのも効果的です。'); else R(tc ? `外した手は「${CATS[tc.k]}」の場面に${tc.n}回。` + (pr ? pr[2] : '') : f.danger && !f.won ? `第${f.danger.round}巡に${f.danger.who}が残り${f.danger.h}枚。相手が残り少ないときは、上がりより失点を減らす手が優先になりやすい局面です。` : RVP(['次のゲームも、残す札の形と手札の合計を意識しましょう。', '次は相手の残り枚数にも目を配ってみましょう。', '大きい札は早めに処分。次のゲームも続けましょう。']));
   return out;
 }
 function rvdMerge(L) { const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
