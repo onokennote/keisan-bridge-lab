@@ -219,6 +219,20 @@ function polChoose(pol, h, t, r) {
   return best;
 }
 KB.polChoose = polChoose;
+// 絶対透視の打ち方（シミュレーションの中のカナタ）：全員の手札と山札の順番が見えている
+//  ①出し切れるなら上がる ②この巡でこのあと番が来る誰かが場で出し切れるなら、いちばん重く切る
+//  ③自分がこの巡の最後なら、次の場（山札のいちばん上）で残りを出し切れる手を選ぶ ④それ以外はふつうの★5の打ち方
+function clearChoose(sim, p) {
+  const h = sim.hands[p], t = sim.field, total = nCounts(h), all = findMoves(h, t, 'all', 3); if (!all.length) return null;
+  const out = all.find(m => m.n === total); if (out) return out;
+  const sumOf = m => m.vals.reduce((a, b) => a + b, 0);
+  const later = sim.order.slice(sim.pos).filter(q => q !== p);
+  if (later.some(q => { const hq = sim.hands[q], n = nCounts(hq); return n <= 3 && findMoves(hq, t, 'all', 3).some(m => m.n === n); })) return all.slice().sort((a, b) => sumOf(b) - sumOf(a) || b.n - a.n)[0];
+  if (!later.length && sim.deck.length) { const nf = sim.deck[sim.deck.length - 1];
+    const fin = all.filter(m => { const r = h.slice(); m.vals.forEach(v => r[v]--); const n = nCounts(r); return n <= 3 && findMoves(r, nf, 'all', 3).some(x => x.n === n); });
+    if (fin.length) return fin.sort((a, b) => sumOf(b) - sumOf(a))[0]; }
+  return polChoose(sim.pol[p], h, t, sim.r);
+}
 function simRun(sim, maxRounds) {
   let rounds = 0;
   for (;;) {
@@ -226,7 +240,7 @@ function simRun(sim, maxRounds) {
       const p = sim.order[sim.pos++];
       if (p === sim.me) sim.meTurns++;
       const h = sim.hands[p];
-      const m = polChoose(sim.pol[p], h, sim.field, sim.r);
+      const m = sim.clear && p === sim.me ? clearChoose(sim, p) : polChoose(sim.pol[p], h, sim.field, sim.r); // 絶対透視のカナタは、シミュレーションの中でも見えている札を使って打つ
       if (m) { for (const v of m.vals) { h[v]--; sim.discard.push(v); } if (nCounts(h) === 0) return p; }
       else { const v = simDraw(sim); if (v) h[v]++; }
     }
@@ -571,15 +585,15 @@ function aiMoveClear(game, p, rollouts) {
   const pol = game.players.map((pl, i) => i === p ? makePolicy(5, 'keisan') : makePolicy(pl.human ? 4 : Math.min(pl.level || 3, 5), pl.style || 'keisan'));
   const N = rollouts || Math.max(24, Math.min(64, Math.floor(3200 / cands.length))); let best = null, bs = -1e9;
   for (const m of cands) {
-    let win = 0, pp = 0;
+    let win = 0, pp = 0, turns = 0;
     for (let it = 0; it < N; it++) {
       const hands = hands0.map(h => h.slice());
-      const sim = { hands, deck: deck0.slice(), discard: disc0.slice(), field: t, order: game.order, pos: game.pos + 1, r: mulberry(1000 + it * 7919), pol, me: p, meTurns: 0 };
+      const sim = { hands, deck: deck0.slice(), discard: disc0.slice(), field: t, order: game.order, pos: game.pos + 1, r: mulberry(1000 + it * 7919), pol, me: p, meTurns: 0, clear: true };
       if (m) { for (const v of m.vals) { hands[p][v]--; sim.discard.push(v); } } else { const v = simDraw(sim); if (v) hands[p][v]++; }
       const w = m && nCounts(hands[p]) === 0 ? p : simRun(sim);
-      if (w === p) win++; else pp += sumCounts(hands[p]);
+      if (w === p) { win++; turns += sim.meTurns; } else pp += sumCounts(hands[p]);
     }
-    const s = win / N * 0.5 - pp / N; // 失点の見込みを最小に（同じくらいなら上がりやすい方）
+    const s = win / N * 0.5 - pp / N - (win ? turns / win * 0.02 : 0); // 失点の見込みを最小に（同じくらいなら上がりやすい方・早く上がれる方）
     if (s > bs) { bs = s; best = m; }
   }
   return best;
