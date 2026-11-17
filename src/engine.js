@@ -561,10 +561,15 @@ function aiMoveClear(game, p, rollouts) {
   const counts = game.counts(p), t = game.field.v, total = nCounts(counts);
   const all = findMoves(counts, t, 'all', 3); if (!all.length) return null;
   const win = all.find(m => m.n === total); if (win) return win;
-  const cands = KB.candidates(counts, t, 10).concat([null]);
-  const hands0 = game.hands.map(h => countsOf(h)), deck0 = game.deck.map(c => c.v), disc0 = game.discard.map(c => c.v);
+  const sumOf = m => m.vals.reduce((a, b) => a + b, 0);
+  // 見えているので確実：この巡でカナタのあとに番が来る誰かが、いまの場で手札を全部出し切れる → 上がられる前に、いちばん重く札を切る
+  const hands0 = game.hands.map(h => countsOf(h));
+  const doomed = game.order.slice(game.pos + 1).some(q => q !== p && nCounts(hands0[q]) <= 3 && findMoves(hands0[q], t, 'all', 3).some(m => m.n === nCounts(hands0[q])));
+  if (doomed) return all.slice().sort((a, b) => sumOf(b) - sumOf(a) || b.n - a.n)[0];
+  // 出せる手はぜんぶ比べる（上位だけに絞らない）。1ゲーム1回の奥義なので、回数も多めに
+  const cands = all.concat([null]), deck0 = game.deck.map(c => c.v), disc0 = game.discard.map(c => c.v);
   const pol = game.players.map((pl, i) => i === p ? makePolicy(5, 'keisan') : makePolicy(pl.human ? 4 : Math.min(pl.level || 3, 5), pl.style || 'keisan'));
-  const N = rollouts || 48; let best = null, bs = -1e9;
+  const N = rollouts || Math.max(24, Math.min(64, Math.floor(3200 / cands.length))); let best = null, bs = -1e9;
   for (const m of cands) {
     let win = 0, pp = 0;
     for (let it = 0; it < N; it++) {
