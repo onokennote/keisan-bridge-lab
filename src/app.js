@@ -3106,14 +3106,14 @@ function homeHTML() {
   KB.resetNames();
   const sts = KB.getStrategy().styles;
   const fanCards = (S.titleQ && S.titleQ.cards) || [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
-  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''} ${i === 3 ? 'odai' : ''}" style="--r:${(i - 1.5) * 14}deg;--i:${i};transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span><i class="cn">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>${i === 3 ? '<em class="odai-tag">場</em>' : ''}</div>`).join('');
+  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''} " style="--r:${(i - 1.5) * 14}deg;--i:${i};transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span><i class="cn">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i></div>`).join('');
   return `<section class="title ${titleIntro() ? 'intro' : ''}" ${S.introAt ? `style="--el:${-Math.min(3000, Date.now() - S.introAt)}ms"` : ''}>
   <div class="title-stage">
     <button class="host host-l host-btn" data-act="host-root" aria-label="ルート博士：公式ルールを見る"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span><span class="host-tag">📖 ルール</span></button>
     <div class="fan" data-act="title-shuffle" role="button" aria-label="カードを配り直す（3枚で場の数を作る式）">${fan}</div>
     <button class="host host-r host-btn ${masaBeckon() ? 'beckon' : ''}" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">${masaBeckon() ? R0(['アドバイスするで〜！', '押してみ！教えたる！', '迷ったらおれや！']) : 'ほな、いこか！'}</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
-  <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><small>作戦研究所</small></div>
+  <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><small>作戦研究所</small><span class="lg-sub">〜打倒OZ家への道〜</span></div>
   <p><b class="title-expr">${esc((S.titleQ && S.titleQ.expr) || 'J − 4 × A ＝ 7')}</b>。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
