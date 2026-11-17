@@ -2499,3 +2499,15 @@ body.rewinding #home-fab{display:none}
 .dl-part>.btn{white-space:nowrap}.dl-ps{min-width:0}
 .dl-fmt{display:inline-block;align-self:flex-start;max-width:100%;margin-bottom:2px;padding:1px 6px;border-radius:6px;font-style:normal;font-size:10.5px;letter-spacing:0;font-weight:800;line-height:1.4;white-space:nowrap;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22);color:var(--ink)}
 .dl-part>.dl-fmt{grid-column:1/-1;justify-self:start;margin:0 0 -2px}
+/* 博士とマサの掛け合い（総評） */
+.rvd{display:flex;flex-direction:column;gap:6px}
+.rvd-line{display:flex;gap:8px;align-items:flex-start}
+.rvd-line.masa{flex-direction:row-reverse}
+.rvd-av{flex:0 0 34px;width:34px;height:34px;border-radius:50%;overflow:hidden;background:rgba(255,255,255,.08)}
+.rvd-av svg{width:100%;height:100%;display:block}
+.rvd-line p{margin:0;padding:7px 10px;border-radius:12px;font-size:13.5px;line-height:1.55;max-width:calc(100% - 50px);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:var(--ink)}
+.rvd-line.root p{border-top-left-radius:3px;background:rgba(116,192,252,.12);border-color:rgba(116,192,252,.3)}
+.rvd-line.masa p{border-top-right-radius:3px;background:rgba(255,169,77,.13);border-color:rgba(255,169,77,.35)}
+.rvd-more summary{cursor:pointer;font-size:12.5px;color:var(--muted);padding:4px 2px;list-style:none}
+.rvd-more summary::-webkit-details-marker{display:none}
+.rvd-more[open] summary{color:var(--accent)}

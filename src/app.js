@@ -4805,19 +4805,17 @@ function reviewHTML(scope) {
   if (S.attack) return ''; // バッジアタック中はAI総括を出さない
   scope = scope || (S.review && S.review.scope) || 'game';
   const r = S.review && S.review.scope === scope ? S.review : null;
-  const btn = (who, label) => `<button class="btn ${r && r.who === who ? 'primary' : ''}" data-review="${who}" data-scope="${scope}"><span class="rv-av">${KB.casterSVG(who, 'happy')}</span>${label}</button>`;
-  return `<div class="stack" style="gap:8px"><div class="lbl">${scope === 'set' ? (S.T && S.T.phase === 'final' ? '決勝戦の総括を読む' : 'このセットの総括を読む') : 'AI総評を読む'}</div>
-  <div class="row">${btn('root', 'ルート博士の総評')}${btn('masa', 'ナニワのマサの総評')}</div>
-  ${r ? `<div class="commentary review"><div class="cm-av">${KB.casterSVG(r.who, r.busy ? 'normal' : 'happy')}</div><div class="cm-body"><span class="cm-name">${r.who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span><span class="cm-text">${r.busy ? `<span class="cm-wait">${r.stage === 'check' ? '内容を確認しています' : '考えています'}<span class="dots"><i></i><i></i><i></i></span></span>` : esc(yo(r.text))}</span>${r.simple && !r.busy ? `<span class="rv-simple">${r.simple === 'login' ? '簡易版：ログインしてClaudeの利用を許可すると、Claudeがゲームの内容に合わせて詳しく総括します' : '簡易版：Claudeにつながらなかったため、アプリ内の定型文で表示しています'}</span>` : ''}</div></div>` : ''}</div>`;
+  if (!r) return '<div class="small muted">総評を作っています…</div>';
+  return `<div class="stack" style="gap:8px"><div class="lbl">${scope === 'set' ? (S.T && S.T.phase === 'final' ? '決勝戦の総括' : 'このセットの総括') : 'AI総評'}　<small class="muted">博士とマサ</small></div>
+  ${r.dialog && r.dialog.length ? rvDialogHTML(r.dialog) : ''}
+  ${r.text ? `<details class="rvd-more"><summary>▸ くわしく見る（${r.who === 'root' ? 'ルート博士' : 'ナニワのマサ'}の総評）</summary><div class="commentary review"><div class="cm-av">${KB.casterSVG(r.who, 'happy')}</div><div class="cm-body"><span class="cm-name">${r.who === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</span><span class="cm-text">${esc(r.text)}</span></div></div></details>` : ''}</div>`;
 }
 function rerenderReview() { const el = $('#review-wrap'); if (el) { el.innerHTML = reviewHTML(el.dataset.scope); bindReview(el); } }
-// 総評は博士かマサのどちらかを必ず出す（はじめは前回読んだほう。まだなければマサ）
+// 総評：博士とマサの短い掛け合いを出し、くわしい総評（博士かマサのどちらかをランダム）は「くわしく見る」にたたむ
 function bindReview(root) {
-  root.querySelectorAll('[data-review]').forEach(b => b.onclick = () => { try { localStorage.setItem('kb.rvWho', b.dataset.review); } catch (e) { } readReview(b.dataset.review, b.dataset.scope); });
-  const w = root.id === 'review-wrap' ? root : root.querySelector('#review-wrap'); if (!w || S.attack || !w.querySelector('[data-review]')) return;
+  const w = root.id === 'review-wrap' ? root : root.querySelector('#review-wrap'); if (!w || S.attack) return;
   const scope = w.dataset.scope || 'game'; if (S.review && S.review.scope === scope) return;
-  let who = 'masa'; try { who = localStorage.getItem('kb.rvWho') === 'root' ? 'root' : 'masa'; } catch (e) { }
-  readReview(who, scope);
+  readReview(Math.random() < 0.5 ? 'root' : 'masa', scope);
 }
 // Claudeが使えないときの総括（判定データから組み立てる）
 function localReview(who) {
@@ -4856,7 +4854,7 @@ async function readReview(who, scope) {
   scope = scope || 'game';
   if (S.review && S.review.busy && S.review.ctl) S.review.ctl.abort();
   // 総評はアプリの判定データから組み立てる（Claudeは使わない）
-  { let text = ''; try { text = scope === 'set' ? rvSetSolo(who) : rvGameSolo(who); } catch (e) { text = scope === 'set' ? setLocalReview(who) : localReview(who); } S.review = { who, scope, text, busy: false }; rerenderReview(); return; }
+  { let text = '', dialog = null; try { text = scope === 'set' ? rvSetSolo(who) : rvGameSolo(who); } catch (e) { text = scope === 'set' ? setLocalReview(who) : localReview(who); } try { dialog = rvdMerge(rvDialog(scope)); } catch (e) { console.error(e); } S.review = { who, scope, text, dialog, busy: false }; rerenderReview(); return; }
   S.review = { who, scope, text: '', busy: true };
   rerenderReview();
   const local = () => scope === 'set' ? setLocalReview(who) : localReview(who);
@@ -5431,6 +5429,61 @@ function rvAssemble(L, who, W, must) {
   if (who === 'root' && Math.random() < 0.35 && KB.PHILO) out.push({ t: RVP(KB.PHILO) });
   return out.map(x => x.t).join('');
 }
+// ---------- 博士とマサの掛け合い（短い総評。くわしい総評は下の「くわしく見る」） ----------
+// 必ず入れる：結果・いちばんの分かれ道（最善手と「○%→○%」）・取ったバッジ・次の課題。マサのサッカー／ポーカーのたとえは1回以上
+const RVD_HL_M = { sutemi: '上がれるのに見送った捨て身、しびれたで！', aete: 'あえて引いた我慢、しびれたで！', divParen: '「{m}」、かっこ付きの割り算や！', div: '「{m}」、割り算きれいに決めたな！', three: '「{m}」、重い札まとめて3枚や！', one: 'あえて1枚の「{m}」、渋い一手や！', defend: '相手リーチの場面で「{m}」、ナイスディフェンス！', perfect: '判断ぜんぶ最善、パーフェクトや！', run: '最善手の連続、安定しとったで！', fast: '速攻の上がり、カウンター決まったな！' };
+function rvdBadges(ea) { if (!ea.badges.length) return ''; const L = ea.badges.slice(0, 2).map(b => `「${b.name || b[0] || b}」`); return L.join('') + (ea.badges.length > 2 ? `ほか${ea.badges.length - 2}個` : ''); }
+function rvDialog(scope) {
+  const out = [], R = t => t && out.push({ w: 'root', t }), M = t => t && out.push({ w: 'masa', t }), nmY = rvName();
+  let neta = false; const NM = k => { const t = rvNeta('masa', k); if (t) neta = true; return t || ''; };
+  const miss = (w, pre) => { const gf = w.gf; return `${pre}「${w.mine}」。` + (gf ? gf.root : `最善は「${w.best}」でした。`); };
+  if (scope === 'set') {
+    const c = setContext(), Lg = S.T.setLog || [], F = Lg.map(x => x.rv);
+    const nDec = Lg.reduce((a, x) => a + (x.nDec || 0), 0), nBest = Lg.reduce((a, x) => a + (x.nBest || 0), 0), nGood = Lg.reduce((a, x) => a + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length, nHint = Lg.reduce((a, x) => a + (x.nHint || 0), 0);
+    const sq = rvQual(nDec, nBest, nGood), top1 = c.rank === 1 || c.finalRank === 1;
+    R((c.phase === 'final' ? `決勝は${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}。` : `卓内${c.rank}位、セットPP${c.pp}。`) + (nDec ? `最善は${nDec}回中${nBest}回${wins ? `、上がり${wins}回` : ''}でした。` : nHint ? `判断はすべてAIの読みを見て打ったので、採点はしていません。` : `上がりは${wins}回でした。`));
+    const allHl = []; F.forEach((f, i) => f && (f.hl || []).forEach(h => allHl.push(Object.assign({ game: Lg[i].game }, h))));
+    const order = ['perfect', 'sutemi', 'divParen', 'run', 'fast', 'aete', 'one', 'div', 'defend', 'three'], top = allHl.sort((a, b) => order.indexOf(a.k) - order.indexOf(b.k))[0];
+    const react = top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose');
+    M(top ? `第${top.game}ゲームの` + RVD_HL_M[top.k].replace('{m}', top.mine || '') + (top1 && sq === 'poor' ? 'せやけど順位はラッキーも込みやで！' : '') : `${nmY}、` + NM(react));
+    const ws = []; F.forEach((f, i) => f && (f.misses || []).forEach(w => ws.push(Object.assign({ game: Lg[i].game }, w)))); ws.sort((a, b) => b.loss - a.loss);
+    if (ws[0]) { R(miss(ws[0], `いちばんの分かれ道は第${ws[0].game}ゲーム第${ws[0].round}巡、場${ws[0].t}の`)); M(NM(rvBadNeta(ws[0]))); }
+    else if (nDec >= 3) { R('大きく外した手はなく、判断は安定していました。'); M(NM(sq === 'good' && !top1 ? 'goodLose' : 'defend')); }
+    const mc = {}; F.forEach(f => f && Object.entries(f.missCats || {}).forEach(([k, n]) => mc[k] = (mc[k] || 0) + n)); const tc = rvTopCat(mc, 2);
+    if (tc) R(`外した手は「${CATS[tc.k]}」の場面に${tc.n}回かたまっています。`);
+    const unl = Lg.filter(x => x.luck === 'resultUnlucky').length, lk = Lg.filter(x => x.luck === 'resultLucky').length;
+    let m2 = '';
+    if (c.kind === 'tournament' && c.phase === 'prelim') m2 = c.last ? (c.qualified ? `予選${c.overall}位で決勝進出や！` : `予選${c.overall}位、決勝には届かんかった…次の大会で取り返そ！`) : (c.qualified ? `総合${c.overall}位、決勝圏内や！` : `総合${c.overall}位、ラインまで${c.gap}点や。まだ行ける！`);
+    else if (c.phase === 'final') m2 = c.finalRank === 1 ? '優勝や！てっぺん取ったで！' : `優勝は${c.winnerName === 'あなた' ? nmY : san(c.winnerName)}や。ここまで来たんは立派やで！`;
+    if (unl) m2 += `内容最善で不運なゲームも${unl}回、そこは気にせんでええ！`; else if (lk) m2 += `結果オーライのゲームが${lk}回、ラッキーやっただけやで！`;
+    const ea = rvEarned(S.T.setT0 || Date.now()), bd = rvdBadges(ea); if (bd) m2 += `${bd}のバッジもゲットや！`;
+    if (!neta) m2 += NM(react);
+    M(m2);
+    const pr = tc && RV_PRACTICE[tc.k];
+    R(pr ? pr[2] : RVP(['次のセットも、大きい札の早めの処分と、相手の残り枚数を意識しましょう。', '判断の質を積み重ねれば、順位は後から付いてきます。', '次は「残す札」で選ぶ意識を持つと、もう一段精度が上がります。']));
+    return out;
+  }
+  const f = S.lastFacts || rvGameFacts(), q = rvQual(f.nDec, f.nBest, f.nGood);
+  R((f.won ? `上がりでPP0、第${f.round}巡で上がり切りました。` : `PP${f.pp}で${f.n}人中${f.rank}位。` + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられました。` : '')) + (f.nDec ? `最善は${f.nDec}回中${f.nBest}回。` : f.nHint ? 'AIの読みを見て打ったので採点はなしです。' : '') + (f.luck === 'resultUnlucky' ? '判断は最善、札運が悪かっただけです。' : ''));
+  const react = f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : f.luck === 'resultUnlucky' ? 'luckBad' : 'lose');
+  const h = (f.hl || [])[0];
+  M(h ? `第${h.round || f.round}巡の` + RVD_HL_M[h.k].replace('{m}', h.mine || '') : `${nmY}、` + NM(react));
+  if (f.worst) { R(miss(f.worst, `分かれ道は第${f.worst.round}巡、場${f.worst.t}の`)); M(NM(rvBadNeta(f.worst))); }
+  else if (f.nDec >= 2) R('大きく外した手はなく、判断は安定していました。');
+  if (f.kanata && !f.won) R(`第${f.kanata.round}巡からカナタの絶対透視。上がりも狙えますが、失点の見込みに備えて大きい札から処分するのが有力です。`);
+  let m2 = '';
+  if (f.luck === 'resultLucky') m2 += '結果オーライやな、ラッキーやっただけや！';
+  if (f.near && f.near.p >= 0.2 && !f.won) m2 += `残り${f.near.n}枚で${Math.round(f.near.p * 100)}%の形やったのに、惜しかったな！`;
+  const ea = rvEarned(S.gameT0 || Date.now()), bd = rvdBadges(ea); if (bd) m2 += `${bd}のバッジもゲットや！`;
+  else { const nb = rvNear(S.pbSnap); if (nb.length) m2 += `あと${nb[0].left}回で「${nb[0].name}」や！`; }
+  if (!neta) m2 += NM(react);
+  M(m2);
+  const tc = rvTopCat(f.missCats, 2), pr = tc && RV_PRACTICE[tc.k];
+  R(tc ? `外した手は「${CATS[tc.k]}」の場面に${tc.n}回。` + (pr ? pr[2] : '') : f.danger && !f.won ? `第${f.danger.round}巡に${f.danger.who}が残り${f.danger.h}枚。相手が残り少ないときは、上がりより失点を減らす手が優先になりやすい局面です。` : RVP(['次のゲームも、残す札の形と手札の合計を意識しましょう。', '次は相手の残り枚数にも目を配ってみましょう。', '大きい札は早めに処分。次のゲームも続けましょう。']));
+  return out;
+}
+function rvdMerge(L) { const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
+function rvDialogHTML(L) { return `<div class="rvd">${L.map(x => `<div class="rvd-line ${x.w}"><span class="rvd-av">${KB.casterSVG(x.w, 'happy')}</span><p>${esc(x.t)}</p></div>`).join('')}</div>`; }
 function nextGame() {
   S.inSummary = false;
   closeModal();
@@ -6928,6 +6981,6 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, rvAll: scope => ({ dialog: rvdMerge(rvDialog(scope)).map(x => (x.w === 'root' ? '博士：' : 'マサ：') + x.t).join('\n'), root: scope === 'set' ? rvSetSolo('root') : rvGameSolo('root'), masa: scope === 'set' ? rvSetSolo('masa') : rvGameSolo('masa') }), huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();
