@@ -1780,8 +1780,8 @@ function rankJumpDo(y) { rkFit(); if (S.rankJump) { S.rankJumpT = { id: S.rankJu
 // 称号（自分で選んだオンライン大会の成績）：プロフィールの名前の上に出す
 const placeJa = p => ['', '優勝', '準優勝', '3位'][p] || '';
 function pvTitle(D) {
-  let t = D.titleShow; if (!t && D.title && D.awards) { const a = D.awards.find(x => x.tid === D.title); if (a) t = { text: `${a.tname} ${placeJa(+a.place)}`, official: +a.official, place: +a.place }; }
-  return t ? `<div class="pv-title ${t.official ? 'off' : ''} p${t.place}">${t.place === 1 ? '👑' : t.place === 2 ? '🥈' : '🥉'} ${t.official ? '<em>公式</em>' : ''}${esc(t.text)}</div>` : '';
+  let t = D.titleShow; if (!t && D.title && D.awards) { const a = D.awards.find(x => x.tid === D.title && +x.official !== 2); if (a) t = { text: `${a.tname} ${placeJa(+a.place)}`, official: +a.official, place: +a.place }; }
+  return t ? `<div class="pv-title ${t.official ? 'off' : ''} p${t.place}">${t.place === 1 ? '👑' : t.place === 2 ? '🥈' : '🥉'} ${t.official === 3 ? '<em>シーズン</em>' : t.official ? '<em>公式</em>' : ''}${esc(t.text)}</div>` : '';
 }
 // 大会のメダルの数（公式・オンラインで別々）
 function podiumHTML(aw) {
@@ -1791,11 +1791,13 @@ function podiumHTML(aw) {
   return `<div class="pv-pods">${row(true)}${row(false)}</div>`;
 }
 // 称号を選ぶ（自分のプロフィールから。いまのプレイヤーが取ったオンライン大会の成績から1つ）
+// 称号にできるのは、オンライン大会（0）・公式大会（1）・デイリーのシーズン入賞（3）。デイリー1回ごとの入賞（2）は称号にしない
+const titleOk = a => +a.official !== 2, ttlTag = a => ({ 1: '公式', 3: 'シーズン' })[+a.official] || '';
 function titleModal() {
-  const L = (ON.myAwards || []).filter(a => a.pid === PID).sort((a, b) => (+b.official) - (+a.official) || a.place - b.place), cur = store.get('title', '');
+  const L = (ON.myAwards || []).filter(a => a.pid === PID && titleOk(a)).sort((a, b) => (+b.official) - (+a.official) || a.place - b.place), cur = store.get('title', '');
   modal(`<div class="stack"><h3 style="margin:0">👑 称号を選ぶ</h3><p class="small muted" style="margin:0">ランキングから開くプロフィールで、名前の上に出ます。</p>
-    <div class="ttl-list"><button class="ttl ${!cur ? 'on' : ''}" data-act="title-set" data-id="">つけない</button>${L.map(a => `<button class="ttl ${cur === a.tid ? 'on' : ''} ${+a.official ? 'off' : ''}" data-act="title-set" data-id="${esc(a.tid)}">${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '<em>公式</em>' : ''}${esc(a.tname)} ${placeJa(+a.place)}</button>`).join('')}</div>
-    ${L.length ? '' : '<p class="small muted" style="margin:0">オンライン大会（人が10人以上）で3位以内に入ると、称号が選べるようになります。</p>'}
+    <div class="ttl-list"><button class="ttl ${!cur ? 'on' : ''}" data-act="title-set" data-id="">つけない</button>${L.map(a => `<button class="ttl ${cur === a.tid ? 'on' : ''} ${+a.official ? 'off' : ''}" data-act="title-set" data-id="${esc(a.tid)}">${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? `<em>${ttlTag(a)}</em>` : ''}${esc(a.tname)} ${placeJa(+a.place)}</button>`).join('')}</div>
+    ${L.length ? '' : '<p class="small muted" style="margin:0">オンライン大会（人が10人以上）か、デイリートーナメントのシーズンで3位以内に入ると、称号が選べるようになります。</p>'}
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
 }
 function profHTML(D, o) {
@@ -3097,7 +3099,7 @@ function homeHTML() {
   <div class="cast">${castHTML()}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar pb2"><div class="pb-top"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b class="pb-nm" style="--nl:${[...S.settings.name].length}">${esc(S.settings.name)}</b><button class="pb-rate" data-go="growth" aria-label="推定実力（成長記録へ）">${r.ok ? `<span class="pb-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<small>推定実力は測定中（あと${r.need}手）</small>`}</button><span class="pb-sub">${gamesN(g)}ゲーム・連続最善 最長${g.cnt.streakMax || 0}</span></span></div>${CLOUD_ON ? `<div class="pb-meta"><span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span></div>` : ''}<div class="pb-btns2"><button class="btn sm pb-grow" data-go="growth">📈 成長記録</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・切り替え</button></div>
-    ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${+a.official ? '公式・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
+    ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID && titleOk(a)) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID && titleOk(x)); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? ttlTag(a) + '・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
