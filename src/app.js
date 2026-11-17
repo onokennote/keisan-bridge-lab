@@ -3069,6 +3069,27 @@ function tourFacts() {
   const c = store.get('cfgTour', null); if (!c) return '';
   return `<div class="facts my-facts"><span>${c.nPlayers}人・${KB.splitTables(c.nPlayers, 5).length}卓</span><span>${c.games}ゲーム×${c.sets}セット</span><span>上位${c.finalists}名が決勝</span><span>相手：${esc((MIX[c.mix] || MIX.random).label)}</span></div>`;
 }
+// タイトルのカード：左の3枚で、右端のお題（場の数）を作る式。ときどき配り直して式も入れ替える（押しても配り直す）
+function titleNewQ() {
+  for (let tries = 0; tries < 60; tries++) {
+    const v3 = [0, 0, 0].map(() => 1 + ((Math.random() * 13) | 0)), cs = KB.countsOf(v3), ts = KB.shuffle([...Array(13)].map((_, i) => i + 1));
+    for (const t of ts) { const m = KB.findMoves(cs, t, 'all', 3).filter(x => x.n === 3); if (!m.length) continue; const mv = m[(Math.random() * m.length) | 0];
+      const su = () => (Math.random() * 4) | 0; return { cards: mv.vals.map(v => ({ v, s: su() })).concat([{ v: t, s: su() }]), expr: mv.expr.replace(/\d+/g, d => KB.vname(+d)) + ' ＝ ' + KB.vname(t), t }; }
+  }
+  return null;
+}
+function titleShuffle(byTap) {
+  const fan = $('.title .fan'); if (!fan || S.view !== 'home') return;
+  const q = titleNewQ(); if (!q) return; S.titleQ = q;
+  const reduce = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
+  const cards = [...fan.querySelectorAll('.card')], ex = $('.title .title-expr');
+  const paint = (el, c) => { el.classList.toggle('red', c.s === 1 || c.s === 2); el.querySelector('.v').textContent = KB.vname(c.v); el.querySelector('.s').textContent = KB.SUITS[c.s]; const cn = el.querySelector('.cn'); if (cn) cn.innerHTML = `${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small>`; };
+  cards.forEach((el, i) => { if (reduce) { paint(el, q.cards[i]); return; } setTimeout(() => { el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip'); setTimeout(() => paint(el, q.cards[i]), 230); setTimeout(() => el.classList.remove('flip'), 520); }, i * 140); });
+  if (ex) { if (reduce) ex.textContent = q.expr; else { ex.classList.add('fade'); setTimeout(() => { ex.textContent = q.expr; ex.classList.remove('fade'); }, 1500); } } // 式はじんわり入れ替える（目立たせない）
+  if (byTap) { const say = $('.title .host-r .host-say'); if (say) say.textContent = RVP([`3枚で場の${KB.vname(q.t)}を作るんや！`, `この3枚で${KB.vname(q.t)}、作れるか？`, `答えは下や！${KB.vname(q.t)}、作れたか？`]); }
+}
+// 自動の配り直し：9秒ごと（ホームが見えているときだけ・動きを減らす設定と自動テストでは止める）
+setInterval(() => { try { if (document.hidden || S.view !== 'home' || $('#modal') || navigator.webdriver || window.KB_TEST || matchMedia('(prefers-reduced-motion: reduce)').matches) return; if (Date.now() - (S.titleTapAt || 0) < 8000) return; titleShuffle(false); } catch (e) { } }, 9000);
 // タイトルの登場の動き：その日はじめてホームを開いたときだけ（端末ごと）。動きを減らす設定・自動テストでは出さない（確かめるときは kb.forceIntro）
 function titleIntro() {
   if (S.introChecked !== undefined) return S.introChecked; S.introChecked = false;
@@ -3084,16 +3105,16 @@ function homeHTML() {
   const saved = store.get('session', null);
   KB.resetNames();
   const sts = KB.getStrategy().styles;
-  const fanCards = [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
-  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''}" style="--r:${(i - 1.5) * 14}deg;--i:${i};transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span></div>`).join('');
+  const fanCards = (S.titleQ && S.titleQ.cards) || [{ v: 11, s: 1 }, { v: 4, s: 0 }, { v: 1, s: 2 }, { v: 7, s: 3 }];
+  const fan = fanCards.map((c, i) => `<div class="card ${c.s === 1 || c.s === 2 ? 'red' : ''} ${i === 3 ? 'odai' : ''}" style="--r:${(i - 1.5) * 14}deg;--i:${i};transform:translateX(-50%) rotate(${(i - 1.5) * 14}deg)"><span class="v">${KB.vname(c.v)}</span><span class="s">${KB.SUITS[c.s]}</span><i class="cn">${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small></i>${i === 3 ? '<em class="odai-tag">場</em>' : ''}</div>`).join('');
   return `<section class="title ${titleIntro() ? 'intro' : ''}" ${S.introAt ? `style="--el:${-Math.min(3000, Date.now() - S.introAt)}ms"` : ''}>
   <div class="title-stage">
     <button class="host host-l host-btn" data-act="host-root" aria-label="ルート博士：公式ルールを見る"><span class="host-say">ようこそ。</span><span class="host-av">${KB.casterSVG('root', 'happy')}</span><span class="host-nm">解説<b>ルート博士</b></span><span class="host-tag">📖 ルール</span></button>
-    <div class="fan" aria-hidden="true">${fan}</div>
+    <div class="fan" data-act="title-shuffle" role="button" aria-label="カードを配り直す（3枚で場の数を作る式）">${fan}</div>
     <button class="host host-r host-btn ${masaBeckon() ? 'beckon' : ''}" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">${masaBeckon() ? R0(['アドバイスするで〜！', '押してみ！教えたる！', '迷ったらおれや！']) : 'ほな、いこか！'}</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
   <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><small>作戦研究所</small></div>
-  <p>J − 4 × A ＝ 7。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
+  <p><b class="title-expr">${esc((S.titleQ && S.titleQ.expr) || 'J − 4 × A ＝ 7')}</b>。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
   <div class="cast">${castHTML()}</div>
@@ -6190,6 +6211,7 @@ function act(a, el) {
     case 'rank-card': rankCardOpen(el.dataset.rid, !!el.dataset.me, el); break;
     case 'host-root': hostRules(); break;
     case 'season-rank': S.drTab = 'past'; closeModal(); dailyRankOpen('past'); break;
+    case 'title-shuffle': S.titleTapAt = Date.now(); titleShuffle(true); break;
     case 'host-masa': try { localStorage.setItem('kb.masaUsed', '1'); } catch (e) { } S.masaBeckoned = true; masaAdvice(); break;
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; if (f) f(); else closeModal(); break; }

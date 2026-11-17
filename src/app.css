@@ -2513,3 +2513,17 @@ body.rewinding #home-fab{display:none}
 .rvd-more[open] summary{color:var(--accent)}
 /* 大会ポイントの見出しは、PCの2列でも1行まるごと使う（下に区切り線） */
 .rk-all>.rk-group-h{grid-column:1/-1;margin:22px 2px 2px;padding:14px 4px 8px;border-top:1px solid rgba(255,214,102,.35);flex-direction:row;align-items:baseline;flex-wrap:wrap;column-gap:12px}
+/* タイトルのカード：ゆっくり呼吸・ときどきめくれて配り直し・右端はお題（場） */
+.title .fan{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.title:not(.intro) .fan .card{animation:tiBreath 5.5s ease-in-out infinite;animation-delay:calc(var(--i) * -0.35s)}
+@keyframes tiBreath{0%,100%{transform:translateX(-50%) rotate(var(--r))}50%{transform:translateX(-50%) rotate(calc(var(--r) * 1.12)) translateY(-2px)}}
+.title .fan .card.flip{animation:tiFlip .5s ease-in-out}
+@keyframes tiFlip{0%{transform:translateX(-50%) rotate(var(--r)) scaleX(1)}45%{transform:translateX(-50%) rotate(var(--r)) scaleX(.04) translateY(-6px)}55%{transform:translateX(-50%) rotate(var(--r)) scaleX(.04) translateY(-6px)}100%{transform:translateX(-50%) rotate(var(--r)) scaleX(1)}}
+.title .fan .card.odai{box-shadow:0 0 0 2px #f2b632,0 6px 18px rgba(242,182,50,.45)}
+.title .fan .card .odai-tag{position:absolute;top:-9px;right:-7px;background:#f2b632;color:#2b1d00;font-style:normal;font-size:11px;font-weight:900;line-height:1;padding:3px 5px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.35)}
+.title .title-expr{font-weight:inherit;color:inherit;white-space:nowrap;transition:opacity 1.4s ease}
+.title .title-expr.fade{opacity:0}
+@media (prefers-reduced-motion: reduce){ .title .fan .card,.title .fan .card.flip{animation:none!important}.title .title-expr{transition:none} }
+/* 重なって隠れる札も読めるように、左上の角に数字（トランプの角の印） */
+.title .fan .card .cn{position:absolute;left:5px;top:4px;display:flex;flex-direction:column;align-items:center;font-style:normal;font-weight:900;font-size:15px;line-height:1;color:inherit}
+.title .fan .card .cn small{font-size:10px;margin-top:1px}
