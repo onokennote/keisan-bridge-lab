@@ -3113,7 +3113,7 @@ function homeHTML() {
     <div class="fan" data-act="title-shuffle" role="button" aria-label="カードを配り直す（3枚で場の数を作る式）">${fan}</div>
     <button class="host host-r host-btn ${masaBeckon() ? 'beckon' : ''}" data-act="host-masa" aria-label="ナニワのマサ：次にやることのアドバイス"><span class="host-say">${masaBeckon() ? R0(['アドバイスするで〜！', '押してみ！教えたる！', '迷ったらおれや！']) : 'ほな、いこか！'}</span><span class="host-av">${KB.casterSVG('masa', 'happy')}</span><span class="host-nm">実況<b>ナニワのマサ</b></span><span class="host-tag">💡 アドバイス</span></button>
   </div>
-  <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><small>作戦研究所</small><span class="lg-sub">〜打倒OZ家への道〜</span></div>
+  <div class="logo"><span class="lg-main" data-t="計算ブリッジ">計算ブリッジ</span><span class="lg-row"><small>作戦研究所</small><span class="lg-sub">〜打倒OZ家への道〜</span></span></div>
   <p><b class="title-expr">${esc((S.titleQ && S.titleQ.expr) || 'J − 4 × A ＝ 7')}</b>。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
