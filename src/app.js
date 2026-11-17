@@ -396,7 +396,7 @@ function ctxFor(pIdx) {
 // アプリ更新の検知：プレイ中の画面にいたことを、ビルド番号と一緒に記録しておく
 const PLAY_VIEWS = { game: 1, 'set-end': 1, entrance: 1, opening: 1, result: 1 };
 function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) store.set('active', { view, build: BUILD }); else store.del('active'); } catch (e) { } }
-function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
+function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (S.xmBak && !['game', 'set-end'].includes(view)) xmRestore(); /* サンタのテストプレイを途中でやめても記録を戻す */ if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
 // テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
 function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です'; document.body.appendChild(b); }
@@ -421,7 +421,7 @@ function fabHome() {
 function render() {
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
-  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); else if (PID && !S.homeGreetDone) setTimeout(homeGreet, 2200); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
+  if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); xmCheck(); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); else if (PID && !S.homeGreetDone) setTimeout(homeGreet, 2200); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
   else if (S.view === 'setup-practice') app.innerHTML = setupPracticeHTML();
   else if (S.view === 'setup-tour') app.innerHTML = setupTourHTML();
   else if (S.view === 'game') app.innerHTML = gameHTML();
@@ -2582,6 +2582,7 @@ function profileModal() {
       <p class="small muted pm-p">記録はクラウドに保存されています。スマホを替えたり、ブラウザのデータを消したりしたときは、<b>復活の呪文</b>${G_ON ? 'か<b>Google</b>' : ''}で戻れます。</p>
       ${code ? `<div class="pm-code"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 カード</button></div><p class="small muted pm-p">呪文は人に教えないでね（おうちの人はOK）。</p>` : '<p class="small muted pm-p">復活の呪文は、少し遊んでクラウドに保存されると出ます。</p>'}
       ${G_ON ? (gLinked() ? '<button class="pm-link" data-act="g-unlink">Googleでまもるのをやめる</button>' : '<button class="btn g-pro pm-g" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted pm-p">Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>') : ''}
+      ${G_ON ? '<button class="pm-link xm-parent-btn" data-act="xm-parent">🎄 おうちの人へ：クリスマスのしかけ</button>' : ''}
     </section>` : ''}
     <section class="pm-sec">
       <div class="pm-h">👥 この端末のプレイヤー</div>
@@ -3125,7 +3126,7 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
-${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
+${xmCardHTML()}${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}
 ${onlineHomeHTML()}
 <div class="mode-grid">
   <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${modeBadgeRows(MB_PRAC, true)}
@@ -3157,6 +3158,7 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
+  ${G_ON ? '<p class="small"><button class="pm-link" data-act="xm-parent">🎄 おうちの人へ：クリスマスのしかけ（保護者のGoogleでログインして開きます）</button></p>' : ''}
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
@@ -3554,7 +3556,7 @@ function restoreLive() {
   go('game');
   loop();
 }
-function saveSession() { if (S.attack || S.spectate) return; if (S.T && !S.T.done) store.set('session', S.T); }
+function saveSession() { if (S.attack || S.spectate || (S.T && S.T.xmas && S.T.xmas.test)) return; if (S.T && !S.T.done) store.set('session', S.T); }
 
 // 巡の最後の人のアクションが落ち着いてから、ほんの少し間をおいて次の場札と「第N巡」を出す
 // 一時停止できるタイマー：順位表を見ている間などは、時間が来ても進めずに保留する
@@ -5556,6 +5558,7 @@ function endSet() {
   if (!S.tiebreak && !T.tourHinted && badgeElig(T).tour && T.cfg.kind === 'tournament' && T.phase === 'prelim' && T.set === T.cfg.sets) { const pre = T.setHist.filter(h => h.phase === 'prelim'); if (pre.length >= T.cfg.sets && pre.every(h => { const r = h.res.find(x => x.id === 0); return r && r.rank === 1; })) bump('all_sets'); } /* 予選の全セット優勝 */
   if (!S.tiebreak && badgeElig(T).set) { const L = T.setLog || [], nD = L.reduce((a, x) => a + (x.nDec || 0), 0); if (nD >= 5 && L.every(x => (x.nGood != null ? x.nGood : x.nBest) === x.nDec && !(x.fouls || []).length) && L.length >= T.cfg.games && !T.setHinted) bump('perfect_set'); if (T.cfg.kind === 'practice') bump('practice_set'); if (judgeAfter() && !(T.setFouls || 0) && (T.setPP[0] || []).length && !T.setHinted) bump('no_foul_set'); }
   T.setFouls = 0;
+  if (T.xmas) { const mr = res.find(r => r.id === 0); setTimeout(() => xmAfter(!!mr && mr.rank === 1), 900); }
   if (S.attack) { attackSetBonus(); if (!S.attack.finishing) attackNextSet(); return; }
   saveSession();
   go('set-end');
@@ -6177,6 +6180,17 @@ function act(a, el) {
     case 'chart-open': chartIntro(); break;
     case 'cloud-show': { const e = $('#cl-code'); if (e) e.textContent = e.dataset.code; break; }
     case 'g-protect': gProtect(); break;
+    case 'xm-parent': xmParent(); break;
+    case 'xm-edit': xmEdit(el.dataset.k); break;
+    case 'xm-save': xmSave(el.dataset.k); break;
+    case 'xm-del': xmDel(el.dataset.k); break;
+    case 'xm-test': xmTestMenu(); break;
+    case 'xm-test-play': closeModal(); xmStart(true); break;
+    case 'xm-test-reveal': { const m = ($('#xm-msg-test') ? $('#xm-msg-test').value : '') || S.xmTestMsg || '（テスト）ここにメッセージが出ます'; closeModal(); xmReveal(m, true); break; }
+    case 'xm-about': xmAbout(); break;
+    case 'xm-open': xmIntro(); break;
+    case 'xm-go': closeModal(); xmStart(false); break;
+    case 'xm-read': xmReveal(ON.xm && ON.xm.msg, false); break;
     case 'g-unlink': gUnlink(); break;
     case 'g-restore': gRestore(); break;
     case 'g-pick': gPick(el.dataset.k); break;
@@ -6464,6 +6478,117 @@ async function dailyInfoLoad(force) {
   if (!ON_ENABLED() || (!force && Date.now() - (ON.dinfoAt || 0) < 60000)) return; ON.dinfoAt = Date.now();
   try { ON.dinfo = await onReq('daily_info', { pid: PID }); } catch (e) { return; }
   const el = S.view === 'home' && $('.on-card .dl-card'); if (el) { el.outerHTML = dailyCardHTML((ON.tours || []).filter(v => v.daily)); document.querySelectorAll('.on-card .dl-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+}
+
+// ---------- サンタからの挑戦状（クリスマスのしかけ） ----------
+// 保護者（子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウント）が、サンタからのメッセージ（プレゼントの隠し場所のヒントなど）を仕込む。
+// 子どもは期間中（はじめは12/25の朝7時〜夜9時）、サンタ・カナタ（★6・絶対透視）と達人3人の5ゲームで優勝するとメッセージを受け取れる。3回負けると手加減（絶対透視なし・相手が1段弱く）。
+// メッセージはサーバーにだけあり、優勝するまで子どもの端末には届かない。同じプレイヤーなら別の端末でも同じ挑戦状
+const XM_LV = [[5, '達人ぞろい（★5×3）'], [4, '強豪（★4×3）'], [3, 'ふつう（★3×3）']];
+function santaCh() { return Object.assign(KB.charToCh(KB.KANATA), { name: 'サンタ・カナタ', acc: 'santa', shirt: '#c92a2a', bgpat: 'pat:stars' }); }
+function xmDef() { const y = new Date().getFullYear(), d = new Date(y, 11, 25, 7, 0), e = new Date(y, 11, 25, 21, 0); return { start: d, end: e }; }
+const xmLoc = d => { const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
+const xmActive = () => { const x = ON.xm; if (!x) return false; const now = Date.now() / 1000 + (ON.xmSkew || 0); return now >= x.start && now <= x.end; };
+async function xmCheck() {
+  if (!CLOUD_ON || !PID || !plLink(PID) || Date.now() - (S.xmAt || 0) < 60000 && S.xmPid === PID) return;
+  S.xmAt = Date.now(); S.xmPid = PID;
+  try { const j = await onReq('xm_get', { pid: PID }); ON.xm = j.xm; ON.xmSkew = j.now ? j.now - Date.now() / 1000 : 0; } catch (e) { return; }
+  const el = $('#xm-card'); if (S.view === 'home') { const h = xmCardHTML(); if (el) el.outerHTML = h || '<div id="xm-card" hidden></div>'; else if (h) { const t = $('.rank-banner') || $('.mode-grid'); if (t) t.insertAdjacentHTML('beforebegin', h); } document.querySelectorAll('#xm-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+  if (xmActive() && !ON.xm.won && raw.get(plKey(PID, 'xmSeen'), 0) !== ON.xm.start && S.view === 'home' && !$('#modal')) { plSetLocal(PID, 'xmSeen', ON.xm.start); setTimeout(() => { if (S.view === 'home' && !$('#modal')) xmIntro(); }, 1200); }
+}
+function xmCardHTML() {
+  const x = ON.xm; if (!x || !CLOUD_ON) return '<div id="xm-card" hidden></div>';
+  if (x.won) return `<div id="xm-card" class="xm-card won"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</span><div><b>🎁 サンタからのメッセージ</b><small>サンタ・カナタに勝って受け取ったメッセージです</small></div><button class="btn primary sm" data-act="xm-read">ひらく</button></div>`;
+  if (!xmActive()) return '<div id="xm-card" hidden></div>';
+  const easy = x.losses >= 3;
+  return `<div id="xm-card" class="xm-card"><span class="xm-av">${KB.avatarSVG(santaCh(), { mood: 'normal', level: 6 })}</span><div><b>🎄 サンタからの挑戦状</b><small>サンタ・カナタと達人たちの5ゲームで優勝すると、サンタからのメッセージが届く！${x.losses ? `（${x.losses}回挑戦${easy ? '・サンタが少し手加減中' : ''}）` : ''}</small></div><button class="btn primary sm" data-act="xm-open">挑戦する</button></div>`;
+}
+function xmIntro() {
+  const x = ON.xm; if (!x) return; const easy = x.losses >= 3, nm = rvName();
+  modal(`<div class="stack xm-intro"><div class="xm-hero">${KB.avatarSVG(santaCh(), { mood: 'normal', level: 6 })}</div><h3 style="margin:0;text-align:center">🎄 サンタからの挑戦状</h3>
+    <div class="op-lines"><div class="op-line root"><div class="cm-av">${KB.casterSVG('root', 'happy')}</div><div class="op-bubble"><span class="cm-name">解説・ルート博士</span>${esc(`${nm}に、謎のサンタから挑戦状が届いています。サンタと達人3人の5ゲームで、卓内1位になればメッセージを受け取れるそうです。`)}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(easy ? `${x.losses}回も挑んだ根性、サンタも見とったで！今回はちょっと手加減してくれるらしい。ラストチャンスや、いったれ！` : 'このサンタ、ただ者やないで…目ぇ閉じたまま打っとる。クリスマスの決勝戦や、いったれ！')}</div></div></div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">あとで</button><button class="btn primary" data-act="xm-go">挑戦する</button></div></div>`);
+}
+// 対局：サンタ・カナタ（★6・絶対透視）＋達人3人。test は保護者のテストプレイ（記録しない・サーバーに送らない）
+function xmStart(test) {
+  const x = ON.xm || {}, lv0 = test ? (S.xmTestLv || 5) : (x.lv || 5), easy = !test && (x.losses || 0) >= 3, lv = easy ? Math.max(2, lv0 - 1) : lv0;
+  KB.resetNames(); const used = new Set(['kanata']);
+  const T = newSession({ kind: 'practice', games: 5, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: PRACTICE_POINTS.slice(), tie: 'janken' });
+  const santa = { id: 1, human: false, level: easy ? 5 : 6, style: 'keisan', ch: santaCh(), clairvoyant: !easy, santa: true };
+  T.players = [T.players[0], santa].concat([2, 3, 4].map(i => makeAI(i, lv, null, used)));
+  T.points = {}; T.totPP = {}; T.tb = {}; T.players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
+  T.xmas = { test: !!test, easy }; if (test) S.xmBak = { growth: JSON.stringify(store.get('growth', null)) }; S.T = T; startSet(); // テストプレイは成長記録を控えておき、終わったら戻す（記録・バッジに残さない）
+}
+function xmRestore() { if (!S.xmBak) return; try { const g = JSON.parse(S.xmBak.growth); if (g) store.set('growth', g); } catch (e) { } S.xmBak = null; }
+async function xmAfter(won) {
+  const T = S.T; if (!T || !T.xmas) return;
+  if (T.xmas.test) { xmRestore(); if (won) xmReveal(S.xmTestMsg || '（テストプレイ）ここに、仕込んだメッセージが出ます。', true); else xmLose(0, true); return; }
+  try { const j = await onReq('xm_result', { pid: PID, won }); ON.xm = j.xm; if (won && j.xm && j.xm.msg) xmReveal(j.xm.msg, false); else if (!won) xmLose(j.xm ? j.xm.losses : 0, false); }
+  catch (e) { toast(e.message || '通信できませんでした。もう一度ためしてください'); }
+}
+function xmLose(losses, test) {
+  const left = Math.max(0, 3 - losses);
+  modal(`<div class="stack"><div class="xm-hero sm">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</div><h3 style="margin:0;text-align:center">サンタ・カナタ「……まだまだ」</h3>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(test ? '（テストプレイ）負けたときは、こんなふうに声をかけるで。3回負けると、サンタが手加減してくれる仕組みや。' : left ? `惜しかったな！あと${left}回負けたら、サンタがちょっと手加減してくれるらしいで。でも今のうちに勝ったらカッコええで！何回でも挑戦できる！` : '大丈夫や、次からサンタが手加減してくれるで！絶対透視もなしや。何回でも挑戦できる！')}</div></div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button>${test ? '' : '<button class="btn primary" data-act="xm-go">もう一度挑戦</button>'}</div></div>`);
+}
+function xmReveal(msg, test) {
+  if (!msg) return;
+  KB.sfx && KB.sfx('cutin');
+  modal(`<div class="stack xm-reveal"><div class="xm-env"><div class="xm-flap"></div><div class="xm-letter"><div class="xm-from">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}<b>サンタからのメッセージ</b></div><p class="xm-msg">${esc(msg).replace(/\n/g, '<br>')}</p>${test ? '<small class="muted">（テストプレイ：記録は残りません）</small>' : ''}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(RVP(['サンタに勝ったで〜！メリークリスマスや！', 'クリスマスの決勝、優勝や！ワールドカップ級やで！', '絶対透視のサンタに勝つて、ジャイアントキリングや！メリークリスマス！']))}</div></div>
+    <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button></div></div>`);
+  try { confetti && confetti(); } catch (e) { }
+}
+// 保護者メニュー（Googleでログイン）
+async function xmParent() {
+  let idt; try { idt = await gSignIn('🎄 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
+  let j; try { j = await cloudReq('xm_list', { idt }); } catch (e) { toast(e.message || 'ひらけませんでした'); return; }
+  S.xmList = j.list; xmParentModal();
+}
+function xmParentModal() {
+  const L = S.xmList || [], fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  modal(`<div class="stack xm-par"><h3 style="margin:0">🎄 サンタからの挑戦状（おうちの人向け）</h3>
+    <p class="small" style="margin:0">サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもがサンタ・カナタ（★6・絶対透視）と達人たちの5ゲームで優勝すると、メッセージが届きます。メッセージは優勝するまで子どもの端末には届きません。</p>
+    ${L.length ? `<div class="xm-kids">${L.map(x => `<div class="xm-kid"><span class="xm-kav">${KB.avatarSVG(Object.assign({}, x.avatar || AVATAR_DEF, { name: x.name }), { mood: 'happy' })}</span><div><b>${esc(x.name)}</b><small>${x.xm ? `仕込み済み・${fmt(x.xm.start)}〜${fmt(x.xm.end)}・挑戦${x.xm.losses}回${x.xm.won ? '・🎁 受け取り済み' : ''}` : 'まだ仕込んでいません'}</small></div><button class="btn sm ${x.xm ? '' : 'primary'}" data-act="xm-edit" data-k="${esc(x.k)}">${x.xm ? '編集' : '仕込む'}</button></div>`).join('')}</div>` : '<p class="small muted" style="margin:0">このGoogleアカウントでまもっているプレイヤーがいません。子どものプレイヤーで「🛡 Googleでまもる」をしてから、もう一度開いてください。</p>'}
+    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="xm-test">🎮 演出をためす</button><button class="btn sm" data-act="xm-about">📖 使い方・うちの使い方</button></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
+}
+function xmEdit(k) {
+  const x = (S.xmList || []).find(y => y.k === k); if (!x) return; const d = xmDef(), c = x.xm;
+  modal(`<div class="stack xm-par"><h3 style="margin:0">🎄 ${esc(x.name)}への挑戦状</h3>
+    <label class="su-row col"><b>サンタからのメッセージ（200文字まで）</b><textarea id="xm-msg" rows="4" maxlength="200" placeholder="例）メリークリスマス！プレゼントは、本棚のいちばん上の段の奥にあるよ。">${esc(c ? c.msg : '')}</textarea></label>
+    <label class="su-row col"><b>挑戦できる期間（はじめ）</b><input id="xm-st" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.start * 1000) : d.start)}"></label>
+    <label class="su-row col"><b>挑戦できる期間（おわり）</b><input id="xm-en" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.end * 1000) : d.end)}"></label>
+    <div class="su-row col"><b>サンタ・カナタといっしょに打つ3人</b><div class="su-seg" id="xm-lv">${XM_LV.map(([v, l]) => `<button class="${(c ? c.lv : 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div><small class="muted">3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）</small></div>
+    ${c ? `<label class="small"><input type="checkbox" id="xm-reset"> 挑戦の回数と受け取りを最初に戻す（${c.losses}回挑戦${c.won ? '・受け取り済み' : ''}）</label>` : ''}
+    <div class="row" style="justify-content:space-between;gap:8px">${c ? `<button class="btn" data-act="xm-del" data-k="${esc(k)}">取り消す</button>` : '<span></span>'}<span class="row" style="gap:8px"><button class="btn" data-act="xm-parent-back">もどる</button><button class="btn primary" data-act="xm-save" data-k="${esc(k)}">仕込む</button></span></div></div>`);
+  document.querySelectorAll('#xm-lv button').forEach(b => b.onclick = () => { document.querySelectorAll('#xm-lv button').forEach(o => o.classList.toggle('on', o === b)); });
+  const bk = $('[data-act="xm-parent-back"]'); if (bk) bk.onclick = () => xmParentModal();
+}
+async function xmSave(k) {
+  const msg = $('#xm-msg').value.trim(), st = new Date($('#xm-st').value).getTime() / 1000, en = new Date($('#xm-en').value).getTime() / 1000, lv = +(($('#xm-lv .on') || {}).dataset || {}).v || 5;
+  if (!msg) { toast('メッセージを書いてください'); return; } if (!(en > st)) { toast('期間を確かめてください'); return; }
+  try { await cloudReq('xm_set', { idt: S.gIdt && S.gIdt.t, k, msg, start: Math.round(st), end: Math.round(en), lv, reset: !!($('#xm-reset') && $('#xm-reset').checked) }); toast('仕込みました 🎄'); const j = await cloudReq('xm_list', { idt: S.gIdt && S.gIdt.t }); S.xmList = j.list; S.xmAt = 0; xmParentModal(); }
+  catch (e) { toast(e.message || '保存できませんでした'); }
+}
+async function xmDel(k) { if (!confirm('この挑戦状を取り消しますか？')) return; try { await cloudReq('xm_del', { idt: S.gIdt && S.gIdt.t, k }); const j = await cloudReq('xm_list', { idt: S.gIdt && S.gIdt.t }); S.xmList = j.list; S.xmAt = 0; xmParentModal(); } catch (e) { toast(e.message || '取り消せませんでした'); } }
+function xmTestMenu() {
+  modal(`<div class="stack xm-par"><h3 style="margin:0">🎮 演出をためす（テストプレイ）</h3><p class="small" style="margin:0">子どもと同じ流れを、おうちの人がためせます。記録やランキングには残らず、子どもの挑戦の回数にも数えません。</p>
+    <label class="su-row col"><b>ためしに出すメッセージ</b><textarea id="xm-msg-test" rows="3" maxlength="200">メリークリスマス！（テスト）プレゼントは○○の中にあるよ。</textarea></label>
+    <div class="su-row col"><b>いっしょに打つ3人</b><div class="su-seg" id="xm-tlv">${XM_LV.map(([v, l]) => `<button class="${(S.xmTestLv || 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="xm-test-reveal">🎁 勝ったときの演出だけ見る</button><button class="btn primary" data-act="xm-test-play">🃏 実際に1セット遊ぶ</button></div></div>`);
+  document.querySelectorAll('#xm-tlv button').forEach(b => b.onclick = () => { S.xmTestLv = +b.dataset.v; document.querySelectorAll('#xm-tlv button').forEach(o => o.classList.toggle('on', o === b)); });
+  const ta = $('#xm-msg-test'); ta.oninput = () => { S.xmTestMsg = ta.value; }; S.xmTestMsg = ta.value;
+}
+function xmAbout() {
+  modal(`<div class="stack xm-par"><h3 style="margin:0">📖 サンタからの挑戦状　使い方</h3>
+    <ol class="small xm-steps"><li>子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。</li><li>「🎄 おうちの人へ」からGoogleでログインし、子どもを選んで、サンタからのメッセージと期間（はじめは12/25の朝7時〜夜9時）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。</li><li>「🎮 演出をためす」で、子どもと同じ流れを先にためせます。</li><li>当日、子どもがホームを開くと、サンタ・カナタから挑戦状が届きます。サンタ・カナタ（★6・奥義「絶対透視」）と達人3人の5ゲームで卓内1位になると、メッセージが届きます。</li><li>3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）。何回でも挑戦できます。</li></ol>
+    <p class="small muted" style="margin:0">メッセージはサーバーにだけ置き、優勝するまで子どもの端末には届きません。同じプレイヤーなら、別の端末で開いても同じ挑戦状です。</p>
+    <h4 style="margin:4px 0 0">🏠 うちではこんな使い方</h4>
+    <p class="small" style="margin:0">わが家では毎年、サンタがプレゼントの隠し場所をクイズにしたカードを仕込んでいます。上の子が小さいころは、Scratchで冒険ゲームを作り、とらわれたサンタを救い出すとプレゼントのありかが分かるようにしました。今年は、カナタがふんするサンタを含む達人ぞろいのセットで優勝すると、隠し場所のメッセージを受け取れるようにしています。このしかけを、ほかのおうちでも使えるようにお裾分けしました。</p>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
 }
 // ホームを開いたときのひと声：①締めたシーズンに出ていたら、博士とマサがシーズンの結果を発表（シーズンごとに1回）②その日はじめて開いたら、マサのアドバイスを出す（①があればそちらを優先し、その日は②を出さない）
 async function homeGreet() {

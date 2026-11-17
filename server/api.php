@@ -44,6 +44,7 @@ function db(): PDO {
   $pdo->exec('CREATE TABLE IF NOT EXISTS notes (id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, pid TEXT NOT NULL, kind TEXT NOT NULL, data TEXT, at INTEGER NOT NULL)'); // 通知（ライバル・ライバルの動き・大会）。30日で消す
   $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS glinks (g TEXT NOT NULL, uid TEXT NOT NULL, pid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (g, uid, pid))'); // Googleでまもる：Googleのアカウントの番号（sub）をハッシュにしたもの g と、プレイヤー
+  $pdo->exec('CREATE TABLE IF NOT EXISTS xmas (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // サンタからの挑戦状：保護者（Googleでまもっている人）が子どものプレイヤーに仕込む。メッセージは優勝するまで子どもの端末に送らない
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
@@ -750,6 +751,36 @@ try {
       $n = db()->prepare('SELECT COUNT(*) FROM glinks WHERE g = ?'); $n->execute([$g]); if ((int)$n->fetchColumn() >= 20) fail('1つのGoogleアカウントでまもれるのは20人までです');
       db()->prepare('INSERT OR REPLACE INTO glinks (g, uid, pid, at) VALUES (?, ?, ?, ?)')->execute([$g, $u['uid'], $pid, time()]);
       out(['ok' => true]);
+    }
+    // ---------- サンタからの挑戦状（保護者がGoogleでログインして仕込む。子どもは優勝するとメッセージを受け取る） ----------
+    case 'xm_list': { // 保護者：まもっているプレイヤーと、仕込んだ挑戦状
+      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
+      $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, x.msg, x.start_at, x.end_at, x.lv, x.losses, x.won_at FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid LEFT JOIN xmas x ON x.uid = l.uid AND x.pid = l.pid WHERE l.g = ? ORDER BY l.at'); $q->execute([$g]);
+      $L = []; foreach ($q->fetchAll() as $r) $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: 'プレイヤー', 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'xm' => $r['msg'] !== null ? ['msg' => $r['msg'], 'start' => (int)$r['start_at'], 'end' => (int)$r['end_at'], 'lv' => (int)$r['lv'], 'losses' => (int)$r['losses'], 'won' => $r['won_at'] ? (int)$r['won_at'] : null] : null];
+      out(['ok' => true, 'list' => $L]);
+    }
+    case 'xm_set': case 'xm_del': { // 保護者：挑戦状を仕込む／取り消す（まもっているプレイヤーだけ）
+      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); $k = (string)($b['k'] ?? ''); $hit = null;
+      $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
+      if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
+      if ($a === 'xm_del') { db()->prepare('DELETE FROM xmas WHERE uid = ? AND pid = ?')->execute([$hit['uid'], $hit['pid']]); out(['ok' => true]); }
+      $msg = trim(mb_substr(preg_replace('/[\x00-\x08\x0B-\x1F\x7F<>]/u', '', (string)($b['msg'] ?? '')), 0, 200)); if ($msg === '') fail('メッセージを書いてください');
+      $st = (int)($b['start'] ?? 0); $en = (int)($b['end'] ?? 0); if ($st <= 0 || $en <= $st || $en - $st > 86400 * 14 || $en < time() - 3600) fail('期間を確かめてください');
+      $lv = max(3, min(5, (int)($b['lv'] ?? 5)));
+      db()->prepare('INSERT INTO xmas (uid, pid, g, msg, start_at, end_at, lv, losses, won_at, updated) VALUES (?,?,?,?,?,?,?,0,NULL,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, msg=excluded.msg, start_at=excluded.start_at, end_at=excluded.end_at, lv=excluded.lv, losses=CASE WHEN ' . ((int)!empty($b['reset'])) . ' THEN 0 ELSE xmas.losses END, won_at=CASE WHEN ' . ((int)!empty($b['reset'])) . ' THEN NULL ELSE xmas.won_at END, updated=excluded.updated')->execute([$hit['uid'], $hit['pid'], $g, $msg, $st, $en, $lv, time()]);
+      out(['ok' => true]);
+    }
+    case 'xm_get': case 'xm_result': { // 子ども：いま挑戦できる挑戦状（メッセージは優勝してから）／結果を送る
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
+      $q = db()->prepare('SELECT * FROM xmas WHERE uid = ? AND pid = ?'); $q->execute([$u['uid'], $pid]); $x = $q->fetch();
+      if (!$x) out(['ok' => true, 'xm' => null]);
+      $now = time();
+      if ($a === 'xm_result') {
+        if ($now < (int)$x['start_at'] - 60 || $now > (int)$x['end_at'] + 1800) fail('挑戦の期間ではありません');
+        if (!empty($b['won'])) { if (!$x['won_at']) db()->prepare('UPDATE xmas SET won_at = ? WHERE uid = ? AND pid = ?')->execute([$now, $u['uid'], $pid]); $x['won_at'] = $x['won_at'] ?: $now; }
+        else { db()->prepare('UPDATE xmas SET losses = losses + 1 WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]); $x['losses'] = (int)$x['losses'] + 1; }
+      }
+      out(['ok' => true, 'now' => $now, 'xm' => ['start' => (int)$x['start_at'], 'end' => (int)$x['end_at'], 'lv' => (int)$x['lv'], 'losses' => (int)$x['losses'], 'won' => $x['won_at'] ? (int)$x['won_at'] : null, 'msg' => $x['won_at'] ? $x['msg'] : null]]);
     }
     case 'g_unlink': { // Googleでまもるのをやめる（このプレイヤーのひもづけを全部外す）
       $b = body(); $u = authUser($b); $pid = cleanPid($b['pid'] ?? '');
