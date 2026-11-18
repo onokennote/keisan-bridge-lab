@@ -2064,6 +2064,7 @@ function growthHTML() {
     ${catRows || '<p class="small muted" style="margin:0">もう少しプレイすると、場面ごとの傾向が見えてきます。</p>'}
     <p class="small muted" style="margin:0">直近40ゲームで、その場面での1判断あたりの平均損失（小さいほど得意）。全体の平均は${allAvg.toFixed(1)}pt。項目を押すと博士が解説します（AIの読みを見た手は除いています）。</p>
   </div>
+  ${missedHTML()}
   <div class="panel stack">
     <div class="lbl">バッジ（${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}）・合計 <b class="atk-bp">${bpTotal(g)} BP</b></div>
     <p class="small muted" style="margin:0">BP（バッジポイント）は、バッジの段階（銅・銀・金）と取りにくさで決まります。カテゴリーの特別バッジは${BP_CAT}BP（ライバルは${BP_CAT_G['ライバル']}BP）。カテゴリーを押すと開きます。${(() => { const b = attackBests(); return b[15] ? `バッジアタックの自己ベストは${b[15].bp}BP（ここの合計とは別集計）。` : ''; })()}</p>
@@ -2071,7 +2072,6 @@ function growthHTML() {
     ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } const op = (S.bdgOpen || new Set()).has(gi); return `<div class="bdg-group ${done ? 'complete' : ''} ${op ? 'open' : ''}"><div class="bdg-gh" data-bgt="${gi}" role="button" aria-expanded="${op}"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${catBp(gi)}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<span class="bdg-gauge" role="img" aria-label="${have}/${all}"><i style="width:${Math.round(have / all * 100)}%"></i><b>${have}<small>/${all}</small></b></span>`}<i class="bdg-chev">▸</i></div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
     ${spGot(g).length ? `<div class="bdg-group sp-group open"><div class="bdg-gh"><b>🎁 特別クエスト</b><small class="muted">（持っている人だけに出ます・各${bpOf(SP_ACH[0][0], 0)}BP・冠なし）</small></div><div class="bdg-grid">${spGot(g).map(a => `<button class="bdg-cell got" data-bdg="${a[0]}:0" aria-label="${esc(a[4][0])}">${badgeSVG(a, 0, true, 40)}<b>${esc(a[4][0])}</b><small>${esc(a[3]())}</small><i class="bp-s">${bpOf(a[0], 0)}BP</i></button>`).join('')}</div></div>` : ''}
   </div>
-  ${missedHTML()}
   <div class="panel stack">
     <div class="lbl">記録</div>
     <div class="rec-top"><div><small>連続最善の最長記録</small><b>${g.cnt.streakMax || 0}</b></div><div><small>いまの連続最善</small><b>${g.cnt.streakNow || 0}</b></div><div><small>推定実力の最高</small><b>${g.cnt.rating ? '★' + g.cnt.rating.toFixed(1) : '—'}</b></div></div>
