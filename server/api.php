@@ -464,7 +464,7 @@ function obTourAward(array &$t): void {
   $t['awardOk'] = $daily || count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
   if (!$t['awardOk']) return;
   $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
-  $podAi = $daily || !array_key_exists('podAi', $t['cfg']) || !empty($t['cfg']['podAi']); // 表彰台にAIを含む（はじめ）：AIも順位に数え、AIの順位にはバッジなし。含まない：人だけで数え直す
+  $podAi = $daily || !empty($t['cfg']['official']) || !array_key_exists('podAi', $t['cfg']) || !empty($t['cfg']['podAi']); // 公式大会はいつもAIも含めて数える // 表彰台にAIを含む（はじめ）：AIも順位に数え、AIの順位にはバッジなし。含まない：人だけで数え直す
   $order = $podAi ? array_slice($t['result'], 0, 3) : array_slice(array_values(array_filter($t['result'], fn($k) => isset($ent[$k]))), 0, 3);
   foreach ($order as $i => $k) {
     if (!isset($ent[$k])) continue; // AIの順位にはバッジなし
@@ -472,10 +472,10 @@ function obTourAward(array &$t): void {
     $t['awards'][] = ['place' => $i + 1, 'name' => $e['name']];
     noteAdd($e['uid'], $e['pid'] ?? '', 'award', ['tid' => $t['id'], 'tname' => $t['cfg']['name'], 'place' => $i + 1, 'official' => !empty($t['cfg']['official'])]);
   }
-  if (!empty($t['cfg']['official'])) { // 公式大会：入賞した人（AIは飛ばす）に総ポイント
-    $tp = $t['cfg']['tpts'] ?? OFFICIAL_TPTS; $j = 0;
-    foreach ($t['result'] as $k) { if (!isset($ent[$k])) continue; if ($j >= count($tp)) break; $e = $ent[$k];
-      if ($tp[$j] > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', 'official', $t['id'], $tp[$j], $e['name'], time()]); $j++; }
+  if (!empty($t['cfg']['official'])) { // 公式大会：AIも順位に入れたまま、人の入賞者に総ポイント（AIの順位の分は誰にも付かない）
+    $tp = $t['cfg']['tpts'] ?? OFFICIAL_TPTS;
+    foreach (array_slice($t['result'], 0, count($tp)) as $j => $k) { if (!isset($ent[$k])) continue; $e = $ent[$k];
+      if ($tp[$j] > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', 'official', $t['id'], $tp[$j], $e['name'], time()]); }
   }
 }
 // ---------- デイリートーナメント（毎朝6時に作る。17:30・18:30・19:30・20:30の4部）とシーズン（毎月前半・後半） ----------

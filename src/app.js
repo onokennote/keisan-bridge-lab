@@ -7103,8 +7103,8 @@ function onTourNewModal() {
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
     <div class="su-row col"><b>セットの合間の待ち時間</b>${seg('waitMin', [[3, '3分'], [5, '5分'], [10, '10分'], [15, '15分'], [30, '30分']])}<small class="muted">全員が「準備OK」を押せばすぐ次のセット。そろわなくてもこの時間で始まり、来ていない人の席はAIが打ちます</small></div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
-    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>${c.official === true ? `<label class="su-row col"><b>入賞した人の総ポイント（1位から。AIは飛ばして数える）</b><input id="ot-tpts" class="su-in" value="${esc(c.tpts || '100,70,50,40,20')}"></label>` : ''}` : ''}
-    <div class="su-row col"><b>🏆 表彰台の順位</b>${seg('podAi', [['true', 'AIも含めて数える'], ['false', '人だけで数える']])}<small class="muted">含める：AIが1位なら、人の最高は2位（準優勝）。AIの順位にはバッジなし。人だけ：AIを飛ばして、人の中の1〜3位にバッジと称号</small></div>
+    ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>${c.official === true ? `<label class="su-row col"><b>入賞した人の総ポイント（1位から。AIも順位に入る）</b><input id="ot-tpts" class="su-in" value="${esc(c.tpts || '100,70,50,40,20')}"></label>` : ''}` : ''}
+    ${c.official === true ? '<div class="su-row col"><b>🏆 表彰台の順位</b><small class="muted">公式大会は、バッジ・称号・総ポイントとも AIも含めた順位で数えます（AIが1位なら、人の最高は2位）</small></div>' : ''}<div class="su-row col" ${c.official === true ? 'hidden' : ''}><b>🏆 表彰台の順位</b>${seg('podAi', [['true', 'AIも含めて数える'], ['false', '人だけで数える']])}<small class="muted">含める：AIが1位なら、人の最高は2位（準優勝）。AIの順位にはバッジなし。人だけ：AIを飛ばして、人の中の1〜3位にバッジと称号</small></div>
     <p class="small muted" style="margin:0">🏅 バッジと称号（上位3位）は、人が10人以上参加した大会だけです（人数にAIは数えません）。</p>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">やめる</button><button class="btn primary" data-act="on-tour-create">${S.onTourEdit ? '変更を保存' : 'ひらく'}</button></div></div>`);
   const keep = () => { c.name = $('#ot-name').value; c.desc = $('#ot-desc').value; c.start = $('#ot-start').value; };
@@ -7171,7 +7171,7 @@ function onTourClock() {
 function onCeremony(t) {
   if (!t || t.phase !== 'done' || !t.stand || ON.cer[t.id]) return; ON.cer[t.id] = 1;
   if (Date.now() / 1000 - t.now > 120 && !t.entered) return;
-  const top = (t.podAi === false && !t.daily ? t.stand.filter(r => !r.ai) : t.stand).slice(0, 3), avOf = r => r.ai ? onAv(r, 'happy') : KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
+  const top = (t.podAi === false && !t.daily && !t.official ? t.stand.filter(r => !r.ai) : t.stand).slice(0, 3), avOf = r => r.ai ? onAv(r, 'happy') : KB.avatarSVG(Object.assign({}, r.avatar || AVATAR_DEF, { name: r.name }), { mood: 'happy' });
   const me = t.stand.findIndex(r => r.me);
   const el = document.createElement('div'); el.className = 'whistle-ov on-cer';
   const pod = [1, 0, 2].map(i => top[i] ? `<div class="pd p${i + 1}"><span class="on-av">${avOf(top[i])}</span><b>${esc(top[i].ai ? onName(top[i]) : top[i].name)}</b><div class="pd-step">${['🥇', '🥈', '🥉'][i]}<small>${i + 1}位</small></div></div>` : '').join('');
@@ -7261,7 +7261,7 @@ function otInfoHTML(t) {
     ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', t.finalists ? `上位${t.finalists}人` : 'なし')}
     ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 15}分`)}
     ${I('✋', '式の判定', judge)}${I('🥇', 'セットの得点', t.points.join('・'))}
-    ${I('🤖', '足りないとき', t.aiFill ? `${t.aiRes ? 'AI研究員と' : ''}AIで補充<br><small>${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}</small>` : '中止')}${I('🏅', `バッジ（${t.official ? '公式大会' : 'オンライン大会'}）`, `${aw}<br><small>表彰台は${t.podAi === false ? '人だけで数える' : 'AIも含めて数える'}</small>`)}</div>`;
+    ${I('🤖', '足りないとき', t.aiFill ? `${t.aiRes ? 'AI研究員と' : ''}AIで補充<br><small>${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}</small>` : '中止')}${I('🏅', `バッジ（${t.official ? '公式大会' : 'オンライン大会'}）`, `${aw}<br><small>表彰台は${t.podAi === false && !t.official ? '人だけで数える' : 'AIも含めて数える'}</small>`)}</div>`;
 }
 function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }
 async function onReq(a, extra) { const c = PID ? plLink(PID) : null; if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }
