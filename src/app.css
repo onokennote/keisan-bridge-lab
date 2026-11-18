@@ -2696,3 +2696,4 @@ body.rewinding #home-fab{display:none}
 .ot-dlbody section{padding-top:10px;border-top:1px solid rgba(242,182,50,.3)}.ot-dlbody section:first-child{border-top:0;padding-top:0}
 .ot-dlbody h4{margin:0 0 8px;font-size:15px;color:#ffd43b}
 .ot-ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.5}
+.me{z-index:4}.me-av .bubble{pointer-events:none} /* 上がりの帯の上に、自分のひと言が隠れないように（押す邪魔はしない） */

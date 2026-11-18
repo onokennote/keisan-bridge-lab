@@ -1732,8 +1732,7 @@ function rankingHTML() {
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">ランキング</div><div></div></div>
   <div class="rk-ai-bar"><button class="btn sm rk-ai-tg ${withAi ? 'on' : ''}" data-act="rank-ai" aria-pressed="${withAi}">🤖 AI研究員を含む：${withAi ? 'ON' : 'OFF'}</button><span class="small muted">「AI研究員」の印は、ごちゃまぜ倶楽部のキャラ（AI）が毎日の対局で育てている記録です（デイリーやオンライン大会にも競走相手として出ます）</span></div>
   ${rkTocHTML(R, di)}<div class="rk-all">${RANK_DEFS.map(sec).join('')}${dailyS}</div>
-  <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label>
-    <p class="small muted" style="margin:0">ランキングに出るのはプレイヤー名とアバター、上の数字だけです。ふさわしくない名前は「研究員○○」と表示されます。各ランキングは「上位」・「自分のまわり」（自分が真ん中。どちらも10人分の枠の中をスクロール）・「ライバル」（ライバル視・被ライバル・宿敵の人）を切り替えられます。</p></div>`;
+  <div class="panel stack rk-hide-p"><label class="small row" style="gap:6px;align-items:center"><input type="checkbox" id="rk-hide" ${hide ? 'checked' : ''}> ${esc(S.settings.name)}をランキングに載せない</label></div>`;
 }
 // ランキングの表示の切り替え（部門ごと。その間だけ覚える）：上位／自分のまわり（自分が真ん中）。どちらも10人分の枠でスクロール／ライバル
 // 見出しの右端の ▲▼：前・次の部門へ画面を動かす（スマホで長い一覧を飛ばす）
