@@ -5566,7 +5566,7 @@ function rvdBadges(ea) { if (!ea.badges.length) return ''; const L = ea.badges.s
 function rvDialog(scope) {
   const out = [], R = t => t && out.push({ w: 'root', t }), M = t => t && out.push({ w: 'masa', t }), nmY = rvName();
   let neta = false; const NM = k => { const t = rvNeta('masa', k); if (t) neta = true; return t || ''; };
-  const miss = (w, pre) => { const gf = w.gf; return `${pre}「${w.mine}」。` + (gf ? gf.root : `最善は「${w.best}」でした。`); };
+  const miss = (w, pre) => { const gf = w.gf, t = `${pre}「${w.mine}」。` + (gf ? gf.root : `最善は「${w.best}」でした。`); return t + (/上がれていました/.test(t) && !S.attack ? RVP(['この場面は、成長記録の「👀 見のがした式」で見返せます。', '成長記録の「👀 見のがした式」に入れておきました。式の形ごと覚えましょう。']) : ''); }; // 上がれる式を見のがした場面は、見のがした式の一覧で見返せる
   if (scope === 'set') {
     const c = setContext(), Lg = S.T.setLog || [], F = Lg.map(x => x.rv);
     const nDec = Lg.reduce((a, x) => a + (x.nDec || 0), 0), nBest = Lg.reduce((a, x) => a + (x.nBest || 0), 0), nGood = Lg.reduce((a, x) => a + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length, nHint = Lg.reduce((a, x) => a + (x.nHint || 0), 0);
