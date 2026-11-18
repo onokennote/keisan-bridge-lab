@@ -15,7 +15,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await new Promise(r => setTimeout(r, 800));
   const b = await chromium.launch(), errs = [];
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 })).newPage(); p.on('pageerror', e => errs.push(e.message));
-  await p.goto('http://localhost:8134/'); await p.waitForTimeout(800);
+  await p.goto('http://localhost:8134/'); await p.evaluate(() => localStorage.setItem('kb.forceTabs', '1')); await p.waitForTimeout(800);
   await p.fill('#new-name', 'ユウ'); await p.click('[data-act="create-profile"]'); await p.waitForTimeout(1500);
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); const k = 'kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.growth', g = KBAPP.G(); Object.assign(g.cnt, { games: 60, practice_set: 8, win: 12, three: 30, quick5: 12, set_win: 3 }); ['games:10', 'games:50', 'practice_set:1', 'practice_set:5', 'win:1', 'win:10', 'three:10', 'quick5:1', 'quick5:10', 'set_win:1'].forEach(x => g.ach[x] = Date.now()); localStorage.setItem(k, JSON.stringify(g)); KBAPP.cloudPush(); });
   await p.waitForTimeout(600);

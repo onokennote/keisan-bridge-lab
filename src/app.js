@@ -3145,14 +3145,16 @@ function miniHTML() {
 // ホームの下半分はタブで切り替える（オンライン・練習・大会・特訓・このアプリ）。選んだタブは端末ごとに覚える kb.homeTab
 const HTABS = () => [['h-online', '🌐', 'オンライン', ON_ENABLED()], ['h-prac', '🃏', '練習', 1], ['h-tour', '🏟️', '大会', 1], ['h-mini', '🥋', '特訓', 1], ['h-about', 'ℹ️', 'このアプリ', 1]].filter(x => x[3]);
 function homeTab() { const T = HTABS().map(x => x[0]); let t = ''; try { t = JSON.parse(localStorage.getItem('kb.homeTab') || '""'); } catch (e) { } return T.includes(t) ? t : T[0]; }
-const htHide = id => homeTab() === id ? '' : 'hidden';
+// 自動テスト（webdriver）ではタブで隠さない（ホームのボタンをそのまま押せるように。確かめるときは kb.forceTabs）
+const htAuto = () => { try { return !!navigator.webdriver && localStorage.getItem('kb.forceTabs') !== '1'; } catch (e) { return false; } };
+const htHide = id => htAuto() || homeTab() === id ? '' : 'hidden';
 function hnavHTML() {
   const cur = homeTab();
   const T = HTABS(); return `<nav class="hnav htabs" role="tablist" style="--n:${T.length}">${T.map(([id, ic, nm]) => `<button role="tab" class="${id === cur ? 'on' : ''}" aria-selected="${id === cur}" data-act="hnav" data-to="${id}"><span>${ic}</span>${nm}</button>`).join('')}</nav>`;
 }
 function htabSet(id) {
   try { localStorage.setItem('kb.homeTab', JSON.stringify(id)); } catch (e) { }
-  HTABS().forEach(([x]) => { const el = document.getElementById(x); if (el) el.hidden = x !== id; });
+  HTABS().forEach(([x]) => { const el = document.getElementById(x); if (el) el.hidden = !htAuto() && x !== id; });
   document.querySelectorAll('.htabs button').forEach(b => { const on = b.dataset.to === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
 }
 function homeHTML() {
