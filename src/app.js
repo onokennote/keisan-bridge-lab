@@ -5873,66 +5873,82 @@ function charProfile(id) {
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
-// ---------- 計算ブリッジ 日本一への道（特訓のロードマップ）：アプリの機能を「修行」に見立てて、いまの記録から★（各3つ）と、マサの次のひと言を出す ----------
+// ---------- 計算ブリッジ 日本一への道（特訓のロードマップ）：アプリの機能を「修行」に見立て、いまの記録から★を付け、マサが次をすすめる。どこからやってもいい ----------
 function roadStages() {
-  const g = G_(), c = g.cnt || {}, z = zukanCount(store.get('zukan', {}) || {}), r = Math.max(c.rating || 0, (() => { const x = ratingOf(g.games || []); return x.ok ? x.r : 0; })());
-  const st = (v, ts) => ts.filter(t => v >= t).length;
+  const g = G_(), c = g.cnt || {}, ach = g.ach || {}, z = zukanCount(store.get('zukan', {}) || {}), r = Math.max(c.rating || 0, (() => { const x = ratingOf(g.games || []); return x.ok ? x.r : 0; })());
+  const nb = ACH.reduce((n, a) => n + a[2].filter(t => ach[a[0] + ':' + t]).length, 0), nc = ACH_GROUPS.filter((_, gi) => ach['cat:' + gi]).length;
   const L = [
     { ic: '型', name: '基本の型', what: 'ルールを覚えて、まずは打ってみる', tool: '📖 ルールの説明・1セット練習', v: c.practice_set || 0, ts: [1, 3, 10], unit: n => `練習 ${n}セット`, go: 'setup-practice',
       m0: 'まずは基本の型や！1セット打ってみい。考えるのはそれからや！', m1: '型は千回くり返して身につくもんや。練習セットを重ねえ！' },
+    { ic: '師', name: '達人の背中', what: '達人の打ち方を見て、技を盗む', tool: '👀 達人のゲームを観戦', v: store.get('watched', false) ? 1 : 0, ts: [1], unit: n => n ? '観戦ずみ' : 'まだ観戦していない', act: 'watch-start',
+      m0: '達人の背中を見て盗むんや！観戦してみい！', m1: '' },
     { ic: '拳', name: '計算の拳', what: '手札から一瞬で式を作る。待ちの形を体に叩き込む', tool: '📋 早見表', v: c.chart || 0, ts: [1, 10, 37], unit: n => `早見表 ${n}/37行`, act: 'chart-open',
-      m0: 'まずは計算の拳を鍛えるんや！早見表の1行目からや！', m1: '早見表を叩き込め！待ちの形が体に染みつくまでや！' },
+      m0: '計算の拳を鍛えるんや！早見表の1行目からや！', m1: '早見表を叩き込め！待ちの形が体に染みつくまでや！' },
     { ic: '千', name: '式の千本ノック', what: '飛んでくる場の数を、片っぱしから式で撃ち落とす', tool: '🎯 式ハンター・式の図鑑', v: z, ts: [10, 100, 400], unit: n => `図鑑 ${n}式`, go: 'zukan',
       m0: '式ハンターで千本ノックや！手が勝手に動くまでやるで！', m1: '図鑑を埋めえ！まだまだ知らん式が山ほどあるで！' },
     { ic: '眼', name: '確率の眼', what: '見えていない札から、来る確率を読む', tool: '🎲 アウツチャレンジ', v: (c.outs3 ? 1 : 0) + (c.outs4 ? 1 : 0) + (c.outs5 ? 1 : 0), ts: [1, 2, 3], unit: n => `アウツ ${['—', '3問目突破', '4問目突破', '全問クリア'][n]}`, act: 'drill',
       m0: '確率の眼を開くんや！アウツが数えられん者に日本一はない！', m1: 'アウツを数え切れ！ポーカーの達人はみんなこれをやっとる！' },
-    { ic: '師', name: '達人の背中', what: '達人の打ち方を見て、技を盗む', tool: '👀 達人のゲームを観戦', v: store.get('watched', false) ? 1 : 0, ts: [1], unit: n => n ? '観戦ずみ' : 'まだ観戦していない', act: 'watch-start',
-      m0: '達人の背中を見て盗むんや！観戦してみい！', m1: '' },
-    { ic: '判', name: '判断の型', what: '確率で選ぶ。結果ではなく選択を磨く', tool: '📝 前回の判断・AIの読み・推定実力', v: r, ts: [3, 3.5, 4], unit: n => r ? `推定実力 ★${r.toFixed(1)}` : '推定実力 まだ', go: 'setup-practice', fmt: 1,
+    { ic: '判', name: '判断の型', what: '確率で選ぶ。結果ではなく選択を磨く', tool: '📝 前回の判断・AIの読み・推定実力', v: r, ts: [3, 3.5, 4], unit: () => r ? `推定実力 ★${r.toFixed(1)}` : '推定実力 まだ', go: 'setup-practice',
       m0: '判断の型を磨くんや！前回の判断を毎回見返すんやで！', m1: '推定実力を上げえ！★4で上級、日本一はその先や！' },
     { ic: '速', name: '早撃ちの極意', what: '迷わず、速く、正しく', tool: '⚡ バッジアタック・早撃ち', v: c.quick5 || 0, ts: [1, 10, 50], unit: n => `5秒以内の最善手 ${n}回`, act: 'attack-start',
       m0: '早撃ちの極意や！本番は待ってくれへんで！', m1: '速さと正確さを両立させえ！カウンターは一瞬が勝負や！' },
+    { ic: '集', name: 'バッジを集めて弱点をなくせ', what: 'いろいろな場面のバッジを集めて、苦手をつぶす', tool: '🏅 成長記録のバッジ', v: nb, ts: [20, 50, 100], unit: n => `バッジ ${n}/${ACH_TOTAL}`, go: 'growth',
+      m0: 'バッジを集めて弱点をなくすんや！まだ取ってないバッジが、そのまま伸びしろや！', m1: '取れてないバッジを狙え！穴のない守りが日本一の条件や！' },
+    { ic: '極', name: '一点を究めよ', what: 'ひとつの系統をとことん。バッジを全部そろえて冠を取る', tool: '👑 冠（系統のコンプリート）', v: nc, ts: [1, 3, 5], unit: n => `冠 ${n}/${ACH_GROUPS.length}`, go: 'growth',
+      m0: '一点を究めよ！どれかひとつ、冠を取るまでやり切るんや！', m1: '次の冠や！得意を武器にまで磨き上げえ！' },
     { ic: '戦', name: '実戦の試練', what: '大会の流れで、決勝に勝ち上がる', tool: '🏆 大会練習モード', v: (c.tour_done ? 1 : 0) + (c.qualify ? 1 : 0) + (c.champion ? 1 : 0), ts: [1, 2, 3], unit: n => ['大会 まだ', '大会完走', '決勝進出', '優勝'][n], go: 'setup-tour',
       m0: '実戦の試練や！大会練習モードで決勝を目指せ！', m1: '決勝の舞台で勝ち切れ！リーグ戦とトーナメントは別もんやで！' },
     { ic: '他', name: '他流試合', what: '人と打つ。毎晩のデイリーで腕を試す', tool: '🌐 オンライン大会・デイリー', v: c.daily_play || 0, ts: [1, 5, 15], unit: n => `デイリー ${n}回`, home: 1,
       m0: '他流試合や！デイリーでほんまもんの人間と打ってこい！', m1: 'デイリーに通え！場数がものを言うんや！' },
-    { ic: '頂', name: '最終試練「打倒OZ家」', what: '全員達人の大会で優勝し、★4.5の域へ', tool: '👑 全員達人の大会・推定実力', v: (c.champion_strong >= 1 ? 1 : 0) + (r >= 4.5 ? 1 : 0) + (c.champion_strong >= 2 ? 1 : 0), ts: [1, 2, 3], unit: n => ['まだ', '強豪大会で優勝', '★4.5に到達', '免許皆伝'][n], go: 'setup-tour',
-      m0: 'ここまで来たか…最終試練や！全員達人の大会で優勝してみい！', m1: 'OZ家はもう目の前や！達人の大会で勝ち切れ！' }
+    { ic: '皆', name: '免許皆伝の試練', what: '全員達人の大会で優勝し、★4.5の域へ', tool: '👑 全員達人の大会・推定実力', v: (c.champion_strong >= 1 ? 1 : 0) + (r >= 4.5 ? 1 : 0) + (c.champion_strong >= 2 ? 1 : 0), ts: [1, 2, 3], unit: n => ['まだ', '強豪大会で優勝', '★4.5に到達', '免許皆伝'][n], go: 'setup-tour',
+      m0: '免許皆伝の試練や！全員達人の大会で優勝してみい！', m1: 'あとひと息で免許皆伝や！達人の大会で勝ち切れ！' }
   ];
-  L.forEach((s, i) => { s.i = i; s.max = s.ts.length; s.star = st(s.v, s.ts); s.done = s.star >= s.max; });
+  L.forEach((s, i) => { s.i = i; s.max = s.ts.length; s.star = s.ts.filter(t => s.v >= t).length; s.done = s.star >= s.max; });
   return L;
 }
-const ROAD_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十'];
-function roadSummary() { const L = roadStages(), got = L.reduce((a, s) => a + s.star, 0), all = L.reduce((a, s) => a + s.max, 0), cur = L.find(s => !s.done) || null; return { L, got, all, cur, pct: Math.round(got / all * 100) }; }
+const ROAD_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+// 風景：ふもとの村 → 竹林 → 川 → 山道 → 雪の峠 → 雲の上（2つの修行ごとに変わる）
+const ROAD_ZONES = [
+  { k: 'vil', name: 'ふもとの村', deco: ['🏠', '🌾', '🐓'] }, { k: 'bam', name: '竹林', deco: ['🎋', '🐼', '🎋'] }, { k: 'riv', name: '川の道', deco: ['🌉', '🐟', '🌊'] },
+  { k: 'mtn', name: '山道', deco: ['🌲', '🪨', '🦌'] }, { k: 'snw', name: '雪の峠', deco: ['❄️', '🏔️', '⛄'] }, { k: 'sky', name: '雲の上', deco: ['☁️', '⛩️', '🦅'] }];
+function roadSummary() {
+  const L = roadStages(), got = L.reduce((a, s) => a + s.star, 0), all = L.reduce((a, s) => a + s.max, 0);
+  const cur = L.find(s => s.star === 0) || L.find(s => !s.done) || null; // おすすめ：まだ手をつけていない修行（なければ★がそろっていない修行）
+  return { L, got, all, cur, pct: Math.round(got / all * 100) };
+}
 function roadMasa(R) {
-  const nm = rvName(), s = R.cur; if (!s) return `${nm}、免許皆伝や！もう教えることはない…あとは本番で日本一を獲ってこい！`;
-  const left = R.all - R.got;
-  const tail = left > 15 ? '日本一はまだ遠いぞ！' : left > 6 ? '頂上が見えてきたで！' : 'あと少しや、気ぃ抜くなよ！', m = s.star === 0 ? s.m0 : (s.m1 || s.m0);
-  return /日本一/.test(m) && left > 15 ? m : m + tail;
+  const nm = rvName(), s = R.cur; if (!s) return `${nm}、免許皆伝や！アプリで教えることはもうない…あとはリアルの大会で、打倒OZ家や！`;
+  const left = R.all - R.got, tail = left > 20 ? '日本一はまだ遠いぞ！' : left > 8 ? '頂上が見えてきたで！' : 'あと少しや、気ぃ抜くなよ！', m = s.star === 0 ? s.m0 : (s.m1 || s.m0);
+  return `修行はどこからやってもええで！迷うんやったら「${s.name}」や。${m}${/日本一/.test(m) && left > 20 ? '' : tail}`;
 }
 function roadHTML() {
   const R = roadSummary(), stars = (n, m) => `<span class="rd-st">${'★'.repeat(n)}<i>${'★'.repeat(m - n)}</i></span>`;
+  const X = i => i % 2 ? 66 : 26; // 道は左右にくねる
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">日本一への道</div><div></div></div>
   <div class="road">
-    <div class="rd-hero"><div class="rd-sun"></div><div class="rd-mt"><svg viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 L70 52 L110 80 L180 8 L250 74 L290 46 L360 120Z" fill="#1d3a33"/><path d="M180 8 L198 30 L188 28 L180 40 L172 27 L162 30Z" fill="#f1efe4"/><path d="M180 8 V-14" stroke="#f2b632" stroke-width="2.5"/><path d="M181 -14 L204 -8 L181 -2Z" fill="#e03131"/></svg></div>
-      <div class="rd-tt"><small>特訓の書</small><b>計算ブリッジ<br>日本一への道</b></div>
-      <div class="rd-meter"><span>日本一まで</span><div class="rd-bar"><i style="width:${R.pct}%"></i></div><b>${R.got}<small>/${R.all}★</small></b></div></div>
-    <div class="rd-masa"><div class="cm-av">${KB.casterSVG('masa', R.cur ? 'happy' : 'happy')}</div><div class="op-bubble"><span class="cm-name">師匠・ナニワのマサ</span>${esc(roadMasa(R))}</div></div>
-    <div class="rd-path">${R.L.map(s => `<div class="rd-stage ${s.done ? 'done' : ''} ${R.cur === s ? 'cur' : ''} ${s.i % 2 ? 'r' : 'l'}">
+    <div class="rd-hero"><div class="rd-sun"></div><div class="rd-tt"><small>特訓の書</small><b>計算ブリッジ<br>日本一への道</b></div>
+      <div class="rd-mt"><svg viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 L70 52 L110 80 L180 8 L250 74 L290 46 L360 120Z" fill="#1d3a33"/><path d="M180 8 L198 30 L188 28 L180 40 L172 27 L162 30Z" fill="#f1efe4"/><path d="M180 8 V-14" stroke="#f2b632" stroke-width="2.5"/><path d="M181 -14 L204 -8 L181 -2Z" fill="#e03131"/></svg></div></div>
+    <div class="rd-meter"><span>日本一まで</span><div class="rd-bar"><i style="width:${R.pct}%"></i></div><b>${R.got}<small>/${R.all}★</small></b></div>
+    <div class="rd-masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">師匠・ナニワのマサ</span>${esc(roadMasa(R))}</div></div>
+    <div class="rd-path">${R.L.map(s => { const zi = Math.min(ROAD_ZONES.length - 1, Math.floor(s.i / 2)), Z = ROAD_ZONES[zi], first = s.i % 2 === 0, x0 = X(s.i), x1 = X(s.i + 1);
+      return `<div class="rd-stage z-${Z.k} ${first ? 'zf' : ''} ${s.done ? 'done' : ''} ${R.cur === s ? 'cur' : ''}" style="--mx:${x0}px;--dx:${x0 < 40 ? 58 : 4}px">
+      ${first ? `<div class="rd-zone">${Z.deco.map((d, k) => `<span class="rd-d d${k}">${d}</span>`).join('')}<em>${Z.name}</em></div>` : ''}
+      <svg class="rd-road" viewBox="0 0 92 100" preserveAspectRatio="none" aria-hidden="true"><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rr"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rc"/></svg>
       <div class="rd-med"><span>${s.ic}</span>${s.done ? '<em>修了</em>' : ''}</div>
-      <div class="rd-card">${R.cur === s ? '<span class="rd-now">いまここ</span>' : ''}<small>第${ROAD_NUM[s.i]}の修行</small><b>${esc(s.name)}</b><p>${esc(s.what)}</p>
-        <div class="rd-row">${stars(s.star, s.max)}<span class="rd-v">${esc(s.unit(s.fmt ? s.v : s.v))}</span></div>
-        <div class="rd-row"><span class="rd-tool">${esc(s.tool)}</span><button class="btn sm ${R.cur === s ? 'primary' : ''}" data-road="${s.i}">修行する →</button></div></div></div>`).join('')}
-      <div class="rd-goal"><div class="rd-flag">🏯</div><b>${R.cur ? '日本一' : '免許皆伝'}</b><small>計算ブリッジ・日本一決定戦</small></div></div>
-    <p class="small muted" style="text-align:center">★はいまの記録から付きます（この端末のプレイヤーの記録）。</p>
+      <div class="rd-card">${R.cur === s ? '<span class="rd-now">マサのおすすめ</span>' : ''}<small>第${ROAD_NUM[s.i]}の修行</small><b>${esc(s.name)}</b><p>${esc(s.what)}</p>
+        <div class="rd-row">${stars(s.star, s.max)}<span class="rd-v">${esc(s.unit(s.v))}</span></div>
+        <div class="rd-row"><span class="rd-tool">${esc(s.tool)}</span><button class="btn sm ${R.cur === s ? 'primary' : ''}" data-road="${s.i}">修行する →</button></div></div></div>`; }).join('')}
+      <div class="rd-goal"><div class="rd-flag">🏯</div><small class="rd-real">ここから先は、アプリの外</small><b>日本一</b><strong>打倒OZ家！</strong>
+        <p>リアルの大会「計算ブリッジ・日本一決定戦」で、本物の相手と打つ。研究所の修行は、すべてこの日のために。</p>
+        <a class="btn sm" href="https://keisan-bridge.amebaownd.com/" target="_blank" rel="noopener">大会の情報（公式サイト）↗</a></div></div>
+    <p class="small muted" style="text-align:center">★はいまの記録から付きます。どの修行からはじめてもかまいません。</p>
   </div>`;
 }
 function roadBind() {
   document.querySelectorAll('[data-road]').forEach(b => b.onclick = () => { const s = roadStages()[+b.dataset.road]; if (!s) return; KB.sfx && KB.sfx('select');
     if (s.go) go(s.go); else if (s.act) act(s.act, b); else if (s.home) { go('home'); setTimeout(() => { const c = document.querySelector('.on-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200); } });
-  const c = document.querySelector('.rd-stage.cur'); if (c && !navigator.webdriver) setTimeout(() => c.scrollIntoView({ behavior: 'smooth', block: 'center' }), 700);
 }
-function roadBannerHTML() { const R = roadSummary(); return `<button class="rank-banner road-banner" data-go="road"><span class="rb-ic">🥋</span><span><b>日本一への道</b><small>${R.cur ? `いまは第${ROAD_NUM[R.cur.i]}の修行「${esc(R.cur.name)}」` : '免許皆伝！'}・${R.got}/${R.all}★</small></span><span class="rb-go">特訓 →</span></button>`; }
+function roadBannerHTML() { const R = roadSummary(); return `<button class="rank-banner road-banner" data-go="road"><span class="rb-ic">🥋</span><span><b>日本一への道</b><small>${R.cur ? `12の修行・${R.got}/${R.all}★・マサのおすすめ「${esc(R.cur.name)}」` : '免許皆伝！あとはリアルの大会で打倒OZ家'}</small></span><span class="rb-go">特訓 →</span></button>`; }
 // ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
 // 段取りより衝動を伝える。短く、事実だけ
 const STORY = [
