@@ -2562,3 +2562,21 @@ body.rewinding #home-fab{display:none}
 .xm-card.soon{opacity:.95}.xm-card .on-cd{display:block;margin-top:2px;font-size:13px}
 .xm-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:8px;background:rgba(255,214,102,.18);color:#ffd666;border:1px solid rgba(255,214,102,.5);white-space:nowrap}
 .on-card .xm-card{margin:0 0 10px}
+/* 誕生日の挑戦状（ピンク系） */
+.xm-card.bd{background:linear-gradient(135deg,rgba(230,73,128,.28),rgba(252,196,25,.14));border-color:rgba(230,73,128,.55)}
+/* 成長のおたより */
+.fam-rep .fr-tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.fam-rep .fr-tiles>div{background:rgba(255,255,255,.05);border-radius:10px;padding:6px 4px;text-align:center}
+.fam-rep .fr-tiles small{display:block;font-size:11px;color:var(--muted)}.fam-rep .fr-tiles b{display:block;font-size:18px;color:#f2b632}.fam-rep .fr-tiles em{font-style:normal;font-size:10.5px;color:var(--muted)}
+.fam-rep .fr-sec{display:flex;flex-direction:column;gap:4px;background:rgba(255,255,255,.04);border-radius:10px;padding:8px 10px}
+.fam-rep .fr-spark{width:100%;height:60px}
+.fam-rep .fr-bars{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;align-items:end;height:110px;margin-top:4px}
+.fam-rep .fr-bar{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;position:relative}
+.fam-rep .fr-bar i{display:block;width:70%;min-height:2px;background:#5cc8a8;border-radius:4px 4px 0 0}
+.fam-rep .fr-bar.over i{background:#f08c3a}
+.fam-rep .fr-bar small{font-size:10px;line-height:1.2;text-align:center;color:var(--muted);margin-top:2px}
+.fam-rep .fr-bar em{position:absolute;top:0;font-style:normal;font-size:9.5px;color:var(--muted);white-space:nowrap}
+.fam-rep .fr-cats{font-size:13px;line-height:1.7}.fam-rep .fr-cats span{display:inline-block;padding:0 6px;border-radius:6px;font-size:11px;margin-right:4px}
+.fam-rep .fr-bdg{display:flex;flex-wrap:wrap;gap:8px}.fam-rep .fr-bdg>span{display:flex;flex-direction:column;align-items:center;width:64px;text-align:center}.fam-rep .fr-bdg small{font-size:10px;line-height:1.2}
+.xm-kid.fam-lim .su-step b{min-width:64px;text-align:center}
+.lim-modal h3{font-size:19px}

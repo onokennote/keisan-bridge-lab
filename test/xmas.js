@@ -72,14 +72,14 @@ const shot = n => path.join(__dirname, 'out', n);
   const L0 = await post('xm_list', { idt: 'test:u1', pw: 'santa2026' }), kk = L0.list[0].k, now = Math.round(Date.now() / 1000);
   await post('xm_set', { idt: 'test:u1', pw: 'santa2026', k: kk, msg: L0.list[0].xm.msg, start: now + 2 * 86400, end: now + 3 * 86400, lv: 5 });
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1800);
-  ok(await p.evaluate(() => { const c = document.querySelector('.on-card #xm-card.soon'); return !!c && /開始まで/.test(c.innerText) && !c.querySelector('[data-act="xm-open"]'); }), '3日前から、オンライン大会の一覧に「受付前」（開始までの残り時間）');
-  await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove())); await (await p.$('#xm-card')).screenshot({ path: shot('xm_card_soon.png') });
+  ok(await p.evaluate(() => { const c = document.querySelector('.on-card #xm-cards .xm-card.soon'); return !!c && /開始まで/.test(c.innerText) && !c.querySelector('[data-act="xm-open"]'); }), '3日前から、オンライン大会の一覧に「受付前」（開始までの残り時間）');
+  await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove())); await (await p.$('#xm-cards .xm-card')).screenshot({ path: shot('xm_card_soon.png') });
   await post('xm_set', { idt: 'test:u1', pw: 'santa2026', k: kk, msg: L0.list[0].xm.msg, start: now - 120, end: now + 3600, lv: 5 });
   // ホームに挑戦状のカード
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(2600);
-  ok(await p.evaluate(() => !!document.querySelector('.on-card #xm-card [data-act="xm-open"]')), '期間中は、オンライン大会の一覧の「サンタからの挑戦状」からエントリーできる');
+  ok(await p.evaluate(() => !!document.querySelector('.on-card #xm-cards [data-act="xm-open"]')), '期間中は、オンライン大会の一覧の「サンタからの挑戦状」からエントリーできる');
   await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
-  await (await p.$('#xm-card')).screenshot({ path: shot('xm_card.png') });
+  await (await p.$('#xm-cards .xm-card')).screenshot({ path: shot('xm_card.png') });
   // 挑戦：サンタ・カナタ（絶対透視）＋達人3人
   await p.evaluate(() => KBAPP.act('xm-open')); await p.waitForTimeout(300); await (await p.$('#modal .xm-intro')).screenshot({ path: shot('xm_intro.png') });
   await p.evaluate(() => KBAPP.act('xm-go')); await p.waitForTimeout(800);
