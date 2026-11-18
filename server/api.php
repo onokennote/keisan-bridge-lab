@@ -908,7 +908,7 @@ try {
     case 'rankings': { // 6つのランキングをまとめて返す（各上位20人（all=1 なら300人）＋それより下の自分の行）
       $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = !empty($_GET['all']) ? 300 : 20; $res = []; // all=1：上位300人まで（画面で「自分のまわり」「ライバル」「もっと見る」に使う）
       $withAi = ($_GET['ai'] ?? '1') !== '0'; // ai=0 でAI研究員を外す
-      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1' . ($withAi ? '' : ' AND (ai IS NULL OR ai = 0)'))->fetchAll();
+      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1')->fetchAll(); // 総合の点はAI研究員も入れた全員で決め、ai=0 のときはそのあとでAIの行を外す（人だけの順位＝AI込みの並びからAIを抜いたもの）
       foreach ($all as &$r) {
         $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0;
         // 連続最善の列ができる前に保存した人は、成績カードに入っている記録を使う
@@ -923,11 +923,12 @@ try {
         'attack' => [fn($r) => $r['atk'] > 0, fn($a, $b) => $b['atk'] <=> $a['atk']]];
       // 総合：推定実力・BP・連続最善・バッジアタックそれぞれ「1位の成績を1とした比率」に重み（35・30・20・15）をかけて合計。全部1位なら100点
       $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $COL = ['rating' => 'rating', 'bp' => 'bp', 'streak' => 'streak', 'attack' => 'atk']; $sorted = [];
+      foreach ($W as $type => $w) { $c = $COL[$type]; $top = 0.0; foreach ($all as $x) $top = max($top, (float)($x[$c] ?? 0)); if ($top > 0) foreach ($all as &$x) { $v = (float)($x[$c] ?? 0); if ($v > 0) $x['total'] += $w * min(1, $v / $top); } unset($x); } // 1位の成績は全員（AI研究員も）から
+      if (!$withAi) $all = array_values(array_filter($all, fn($r) => empty($r['ai'])));
       foreach ($defs as $type => [$in, $cmp]) {
         $l = array_values(array_filter($all, $in)); usort($l, fn($a, $b) => $cmp($a, $b) ?: $a['updated'] <=> $b['updated']);
         $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmp($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1; // 同じ値は同じ順位
         $sorted[$type] = [$l, $rk];
-        if (isset($W[$type]) && $l) { $c = $COL[$type]; $top = (float)$l[0][$c]; if ($top > 0) foreach ($all as &$x) { $v = (float)($x[$c] ?? 0); if ($v > 0) $x['total'] += $W[$type] * min(1, $v / $top); } unset($x); }
       }
       foreach ($all as &$r) $r['total'] = round($r['total'], 1); unset($r);
       $l = array_values(array_filter($all, fn($r) => $r['total'] > 0)); $cmpT = fn($a, $b) => $b['total'] <=> $a['total'];
