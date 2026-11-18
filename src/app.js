@@ -5896,17 +5896,19 @@ function roadStages() {
       m0: 'バッジを集めて弱点をなくすんや！まだ取ってないバッジが、そのまま伸びしろや！', m1: '取れてないバッジを狙え！穴のない守りが日本一の条件や！' },
     { ic: '極', name: '一点を究めよ', cond: ['冠を1つ（どれかの系統のバッジをすべてそろえる）', '冠を3つ', '冠を5つ'], what: 'ひとつの系統をとことん。バッジを全部そろえて冠を取る', tool: '👑 冠（系統のコンプリート）', v: nc, ts: [1, 3, 5], unit: n => `冠 ${n}/${ACH_GROUPS.length}`, go: 'growth',
       m0: '一点を究めよ！どれかひとつ、冠を取るまでやり切るんや！', m1: '次の冠や！得意を武器にまで磨き上げえ！' },
-    { ic: '戦', name: '実戦の試練', cond: ['大会練習モードを最後まで（完走）', '大会練習モードで決勝に進む', '大会練習モードで優勝'], what: '大会の流れで、決勝に勝ち上がる', tool: '🏆 大会練習モード', v: (c.tour_done ? 1 : 0) + (c.qualify ? 1 : 0) + (c.champion ? 1 : 0), ts: [1, 2, 3], unit: n => ['大会 まだ', '大会完走', '決勝進出', '優勝'][n], go: 'setup-tour',
-      m0: '実戦の試練や！大会練習モードで決勝を目指せ！', m1: '決勝の舞台で勝ち切れ！リーグ戦とトーナメントは別もんやで！' },
+    { ic: '戦', name: '実戦の試練', cond: ['大会練習モードを最後まで（完走）', '大会練習モードで決勝に進む', '大会練習モードで優勝', '相手が「強豪ぞろい」以上の大会で優勝', '相手が「全員達人」の大会で優勝'], what: '大会の流れで決勝に勝ち上がり、強い相手の大会で優勝する', tool: '🏆 大会練習モード', v: (c.tour_done ? 1 : 0) + (c.qualify ? 1 : 0) + (c.champion ? 1 : 0) + (c.champion_strong >= 1 ? 1 : 0) + (c.champion_strong >= 2 ? 1 : 0), ts: [1, 2, 3, 4, 5], unit: n => ['大会 まだ', '大会完走', '決勝進出', '優勝', '強豪ぞろいで優勝', '全員達人で優勝'][n], go: 'setup-tour',
+      m0: '実戦の試練や！大会練習モードで決勝を目指せ！', m1: '決勝の舞台で勝ち切れ！相手が強なるほど、優勝の値打ちも上がるで！' },
     { ic: '他', name: '他流試合', cond: ['デイリートーナメントに1回参加', 'デイリーに5回参加', 'デイリーに15回参加'], what: '人と打つ。毎晩のデイリーで腕を試す', tool: '🌐 オンライン大会・デイリー', v: c.daily_play || 0, ts: [1, 5, 15], unit: n => `デイリー ${n}回`, home: 1,
       m0: '他流試合や！デイリーでほんまもんの人間と打ってこい！', m1: 'デイリーに通え！場数がものを言うんや！' },
-    { ic: '皆', name: '免許皆伝の試練', cond: ['相手が「強豪ぞろい」以上の大会で優勝', '推定実力★4.5', '相手が「全員達人」の大会で優勝'], what: '全員達人の大会で優勝し、★4.5の域へ', tool: '👑 全員達人の大会・推定実力', v: (c.champion_strong >= 1 ? 1 : 0) + (r >= 4.5 ? 1 : 0) + (c.champion_strong >= 2 ? 1 : 0), ts: [1, 2, 3], unit: n => ['まだ', '強豪大会で優勝', '★4.5に到達', '免許皆伝'][n], go: 'setup-tour',
-      m0: '免許皆伝の試練や！全員達人の大会で優勝してみい！', m1: 'あとひと息で免許皆伝や！達人の大会で勝ち切れ！' }
+    { ic: '皆', name: '免許皆伝の試練', cond: ['推定実力★4.5'], what: '判断の質を達人の域へ。推定実力★4.5', tool: '📈 推定実力', v: r, ts: [4.5], unit: () => r ? `推定実力 ★${r.toFixed(1)}` : '推定実力 まだ', go: 'setup-practice',
+      m0: '免許皆伝の試練や！推定実力★4.5、達人の域を目指せ！', m1: '' },
+    { ic: '試', name: '最後の腕試し', cond: ['公式大会で3位以上（表彰台）'], what: '公式のオンライン大会で、表彰台に立つ', tool: '🏅 公式大会（オンライン大会）', v: ach['off_podium:1'] ? 1 : 0, ts: [1], unit: n => n ? '公式大会で表彰台' : 'まだ', home: 1,
+      m0: '最後の腕試しや！公式大会で表彰台に立ってこい！', m1: '' }
   ];
   L.forEach((s, i) => { s.i = i; s.max = s.ts.length; s.star = s.ts.filter(t => s.v >= t).length; s.done = s.star >= s.max; });
   return L;
 }
-const ROAD_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
+const ROAD_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三'];
 // 風景：ふもとの村 → 竹林 → 川 → 山道 → 雪の峠 → 雲の上（2つの修行ごとに変わる）
 const ROAD_ZONES = [
   { k: 'vil', name: '修行の村', deco: ['🏮', '🥟', '🐓'] }, { k: 'bam', name: '竹林', deco: ['🎋', '🐼', '🎋'] }, { k: 'riv', name: '渓流', deco: ['🪷', '🐟', '🪨'] },
@@ -5930,7 +5932,7 @@ function roadHTML() {
       <div class="rd-mt"><svg viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 V70 Q14 30 30 62 Q40 84 52 56 Q62 20 78 50 Q90 76 104 64 V120Z" fill="#3b1d1d" opacity=".55"/><path d="M230 120 V60 Q246 14 262 52 Q272 78 288 44 Q300 18 318 58 Q330 80 344 66 Q352 60 360 70 V120Z" fill="#3b1d1d" opacity=".55"/><path d="M60 120 Q80 74 96 92 Q110 40 132 70 Q150 92 166 54 Q180 6 200 50 Q214 82 232 72 Q252 60 270 96 Q290 80 312 120Z" fill="#1d2e28"/><g fill="#1d2e28" transform="translate(178 -2)"><path d="M-12 18h24l-4 -5h-16Z"/><rect x="-6" y="18" width="12" height="6"/><path d="M-10 28h20l-3 -4h-14Z"/><rect x="-5" y="28" width="10" height="6"/><path d="M-8 6h16l-8 -8Z"/><rect x="-4" y="6" width="8" height="7"/></g><g stroke="#1d2e28" stroke-width="1.5" fill="none"><path d="M40 20 q8 -6 16 0 q8 6 16 0"/><path d="M300 26 q6 -5 12 0 q6 5 12 0"/></g></svg></svg></div></div>
     <div class="rd-meter"><span>日本一まで</span><div class="rd-bar"><i style="width:${R.pct}%"></i></div><b>${R.got}<small>/${R.all}★</small></b></div>
     <div class="rd-masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">師匠・ナニワのマサ</span>${esc(roadMasa(R))}</div></div>
-    <div class="rd-path">${R.L.map(s => { const zi = Math.min(ROAD_ZONES.length - 1, Math.floor(s.i / 2)), Z = ROAD_ZONES[zi], first = s.i % 2 === 0, x0 = X(s.i), x1 = X(s.i + 1);
+    <div class="rd-path">${R.L.map(s => { const zi = Math.min(ROAD_ZONES.length - 1, Math.floor(s.i / 2)), Z = ROAD_ZONES[zi], first = s.i % 2 === 0 && s.i / 2 < ROAD_ZONES.length, x0 = X(s.i), x1 = X(s.i + 1);
       return `<div class="rd-stage z-${Z.k} ${first ? 'zf' : ''} ${s.done ? 'done' : ''} ${R.cur === s ? 'cur' : ''}" style="--mx:${x0}px;--dx:${x0 < 40 ? 58 : 4}px">
       ${first ? `<div class="rd-zone">${Z.deco.map((d, k) => `<span class="rd-d d${k}">${d}</span>`).join('')}<em>${Z.name}</em></div>` : ''}
       <svg class="rd-road" viewBox="0 0 92 100" preserveAspectRatio="none" aria-hidden="true"><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="re"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rr"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rc"/></svg>
@@ -5949,7 +5951,7 @@ function roadBind() {
   document.querySelectorAll('[data-road]').forEach(b => b.onclick = () => { const s = roadStages()[+b.dataset.road]; if (!s) return; KB.sfx && KB.sfx('select');
     if (s.go) go(s.go); else if (s.act) act(s.act, b); else if (s.home) { go('home'); setTimeout(() => { const c = document.querySelector('.on-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200); } });
 }
-function roadBannerHTML() { const R = roadSummary(); return `<button class="rank-banner road-banner" data-go="road"><span class="rb-ic">🥋</span><span><b>日本一への道</b><small>${R.cur ? `12の修行・${R.got}/${R.all}★・マサのおすすめ「${esc(R.cur.name)}」` : '免許皆伝！あとはリアルの大会で打倒OZ家'}</small></span><span class="rb-go">特訓 →</span></button>`; }
+function roadBannerHTML() { const R = roadSummary(); return `<button class="rank-banner road-banner" data-go="road"><span class="rb-ic">🥋</span><span><b>日本一への道</b><small>${R.cur ? `13の修行・${R.got}/${R.all}★・マサのおすすめ「${esc(R.cur.name)}」` : '免許皆伝！あとはリアルの大会で打倒OZ家'}</small></span><span class="rb-go">特訓 →</span></button>`; }
 // ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
 // 段取りより衝動を伝える。短く、事実だけ
 const STORY = [

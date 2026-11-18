@@ -12,8 +12,8 @@ const { chromium } = require('playwright'); const fs = require('fs'), path = req
   await pg.evaluate(() => { document.querySelector('[data-go="road"]') ? document.querySelector('[data-go="road"]').click() : 0; }); await pg.waitForTimeout(800);
   await pg.screenshot({ path: path.join(__dirname, 'out', 'road_full.png'), fullPage: true });
   await pg.screenshot({ path: path.join(__dirname, 'out', 'road_top.png') });
-  await pg.evaluate(() => { document.querySelectorAll('.rd-cond')[4].open = true; document.querySelectorAll('.rd-stage')[3].scrollIntoView({ block: 'start' }); }); await pg.waitForTimeout(300); await pg.screenshot({ path: path.join(__dirname, 'out', 'road_mid.png') });
-  await pg.evaluate(() => document.querySelectorAll('.rd-stage')[9].scrollIntoView({ block: 'start' })); await pg.waitForTimeout(300); await pg.screenshot({ path: path.join(__dirname, 'out', 'road_end.png') });
+  await pg.evaluate(() => { document.querySelectorAll('.rd-cond')[9].open = true; document.querySelectorAll('.rd-stage')[9].scrollIntoView({ block: 'start' }); }); await pg.waitForTimeout(300); await pg.screenshot({ path: path.join(__dirname, 'out', 'road_mid.png') });
+  await pg.evaluate(() => document.querySelectorAll('.rd-stage')[11].scrollIntoView({ block: 'start' })); await pg.waitForTimeout(300); await pg.screenshot({ path: path.join(__dirname, 'out', 'road_end.png') });
   await pg.evaluate(() => { document.querySelector('[data-go="home"]').click(); }); await pg.waitForTimeout(500);
   const bn = await pg.$('.road-banner'); if (bn) await bn.screenshot({ path: path.join(__dirname, 'out', 'road_banner.png') });
   console.log('errors', errs); await b.close();
