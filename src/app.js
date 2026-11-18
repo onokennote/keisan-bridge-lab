@@ -1458,7 +1458,7 @@ function huntResultHTML() {
 }
 function huntCardHTML() {
   const b = store.get('huntBest', null), z = zukanGet();
-  return `<div class="mode hunt-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🎯</span><div><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2></div></div>${modeBadgeRows(MB_HUNT, true)}
+  return `<div class="mode hunt-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🎯</span><div><div class="lbl">EXPRESSION HUNTER</div><h2>式ハンター</h2></div></div>${mbFold('mbHunt', MB_HUNT)}
     <p class="small muted" style="margin:0">${HUNT_SEC / 60}分間の狩り。毎回配られる手札の3枚で標的（場）の数を作り、未登録の式＝獲物を捕獲して図鑑を埋めよう。</p>
     <div class="mode-rec">${b ? `<div>自己ベスト：<b class="atk-bp">${b.regs}式登録</b>（${b.score}点・${new Date(b.at).toLocaleDateString('ja-JP')}）</div>` : ''}
       <div class="row zk-mini" style="align-items:center;gap:8px"><span>図鑑 <b>${zukanCount(z)}</b>/${ZUKAN.length}</span><div class="zk-bar" style="flex:1"><i style="width:${(zukanCount(z) / ZUKAN.length * 100).toFixed(1)}%"></i></div><button class="btn sm" data-go="zukan">📖 式の図鑑</button></div>
@@ -1469,14 +1469,14 @@ function huntCardHTML() {
 // ホーム：早見表を作成（ここで式を入れて作る。対局中は、完成した行を見るだけ）
 function chartCardHTML() {
   const done = chartDone(), total = chartTotal(), full = chartFullRows().length;
-  return `<div class="mode chart-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">📋</span><div><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2></div></div>${modeBadgeRows(MB_CHART, true)}
+  return `<div class="mode chart-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">📋</span><div><div class="lbl">QUICK CHART</div><h2>早見表を作成</h2></div></div>${mbFold('mbChart', MB_CHART)}
     <p class="small muted" style="margin:0">多面待ちの2枚・3枚で、待ちになる数を自分の式で埋めていく表。完成した行は、対局中に見返せます。</p>
     <div class="mode-rec"><div>進み具合：<b>${done}</b>/${total}面・完成 <b>${full}</b>/${CHART_ROWS.length}行</div></div>
     <button class="btn primary" data-act="chart-open">早見表を作る</button></div>`;
 }
 function outsCardHTML() {
   const g = G_(), d = g.drill || null, c = g.cnt || {};
-  return `<div class="mode outs-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🔍</span><div><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2></div></div>${modeBadgeRows(MB_OUTS, true)}
+  return `<div class="mode outs-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🔍</span><div><div class="lbl">OUTS CHALLENGE</div><h2>アウツチャレンジ</h2></div></div>${mbFold('mbOuts', MB_OUTS)}
     <p class="small muted" style="margin:0">見えている札から、次の番で上がれる札（アウツ）がいちばん多くなる出し方を選ぶ問題。5問連続で正解するとクリア、1問でも間違えると最初からやり直し。問題はだんだん難しくなります。</p>
     ${d && d.n ? `<div class="mode-rec"><div>これまで <b>${d.ok}</b>/${d.n}問正解・クリア <b>${c.outs5 || 0}</b>回</div></div>` : ''}
     <button class="btn primary" data-act="drill">アウツチャレンジに挑戦</button></div>`;
@@ -2490,7 +2490,7 @@ function whistle(title, sub, then, o) {
 }
 function attackCardHTML() {
   const best = attackBests()[ATTACK_MIN];
-  return `<div class="mode atk-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">⏱️</span><div><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2></div></div>${modeBadgeRows(MB_ATK, true)}
+  return `<div class="mode atk-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">⏱️</span><div><div class="lbl">BADGE ATTACK</div><h2>バッジアタック</h2></div></div>${mbFold('mbAtk', MB_ATK)}
     <p class="small muted" style="margin:0">15分間で、どれだけバッジ（BP）を取れるかの勝負。4人卓・相手まんべんなく・1セット3ゲームを、時間いっぱいくり返します。セット1位は+30BP・2位は+10BPの順位ボーナス。速さ・判定・解説（掛け合い）は固定。AIの読みとゲームごとの総括はありません。</p>
     ${best ? `<div class="mode-rec row" style="align-items:center;gap:8px"><p style="margin:0;flex:1">自己ベスト：<b class="atk-bp">${best.bp} BP</b>（バッジ${best.badges}個・${new Date(best.at).toLocaleDateString('ja-JP')}）</p><button class="btn sm" data-act="attack-best">ベスト記録を見る</button></div>` : ''}
     <button class="btn primary" data-act="attack-start">バッジアタック開始</button></div>`;
@@ -3116,6 +3116,25 @@ function titleIntro() {
   raw.set('kb.introDay', today); S.introChecked = true; S.introAt = Date.now(); setTimeout(() => { S.introChecked = false; S.introAt = 0; const t = $('.title.intro'); if (t) t.classList.remove('intro'); }, 2200); // 描き直しても途中から続ける（--el）
   return true;
 }
+// ---------- ホームの折りたたみ（開いたかどうかは端末ごとに覚える kb.fold） ----------
+const foldOpen = id => { const f = raw.get('kb.fold', {}) || {}; return !!f[id]; };
+try { document.addEventListener('toggle', e => { const d = e.target; if (!d || !d.dataset || !d.dataset.fold) return; const f = raw.get('kb.fold', {}) || {}; f[d.dataset.fold] = d.open; try { localStorage.setItem('kb.fold', JSON.stringify(f)); } catch (x) { } }, true); } catch (e) { }
+function mbFold(id, keys) {
+  const g = G_(), ks = keys, all = ks.reduce((n, k) => { const a = ACH.find(x => x[0] === k); return n + (a ? a[2].length : 0); }, 0), have = ks.reduce((n, k) => { const a = ACH.find(x => x[0] === k); return n + (a ? a[2].filter(t => g.ach[k + ':' + t]).length : 0); }, 0);
+  return `<details class="hf mb-fold" data-fold="${id}" ${foldOpen(id) ? 'open' : ''}><summary><span>🏅 このモードのバッジ <b>${have}</b>/${all}</span></summary>${modeBadgeRows(keys, true)}</details>`;
+}
+// 特訓（ミニゲーム）：2×2の小さなタイル。押すとすぐ始まる。説明・バッジ・記録は「くわしく」にたたむ
+function miniHTML() {
+  const ab = attackBests()[ATTACK_MIN], hb = store.get('huntBest', null), z = zukanCount(zukanGet()), c = G_().cnt || {};
+  const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}`, 'hunt-start'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open']];
+  return `<div class="mode mini-card" id="h-mini"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🥋</span><div><div class="lbl">MINI GAMES</div><h2>特訓（ミニゲーム）</h2></div></div>
+    <div class="mini-tiles">${T.map(([ic, nm, sub, a]) => `<button class="mini-t" data-act="${a}"><span class="mt-ic">${ic}</span><b>${nm}</b><small>${esc(sub)}</small></button>`).join('')}</div>
+    <details class="hf" data-fold="miniMore" ${foldOpen('miniMore') ? 'open' : ''}><summary><span>くわしく（説明・バッジ・記録）</span></summary><div class="mini-more">${attackCardHTML()}${huntCardHTML()}${outsCardHTML()}${chartCardHTML()}</div></details></div>`;
+}
+function hnavHTML() {
+  const I = [['🌐', 'オンライン', 'h-online', ON_ENABLED()], ['🃏', '練習', 'h-prac', 1], ['🏟️', '大会', 'h-tour', 1], ['🥋', '特訓', 'h-mini', 1], ['ℹ️', 'このアプリ', 'about', 1]].filter(x => x[3]);
+  return `<nav class="hnav">${I.map(([ic, nm, id]) => `<button data-act="hnav" data-to="${id}">${ic} ${nm}</button>`).join('')}</nav>`;
+}
 function homeHTML() {
   const saved = store.get('session', null);
   KB.resetNames();
@@ -3138,25 +3157,23 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID && titleOk(a)) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID && titleOk(x)); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? ttlTag(a) + '・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
     ${CLOUD_ON && G_ON && ON.famRole === 'adult' ? `<button class="pb-fam" data-act="fam-menu">👪 おうちの人メニュー${famUnseen() ? '<i class="nb">!</i>' : ''}</button>` : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
-    <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
-    <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
+    <details class="hf pb-fold" data-fold="pbBdg" ${foldOpen('pbBdg') ? 'open' : ''}><summary><span>🏅 バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span><span class="hf-sub">冠 ${ACH_GROUPS.filter((_, gi) => g.ach['cat:' + gi]).length}/${ACH_GROUPS.length}</span></summary><div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
+    <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></details></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
+${hnavHTML()}
 ${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}${roadBannerHTML()}
 ${onlineHomeHTML()}
 <div class="mode-grid">
-  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${modeBadgeRows(MB_PRAC, true)}
+  <div class="mode" id="h-prac"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${mbFold('mbPrac', MB_PRAC)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     ${pracFacts()}
     <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
-  <div class="mode"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT PRACTICE</div><h2>大会練習モード</h2></div></div>${modeBadgeRows(MB_TOUR, true)}
+  <div class="mode" id="h-tour"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT PRACTICE</div><h2>大会練習モード</h2></div></div>${mbFold('mbTour', MB_TOUR)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
     ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
-  ${attackCardHTML()}
-  ${huntCardHTML()}
-  ${outsCardHTML()}
-  ${chartCardHTML()}
+  ${miniHTML()}
 </div>
 
 <div class="row" style="margin-top:14px">
@@ -3172,8 +3189,10 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/18/" target="_blank" rel="noopener">公式ルール ↗</a>
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
+  <details class="hf" data-fold="aboutMore" ${foldOpen('aboutMore') ? 'open' : ''}><summary><span>キャラクター・おうちの人メニューなど</span></summary>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
   ${G_ON && ON.famRole !== 'child' ? '<p class="small"><button class="pm-link" data-act="fam-menu">👪 おうちの人メニュー（保護者のGoogleでログインして開きます）</button></p>' : ''}
+  </details>
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
@@ -6303,6 +6322,7 @@ function act(a, el) {
     case 'g-protect': gProtect(); break;
     case 'xm-parent': xmParent(false, (el && el.dataset || {}).xk); break;
     case 'fam-menu': famMenu(); break;
+    case 'hnav': { const t = document.getElementById(el.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'fam-back': famMenuModal(); break;
     case 'fam-rep-back': famReportPick(); break;
     case 'lim-home': closeModal(); go('home'); break;
@@ -6567,7 +6587,7 @@ function onlineHomeHTML() {
   const icon = v => ({ open: '🏆', live: '🔥', soon: '⏳', end: '🏁' })[kind(v)];
   const D = (L || []).filter(v => v.daily), L2 = L ? L.filter(v => !v.daily) : L;
   const rows = L2 ? (L2.length ? L2.map(v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}${v.phase === 'entry' ? `<br><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b>` : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>') : '<p class="small muted" style="margin:0">読み込み中…</p>';
-  return `<div class="mode on-card"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
+  return `<div class="mode on-card" id="h-online"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
     ${xmCardHTML()}${dailyCardHTML(D)}
     <div class="on-tlist">${rows}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
@@ -6592,7 +6612,9 @@ function dailyCardHTML(D) {
     if (v.phase === 'entry' && myPart && !v.entered) return `<div class="dl-part done-day">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps"><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small></span><span class="dl-joined">✅ きょうは参加済み</span></div>`; // 1日1部：出た人にはエントリーを出さない
     const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : pre ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
     return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`.replace(`btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}`, `btn sm ${v.phase === 'entry' && !myPart && !pre ? 'primary' : ''}`); };
-  const rows = Object.keys(parts).sort().map(rowOf).join('') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（17:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
+  const ks = Object.keys(parts).sort(), live1 = k => { const v = parts[k][0]; return v.phase === 'entry' || v.phase === 'prelim' || v.phase === 'final'; };
+  const pk = (myPart && parts[myPart] ? myPart : null) || ks.find(k => ['prelim', 'final'].includes(parts[k][0].phase)) || ks.find(live1) || ks[0], others = ks.filter(k => k !== pk); // いちばん大事な部（出た部・開催中・次の部）だけを出し、ほかはたたむ
+  const rows = (pk ? rowOf(pk) + (others.length ? `<details class="hf dl-more" data-fold="dlMore" ${foldOpen('dlMore') ? 'open' : ''}><summary><span>ほかの部（${others.map(k => '第' + k + '部').join('・')}）</span></summary>${others.map(rowOf).join('')}</details>` : '') : '') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（17:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
   const me = di && di.me, sl = di ? `<div class="dl-season"><b>🗓 ${esc(di.label)}シーズン</b><span>${me ? `${esc(san(S.settings.name))}は <b>${me.rank}位</b>・<b>${me.pts}pt</b>（${me.n}回）` : 'まだポイントはありません'}</span><small class="muted">シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</small></div>` : '';
   return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日4部（17:30・18:30・19:30・20:30）から1日1部だけ・エントリーは15分前から。15人・予選は17:30・19:30が5ゲーム×3セット、18:30・20:30が3ゲーム×3セット・上位5人で決勝（5ゲーム）・空きはAI</small></div></div>
     <div class="dl-parts">${rows}</div>${myPart ? `<div class="dl-mine"><span>✅ きょうは<b class="on-in">第${myPart}部</b>に${dm && (dm.phase === 'done') ? '参加しました' : dm && (dm.phase === 'prelim' || dm.phase === 'final') ? '参加中です' : 'エントリーしています'}（1日1部まで）</span>${dm && dm.phase === 'done' && !parts[myPart] ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : ''}
