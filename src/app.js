@@ -609,7 +609,7 @@ function noteText(n) {
     case 'rv_badge': return ['🏅', `ライバル視している${san(n.who)}が「${bn((n.ach || [])[0])}」${n.n > 1 ? `ほか${n.n - 1}個` : ''}を取りました`];
     case 'rv_bp': return ['📈', `ライバル視している${san(n.who)}が、BPで${me}を抜きました（${n.bp}BP）`];
     case 'invite': return ['✉', `${n.host ? san(n.host) + 'から' : ''}オンライン大会「${n.tname}」に招待されました`];
-    case 'award': return ['🏆', `${n.official ? '公式大会' : 'オンライン大会'}「${n.tname}」で${n.place}位に入りました`];
+    case 'award': return ['🏆', `${+n.official === 1 ? '公式大会' : +n.official === 2 ? 'デイリー' : 'オンライン大会'}「${n.tname}」で${n.place}位に入りました`];
     case 'soon': { const d = new Date(n.at * 1000); return ['⏰', `エントリーした「${n.tname}」がまもなく始まります（${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}）`]; }
     case 'badge': { const a = A(n.k); return a ? ['🎖', `「${a[4][n.i]}」（${a[1]}・${['銅', '銀', '金'][a[5] ? a[5][n.i] : Math.min(n.i, 2)]}）を取りました`] : ['🎖', 'バッジを取りました']; }
     case 'cat': return ['👑', `冠「${CAT_SPECIAL[(ACH_GROUPS[n.gi] || [])[0]] || ''}」（${(ACH_GROUPS[n.gi] || [])[0] || ''}）を達成しました`];
@@ -1795,9 +1795,10 @@ function pvTitle(D) {
 // 大会のメダルの数（公式・オンラインで別々）
 function podiumHTML(aw) {
   if (!aw || !aw.length) return '';
-  const row = off => { const L = aw.filter(a => !!+a.official === off); if (!L.length) return ''; const c = [1, 2, 3].map(p => L.filter(a => +a.place === p).length);
-    return `<div class="pv-pod ${off ? 'off' : ''}"><b>${off ? '公式大会' : 'オンライン大会'}</b>${c.map((n, i) => n ? `<span class="pv-md m${i + 1}" title="${placeJa(i + 1)}">${['🥇', '🥈', '🥉'][i]}<small>×${n}</small></span>` : '').join('')}</div>`; };
-  return `<div class="pv-pods">${row(true)}${row(false)}</div>`;
+  // official：0 オンライン・1 公式・2 デイリー・3 シーズン（デイリーは公式大会に数えない）
+  const row = k => { const L = aw.filter(a => (+a.official || 0) === k); if (!L.length) return ''; const c = [1, 2, 3].map(p => L.filter(a => +a.place === p).length);
+    return `<div class="pv-pod ${k === 1 ? 'off' : ''}"><b>${['オンライン大会', '公式大会', 'デイリー', 'シーズン'][k]}</b>${c.map((n, i) => n ? `<span class="pv-md m${i + 1}" title="${placeJa(i + 1)}">${['🥇', '🥈', '🥉'][i]}<small>×${n}</small></span>` : '').join('')}</div>`; };
+  return `<div class="pv-pods">${row(1)}${row(3)}${row(0)}${row(2)}</div>`;
 }
 // 称号を選ぶ（自分のプロフィールから。いまのプレイヤーが取ったオンライン大会の成績から1つ）
 // 称号にできるのは、オンライン大会（0）・公式大会（1）・デイリーのシーズン入賞（3）。デイリー1回ごとの入賞（2）は称号にしない
@@ -1832,7 +1833,7 @@ function profHTML(D, o) {
     <div class="pv-info" hidden></div>
     <div class="pv-badges">${got.length || spGot(g).length ? spGot(g).map(a => ({ a, i: 0 })).concat(got).map(b => `<button type="button" class="pv-bb" data-pvi="b:${b.a[0]}:${b.i}" aria-label="${esc(b.a[4][b.i])}">${badgeSVG(b.a, b.i, true, 26)}</button>`).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
     ${podiumHTML(D.awards)}
-    ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${+a.official ? '<em class="on-off">公式</em> ' : ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
+    ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${{ 1: '<em class="on-off">公式</em> ', 2: '<em class="on-off dl">デイリー</em> ', 3: '<em class="on-off">シーズン</em> ' }[+a.official] || ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
 }
