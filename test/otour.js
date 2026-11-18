@@ -33,19 +33,19 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.click('[data-act="on-tour-create"]'); await pa.waitForTimeout(800);
   ok(await pa.evaluate(() => KBAPP.S.view === 'otour' && /テスト杯/.test(document.body.innerText) && /主催 ケン/.test(document.body.innerText)), '大会をひらくと、大会の画面になる（主催は自分の名前）');
   // B：ホームの一覧に出る → 開いてエントリー
-  await pb.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pb.waitForTimeout(1200);
+  await pb.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.S.olTab = 'un'; KBAPP.go('home'); }); await pb.waitForTimeout(1200);
   ok(await pb.evaluate(() => /テスト杯/.test(document.querySelector('.on-card').innerText) && /受付中/.test(document.querySelector('.on-card').innerText)), 'ホームの大会一覧に出る（受付中）');
   await pb.screenshot({ path: path.join(__dirname, 'out', 'ot_list.png') });
-  await pb.click('.on-trow'); await pb.waitForTimeout(800); await pb.click('[data-act="on-tour-entry"]'); await pb.waitForTimeout(800);
+  await pb.click('.ol-row'); await pb.waitForTimeout(800); await pb.click('[data-act="on-tour-entry"]'); await pb.waitForTimeout(800);
   ok(await pb.evaluate(() => KBAPP.ON.t.entered), 'エントリーできる');
   await pa.click('[data-act="on-tour-entry"]'); await pa.waitForTimeout(800);
   // 招待だけの大会：招待された人にだけ見える
   await pc.evaluate(async () => { const c = JSON.parse(localStorage.getItem('kb.cloud')); await fetch(KB_CLOUD_API + '?a=on_tour_new', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: c.token, name: 'タロウ', tname: '招待杯', startAt: Math.round(Date.now() / 1000) + 3600, entry: 'invite', invites: ['ユイ'], min: 2, max: 4 }) }); });
-  await pb.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pa.evaluate(() => { KBAPP.ON.toursAt = 0; }); await pb.waitForTimeout(1200);
+  await pb.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.S.olTab = 'un'; KBAPP.go('home'); }); await pa.evaluate(() => { KBAPP.ON.toursAt = 0; }); await pb.waitForTimeout(1200);
   const seeB = await pb.evaluate(() => /招待杯/.test(document.querySelector('.on-card').innerText) && /招待されています/.test(document.querySelector('.on-card').innerText));
   const seeA = await pa.evaluate(async () => { const j = await (await fetch(KB_CLOUD_API + '?a=on_tours', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: JSON.parse(localStorage.getItem('kb.cloud')).token }) })).json(); return j.tours.some(t => t.name === '招待杯'); });
   ok(seeB && !seeA, '招待だけの大会は、招待された人にだけ見える');
-  await pb.click('.on-trow'); await pb.waitForTimeout(800);
+  await pb.click('.ol-row'); await pb.waitForTimeout(800);
   // A：今すぐ開始（2人＋AI★2で6人に補充 → 3人卓×2）
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_entry.png') });
   await pa.click('[data-act="on-tour-startnow"]'); await pa.waitForTimeout(1500);
@@ -59,8 +59,8 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   await pa.screenshot({ path: path.join(__dirname, 'out', 'ot_stand_view.png') });
   await pa.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   // C（出ていない人）：大会の画面から卓を選んで観戦（手札は届かない・席を押すと手元が替わる）
-  await pc.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pc.waitForTimeout(1200);
-  await pc.evaluate(() => [...document.querySelectorAll('.on-trow')].find(b => /テスト杯/.test(b.innerText)).click()); await pc.waitForTimeout(1200);
+  await pc.evaluate(() => { KBAPP.ON.toursAt = 0; KBAPP.S.olTab = 'un'; KBAPP.go('home'); }); await pc.waitForTimeout(1200);
+  await pc.evaluate(() => [...document.querySelectorAll('.ol-row')].find(b => /テスト杯/.test(b.innerText)).click()); await pc.waitForTimeout(1200);
   ok(await pc.evaluate(() => document.querySelectorAll('[data-act="on-watch"]').length === 2), '開催中の大会の画面に、観戦する卓（2卓）が並ぶ');
   await pc.screenshot({ path: path.join(__dirname, 'out', 'ot_rooms.png') });
   await pc.click('[data-act="on-watch"]'); await pc.waitForTimeout(1500);

@@ -56,11 +56,11 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   await p.evaluate(() => KBAPP.onAwardsSync()); await p.waitForTimeout(800);
   const cnt = await p.evaluate(() => KBAPP.G().cnt.on_podium || 0);
   ok(cnt === (myPlace ? 4 - myPlace : 0), `自分のバッジ（${myPlace ? myPlace + '位' : '圏外'}）：表彰台の段階 ${cnt}`);
-  await p.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.go('home'); }); await p.waitForTimeout(500);
+  await p.evaluate(() => { document.querySelectorAll('#modal,.ach-toast').forEach(e => e.remove()); KBAPP.S.olTab = 'un'; KBAPP.go('home'); }); await p.waitForTimeout(500);
   await p.click('[data-act="on-arch"]'); await p.waitForTimeout(1200);
   ok(await p.evaluate(() => /バッジ杯/.test(document.body.innerText) && /少人数杯/.test(document.body.innerText)), '「過去の大会」でアーカイブが見られる');
   await p.screenshot({ path: path.join(__dirname, 'out', 'ot_archive.png') });
-  await p.evaluate(() => document.querySelector('.on-trow').click()); await p.waitForTimeout(1200);
+  await p.evaluate(() => document.querySelector('.ol-row').click()); await p.waitForTimeout(1200);
   await p.screenshot({ path: path.join(__dirname, 'out', 'ot_award.png'), fullPage: true });
   ok(await p.evaluate(() => /上位3位にバッジ|バッジはなし/.test(document.body.innerText)), 'アーカイブから大会の結果とバッジの有無が見られる');
   // テスト版の仮のユーザー（称号とバッジ）：ランキングから開くプロフィールに称号とメダルの数
