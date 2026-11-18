@@ -83,8 +83,8 @@ const shot = n => path.join(__dirname, 'out', n);
   // 挑戦：サンタ・カナタ（絶対透視）＋達人3人
   await p.evaluate(() => KBAPP.act('xm-open')); await p.waitForTimeout(300); await (await p.$('#modal .xm-intro')).screenshot({ path: shot('xm_intro.png') });
   await p.evaluate(() => KBAPP.act('xm-go')); await p.waitForTimeout(800);
-  let T = await p.evaluate(() => { const T = KBAPP.S.T; return { n: T.players.length, santa: T.players.find(x => x.santa), lv: T.players.filter(x => !x.human && !x.santa).map(x => x.level), xm: T.xmas }; });
-  ok(T.n === 5 && T.santa && T.santa.ch.name === 'サンタ？？' && T.santa.ch.acc === 'santa' && T.santa.clairvoyant && T.santa.level === 6 && T.lv.every(l => l === 5), 'サンタ・カナタ（★6・絶対透視）と★5の3人：' + JSON.stringify(T.lv));
+  let T = await p.evaluate(() => { const T = KBAPP.S.T; return { games: T.cfg.games, n: T.players.length, santa: T.players.find(x => x.santa), lv: T.players.filter(x => !x.human && !x.santa).map(x => x.level), xm: T.xmas }; });
+  ok(T.n === 4 && T.santa && T.santa.ch.name === 'サンタ？？' && T.santa.ch.acc === 'santa' && T.santa.clairvoyant && T.santa.level === 6 && T.lv.length === 2 && T.games === 3 && T.lv.every(l => l === 5), '4人・3ゲーム：謎のサンタ（★6・絶対透視）と★5の2人：' + JSON.stringify(T.lv));
   await p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove())); await p.waitForTimeout(400); await p.screenshot({ path: shot('xm_table.png') });
   // 3回負けると手加減
   for (let i = 0; i < 3; i++) g = await post('xm_result', { token: me.token, pid: me.pid, won: false });
@@ -92,7 +92,7 @@ const shot = n => path.join(__dirname, 'out', n);
   await p.evaluate(() => { KBAPP.S.T = null; KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1500);
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('xm-go'); }); await p.waitForTimeout(500);
   T = await p.evaluate(() => { const T = KBAPP.S.T; return { santa: T.players.find(x => x.santa), lv: T.players.filter(x => !x.human && !x.santa).map(x => x.level), easy: T.xmas.easy }; });
-  ok(T.easy && !T.santa.clairvoyant && T.lv.every(l => l === 4), '3回負けたあとは手加減（絶対透視なし・3人が★4）');
+  ok(T.easy && !T.santa.clairvoyant && T.lv.every(l => l === 4), '3回負けたあとは手加減（絶対透視なし・2人が★4）');
   // 優勝 → メッセージが届く（別の端末でも同じ）
   g = await post('xm_result', { token: me.token, pid: me.pid, won: true });
   ok(g.xm.won && /本棚/.test(g.xm.msg), '優勝するとメッセージが届く');

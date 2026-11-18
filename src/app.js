@@ -6484,9 +6484,12 @@ async function dailyInfoLoad(force) {
 
 // ---------- サンタからの挑戦状（クリスマスのしかけ） ----------
 // 保護者（子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウント）が、サンタからのメッセージ（プレゼントの隠し場所のヒントなど）を仕込む。
-// 子どもは期間中（はじめは12/25の朝7時〜夜9時）、サンタ・カナタ（★6・絶対透視）と達人3人の5ゲームで優勝するとメッセージを受け取れる。3回負けると手加減（絶対透視なし・相手が1段弱く）。
+// 子どもは期間中（はじめは12/25の24時間）、謎のサンタ（★6・絶対透視）と達人2人の5ゲームで優勝するとメッセージを受け取れる。3回負けると手加減（絶対透視なし・相手が1段弱く）。
 // メッセージはサーバーにだけあり、優勝するまで子どもの端末には届かない。同じプレイヤーなら別の端末でも同じ挑戦状
-const XM_LV = [[5, '達人ぞろい（★5×3）'], [4, '強豪（★4×3）'], [3, 'ふつう（★3×3）']];
+const XM_LV = [[5, '達人ぞろい（★5×2）'], [4, '強豪（★4×2）'], [3, 'ふつう（★3×2）']];
+// 手加減：3回目の挑戦（2回負けたあと）から、負けるたびに少しずつ弱くする
+//  0〜1回負け：サンタ★6（絶対透視）＋選んだ強さ×2／2回：2人を1段弱く／3回：サンタの絶対透視なし／4回：2人をもう1段／5回〜：サンタも★4
+function xmEase(losses, lv0) { const L = losses || 0; return { lv: Math.max(2, lv0 - (L >= 4 ? 2 : L >= 2 ? 1 : 0)), clair: L < 3, santaLv: L >= 5 ? 4 : L >= 3 ? 5 : 6, easy: L >= 2 }; }
 function santaCh() { return Object.assign(KB.charToCh(KB.KANATA), { name: 'サンタ？？', acc: 'santa', shirt: '#c92a2a', bgpat: 'pat:stars' }); }
 function xmDef() { const y = new Date().getFullYear(), d = new Date(y, 11, 25, 0, 0), e = new Date(y, 11, 26, 0, 0); return { start: d, end: e }; } // はじめは12/25の24時間
 const xmLoc = d => { const p = n => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
@@ -6506,24 +6509,24 @@ function xmCardHTML() {
   if (x.won) return `<div id="xm-card" class="xm-card won">${av('happy')}<div><b>🎁 サンタからのメッセージ</b><small>謎のサンタに勝って受け取ったメッセージです</small></div><button class="btn primary sm" data-act="xm-read">ひらく</button></div>`;
   if (now < x.start - 3 * 86400 || now > x.end) return '<div id="xm-card" hidden></div>';
   const fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
-  if (now < x.start) return `<div id="xm-card" class="xm-card soon">${av('normal')}<div><b>🎄 サンタからの挑戦状</b><small>${fmt(x.start)}〜${fmt(x.end)}・謎のサンタと達人たちの5ゲーム。優勝するとサンタからのメッセージが届く！</small><b class="on-cd" data-cd="${x.start}">${cdText(x.start)}</b></div><span class="xm-tag">受付前</span></div>`;
-  const easy = x.losses >= 3;
+  if (now < x.start) return `<div id="xm-card" class="xm-card soon">${av('normal')}<div><b>🎄 サンタからの挑戦状</b><small>${fmt(x.start)}〜${fmt(x.end)}・謎のサンタと達人たちの3ゲーム。優勝するとサンタからのメッセージが届く！</small><b class="on-cd" data-cd="${x.start}">${cdText(x.start)}</b></div><span class="xm-tag">受付前</span></div>`;
+  const easy = x.losses >= 2;
   return `<div id="xm-card" class="xm-card">${av('normal')}<div><b>🎄 サンタからの挑戦状</b><small>${fmt(x.end)}まで・優勝するまで何度でも挑戦できる！${x.losses ? `（${x.losses}回挑戦${easy ? '・サンタが少し手加減中' : ''}）` : ''}</small></div><button class="btn primary sm" data-act="xm-open">${x.losses ? 'もう一度挑戦' : 'エントリー'}</button></div>`;
 }
 function xmIntro() {
-  const x = ON.xm; if (!x) return; const easy = x.losses >= 3, nm = rvName();
+  const x = ON.xm; if (!x) return; const easy = x.losses >= 2, nm = rvName();
   modal(`<div class="stack xm-intro"><div class="xm-hero">${KB.avatarSVG(santaCh(), { mood: 'normal', level: 6 })}</div><h3 style="margin:0;text-align:center">🎄 サンタからの挑戦状</h3>
-    <div class="op-lines"><div class="op-line root"><div class="cm-av">${KB.casterSVG('root', 'happy')}</div><div class="op-bubble"><span class="cm-name">解説・ルート博士</span>${esc(`${nm}に、謎のサンタから挑戦状が届いています。サンタと達人3人の5ゲームで、卓内1位になればメッセージを受け取れるそうです。`)}</div></div>
-    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(easy ? `${x.losses}回も挑んだ根性、サンタも見とったで！今回はちょっと手加減してくれるらしい。ラストチャンスや、いったれ！` : 'このサンタ、ただ者やないで…目ぇ閉じたまま打っとる。クリスマスの決勝戦や、いったれ！')}</div></div></div>
+    <div class="op-lines"><div class="op-line root"><div class="cm-av">${KB.casterSVG('root', 'happy')}</div><div class="op-bubble"><span class="cm-name">解説・ルート博士</span>${esc(`${nm}に、謎のサンタから挑戦状が届いています。サンタと達人2人の3ゲームで、卓内1位になればメッセージを受け取れるそうです。`)}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(easy ? `${x.losses}回も挑んだ根性、サンタも見とったで！今回は少し手加減してくれるらしい。いったれ！` : 'このサンタ、ただ者やないで…目ぇ閉じたまま打っとる。クリスマスの決勝戦や、いったれ！')}</div></div></div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">あとで</button><button class="btn primary" data-act="xm-go">挑戦する</button></div></div>`);
 }
-// 対局：サンタ・カナタ（★6・絶対透視）＋達人3人。test は保護者のテストプレイ（記録しない・サーバーに送らない）
+// 対局：サンタ・カナタ（★6・絶対透視）＋達人2人。test は保護者のテストプレイ（記録しない・サーバーに送らない）
 function xmStart(test) {
-  const x = ON.xm || {}, lv0 = test ? (S.xmTestLv || 5) : (x.lv || 5), easy = !test && (x.losses || 0) >= 3, lv = easy ? Math.max(2, lv0 - 1) : lv0;
+  const x = ON.xm || {}, lv0 = test ? (S.xmTestLv || 5) : (x.lv || 5), E = xmEase(test ? 0 : x.losses, lv0), easy = E.easy, lv = E.lv;
   KB.resetNames(); const used = new Set(['kanata']);
-  const T = newSession({ kind: 'practice', games: 5, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: PRACTICE_POINTS.slice(), tie: 'janken' });
-  const santa = { id: 1, human: false, level: easy ? 5 : 6, style: 'keisan', ch: santaCh(), clairvoyant: !easy, santa: true };
-  T.players = [T.players[0], santa].concat([2, 3, 4].map(i => makeAI(i, lv, null, used)));
+  const T = newSession({ kind: 'practice', games: 3, mix: 'random', opps: [{ level: 'r', style: 'r' }, { level: 'r', style: 'r' }, { level: 'r', style: 'r' }], points: PRACTICE_POINTS.slice(), tie: 'janken' }); // 4人・3ゲームで1セット
+  const santa = { id: 1, human: false, level: E.santaLv, style: 'keisan', ch: santaCh(), clairvoyant: E.clair, santa: true };
+  T.players = [T.players[0], santa].concat([2, 3].map(i => makeAI(i, lv, null, used))); // 自分を入れて4人（サンタ＋達人2人）
   T.points = {}; T.totPP = {}; T.tb = {}; T.players.forEach(p => { T.points[p.id] = 0; T.totPP[p.id] = 0; T.tb[p.id] = 0; });
   T.xmas = { test: !!test, easy }; if (test) S.xmBak = { growth: JSON.stringify(store.get('growth', null)) }; S.T = T; startSet(); // テストプレイは成長記録を控えておき、終わったら戻す（記録・バッジに残さない）
 }
@@ -6535,9 +6538,11 @@ async function xmAfter(won) {
   catch (e) { toast(e.message || '通信できませんでした。もう一度ためしてください'); }
 }
 function xmLose(losses, test) {
-  const left = Math.max(0, 3 - losses);
+  const next = xmEase(losses, (ON.xm && ON.xm.lv) || 5), msg = test ? '（テストプレイ）負けたときは、こんなふうに声をかけるで。3回目の挑戦から、負けるたびにサンタが少しずつ手加減してくれる仕組みや。'
+    : losses < 2 ? `惜しかったな！あと${2 - losses}回負けたら、サンタが少しずつ手加減してくれるらしいで。でも今のうちに勝ったらカッコええで！何回でも挑戦できる！`
+    : `次はサンタがもう少し手加減してくれるで！${next.clair ? 'まわりの2人がちょっと弱なる。' : 'サンタの絶対透視もなしや！'}何回でも挑戦できる！`;
   modal(`<div class="stack"><div class="xm-hero sm">${KB.avatarSVG(santaCh(), { mood: 'happy', level: 6 })}</div><h3 style="margin:0;text-align:center">サンタ？？「……まだまだ」</h3>
-    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(test ? '（テストプレイ）負けたときは、こんなふうに声をかけるで。3回負けると、サンタが手加減してくれる仕組みや。' : left ? `惜しかったな！あと${left}回負けたら、サンタがちょっと手加減してくれるらしいで。でも今のうちに勝ったらカッコええで！何回でも挑戦できる！` : '大丈夫や、次からサンタが手加減してくれるで！絶対透視もなしや。何回でも挑戦できる！')}</div></div>
+    <div class="op-line masa"><div class="cm-av">${KB.casterSVG('masa', 'normal')}</div><div class="op-bubble"><span class="cm-name">実況・ナニワのマサ</span>${esc(msg)}</div></div>
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button>${test ? '' : '<button class="btn primary" data-act="xm-go">もう一度挑戦</button>'}</div></div>`);
 }
 function xmReveal(msg, test) {
@@ -6550,7 +6555,7 @@ function xmReveal(msg, test) {
 }
 // おうちの人メニュー：子ども向けのしかけを、ここに順に足していく（いまはサンタからの挑戦状）。
 // プロフィールで「おうちの人（大人）」にしたプレイヤーには、まだ見ていないしかけがあるとホームにおしらせマーク。開くにはGoogleでのログインが必要
-const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの5ゲームで優勝すると届くようにします', open: () => xmParent(true) }];
+const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの3ゲームで優勝すると届くようにします', open: () => xmParent(true) }];
 const famUnseen = () => { const sn = store.get('famSeen', []); return FAM_FEATURES.some(f => !sn.includes(f.id)); };
 async function famMenu() {
   let idt; try { idt = await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
@@ -6602,7 +6607,7 @@ async function xmParent(inMenu) {
 function xmParentModal() {
   const L = S.xmList || [], fmt = t => { const d = new Date(t * 1000); return `${d.getMonth() + 1}/${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
   modal(`<div class="stack xm-par"><h3 style="margin:0">🎄 サンタからの挑戦状</h3>
-    <p class="small" style="margin:0">サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもが謎のサンタ（正体はカナタ・★6・絶対透視）と達人たちの5ゲームで優勝すると、メッセージが届きます。メッセージは優勝するまで子どもの端末には届きません。</p>
+    <p class="small" style="margin:0">サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもが謎のサンタ（正体はカナタ・★6・絶対透視）と達人たちの3ゲームで優勝すると、メッセージが届きます。メッセージは優勝するまで子どもの端末には届きません。</p>
     ${L.length ? `<div class="xm-kids">${L.map(x => `<div class="xm-kid"><span class="xm-kav">${KB.avatarSVG(Object.assign({}, x.avatar || AVATAR_DEF, { name: x.name }), { mood: 'happy' })}</span><div><b>${esc(x.name)}</b><small>${x.xm ? `仕込み済み・${fmt(x.xm.start)}〜${fmt(x.xm.end)}・挑戦${x.xm.losses}回${x.xm.won ? '・🎁 受け取り済み' : ''}` : 'まだ仕込んでいません'}</small></div><button class="btn sm ${x.xm ? '' : 'primary'}" data-act="xm-edit" data-k="${esc(x.k)}">${x.xm ? '編集' : '仕込む'}</button></div>`).join('')}</div>` : '<p class="small muted" style="margin:0">このGoogleアカウントでまもっているプレイヤーがいません。子どものプレイヤーで「🛡 Googleでまもる」をしてから、もう一度開いてください。</p>'}
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn sm" data-act="xm-test">🎮 演出をためす</button><button class="btn sm" data-act="xm-about">📖 使い方・うちの使い方</button></div>
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
@@ -6613,7 +6618,7 @@ function xmEdit(k) {
     <label class="su-row col"><b>サンタからのメッセージ（200文字まで）</b><textarea id="xm-msg" rows="4" maxlength="200" placeholder="例）メリークリスマス！プレゼントは、本棚のいちばん上の段の奥にあるよ。">${esc(c ? c.msg : '')}</textarea></label>
     <label class="su-row col"><b>挑戦できる期間（はじめ）</b><input id="xm-st" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.start * 1000) : d.start)}"></label>
     <label class="su-row col"><b>挑戦できる期間（おわり）</b><input id="xm-en" type="datetime-local" class="su-in" value="${xmLoc(c ? new Date(c.end * 1000) : d.end)}"></label>
-    <div class="su-row col"><b>謎のサンタといっしょに打つ3人</b><div class="su-seg" id="xm-lv">${XM_LV.map(([v, l]) => `<button class="${(c ? c.lv : 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div><small class="muted">3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）</small></div>
+    <div class="su-row col"><b>謎のサンタといっしょに打つ2人</b><div class="su-seg" id="xm-lv">${XM_LV.map(([v, l]) => `<button class="${(c ? c.lv : 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div><small class="muted">3回目の挑戦から、負けるたびに少しずつ手加減します（2人が弱く→サンタの絶対透視なし→さらに弱く）</small></div>
     ${c ? `<label class="small"><input type="checkbox" id="xm-reset"> 挑戦の回数と受け取りを最初に戻す（${c.losses}回挑戦${c.won ? '・受け取り済み' : ''}）</label>` : ''}
     <div class="row" style="justify-content:space-between;gap:8px">${c ? `<button class="btn" data-act="xm-del" data-k="${esc(k)}">取り消す</button>` : '<span></span>'}<span class="row" style="gap:8px"><button class="btn" data-act="xm-parent-back">もどる</button><button class="btn primary" data-act="xm-save" data-k="${esc(k)}">仕込む</button></span></div></div>`);
   document.querySelectorAll('#xm-lv button').forEach(b => b.onclick = () => { document.querySelectorAll('#xm-lv button').forEach(o => o.classList.toggle('on', o === b)); });
@@ -6629,14 +6634,14 @@ async function xmDel(k) { if (!confirm('この挑戦状を取り消しますか�
 function xmTestMenu() {
   modal(`<div class="stack xm-par"><h3 style="margin:0">🎮 演出をためす（テストプレイ）</h3><p class="small" style="margin:0">子どもと同じ流れを、おうちの人がためせます。記録やランキングには残らず、子どもの挑戦の回数にも数えません。</p>
     <label class="su-row col"><b>ためしに出すメッセージ</b><textarea id="xm-msg-test" rows="3" maxlength="200">メリークリスマス！（テスト）プレゼントは○○の中にあるよ。</textarea></label>
-    <div class="su-row col"><b>いっしょに打つ3人</b><div class="su-seg" id="xm-tlv">${XM_LV.map(([v, l]) => `<button class="${(S.xmTestLv || 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div></div>
+    <div class="su-row col"><b>いっしょに打つ2人</b><div class="su-seg" id="xm-tlv">${XM_LV.map(([v, l]) => `<button class="${(S.xmTestLv || 5) === v ? 'on' : ''}" data-v="${v}">${l}</button>`).join('')}</div></div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="xm-test-reveal">🎁 勝ったときの演出だけ見る</button><button class="btn primary" data-act="xm-test-play">🃏 実際に1セット遊ぶ</button></div></div>`);
   document.querySelectorAll('#xm-tlv button').forEach(b => b.onclick = () => { S.xmTestLv = +b.dataset.v; document.querySelectorAll('#xm-tlv button').forEach(o => o.classList.toggle('on', o === b)); });
   const ta = $('#xm-msg-test'); ta.oninput = () => { S.xmTestMsg = ta.value; }; S.xmTestMsg = ta.value;
 }
 function xmAbout() {
   modal(`<div class="stack xm-par"><h3 style="margin:0">📖 サンタからの挑戦状　使い方</h3>
-    <ol class="small xm-steps"><li>子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。</li><li>「🎄 おうちの人へ」からGoogleでログインし、子どもを選んで、サンタからのメッセージと期間（はじめは12/25の0時から24時間）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。</li><li>「🎮 演出をためす」で、子どもと同じ流れを先にためせます。</li><li>開始の3日前から、子どものオンライン大会の一覧に「🎄 サンタからの挑戦状」が出ます（開始までの残り時間つき）。当日はエントリーして挑戦します。サンタ（正体はカナタ・★6・奥義「絶対透視」。白いあごひげとサンタ帽）と達人3人の5ゲームで卓内1位になると、メッセージが届きます。</li><li>3回負けると、サンタが手加減します（絶対透視なし・3人が1段弱く）。何回でも挑戦できます。</li></ol>
+    <ol class="small xm-steps"><li>子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。</li><li>「🎄 おうちの人へ」からGoogleでログインし、子どもを選んで、サンタからのメッセージと期間（はじめは12/25の0時から24時間）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。</li><li>「🎮 演出をためす」で、子どもと同じ流れを先にためせます。</li><li>開始の3日前から、子どものオンライン大会の一覧に「🎄 サンタからの挑戦状」が出ます（開始までの残り時間つき）。当日はエントリーして挑戦します。サンタ（正体はカナタ・★6・奥義「絶対透視」。白いあごひげとサンタ帽）と達人2人の3ゲームで卓内1位になると、メッセージが届きます。</li><li>3回目の挑戦から、負けるたびに少しずつ手加減します（2人が1段弱く→サンタの絶対透視なし→2人がもう1段弱く→サンタも弱く）。何回でも挑戦できます。</li></ol>
     <p class="small muted" style="margin:0">メッセージはサーバーにだけ置き、優勝するまで子どもの端末には届きません。同じプレイヤーなら、別の端末で開いても同じ挑戦状です。</p>
     <h4 style="margin:4px 0 0">🏠 うちではこんな使い方</h4>
     <p class="small" style="margin:0">わが家では毎年、サンタがプレゼントの隠し場所をクイズにしたカードを仕込んでいます。上の子が小さいころは、Scratchで冒険ゲームを作り、とらわれたサンタを救い出すとプレゼントのありかが分かるようにしました。今年は、カナタがふんするサンタを含む達人ぞろいのセットで優勝すると、隠し場所のメッセージを受け取れるようにしています。このしかけを、ほかのおうちでも使えるようにお裾分けしました。</p>
