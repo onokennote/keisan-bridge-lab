@@ -3147,14 +3147,22 @@ const HTABS = () => [['h-online', '🌐', 'オンライン', ON_ENABLED()], ['h-
 function homeTab() { const T = HTABS().map(x => x[0]); let t = ''; try { t = JSON.parse(localStorage.getItem('kb.homeTab') || '""'); } catch (e) { } return T.includes(t) ? t : T[0]; }
 // 自動テスト（webdriver）ではタブで隠さない（ホームのボタンをそのまま押せるように。確かめるときは kb.forceTabs）
 const htAuto = () => { try { return !!navigator.webdriver && localStorage.getItem('kb.forceTabs') !== '1'; } catch (e) { return false; } };
-const htHide = id => htAuto() || homeTab() === id ? '' : 'hidden';
+const htHide = id => htAuto() || homeTab() === id ? '' : 'data-off inert';
+// ホームのフッター：produced by onoken。4つのスートを押すと、研究所のなかまがひと言（遊び）
+const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所いじっとるで…'], ['root', 'このアプリは、悔しさから生まれました。'], ['masa', '打倒OZ家！合言葉はこれや！'], ['root', '確率は裏切りません。ただし、ときどき運が裏切ります。'], ['masa', '♠も♥も♦も♣も、数字は数字や！'], ['root', '最善手を選んでも負けることはあります。それが計算ブリッジの奥深さです。'], ['masa', 'サッカーもポーカーも計算ブリッジも、最後は場数や！']];
+function homeFooterHTML() {
+  return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
+    <div class="hf-name">計算ブリッジ作戦研究所 <small>〜打倒OZ家への道〜</small></div>
+    <div class="hf-by">produced by <b>onoken</b> <span class="muted">＆ 研究所のなかまたち（博士・マサ・AI研究員）</span></div>
+    <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div></footer>`;
+}
 function hnavHTML() {
   const cur = homeTab();
   const T = HTABS(); return `<nav class="hnav htabs" role="tablist" style="--n:${T.length}">${T.map(([id, ic, nm]) => `<button role="tab" class="${id === cur ? 'on' : ''}" aria-selected="${id === cur}" data-act="hnav" data-to="${id}"><span>${ic}</span>${nm}</button>`).join('')}</nav>`;
 }
 function htabSet(id) {
   try { localStorage.setItem('kb.homeTab', JSON.stringify(id)); } catch (e) { }
-  HTABS().forEach(([x]) => { const el = document.getElementById(x); if (el) el.hidden = !htAuto() && x !== id; });
+  HTABS().forEach(([x]) => { const el = document.getElementById(x); if (!el) return; const off = !htAuto() && x !== id; el.toggleAttribute('data-off', off); el.inert = off; });
   document.querySelectorAll('.htabs button').forEach(b => { const on = b.dataset.to === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
 }
 function homeHTML() {
@@ -3184,8 +3192,8 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
 <div class="hb-row">${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ・BP・連続最善</small></span><span class="rb-go">見る →</span></button>' : ''}${roadBannerHTML()}</div>
 ${hnavHTML()}
+<div class="htab-stack ${htAuto() ? 'ht-all' : ''}">
 ${onlineHomeHTML()}
-<div class="mode-grid">
   <div class="mode" id="h-prac" ${htHide('h-prac')}><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${mbFold('mbPrac', MB_PRAC)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     ${pracFacts()}
@@ -3196,7 +3204,6 @@ ${onlineHomeHTML()}
     ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
   ${miniHTML()}
-</div>
 
 <div id="h-about" ${htHide('h-about')}>
 <div class="row" style="margin-top:14px">
@@ -3215,6 +3222,8 @@ ${onlineHomeHTML()}
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 </div>
+</div>
+${homeFooterHTML()}
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
 
@@ -6345,6 +6354,7 @@ function act(a, el) {
     case 'ol-tab': { S.olTab = el.dataset.k; const c = $('.on-card'); if (c) { c.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); } break; }
     case 'mb-pop': mbPopup(el.dataset.mb); break;
     case 'hnav': htabSet(el.dataset.to); break;
+    case 'foot-egg': { const [w, t] = FOOT_LINES[(S.footI = ((S.footI == null ? Math.floor(Math.random() * FOOT_LINES.length) : S.footI) + 1) % FOOT_LINES.length)]; KB.sfx && KB.sfx('select'); toast(`${w === 'root' ? '🦉 博士' : '🧢 マサ'}「${t}」`); document.querySelectorAll('.hf-suits span').forEach((x, i) => { x.style.animation = 'none'; void x.offsetWidth; x.style.animation = `hfJump .5s ${i * 0.06}s ease-out`; }); break; }
     case 'fam-back': famMenuModal(); break;
     case 'fam-rep-back': famReportPick(); break;
     case 'lim-home': closeModal(); go('home'); break;
