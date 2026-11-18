@@ -37,13 +37,21 @@ const shot = n => path.join(__dirname, 'out', n);
   ok(await p.evaluate(() => !!document.querySelector('.pb-fam')), '「おうちの人」にしたプレイヤーのホームに、おうちの人メニューの入口');
   await (await p.$('.pb-fam')).screenshot({ path: shot('fam_btn.png') });
   await p.evaluate(() => { KBAPP.act('fam-menu'); }); await p.waitForTimeout(800);
+  await p.fill('#fam-pw', 'santa2026'); await p.click('#fam-ok'); await p.waitForTimeout(800);
   await p.click('#modal [data-role="child"]'); await p.waitForTimeout(600);
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1800);
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await p.waitForTimeout(400);
   ok(await p.evaluate(() => !document.querySelector('.pb-fam') && !document.querySelector('#modal [data-act="fam-menu"]')), '「子ども」にしたプレイヤーには、おうちの人メニューの入口が出ない（ホームにもプレイヤーの画面にも）');
   await (await p.$('#modal .pm')).screenshot({ path: shot('pm_child.png') });
+  // メニューを閉じて開き直すと、毎回パスワードを聞く（子どもも同じ端末で遊ぶので）
+  await p.evaluate(() => { KBAPP.act('close'); KBAPP.act('fam-menu'); }); await p.waitForTimeout(700);
+  ok(await p.evaluate(() => !!document.querySelector('#modal #fam-pw') && !document.querySelector('#modal #fam-pw2') && !document.querySelector('#modal .fam-list')), 'おうちの人メニューは開くたびにパスワードを聞く');
+  await p.fill('#fam-pw', 'santa2026'); await p.click('#fam-ok'); await p.waitForTimeout(700);
+  ok(await p.evaluate(() => !!document.querySelector('#modal .fam-list')), '正しいパスワードで開ける');
+  await p.click('#modal [data-fam="xmas"]'); await p.waitForTimeout(800);
+  ok(await p.evaluate(() => !document.querySelector('#modal #fam-pw') && /サンタからの挑戦状/.test(document.querySelector('#modal').innerText)), 'メニューの中から開いたしかけでは、もう一度は聞かない');
   // 保護者メニュー：Googleでログイン→子どもが一覧に出る
-  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('xm-parent'); }); await p.waitForTimeout(900);
+  await p.waitForTimeout(100);
   ok(await p.evaluate(() => /ユウ/.test(document.querySelector('#modal').innerText) && /まだ仕込んでいません/.test(document.querySelector('#modal').innerText)), '保護者メニューに、まもっている子ども（ユウ）が出る');
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('xm_parent.png') });
   // 仕込む（画面から）

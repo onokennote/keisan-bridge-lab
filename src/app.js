@@ -6001,7 +6001,7 @@ function modalKeep(fn) {
   if (bg2) { bg2.classList.add('still'); bg2.scrollTop = a; } if (box2) box2.scrollTop = b;
 }
 function modal(html) {
-  closeModal();
+  closeModal(); if (!/xm-par/.test(html)) S.famPw = null; // おうちの人メニューから別の画面へ出たら、パスワードを忘れる（メニューの中の画面どうしでは覚えたまま）
   const bg = document.createElement('div'); bg.className = 'modal-bg'; bg.id = 'modal';
   bg.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
   document.body.appendChild(bg);
@@ -6166,7 +6166,7 @@ function act(a, el) {
     case 'hint-more': deepHint(); break;
     case 'eval-mine': evalMine(); break;
     case 'standings': S.standingsReturn = !!S.inSummary; showStandings(); break;
-    case 'close': closeModal(); if (S.standingsReturn) { S.standingsReturn = false; const pr = $('#peek-return'); if (pr) pr.remove(); showGameSummary(true); } break;
+    case 'close': S.famPw = null; closeModal(); if (S.standingsReturn) { S.standingsReturn = false; const pr = $('#peek-return'); if (pr) pr.remove(); showGameSummary(true); } break;
     case 'peek-board': {
       closeModal();
       const r = document.createElement('div'); r.className = 'peek-return'; r.id = 'peek-return';
@@ -6550,7 +6550,7 @@ function xmReveal(msg, test) {
 }
 // おうちの人メニュー：子ども向けのしかけを、ここに順に足していく（いまはサンタからの挑戦状）。
 // プロフィールで「おうちの人（大人）」にしたプレイヤーには、まだ見ていないしかけがあるとホームにおしらせマーク。開くにはGoogleでのログインが必要
-const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの5ゲームで優勝すると届くようにします', open: () => xmParent() }];
+const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの5ゲームで優勝すると届くようにします', open: () => xmParent(true) }];
 const famUnseen = () => { const sn = store.get('famSeen', []); return FAM_FEATURES.some(f => !sn.includes(f.id)); };
 async function famMenu() {
   let idt; try { idt = await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
@@ -6559,6 +6559,7 @@ async function famMenu() {
   famMenuModal();
 }
 function famMenuModal() {
+  S.famOpen = true;
   const sn = store.get('famSeen', []), L = S.xmList || [];
   modal(`<div class="stack xm-par"><h3 style="margin:0">👪 おうちの人メニュー</h3><p class="small" style="margin:0">子ども向けのしかけを用意できます。しかけは順に増えていきます。</p>
     <div class="fam-list">${FAM_FEATURES.map(f => `<button class="fam-f" data-fam="${f.id}"><span class="fam-ic">${f.ic}</span><span><b>${esc(f.name)}${sn.includes(f.id) ? '' : '<em class="fam-new">NEW</em>'}</b><small>${esc(f.desc)}</small></span></button>`).join('')}</div>
@@ -6572,7 +6573,7 @@ function famMenuModal() {
 }
 // Googleのあとにパスワード（子どもに見られないように）。はじめは決めてもらう。忘れたら作り直せるが、そのGoogleで仕込んだしかけは消える
 function famAuth(idt) {
-  if (S.famPw && S.famPwG === idt) return Promise.resolve(true);
+  S.famPw = null; // 子どもも同じ端末で遊ぶので、メニューを開くたびに毎回パスワードを確かめる（覚えておかない）
   return new Promise(async res => {
     let j; try { j = await cloudReq('fam_auth', { idt }); } catch (e) { toast(e.message || 'ひらけませんでした'); return res(false); }
     const ask = has => {
@@ -6583,7 +6584,7 @@ function famAuth(idt) {
       $('#fam-x').onclick = () => { closeModal(); res(false); };
       $('#fam-ok').onclick = async () => {
         const v = pw.value; if (!has && v !== ($('#fam-pw2') || {}).value) { toast('2回のパスワードがちがいます'); return; }
-        try { await cloudReq('fam_auth', has ? { idt, pw: v } : { idt, newPw: v }); S.famPw = v; S.famPwG = idt; closeModal(); res(true); } catch (e) { toast(e.message || 'パスワードを確かめられませんでした'); }
+        try { await cloudReq('fam_auth', has ? { idt, pw: v } : { idt, newPw: v }); closeModal(); S.famPw = v; res(true); } catch (e) { toast(e.message || 'パスワードを確かめられませんでした'); }
       };
       pw.onkeydown = e => { if (e.key === 'Enter' && has) $('#fam-ok').click(); };
       const fg = $('#fam-forgot'); if (fg) fg.onclick = async () => { if (!confirm('パスワードを作り直します。このGoogleで仕込んだしかけ（サンタからの挑戦状など）はすべて消えます。よろしいですか？')) return; try { await cloudReq('fam_auth', { idt, reset: 1 }); ask(false); } catch (e) { toast(e.message || '作り直せませんでした'); } };
@@ -6592,9 +6593,9 @@ function famAuth(idt) {
   });
 }
 // 保護者メニュー（Googleでログイン）
-async function xmParent() {
+async function xmParent(inMenu) {
   let idt; try { idt = await gSignIn('🎄 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
-  if (!(await famAuth(idt))) return;
+  if (!(inMenu && S.famPw) && !(await famAuth(idt))) return; // メニューの中から開いたときは、さっき入れたパスワードのまま
   let j; try { j = await cloudReq('xm_list', { idt, pw: S.famPw }); } catch (e) { toast(e.message || 'ひらけませんでした'); return; }
   S.xmList = j.list; xmParentModal();
 }
