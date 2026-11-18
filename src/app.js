@@ -1834,7 +1834,7 @@ function profHTML(D, o) {
     <div class="pv-info" hidden></div>
     <div class="pv-badges">${got.length || spGot(g).length ? spGot(g).map(a => ({ a, i: 0 })).concat(got).map(b => `<button type="button" class="pv-bb" data-pvi="b:${b.a[0]}:${b.i}" aria-label="${esc(b.a[4][b.i])}">${badgeSVG(b.a, b.i, true, 26)}</button>`).join('') : '<small class="muted">まだバッジはありません</small>'}</div>
     ${podiumHTML(D.awards)}
-    ${(D.awards || []).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${{ 1: '<em class="on-off">公式</em> ', 2: '<em class="on-off dl">デイリー</em> ', 3: '<em class="on-off">シーズン</em> ' }[+a.official] || ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
+    ${(D.awards || []).filter(a => +a.official === 1).length ? `<div class="pv-aw"><b>🏆 オンライン大会の実績</b>${D.awards.filter(a => +a.official === 1).map(a => `<span>${['🥇', '🥈', '🥉'][a.place - 1] || ''} ${{ 1: '<em class="on-off">公式</em> ', 2: '<em class="on-off dl">デイリー</em> ', 3: '<em class="on-off">シーズン</em> ' }[+a.official] || ''}${esc(a.tname)}<small>${new Date(a.at * 1000).toLocaleDateString('ja-JP')}</small></span>`).join('')}</div>` : ''}
     ${D.bio ? `<div class="rk-bio"><small>${esc(NAME)}の${o.ai ? 'プロフィール（AI研究員）' : '自己紹介'}</small>${esc(D.bio).replace(/\n/g, '<br>')}</div>` : ''}
   </div>`;
 }

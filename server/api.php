@@ -601,7 +601,7 @@ function obTourCfg(array $b, array $u): array {
   $pts = array_values(array_map(fn($x) => max(0, min(20, (int)$x)), array_slice((array)($b['points'] ?? [10, 8, 5, 2, 0]), 0, 5)));
   $cfg = ['name' => $name, 'desc' => $desc, 'startAt' => $startAt, 'limit' => $lim, 'judge' => in_array($b['judge'] ?? '', OB_JUDGE, true) ? $b['judge'] : 'after3', 'min' => $min, 'max' => $max, 'aiFill' => !empty($b['aiFill']), 'aiLv' => max(1, min(3, (int)($b['aiLv'] ?? 2))), 'aiMix' => in_array($b['aiMix'] ?? '', array_keys(OB_MIX), true) ? $b['aiMix'] : 'even',
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
-  'official' => !empty($b['official']) && obCanOfficial($u['uid']), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'waitMin' => in_array((int)($b['waitMin'] ?? 15), OB_WAITS, true) ? (int)$b['waitMin'] : 15, 'points' => $pts ?: [10, 8, 5, 2, 0]];
+  'official' => !empty($b['official']) && obCanOfficial($u, $b), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'waitMin' => in_array((int)($b['waitMin'] ?? 15), OB_WAITS, true) ? (int)$b['waitMin'] : 15, 'points' => $pts ?: [10, 8, 5, 2, 0]];
   $cfg['aiRes'] = array_key_exists('aiRes', $b) ? !empty($b['aiRes']) : $cfg['entry'] === 'open'; // AI研究員を呼ぶ（はじめは、誰でもの大会はON・招待だけの大会はOFF）
   $cfg['podAi'] = array_key_exists('podAi', $b) ? !empty($b['podAi']) : true; // 表彰台の順位にAIを含む（はじめは含む）
   if ($cfg['official']) { $tp = array_values(array_map(fn($x) => max(0, min(1000, (int)$x)), array_slice((array)($b['tpts'] ?? OFFICIAL_TPTS), 0, 10))); $cfg['tpts'] = $tp ?: OFFICIAL_TPTS; }
@@ -633,7 +633,15 @@ function obInvited(array $t, string $uid): bool {
   foreach ($q->fetchAll() as $r) if (in_array(obNorm($r['name']), $inv, true)) return true;
   return false;
 }
-function obCanOfficial(string $uid): bool { global $CFG; return in_array($uid, $CFG['official'] ?? [], true); }
+const OFFICIAL_NAMES = ['おのけん']; // 公式大会をひらける人（ランキングの名前。名前はほかの人とかぶれない）。設定の $CFG['official']（アカウント）でも指定できる
+function obCanOfficial(array $u, array $b = []): bool {
+  global $CFG; if (in_array($u['uid'], $CFG['official'] ?? [], true)) return true;
+  $pid = (string)($u['tpid'] ?? '') ?: cleanPid($b['pid'] ?? ''); if ($pid === '') return false;
+  $q = db()->prepare('SELECT name FROM ranks WHERE uid = ? AND pid = ? AND (ai IS NULL OR ai = 0)'); $q->execute([$u['uid'], $pid]); $n = $q->fetchColumn();
+  if ($n === false) return false; $n = normName((string)$n);
+  foreach (OFFICIAL_NAMES as $w) if (normName($w) === $n) return true;
+  return false;
+}
 // 一覧・詳細に出す形（招待されているか・自分が出ているか・自分の卓）
 function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
@@ -993,7 +1001,7 @@ try {
         $vw = obTourView($t, $u['uid'], $ver, false); if ($t['cfg']['entry'] === 'invite' && !$vw['invited'] && !$vw['entered']) continue; // 招待だけの大会は、招待された人にだけ見える
         $out[] = $vw;
       }
-      out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u['uid']), 'uid' => $u['uid'], 'dailyMine' => dailyMineToday($u['uid'], (string)($u['tpid'] ?? ''), cleanPid($b['pid'] ?? ''))]);
+      out(['ok' => true, 'tours' => $out, 'canOfficial' => obCanOfficial($u, $b), 'uid' => $u['uid'], 'dailyMine' => dailyMineToday($u['uid'], (string)($u['tpid'] ?? ''), cleanPid($b['pid'] ?? ''))]);
     }
     case 'rival_set': { // ライバルに指定する／外す（rid はランキングの人。1人5人まで）
       $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $rid = preg_replace('/[^a-f0-9]/', '', (string)($b['rid'] ?? ''));
