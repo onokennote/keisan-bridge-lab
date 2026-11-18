@@ -538,7 +538,7 @@ const advB = (k, i) => { const a = ACH.find(x => x[0] === k); return a ? { k, i,
 function advText(t) { let h = esc(t.text); (t.bs || []).filter(Boolean).forEach(b => { const q = `「${esc(b.name)}」`; h = h.split(q).join(`<button class="adv-b" data-advb="${b.k}:${b.i}">${q}</button>`); }); return h; }
 function advModal(html) {
   modal(html);
-  document.querySelectorAll('#modal [data-advb]').forEach(el => el.onclick = () => { const [k, i] = el.dataset.advb.split(':'); S.advBack = () => advModal(html); KB.sfx('select'); badgeTalk(k, +i); });
+  document.querySelectorAll('#modal [data-advb]').forEach(el => el.onclick = () => { const [k, i] = el.dataset.advb.split(':'); S.advBack = () => advModal(html); S.advBackLbl = null; KB.sfx('select'); badgeTalk(k, +i); });
 }
 // ホームを開いたとき、マサが「アドバイスするで〜」と手招き（まだ一度も押していない人はずっと、押したことのある人は開いた最初の1回だけ・10秒）
 const R0 = a => a[(Date.now() / 60000 | 0) % a.length];
@@ -638,7 +638,7 @@ function notesOpen(more) {
 function noteGo(i) {
   const n = (S.notesList || [])[i]; if (!n) return;
   if (n.rid) { rankCardOpen(n.rid, false, null); return; }
-  if (n.kind === 'badge') { S.advBack = notesOpen; badgeTalk(n.k, n.i); return; }
+  if (n.kind === 'badge') { S.advBack = notesOpen; S.advBackLbl = null; badgeTalk(n.k, n.i); return; }
   if (n.tid) { closeModal(); act('on-tour-open', { dataset: { id: n.tid } }); return; }
   if (n.kind === 'rank') { closeModal(); go('ranking'); return; }
   if (n.kind === 'cat' || n.kind === 'rating' || n.kind === 'streak') { closeModal(); go('growth'); return; }
@@ -1066,7 +1066,7 @@ function badgeTalk(key, i) {
   else if (key === 'streak5' || key === 'streak10') text += ' AIの読みを見た手は連続に数えへんで（途切れもせえへん）。';
   modal(`<div class="bdg-talk"><div class="bdg-big">${badgeSVG(a, i, !!got, 72)}<b>${esc(name)}</b><small>${esc(a[1])}・${rank}</small><span class="bp-tag">${bpOf(key, i)} BP</span></div>
     <div class="commentary"><div class="cm-av">${KB.casterSVG('masa', got ? 'happy' : 'normal')}</div><div class="cm-body"><span class="cm-name">実況・ナニワのマサ</span><span class="cm-text">${esc(text)}</span></div></div>
-    <div class="row" style="justify-content:flex-end;gap:8px">${S.advBack ? '<button class="btn" data-act="adv-back">← アドバイスに戻る</button>' : ''}<button class="btn primary" data-act="close">閉じる</button></div></div>`);
+    <div class="row" style="justify-content:flex-end;gap:8px">${S.advBack ? `<button class="btn" data-act="adv-back">${S.advBackLbl || '← アドバイスに戻る'}</button>` : ''}<button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // 判断ごとの記録（課題の進み具合と、連続最善・待ちの称号）
 function growthOnDecision(d) {
@@ -3119,17 +3119,28 @@ function titleIntro() {
 // ---------- ホームの折りたたみ（開いたかどうかは端末ごとに覚える kb.fold） ----------
 const foldOpen = id => { const f = raw.get('kb.fold', {}) || {}; return !!f[id]; };
 try { document.addEventListener('toggle', e => { const d = e.target; if (!d || !d.dataset || !d.dataset.fold) return; const f = raw.get('kb.fold', {}) || {}; f[d.dataset.fold] = d.open; try { localStorage.setItem('kb.fold', JSON.stringify(f)); } catch (x) { } }, true); } catch (e) { }
+const MB_DEFS = { mbPrac: ['1セット練習', () => MB_PRAC], mbTour: ['大会練習モード', () => MB_TOUR], mbAtk: ['バッジアタック', () => MB_ATK, () => attackCardHTML()], mbHunt: ['式ハンター', () => MB_HUNT, () => huntCardHTML()], mbOuts: ['アウツチャレンジ', () => MB_OUTS, () => outsCardHTML()], mbChart: ['早見表を作成', () => MB_CHART, () => chartCardHTML()] };
+const mbCount = keys => { const g = G_(); let all = 0, have = 0; keys.forEach(k => { const a = ACH.find(x => x[0] === k); if (!a) return; all += a[2].length; have += a[2].filter(t => g.ach[k + ':' + t]).length; }); return { all, have }; };
+// 取れるバッジは、ボタンで重ねて見せる（ホームを短く）。ポップアップの中では一覧のまま
 function mbFold(id, keys) {
-  const g = G_(), ks = keys, all = ks.reduce((n, k) => { const a = ACH.find(x => x[0] === k); return n + (a ? a[2].length : 0); }, 0), have = ks.reduce((n, k) => { const a = ACH.find(x => x[0] === k); return n + (a ? a[2].filter(t => g.ach[k + ':' + t]).length : 0); }, 0);
-  return `<details class="hf mb-fold" data-fold="${id}" ${foldOpen(id) ? 'open' : ''}><summary><span>🏅 このモードのバッジ <b>${have}</b>/${all}</span></summary>${modeBadgeRows(keys, true)}</details>`;
+  if (S.mbExpand) return modeBadgeRows(keys, true);
+  const c = mbCount(keys);
+  return `<button class="mb-pop" data-act="mb-pop" data-mb="${id}">🏅 このモードのバッジ <b>${c.have}</b>/${c.all}<span>›</span></button>`;
 }
-// 特訓（ミニゲーム）：2×2の小さなタイル。押すとすぐ始まる。説明・バッジ・記録は「くわしく」にたたむ
+function mbPopup(id) {
+  const d = MB_DEFS[id]; if (!d) return;
+  let body; if (d[2]) { S.mbExpand = true; try { body = d[2](); } finally { S.mbExpand = false; } } else body = modeBadgeRows(d[1](), true);
+  const c = mbCount(d[1]());
+  modal(`<div class="stack mb-popup"><h3 style="margin:0">🏅 ${esc(d[0])}のバッジ <small class="muted">${c.have}/${c.all}</small></h3><p class="small muted" style="margin:0">バッジを押すと、条件とマサの説明が出ます。</p>${body}<div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
+  bind(); document.querySelectorAll('#modal [data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); S.advBack = () => mbPopup(id); S.advBackLbl = '← もどる'; badgeTalk(k, +i); });
+}
+// 特訓（ミニゲーム）：2×2の小さなタイル。押すとすぐ始まる。右下の 🏅 で、説明・記録・取れるバッジを重ねて見せる
 function miniHTML() {
-  const ab = attackBests()[ATTACK_MIN], hb = store.get('huntBest', null), z = zukanCount(zukanGet()), c = G_().cnt || {};
-  const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}`, 'hunt-start'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open']];
+  const ab = attackBests()[ATTACK_MIN], z = zukanCount(zukanGet()), c = G_().cnt || {};
+  const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start', 'mbAtk'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}`, 'hunt-start', 'mbHunt'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill', 'mbOuts'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open', 'mbChart']];
   return `<div class="mode mini-card" id="h-mini"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🥋</span><div><div class="lbl">MINI GAMES</div><h2>特訓（ミニゲーム）</h2></div></div>
-    <div class="mini-tiles">${T.map(([ic, nm, sub, a]) => `<button class="mini-t" data-act="${a}"><span class="mt-ic">${ic}</span><b>${nm}</b><small>${esc(sub)}</small></button>`).join('')}</div>
-    <details class="hf" data-fold="miniMore" ${foldOpen('miniMore') ? 'open' : ''}><summary><span>くわしく（説明・バッジ・記録）</span></summary><div class="mini-more">${attackCardHTML()}${huntCardHTML()}${outsCardHTML()}${chartCardHTML()}</div></details></div>`;
+    <div class="mini-tiles">${T.map(([ic, nm, sub, a, mb]) => { const k = mbCount(MB_DEFS[mb][1]()); return `<div class="mini-t"><button class="mt-main" data-act="${a}"><span class="mt-ic">${ic}</span><b>${nm}</b><small>${esc(sub)}</small></button><button class="mt-bdg" data-act="mb-pop" data-mb="${mb}" aria-label="${nm}の説明とバッジ">🏅 ${k.have}/${k.all}</button></div>`; }).join('')}</div>
+    <p class="small muted" style="margin:0">タイルを押すとすぐ始まります。🏅 で説明・記録・取れるバッジ。</p></div>`;
 }
 function hnavHTML() {
   const I = [['🌐', 'オンライン', 'h-online', ON_ENABLED()], ['🃏', '練習', 'h-prac', 1], ['🏟️', '大会', 'h-tour', 1], ['🥋', '特訓', 'h-mini', 1], ['ℹ️', 'このアプリ', 'about', 1]].filter(x => x[3]);
@@ -6175,7 +6186,7 @@ function bind() {
   on('#set-auto', 'onchange', e => { S.settings.autoHint = e.target.checked; store.set('settings', S.settings); });
   document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b));
   document.querySelectorAll('[data-dqc]').forEach(b => b.onclick = () => { const D = S.drill, i = +b.dataset.dqc, k = D.sel.indexOf(i); if (k >= 0) D.sel.splice(k, 1); else { if (D.sel.length >= 3) D.sel.shift(); D.sel.push(i); } KB.sfx(k >= 0 ? 'unselect' : 'select'); render(); });
-  document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); S.advBack = null; badgeTalk(k, +i); });
+  document.querySelectorAll('[data-bdg]').forEach(b => b.onclick = () => { const [k, i] = b.dataset.bdg.split(':'); S.advBack = null; S.advBackLbl = null; badgeTalk(k, +i); });
   document.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => catTalk(b.dataset.cat));
   document.querySelectorAll('[data-bgt]').forEach(h => h.onclick = e => { if (e.target.closest('.emb-btn')) return; const gi = +h.dataset.bgt, o = S.bdgOpen || (S.bdgOpen = new Set()); o.has(gi) ? o.delete(gi) : o.add(gi); const on = o.has(gi); h.parentElement.classList.toggle('open', on); h.setAttribute('aria-expanded', on); const ab = document.querySelector('[data-bga="1"]'); if (ab) ab.textContent = o.size >= ACH_GROUPS.length ? '▴ すべて閉じる' : '▾ すべて開く'; });
   document.querySelectorAll('[data-bga="1"]').forEach(b => b.onclick = () => { const o = S.bdgOpen || (S.bdgOpen = new Set()), all = o.size < ACH_GROUPS.length; o.clear(); if (all) ACH_GROUPS.forEach((_, i) => o.add(i)); document.querySelectorAll('[data-bgt]').forEach(h => { h.parentElement.classList.toggle('open', all); h.setAttribute('aria-expanded', all); }); b.textContent = all ? '▴ すべて閉じる' : '▾ すべて開く'; });
@@ -6322,6 +6333,7 @@ function act(a, el) {
     case 'g-protect': gProtect(); break;
     case 'xm-parent': xmParent(false, (el && el.dataset || {}).xk); break;
     case 'fam-menu': famMenu(); break;
+    case 'mb-pop': mbPopup(el.dataset.mb); break;
     case 'hnav': { const t = document.getElementById(el.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'fam-back': famMenuModal(); break;
     case 'fam-rep-back': famReportPick(); break;
@@ -6386,7 +6398,7 @@ function act(a, el) {
     case 'title-shuffle': S.titleTapAt = Date.now(); titleShuffle(true); break;
     case 'host-masa': try { localStorage.setItem('kb.masaUsed', '1'); } catch (e) { } S.masaBeckoned = true; masaAdvice(); break;
     case 'masa-more': masaAdvice(true); break;
-    case 'adv-back': { const f = S.advBack; S.advBack = null; if (f) f(); else closeModal(); break; }
+    case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;

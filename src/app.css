@@ -2656,8 +2656,12 @@ body.rewinding #home-fab{display:none}
 .mb-fold>summary{padding:6px 10px;font-size:12.5px}
 .dl-more{margin-top:6px}.dl-more>summary{padding:6px 10px;font-size:12.5px}.dl-more .dl-part{margin-top:6px}
 .mini-tiles{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.mini-t{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px;border-radius:14px;border:1px solid rgba(242,182,50,.35);background:linear-gradient(135deg,rgba(242,182,50,.14),rgba(255,255,255,.03));color:inherit;font:inherit;text-align:left;cursor:pointer}
-.mini-t .mt-ic{font-size:24px}.mini-t b{font-size:15px;color:#fff3d6}.mini-t small{font-size:11.5px;color:var(--muted)}
+.mini-t{position:relative;display:flex;flex-direction:column;border-radius:14px;border:1px solid rgba(242,182,50,.35);background:linear-gradient(135deg,rgba(242,182,50,.14),rgba(255,255,255,.03));overflow:hidden}
+.mt-main{display:flex;flex-direction:column;align-items:flex-start;gap:2px;padding:10px 12px 30px;border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer}
+.mt-main .mt-ic{font-size:24px}.mt-main b{font-size:15px;color:#fff3d6}.mt-main small{font-size:11.5px;color:var(--muted)}
+.mt-bdg{position:absolute;right:6px;bottom:6px;padding:2px 8px;border-radius:999px;border:1px solid rgba(242,182,50,.5);background:rgba(10,20,17,.6);color:#ffd43b;font:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+.mb-pop{display:flex;align-items:center;gap:6px;width:100%;padding:6px 10px;border-radius:10px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:#e9e3cf;font:inherit;font-size:12.5px;cursor:pointer;text-align:left}.mb-pop span{margin-left:auto;color:#ffd43b;font-weight:900}
+.mb-popup .mode{margin:0;border:0;background:transparent;padding:0}.mb-popup .mode-head{display:none}
 .mini-more{display:flex;flex-direction:column;gap:10px}.mini-more .mode{margin:0}
 .hnav{display:flex;gap:6px;overflow-x:auto;padding:6px 0 2px;margin:8px 0 0;scrollbar-width:none}.hnav::-webkit-scrollbar{display:none}
 .hnav button{flex:0 0 auto;padding:6px 12px;border-radius:999px;border:1px solid rgba(242,182,50,.4);background:rgba(255,255,255,.04);color:#ffd43b;font:inherit;font-size:13px;font-weight:700;cursor:pointer}

@@ -22,6 +22,8 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await p.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   const h = await p.evaluate(() => document.documentElement.scrollHeight);
   await p.screenshot({ path: path.join(__dirname, 'out', tag + '_full.png'), fullPage: true });
+  const pop = await p.$('.mt-bdg'); if (pop) { await pop.click(); await p.waitForTimeout(400); const m = await p.$('#modal .mb-popup'); if (m) await m.screenshot({ path: path.join(__dirname, 'out', tag + '_pop.png') });
+    const bd = await p.$('#modal [data-bdg]'); if (bd) { await bd.click(); await p.waitForTimeout(300); console.log('back btn', await p.evaluate(() => (document.querySelector('#modal [data-act="adv-back"]') || {}).textContent)); await p.click('#modal [data-act="adv-back"]'); await p.waitForTimeout(300); console.log('back to popup', await p.evaluate(() => !!document.querySelector('#modal .mb-popup'))); } }
   console.log('height', h, 'errors', errs);
   await b.close(); srv.close(); php.kill(); execSync('./deploy.sh', { cwd: root });
 })();
