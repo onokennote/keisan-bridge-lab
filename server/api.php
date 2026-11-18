@@ -764,7 +764,7 @@ try {
     }
     // ---------- おうちの人メニュー：Google＋パスワード（パスワードを忘れたら作り直せるが、そのGoogleで仕込んだしかけは消える） ----------
     case 'fam_auth': {
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
+      rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
       if (!empty($b['reset'])) { db()->prepare('DELETE FROM famauth WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM xmas WHERE g = ?')->execute([$g]); out(['ok' => true, 'has' => false]); }
       $q = db()->prepare('SELECT pw FROM famauth WHERE g = ?'); $q->execute([$g]); $has = $q->fetchColumn() !== false;
       if (isset($b['newPw']) && !$has) { $np = (string)$b['newPw']; if (mb_strlen($np) < 4 || mb_strlen($np) > 32) fail('パスワードは4〜32文字にしてください'); db()->prepare('INSERT INTO famauth (g, pw, updated) VALUES (?, ?, ?)')->execute([$g, password_hash($np, PASSWORD_DEFAULT), time()]); out(['ok' => true, 'has' => true, 'pass' => true]); }
@@ -773,13 +773,13 @@ try {
     }
     // ---------- サンタからの挑戦状（保護者がGoogleでログインして仕込む。子どもは優勝するとメッセージを受け取る） ----------
     case 'xm_list': { // 保護者：まもっているプレイヤーと、仕込んだ挑戦状
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b);
+      rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b);
       $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, x.msg, x.start_at, x.end_at, x.lv, x.losses, x.won_at, f.role FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid LEFT JOIN xmas x ON x.uid = l.uid AND x.pid = l.pid LEFT JOIN famrole f ON f.uid = l.uid AND f.pid = l.pid WHERE l.g = ? ORDER BY l.at'); $q->execute([$g]);
       $L = []; foreach ($q->fetchAll() as $r) $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: 'プレイヤー', 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'role' => $r['role'] ?: null, 'xm' => $r['msg'] !== null ? ['msg' => $r['msg'], 'start' => (int)$r['start_at'], 'end' => (int)$r['end_at'], 'lv' => (int)$r['lv'], 'losses' => (int)$r['losses'], 'won' => $r['won_at'] ? (int)$r['won_at'] : null] : null];
       out(['ok' => true, 'list' => $L]);
     }
     case 'fam_role': { // おうちの人メニュー：まもっているプレイヤーを「おうちの人」か「子ども」にする
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
+      rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
       $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
       if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
       $role = in_array($b['role'] ?? '', ['adult', 'child'], true) ? $b['role'] : '';
@@ -788,7 +788,7 @@ try {
       out(['ok' => true]);
     }
     case 'xm_set': case 'xm_del': { // 保護者：挑戦状を仕込む／取り消す（まもっているプレイヤーだけ）
-      rateLimit('restore', 30); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
+      rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
       $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
       if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
       if ($a === 'xm_del') { db()->prepare('DELETE FROM xmas WHERE uid = ? AND pid = ?')->execute([$hit['uid'], $hit['pid']]); out(['ok' => true]); }

@@ -86,6 +86,9 @@ const shot = n => path.join(__dirname, 'out', n);
   let T = await p.evaluate(() => { const T = KBAPP.S.T; return { games: T.cfg.games, n: T.players.length, santa: T.players.find(x => x.santa), lv: T.players.filter(x => !x.human && !x.santa).map(x => x.level), xm: T.xmas }; });
   ok(T.n === 4 && T.santa && T.santa.ch.name === 'サンタ？？' && T.santa.ch.acc === 'santa' && T.santa.clairvoyant && T.santa.level === 6 && T.lv.length === 2 && T.games === 3 && T.lv.every(l => l === 5), '4人・3ゲーム：謎のサンタ（★6・絶対透視）と★5の2人：' + JSON.stringify(T.lv));
   await p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove())); await p.waitForTimeout(400); await p.screenshot({ path: shot('xm_table.png') });
+  // セットの終わりの画面：勝ったら「同じ設定でもう1セット」も「もう一度挑戦」も出さない／負けたら「もう一度挑戦」
+  const btns = await p.evaluate(() => { const T = KBAPP.S.T, res = (won) => { T.setHist = [{ set: 1, phase: 'prelim', res: T.players.map((q, i) => ({ id: q.id, table: 0, pp: i, rank: q.id === 0 ? (won ? 1 : 2) : (won ? 2 : 1), pts: 0, games: [] })) }]; T.tables = [T.players.map(q => q.id)]; KBAPP.go('set-end'); return { again: !!document.querySelector('[data-act="practice-again"]'), retry: !!document.querySelector('[data-act="xm-go"]') }; }; return { win: res(true), lose: res(false) }; });
+  ok(!btns.win.again && !btns.win.retry && !btns.lose.again && btns.lose.retry, '勝ったあとは「同じ設定でもう1セット」を出さない（負けたら「もう一度挑戦」）：' + JSON.stringify(btns));
   // 3回負けると手加減
   for (let i = 0; i < 3; i++) g = await post('xm_result', { token: me.token, pid: me.pid, won: false });
   ok(g.xm.losses === 3 && g.xm.msg === null, '負けを3回記録（メッセージはまだ）');

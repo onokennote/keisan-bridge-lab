@@ -5581,7 +5581,7 @@ function setEndHTML() {
   });
   const mine = h.res.find(r => r.id === 0) || null;
   let title, btn;
-  if (T.cfg.kind === 'practice') { title = `セット ${mine.rank}位（${mine.pts}点）`; btn = '<button class="btn primary" data-act="practice-again">同じ設定でもう1セット</button>'; T.done = true; store.del('session'); }
+  if (T.cfg.kind === 'practice') { title = `セット ${mine.rank}位（${mine.pts}点）`; btn = T.xmas ? (mine.rank === 1 ? '' : `<button class="btn primary" data-act="${T.xmas.test ? 'xm-test-play' : 'xm-go'}">${T.xmas.test ? 'もう一度ためす' : 'もう一度挑戦'}</button>`) : '<button class="btn primary" data-act="practice-again">同じ設定でもう1セット</button>'; T.done = true; store.del('session'); } // サンタからの挑戦状：勝ったら「もう一度」は出さない（負けたら同じ挑戦をもう一度）
   else if (T.phase === 'final') { title = '決勝 終了'; btn = '<button class="btn primary" data-act="final-result">最終結果へ</button>'; }
   else { title = `第${T.set}セット ${mine.rank}位（+${mine.pts}点）`; btn = T.set < T.cfg.sets ? '<button class="btn primary" data-act="next-set">次のセットへ（席替え）</button>' : '<button class="btn primary" data-act="to-final">予選結果と決勝進出者へ</button>'; }
   return `<div class="topbar"><div class="where">${esc(title)}</div><div></div></div>
