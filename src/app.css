@@ -2697,3 +2697,15 @@ body.rewinding #home-fab{display:none}
 .ot-dlbody h4{margin:0 0 8px;font-size:15px;color:#ffd43b}
 .ot-ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:1.5}
 .me{z-index:4}.me-av .bubble{pointer-events:none;right:auto;top:calc(100% + 6px);width:max-content;max-width:min(78vw,320px);white-space:normal} /* 自分のひと言はアイコンの下に（上だと「結果を見る」とかぶる） */ /* 上がりの帯の上に、自分のひと言が隠れないように（押す邪魔はしない） */
+/* ホーム：ランキングと日本一への道を横並び、その下はタブ */
+.hb-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0 4px}
+.hb-row .rank-banner{margin:0;flex-direction:column;align-items:flex-start;gap:4px;padding:10px 12px}
+.hb-row .rank-banner .rb-ic{font-size:24px;line-height:1}
+.hb-row .rank-banner b{font-size:18px}
+.hb-row .rank-banner small{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;font-size:11.5px;line-height:1.35}
+.hb-row .rank-banner .rb-go{margin-left:0;font-size:13px}
+.htabs{position:sticky;top:0;z-index:6;margin:10px 0 8px;padding:6px 4px;background:var(--bg,#0f1b17);border-bottom:1px solid rgba(242,182,50,.25)}
+.htabs button.on{background:#ffd43b;color:#2a1c00;border-color:#ffd43b}
+#h-online[hidden],#h-prac[hidden],#h-tour[hidden],#h-mini[hidden],#h-about[hidden]{display:none!important}
+.htabs{display:grid;grid-template-columns:repeat(var(--n,5),1fr);gap:4px;overflow:visible}
+.htabs button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;font-size:11.5px;line-height:1.2;white-space:nowrap}

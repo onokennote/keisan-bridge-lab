@@ -3138,13 +3138,22 @@ function mbPopup(id) {
 function miniHTML() {
   const ab = attackBests()[ATTACK_MIN], z = zukanCount(zukanGet()), c = G_().cnt || {};
   const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start', 'mbAtk'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}${aimCount() ? `・🎯 自動照準 ×${aimCount()}` : ''}`, 'hunt-start', 'mbHunt'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill', 'mbOuts'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open', 'mbChart']];
-  return `<div class="mode mini-card" id="h-mini"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🥋</span><div><div class="lbl">MINI GAMES</div><h2>特訓（ミニゲーム）</h2></div></div>
+  return `<div class="mode mini-card" id="h-mini" ${htHide('h-mini')}><div class="mode-head"><span class="mode-ic" aria-hidden="true">🥋</span><div><div class="lbl">MINI GAMES</div><h2>特訓（ミニゲーム）</h2></div></div>
     <div class="mini-tiles">${T.map(([ic, nm, sub, a, mb]) => { const k = mbCount(MB_DEFS[mb][1]()); return `<div class="mini-t"><button class="mt-main" data-act="${a}"><span class="mt-ic">${ic}</span><b>${nm}</b><small>${esc(sub)}</small></button><button class="mt-bdg" data-act="mb-pop" data-mb="${mb}" aria-label="${nm}の説明とバッジ">🏅 ${k.have}/${k.all}</button></div>`; }).join('')}</div>
     <p class="small muted" style="margin:0">タイルを押すとすぐ始まります。🏅 で説明・記録・取れるバッジ。</p></div>`;
 }
+// ホームの下半分はタブで切り替える（オンライン・練習・大会・特訓・このアプリ）。選んだタブは端末ごとに覚える kb.homeTab
+const HTABS = () => [['h-online', '🌐', 'オンライン', ON_ENABLED()], ['h-prac', '🃏', '練習', 1], ['h-tour', '🏟️', '大会', 1], ['h-mini', '🥋', '特訓', 1], ['h-about', 'ℹ️', 'このアプリ', 1]].filter(x => x[3]);
+function homeTab() { const T = HTABS().map(x => x[0]); let t = ''; try { t = JSON.parse(localStorage.getItem('kb.homeTab') || '""'); } catch (e) { } return T.includes(t) ? t : T[0]; }
+const htHide = id => homeTab() === id ? '' : 'hidden';
 function hnavHTML() {
-  const I = [['🌐', 'オンライン', 'h-online', ON_ENABLED()], ['🃏', '練習', 'h-prac', 1], ['🏟️', '大会', 'h-tour', 1], ['🥋', '特訓', 'h-mini', 1], ['ℹ️', 'このアプリ', 'about', 1]].filter(x => x[3]);
-  return `<nav class="hnav">${I.map(([ic, nm, id]) => `<button data-act="hnav" data-to="${id}">${ic} ${nm}</button>`).join('')}</nav>`;
+  const cur = homeTab();
+  const T = HTABS(); return `<nav class="hnav htabs" role="tablist" style="--n:${T.length}">${T.map(([id, ic, nm]) => `<button role="tab" class="${id === cur ? 'on' : ''}" aria-selected="${id === cur}" data-act="hnav" data-to="${id}"><span>${ic}</span>${nm}</button>`).join('')}</nav>`;
+}
+function htabSet(id) {
+  try { localStorage.setItem('kb.homeTab', JSON.stringify(id)); } catch (e) { }
+  HTABS().forEach(([x]) => { const el = document.getElementById(x); if (el) el.hidden = x !== id; });
+  document.querySelectorAll('.htabs button').forEach(b => { const on = b.dataset.to === id; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
 }
 function homeHTML() {
   const saved = store.get('session', null);
@@ -3171,22 +3180,23 @@ ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<d
     <details class="hf pb-fold" data-fold="pbBdg" ${foldOpen('pbBdg') ? 'open' : ''}><summary><span>🏅 バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span><span class="hf-sub">冠 ${ACH_GROUPS.filter((_, gi) => g.ach['cat:' + gi]).length}/${ACH_GROUPS.length}</span></summary><div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></details></div>`; })() : ''}
 ${saved ? `<div class="panel row" style="justify-content:space-between;margin-top:8px"><div><b>続きから</b><div class="small muted">${esc(saved.cfg.kind === 'practice' ? '練習' : '大会')}・${saved.phase === 'final' ? '決勝' : '第' + saved.set + 'セット'} ${resumeLabel(saved)}から</div></div><div class="row"><button class="btn sm ghost" data-act="discard-save">破棄</button><button class="btn primary sm" data-act="resume">再開する</button></div></div>` : ''}
+<div class="hb-row">${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ・BP・連続最善</small></span><span class="rb-go">見る →</span></button>' : ''}${roadBannerHTML()}</div>
 ${hnavHTML()}
-${CLOUD_ON ? '<button class="rank-banner" data-go="ranking"><span class="rb-ic">🏆</span><span><b>ランキング</b><small>総合・推定実力・バッジ数・BP・連続最善・バッジアタック</small></span><span class="rb-go">見る →</span></button>' : ''}${roadBannerHTML()}
 ${onlineHomeHTML()}
 <div class="mode-grid">
-  <div class="mode" id="h-prac"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${mbFold('mbPrac', MB_PRAC)}
+  <div class="mode" id="h-prac" ${htHide('h-prac')}><div class="mode-head"><span class="mode-ic" aria-hidden="true">🃏</span><div><div class="lbl">PRACTICE</div><h2>1セット練習</h2></div></div>${mbFold('mbPrac', MB_PRAC)}
     <p class="small muted" style="margin:0">相手の人数・強さ・性格を選んで5ゲームを1セット。手ごとにAIの読みを確かめられます。</p>
     ${pracFacts()}
     <button class="btn sm watch-sm" data-act="watch-start">👀 達人のゲームを観戦</button>
     <button class="btn primary" data-go="setup-practice">練習をはじめる</button></div>
-  <div class="mode" id="h-tour"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT PRACTICE</div><h2>大会練習モード</h2></div></div>${mbFold('mbTour', MB_TOUR)}
+  <div class="mode" id="h-tour" ${htHide('h-tour')}><div class="mode-head"><span class="mode-ic" aria-hidden="true">🏟️</span><div><div class="lbl">TOURNAMENT PRACTICE</div><h2>大会練習モード</h2></div></div>${mbFold('mbTour', MB_TOUR)}
     <p class="small muted" style="margin:0">予選は毎セット席替え。他の卓も同時に進み、順位表を見ながら決勝進出をかけた作戦を試せます。</p>
     ${tourFacts()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
   ${miniHTML()}
 </div>
 
+<div id="h-about" ${htHide('h-about')}>
 <div class="row" style="margin-top:14px">
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
@@ -3201,6 +3211,7 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
+</div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
 }
@@ -6002,7 +6013,7 @@ function roadHTML() {
 }
 function roadBind() {
   document.querySelectorAll('[data-road]').forEach(b => b.onclick = () => { const s = roadStages()[+b.dataset.road]; if (!s) return; KB.sfx && KB.sfx('select');
-    if (s.go) go(s.go); else if (s.act) act(s.act, b); else if (s.home) { go('home'); setTimeout(() => { const c = document.querySelector('.on-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200); } });
+    if (s.go) go(s.go); else if (s.act) act(s.act, b); else if (s.home) { go('home'); setTimeout(() => { htabSet('h-online'); const c = document.querySelector('.on-card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 200); } });
 }
 function roadBannerHTML() { const R = roadSummary(); return `<button class="rank-banner road-banner" data-go="road"><span class="rb-ic">🥋</span><span><b>日本一への道</b><small>${R.cur ? `13の修行・${R.got}/${R.all}★・マサのおすすめ「${esc(R.cur.name)}」` : '免許皆伝！あとはリアルの大会で打倒OZ家'}</small></span><span class="rb-go">特訓 →</span></button>`; }
 // ---------- このアプリができるまで（応募用の物語。事実だけを書く） ----------
@@ -6331,7 +6342,7 @@ function act(a, el) {
     case 'fam-menu': famMenu(); break;
     case 'ol-tab': { S.olTab = el.dataset.k; const c = $('.on-card'); if (c) { c.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); } break; }
     case 'mb-pop': mbPopup(el.dataset.mb); break;
-    case 'hnav': { const t = document.getElementById(el.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
+    case 'hnav': htabSet(el.dataset.to); break;
     case 'fam-back': famMenuModal(); break;
     case 'fam-rep-back': famReportPick(); break;
     case 'lim-home': closeModal(); go('home'); break;
@@ -6369,7 +6380,7 @@ function act(a, el) {
     case 'watch-play': closeModal(); watchEnd(); go('setup-practice'); break;
     case 'prev-open': prevOpen(); break;
     case 'chart-view': chartOpen(true); break;
-    case 'about-scroll': { const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
+    case 'about-scroll': { htabSet('h-about'); const a = document.getElementById('about'); if (a) a.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'hunt-target': { const H = S.hunt; if (!H || H.started) break; const v = +el.dataset.v || null; H.target = v; store.set('huntT', v); huntDeal(H); KB.sfx('select'); render(); break; }
     case 'hunt-go': huntGo(); break;
     case 'hunt-go-aim': huntGo(true); break;
@@ -6599,7 +6610,7 @@ function onlineHomeHTML() {
   const row = v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}${v.phase === 'entry' ? `<br><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b>` : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`;
   ON.homeRow = row; // 「すべて見る」のポップアップでも同じ行を使う
   const rows = !L2 ? '<p class="small muted" style="margin:0">読み込み中…</p>' : L2.length ? L2.map(row).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>';
-  return `<div class="mode on-card" id="h-online"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
+  return `<div class="mode on-card" id="h-online" ${htHide('h-online')}><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
     ${xmCardHTML()}${olTodayHTML(D, L2 || [])}
     <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
