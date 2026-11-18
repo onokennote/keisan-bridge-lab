@@ -8,7 +8,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1 };
+const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1, missed: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -430,7 +430,7 @@ function render() {
   else if (S.view === 'entrance') { app.innerHTML = entranceHTML(); entranceScroll(); }
   else if (S.view === 'opening') app.innerHTML = openingHTML();
   else if (S.view === 'strategy') app.innerHTML = strategyHTML();
-  else if (S.view === 'growth') app.innerHTML = growthHTML();
+  else if (S.view === 'growth') { app.innerHTML = growthHTML(); missedBind(); }
   else if (S.view === 'drill') app.innerHTML = drillHTML();
   else if (S.view === 'attack-result') app.innerHTML = attackResultHTML();
   else if (S.view === 'zukan') app.innerHTML = zukanHTML();
@@ -2071,6 +2071,7 @@ function growthHTML() {
     ${ACH_GROUPS.map(([gn, keys]) => { const list = keys.map(k => ACH.find(x => x[0] === k)).filter(Boolean); const have = list.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0), all = list.reduce((n, a) => n + a[2].length, 0); const gi = ACH_GROUPS.findIndex(x => x[0] === gn), done = have >= all; if (done && !g.ach['cat:' + gi]) { g.ach['cat:' + gi] = Date.now(); G_save(g); } const op = (S.bdgOpen || new Set()).has(gi); return `<div class="bdg-group ${done ? 'complete' : ''} ${op ? 'open' : ''}"><div class="bdg-gh" data-bgt="${gi}" role="button" aria-expanded="${op}"><button class="emb-btn" data-emb="${gi}" aria-label="特別バッジ ${esc(CAT_SPECIAL[gn])}">${emblemSVG(gi, done, 44)}</button><span class="bdg-gt"><b>${esc(gn)}</b><small>特別バッジ「${esc(CAT_SPECIAL[gn])}」（${catBp(gi)}BP${(CROWN_SETS[gn] || []).length ? `・アバター${(CROWN_SETS[gn] || []).length}点セット` : ''}）${done ? '' : '：すべて集めると獲得'}</small></span>${done ? '<span class="complete-tag">COMPLETE</span>' : `<span class="bdg-gauge" role="img" aria-label="${have}/${all}"><i style="width:${Math.round(have / all * 100)}%"></i><b>${have}<small>/${all}</small></b></span>`}<i class="bdg-chev">▸</i></div><div class="bdg-grid">${list.flatMap(a => a[2].map((t, i) => { const got = !!g.ach[a[0] + ':' + t]; return `<button class="bdg-cell ${got ? 'got' : ''}" data-bdg="${a[0]}:${i}" aria-label="${esc(a[4][i])}：${esc(a[3](t))}">${badgeSVG(a, i, got, 40)}<b>${esc(a[4][i])}</b><small>${esc(a[3](t))}</small><i class="bp-s">${bpOf(a[0], i)}BP</i></button>`; })).join('')}</div></div>`; }).join('')}
     ${spGot(g).length ? `<div class="bdg-group sp-group open"><div class="bdg-gh"><b>🎁 特別クエスト</b><small class="muted">（持っている人だけに出ます・各${bpOf(SP_ACH[0][0], 0)}BP・冠なし）</small></div><div class="bdg-grid">${spGot(g).map(a => `<button class="bdg-cell got" data-bdg="${a[0]}:0" aria-label="${esc(a[4][0])}">${badgeSVG(a, 0, true, 40)}<b>${esc(a[4][0])}</b><small>${esc(a[3]())}</small><i class="bp-s">${bpOf(a[0], 0)}BP</i></button>`).join('')}</div></div>` : ''}
   </div>
+  ${missedHTML()}
   <div class="panel stack">
     <div class="lbl">記録</div>
     <div class="rec-top"><div><small>連続最善の最長記録</small><b>${g.cnt.streakMax || 0}</b></div><div><small>いまの連続最善</small><b>${g.cnt.streakNow || 0}</b></div><div><small>推定実力の最高</small><b>${g.cnt.rating ? '★' + g.cnt.rating.toFixed(1) : '—'}</b></div></div>
@@ -4106,12 +4107,36 @@ function rerenderAsk(where) { if (where === 'hint') renderHint(); else { const e
 const mlabel = e => e && e.m ? e.m.expr : 'あえて引く';
 const sameMove = (e, move) => move ? (e.m && e.m.key === move.key) : e.m === null;
 const BEST_LOOSE = { 1: { loss: 0.035 }, 2: { loss: 0.02 } }; // 1巡目3.5pt・2巡目2.0pt以内は最善扱い
+// ---------- 見のがした式：その場で上がれる式があったのに、ちがう手（または引く）を選んだ場面を集める。成長記録で見返し、×で消せる ----------
+function missedNote(g, me, counts, t, all, move) {
+  try {
+    if (S.attack || S.spectate || S.tiebreak) return;
+    const n = Object.values(counts).reduce((a, b) => a + b, 0), outs = all.filter(m => m.vals.length === n); if (!outs.length) return;
+    if (move && move.vals.length === n) return; // 上がった
+    const hand = []; Object.keys(counts).forEach(v => { for (let k = 0; k < counts[v]; k++) hand.push(+v); }); hand.sort((a, b) => a - b);
+    const L = store.get('missed', []) || [], id = t + ':' + hand.join(',');
+    const rec = { id, t, hand, exprs: outs.slice(0, 3).map(m => m.expr), mine: move ? move.expr : 'あえて引く', at: Date.now(), n: 1 };
+    const old = L.find(x => x.id === id); if (old) { old.n = (old.n || 1) + 1; old.at = rec.at; old.mine = rec.mine; } else L.unshift(rec);
+    L.sort((a, b) => b.at - a.at); store.set('missed', L.slice(0, 100));
+  } catch (e) { }
+}
+function missedHTML() {
+  const L = store.get('missed', []) || [], fmt = at => { const d = new Date(at); return `${d.getMonth() + 1}/${d.getDate()}`; }, card = v => `<span class="ms-c">${esc(KB.vname(v))}</span>`;
+  return `<div class="panel stack" id="missed"><div class="lbl">👀 見のがした式 <small class="muted">${L.length}件</small></div>
+    <p class="small muted" style="margin:0">その場で上がれる式があったのに、ちがう手や「引く」を選んだ場面です（新しい順・100件まで）。あえて引いた場面や、もう覚えた式は × で消せます。</p>
+    ${L.length ? `<div class="ms-list">${L.map(x => `<div class="ms-row"><div class="ms-field"><small>場</small>${card(x.t)}</div><div class="ms-body"><div class="ms-hand"><small>手札</small>${x.hand.map(card).join('')}</div><div class="ms-ex">上がれた式：<b>${x.exprs.map(esc).join('　')}</b> = ${esc(KB.vname(x.t))}</div><div class="ms-mine">選んだ手：${esc(x.mine)}<span>${fmt(x.at)}${x.n > 1 ? `・${x.n}回` : ''}</span></div></div><button class="ms-x" data-msx="${esc(x.id)}" aria-label="消す">×</button></div>`).join('')}</div>` : '<p class="small" style="margin:0">いまは見のがした式はありません。上がれる場面を逃さずに打てています！</p>'}
+  </div>`;
+}
+function missedBind() {
+  document.querySelectorAll('[data-msx]').forEach(b => b.onclick = () => { const L = (store.get('missed', []) || []).filter(x => x.id !== b.dataset.msx); store.set('missed', L); const el = $('#missed'); if (el) { el.outerHTML = missedHTML(); missedBind(); } });
+}
 function recordDecision(move) {
   if (undoAllowed()) try { S.undoCur = undoTake(); } catch (e) { S.undoCur = null; } // 待ったの戻り先：手を打つ直前の状態（番の合図より前に打っても控える）
   const g = S.game; const me = g.current();
   const counts = g.counts(me), t = g.field.v;
   const all = KB.findMoves(counts, t, 'all', 3);
   if (!all.length) return; // 選択肢なし
+  missedNote(g, me, counts, t, all, move); // 上がれるのに見のがした式を集める
   S.lastAct = { k: 'dec', gameNo: S.gameNo, n: S.decisions.length + 1, at: Date.now() }; // 前回の判断のボタン：判定が付くまでは「判定中」
   const key = stateKey(g);
   let ev, ctx = ctxFor(me);
