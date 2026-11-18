@@ -18,7 +18,7 @@ const wait = ms => new Promise(r => setTimeout(r, ms));
   const b = await chromium.launch(), errs = [];
   const open = async (name) => {
     const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(name + ': ' + e.message));
-    await p.goto('http://localhost:8125/'); await p.waitForTimeout(700);
+    await p.goto('http://localhost:8125/'); await p.evaluate(() => localStorage.setItem('kb.fold', JSON.stringify({ onFull: true }))); /* ホームのオンライン大会の「くわしく」を開いておく */ await p.waitForTimeout(700);
     await p.fill('#new-name', name); await p.click('[data-act="create-profile"]'); await p.waitForTimeout(1500);
     await p.evaluate(() => document.querySelectorAll('#modal [data-act="tut-skip"],#modal [data-act="close"]').forEach(b => b.click())); await p.waitForTimeout(300);
     await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.settings.sndLv = 'off'; KBAPP.go('home'); }); await p.waitForTimeout(300);

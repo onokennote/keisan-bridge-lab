@@ -19,7 +19,7 @@ const call = async (a, body) => (await fetch(API + '?a=' + a, { method: 'POST', 
   await wait(800);
   const b = await chromium.launch(), errs = [];
   const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const p = await ctx.newPage(); p.on('pageerror', e => errs.push(e.message));
-  await p.goto('http://localhost:8127/'); await p.waitForTimeout(700);
+  await p.goto('http://localhost:8127/'); await p.evaluate(() => localStorage.setItem('kb.fold', JSON.stringify({ onFull: true }))); /* ホームのオンライン大会の「くわしく」を開いておく */ await p.waitForTimeout(700);
   await p.fill('#new-name', 'ケン'); await p.click('[data-act="create-profile"]'); await p.waitForTimeout(1500);
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.settings.sndLv = 'off'; });
   const me = await p.evaluate(() => ({ token: JSON.parse(localStorage.getItem('kb.cloud')).token, pid: JSON.parse(localStorage.getItem('kb.profile')) }));
