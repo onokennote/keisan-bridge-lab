@@ -7221,15 +7221,19 @@ function otInfoHTML(t) {
   const I = (ic, k, v) => `<div class="ot-i"><span class="ot-ic">${ic}</span><span><small>${k}</small><b>${v}</b></span></div>`;
   const lim = t.limit >= 60 ? '1分' : t.limit + '秒', judge = { before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚';
   const head = '<h4 class="ot-h">📋 大会の条件</h4>';
-  if (t.daily) return `<div class="ot-sec"><h4>📋 ルール</h4><div class="ot-grid">
-      ${I('👥', '人数', '15人ずつのグループ<br><small>空きはAI研究員・AI</small>')}${I('🎫', 'エントリー', '開始の15分前から<br><small>1日4部のうち1部だけ</small>')}
-      ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', `上位${t.finalists}人・${t.finalGames || t.games}ゲーム`)}
-      ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 5}分`)}</div></div>
-    <div class="ot-sec"><h4>🏅 もらえるポイント・バッジ</h4><div class="ot-pts">
-      <div><small>予選ポイント</small><b>16 − グループ内の順位</b><em>1位15pt・2位14pt…（AIも順位に入る）</em></div>
-      <div><small>決勝ボーナス</small><b>1位60・2位40・3位30・4位20・5位10</b></div>
-      <div><small>上位3位</small><b>デイリーのバッジ（優勝・2位・3位）</b><em>人数にかかわらずもらえる</em></div>
-      <div><small>シーズン（毎月前半・後半）</small><b>ポイントの合計で順位</b><em>上位に総ポイント・表彰台のバッジと称号</em></div></div></div>`;
+  if (t.daily) return `<div class="ot-quick"><span>🃏 予選 ${t.sets}セット×${t.games}ゲーム</span><span>🏆 上位${t.finalists}人で決勝</span><span>⏱️ 1手${lim}</span></div>
+    <details class="hf ot-dl" data-fold="dlAbout" ${foldOpen('dlAbout') ? 'open' : ''}><summary><span>📖 デイリートーナメントとは（ルール・ポイント）</span></summary>
+    <div class="ot-dlbody">
+      <section><h4>🗓 しくみ</h4><ul class="ot-ul"><li>毎日4部：17:30・18:30・19:30・20:30</li><li>出られるのは <b>1日1部だけ</b></li><li>エントリーは <b>開始の15分前</b> から</li><li><b>15人ずつ</b> のグループ（空きはAI研究員・AI）</li></ul></section>
+      <section><h4>🃏 試合の流れ</h4><div class="ot-grid">
+        ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', `上位${t.finalists}人・${t.finalGames || t.games}ゲーム`)}
+        ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 5}分`)}</div></section>
+      <section><h4>🏅 もらえるポイント・バッジ</h4><div class="ot-pts">
+        <div><small>予選ポイント</small><b>16 − グループ内の順位</b><em>1位15pt・2位14pt…（AIも順位に入る）</em></div>
+        <div><small>決勝ボーナス</small><b>1位60・2位40・3位30・4位20・5位10</b></div>
+        <div><small>上位3位</small><b>デイリーのバッジ（優勝・2位・3位）</b><em>人数にかかわらずもらえる</em></div>
+        <div><small>シーズン（毎月前半・後半）</small><b>ポイントの合計で順位</b><em>上位に総ポイント・表彰台のバッジと称号</em></div></div></section>
+    </div></details>`;
   const aw = t.awardOk === true ? `上位3位にバッジと称号` : t.awardOk === false ? `人が${t.awardMin}人未満で、なし` : `人が${t.awardMin}人以上なら上位3位に`;
   return head + `<div class="ot-grid">
     ${I('👥', '人数', `${t.min}〜${t.max}人<br><small>いま${t.n}人</small>`)}${I('🎫', 'エントリー', t.entry === 'invite' ? '招待した人だけ' : '誰でも')}
