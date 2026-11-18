@@ -5909,8 +5909,8 @@ function roadStages() {
 const ROAD_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二'];
 // 風景：ふもとの村 → 竹林 → 川 → 山道 → 雪の峠 → 雲の上（2つの修行ごとに変わる）
 const ROAD_ZONES = [
-  { k: 'vil', name: 'ふもとの村', deco: ['🏠', '🌾', '🐓'] }, { k: 'bam', name: '竹林', deco: ['🎋', '🐼', '🎋'] }, { k: 'riv', name: '川の道', deco: ['🌉', '🐟', '🌊'] },
-  { k: 'mtn', name: '山道', deco: ['🌲', '🪨', '🦌'] }, { k: 'snw', name: '雪の峠', deco: ['❄️', '🏔️', '⛄'] }, { k: 'sky', name: '雲の上', deco: ['☁️', '⛩️', '🦅'] }];
+  { k: 'vil', name: '修行の村', deco: ['🏮', '🥟', '🐓'] }, { k: 'bam', name: '竹林', deco: ['🎋', '🐼', '🎋'] }, { k: 'riv', name: '渓流', deco: ['🪷', '🐟', '🪨'] },
+  { k: 'mtn', name: '千段の石段', deco: ['🐒', '🌲', '🪨'] }, { k: 'snw', name: '雪の峰', deco: ['🐅', '❄️', '🏔️'] }, { k: 'sky', name: '雲上の寺', deco: ['🐉', '☁️', '🏮'] }];
 function roadSummary() {
   const L = roadStages(), got = L.reduce((a, s) => a + s.star, 0), all = L.reduce((a, s) => a + s.max, 0);
   const cur = L.find(s => s.star === 0) || L.find(s => !s.done) || null; // おすすめ：まだ手をつけていない修行（なければ★がそろっていない修行）
@@ -5926,19 +5926,19 @@ function roadHTML() {
   const X = i => i % 2 ? 66 : 26; // 道は左右にくねる
   return `<div class="topbar"><button class="btn ghost sm" data-go="home">← 戻る</button><div class="where">日本一への道</div><div></div></div>
   <div class="road">
-    <div class="rd-hero"><div class="rd-sun"></div><div class="rd-tt"><small>特訓の書</small><b>計算ブリッジ<br>日本一への道</b></div>
-      <div class="rd-mt"><svg viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 L70 52 L110 80 L180 8 L250 74 L290 46 L360 120Z" fill="#1d3a33"/><path d="M180 8 L198 30 L188 28 L180 40 L172 27 L162 30Z" fill="#f1efe4"/><path d="M180 8 V-14" stroke="#f2b632" stroke-width="2.5"/><path d="M181 -14 L204 -8 L181 -2Z" fill="#e03131"/></svg></div></div>
+    <div class="rd-hero"><div class="rd-sun"></div><div class="rd-tt"><small>秘伝の書</small><b>計算ブリッジ<br>日本一への道</b></div>
+      <div class="rd-mt"><svg viewBox="0 0 360 120" preserveAspectRatio="none" aria-hidden="true"><path d="M0 120 V70 Q14 30 30 62 Q40 84 52 56 Q62 20 78 50 Q90 76 104 64 V120Z" fill="#3b1d1d" opacity=".55"/><path d="M230 120 V60 Q246 14 262 52 Q272 78 288 44 Q300 18 318 58 Q330 80 344 66 Q352 60 360 70 V120Z" fill="#3b1d1d" opacity=".55"/><path d="M60 120 Q80 74 96 92 Q110 40 132 70 Q150 92 166 54 Q180 6 200 50 Q214 82 232 72 Q252 60 270 96 Q290 80 312 120Z" fill="#1d2e28"/><g fill="#1d2e28" transform="translate(178 -2)"><path d="M-12 18h24l-4 -5h-16Z"/><rect x="-6" y="18" width="12" height="6"/><path d="M-10 28h20l-3 -4h-14Z"/><rect x="-5" y="28" width="10" height="6"/><path d="M-8 6h16l-8 -8Z"/><rect x="-4" y="6" width="8" height="7"/></g><g stroke="#1d2e28" stroke-width="1.5" fill="none"><path d="M40 20 q8 -6 16 0 q8 6 16 0"/><path d="M300 26 q6 -5 12 0 q6 5 12 0"/></g></svg></svg></div></div>
     <div class="rd-meter"><span>日本一まで</span><div class="rd-bar"><i style="width:${R.pct}%"></i></div><b>${R.got}<small>/${R.all}★</small></b></div>
     <div class="rd-masa"><div class="cm-av">${KB.casterSVG('masa', 'happy')}</div><div class="op-bubble"><span class="cm-name">師匠・ナニワのマサ</span>${esc(roadMasa(R))}</div></div>
     <div class="rd-path">${R.L.map(s => { const zi = Math.min(ROAD_ZONES.length - 1, Math.floor(s.i / 2)), Z = ROAD_ZONES[zi], first = s.i % 2 === 0, x0 = X(s.i), x1 = X(s.i + 1);
       return `<div class="rd-stage z-${Z.k} ${first ? 'zf' : ''} ${s.done ? 'done' : ''} ${R.cur === s ? 'cur' : ''}" style="--mx:${x0}px;--dx:${x0 < 40 ? 58 : 4}px">
       ${first ? `<div class="rd-zone">${Z.deco.map((d, k) => `<span class="rd-d d${k}">${d}</span>`).join('')}<em>${Z.name}</em></div>` : ''}
-      <svg class="rd-road" viewBox="0 0 92 100" preserveAspectRatio="none" aria-hidden="true"><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rr"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rc"/></svg>
+      <svg class="rd-road" viewBox="0 0 92 100" preserveAspectRatio="none" aria-hidden="true"><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="re"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rr"/><path d="M${x0} 0 C${x0} 55 ${x1} 45 ${x1} 100" class="rc"/></svg>
       <div class="rd-med"><span>${s.ic}</span>${s.done ? '<em>修了</em>' : ''}</div>
       <div class="rd-card">${R.cur === s ? '<span class="rd-now">マサのおすすめ</span>' : ''}<small>第${ROAD_NUM[s.i]}の修行</small><b>${esc(s.name)}</b><p>${esc(s.what)}</p>
         <div class="rd-row">${stars(s.star, s.max)}<span class="rd-v">${esc(s.unit(s.v))}</span></div>
         <div class="rd-row"><span class="rd-tool">${esc(s.tool)}</span><button class="btn sm ${R.cur === s ? 'primary' : ''}" data-road="${s.i}">修行する →</button></div></div></div>`; }).join('')}
-      <div class="rd-goal"><div class="rd-flag">🏯</div><small class="rd-real">ここから先は、アプリの外</small><b>日本一</b><strong>打倒OZ家！</strong>
+      <div class="rd-goal"><div class="rd-flag">🐉🏆🐉</div><small class="rd-real">ここから先は、アプリの外</small><b>日本一</b><strong>打倒OZ家！</strong>
         <p>リアルの大会「計算ブリッジ・日本一決定戦」で、本物の相手と打つ。研究所の修行は、すべてこの日のために。</p>
         <a class="btn sm" href="https://keisan-bridge.amebaownd.com/" target="_blank" rel="noopener">大会の情報（公式サイト）↗</a></div></div>
     <p class="small muted" style="text-align:center">★はいまの記録から付きます。どの修行からはじめてもかまいません。</p>
