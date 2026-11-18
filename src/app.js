@@ -6602,29 +6602,31 @@ function onlineHomeHTML() {
   const rows = !L2 ? '<p class="small muted" style="margin:0">読み込み中…</p>' : L2.length ? L2.map(row).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>';
   return `<div class="mode on-card" id="h-online"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
     ${xmCardHTML()}${olTodayHTML(D, L2 || [])}
-    <details class="hf on-full" data-fold="onFull" ${foldOpen('onFull') ? 'open' : ''}><summary><span>くわしく・大会をひらく<small class="hf-sub">デイリーの説明・シーズン順位・すべての大会・過去の大会・卓</small></span></summary>
-    ${dailyCardHTML(D)}
-    <div class="on-tlist">${rows}</div>
-    <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
+    <div class="row" style="gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
       <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
-      <button class="btn sm" data-act="on-new">卓をつくる</button></details></details></div>`;
+      <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
 }
-// ホームのオンライン大会：その日にひらかれる大会（デイリー・公式・非公式のタブ）を1行ずつのリストで。押すと大会の画面。くわしいことは「くわしく」の中
+// ホームのオンライン大会：エントリーできる・開催中の大会（終わっていないもの）を2段の行で。タブはデイリー・公式・非公式。押すと大会の画面
 function olTodayHTML(D, L2) {
-  const today = new Date().toDateString(), isToday = v => new Date(v.startAt * 1000).toDateString() === today || v.phase === 'prelim' || v.phase === 'final';
   const parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
-  const dl = Object.keys(parts).sort().map(k => { const L = parts[k]; const v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0]; return Object.assign({}, v, { _n: L.reduce((a, x) => a + (x.n || 0), 0), _label: `デイリー 第${k}部`, _fmt: (v.cfg && v.cfg.games) || v.games }); }).filter(isToday);
-  const off = L2.filter(v => v.official && isToday(v)), un = L2.filter(v => !v.official && isToday(v));
+  const live = v => v.phase === 'prelim' || v.phase === 'final', alive = v => v.phase === 'entry' || live(v);
+  const dl = Object.keys(parts).sort().map(k => { const L = parts[k]; const v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0]; return Object.assign({}, v, { n: L.reduce((a, x) => a + (x.n || 0), 0), _label: `デイリー 第${k}部` }); }).filter(alive);
+  const off = L2.filter(v => v.official && alive(v)), un = L2.filter(v => !v.official && alive(v));
   const tabs = [['daily', '📅 デイリー', dl], ['off', '🏅 公式', off], ['un', '🌐 非公式', un]];
-  if (!S.olTab) S.olTab = (tabs.find(t => t[2].some(v => v.entered || v.phase === 'prelim' || v.phase === 'final')) || tabs[0])[0];
-  const cur = tabs.find(t => t[0] === S.olTab) || tabs[0], now = Date.now() / 1000;
-  const hm = t => { const d = new Date(t * 1000); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
-  const st = v => v.phase === 'entry' ? (now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'cancel' ? '<em class="on-st">中止</em>' : '<em class="on-st">終了</em>';
-  const row = v => `<button class="ol-row ${v.entered ? 'mine' : ''} ${v.phase === 'prelim' || v.phase === 'final' ? 'live' : ''} ${v.phase === 'done' || v.phase === 'cancel' ? 'end' : ''}" data-act="on-tour-open" data-id="${v.id}"><b class="ol-t">${hm(v.startAt)}</b><span class="ol-n">${esc(v._label || v.name)}${v._label ? `<small>${(v.games || 3) >= 5 ? '🐢' : '⚡'}</small>` : ''}${v.entered ? '<small class="on-in">エントリー済み</small>' : ''}</span>${st(v)}<span class="ol-go">›</span></button>`;
+  if (!S.olTab) S.olTab = (tabs.find(t => t[2].some(v => v.entered || live(v))) || tabs.find(t => t[2].length) || tabs[0])[0];
+  const cur = tabs.find(t => t[0] === S.olTab) || tabs[0], now = Date.now() / 1000, today = new Date().toDateString();
+  const hm = t => { const d = new Date(t * 1000); return `${d.toDateString() === today ? '' : `${d.getMonth() + 1}/${d.getDate()} `}${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const st = v => v.phase === 'entry' ? (now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : '<em class="on-st live">開催中</em>';
+  const sub = v => [v.phase === 'entry' ? `<b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b>` : v.phase === 'final' ? '決勝の対局中' : `予選 第${v.set || 1}/${v.sets}セット`, `${v.n || 0}人${v.phase === 'entry' ? 'エントリー' : ''}`, `予選${v.games}G×${v.sets}`, v._label ? '' : `主催 ${esc(v.hostName)}`, v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : ''].filter(Boolean).join('・');
+  const row = v => `<button class="ol-row ${v.entered ? 'mine' : ''} ${live(v) ? 'live' : ''}" data-act="on-tour-open" data-id="${v.id}"><b class="ol-t">${hm(v.startAt)}</b><span class="ol-b"><span class="ol-n">${esc(v._label || v.name)}${v._label ? `<small>${(v.games || 3) >= 5 ? '🐢' : '⚡'}</small>` : ''}${v.entered ? '<small class="on-in">エントリー済み</small>' : ''}${st(v)}</span><small class="ol-s">${sub(v)}</small></span><span class="ol-go">›</span></button>`;
   const L = cur[2].slice().sort((a, b) => a.startAt - b.startAt);
+  const di = ON.dinfo, me = di && di.me, dm = ON.dailyMine;
+  const season = cur[0] === 'daily' && di ? `<div class="ol-season"><span>🗓 ${esc(di.label)}シーズン ${me ? `<b>${me.rank}位</b>・${me.pts}pt（${me.n}回）` : 'まだポイントなし'}</span><button class="btn sm" data-act="daily-rank">📊 ランキング</button></div>` : '';
+  const ent = dl.find(v => v.entered), myPart = ent ? ent.part : dm && dm.part, ph = ent ? ent.phase : dm && dm.phase;
+  const mineDay = cur[0] === 'daily' && myPart ? `<div class="ol-note"><span>✅ きょうは<b>第${myPart}部</b>に${ph === 'done' ? '参加しました' : ph === 'prelim' || ph === 'final' ? '参加中です' : 'エントリーしています'}（1日1部だけ）</span>${ph === 'done' && dm && dm.id ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : '';
   return `<div class="ol-today"><div class="ol-tabs">${tabs.map(([k, l, a]) => `<button class="${k === cur[0] ? 'on' : ''}" data-act="ol-tab" data-k="${k}">${l}<small>${a.length}</small></button>`).join('')}</div>
-    <div class="ol-list">${L.length ? L.map(row).join('') : `<p class="small muted" style="margin:6px 2px">きょうの${cur[1].slice(2)}の大会はありません</p>`}</div></div>`;
+    ${mineDay}<div class="ol-list">${L.length ? L.map(row).join('') : `<p class="small muted" style="margin:6px 2px">いまエントリーできる${cur[1].slice(2)}の大会はありません${cur[0] === 'daily' ? '（あしたの部は朝6時に出ます）' : ''}</p>`}</div>${season}</div>`;
 }
 // 開始までの残り時間（すべての大会で同じ書き方）。画面の [data-cd] は30秒ごとに書きかえる
 function cdText(ts) { const s = Math.max(0, Math.round(ts - Date.now() / 1000)); if (!s) return 'まもなく開始'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.ceil(s % 3600 / 60); return '開始まで あと' + (d ? d + '日' : '') + (d || h ? h + '時間' : '') + (m === 60 ? '59分' : m + '分'); }
@@ -6653,7 +6655,7 @@ function dailyCardHTML(D) {
 async function dailyInfoLoad(force) {
   if (!ON_ENABLED() || (!force && Date.now() - (ON.dinfoAt || 0) < 60000)) return; ON.dinfoAt = Date.now();
   try { ON.dinfo = await onReq('daily_info', { pid: PID }); } catch (e) { return; }
-  const el = S.view === 'home' && $('.on-card .dl-card'); if (el) { el.outerHTML = dailyCardHTML((ON.tours || []).filter(v => v.daily)); document.querySelectorAll('.on-card .dl-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
+  const el = S.view === 'home' && $('.on-card'); if (el) { el.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
 }
 
 // ---------- サンタからの挑戦状・誕生日の挑戦状（おうちの人が仕込むしかけ） ----------
@@ -7209,10 +7211,32 @@ function otourHTML() {
   if ((t.phase === 'done' || t.phase === 'cancel') && t.mine) body += '<div class="row" style="justify-content:flex-end"><button class="btn ghost sm" data-act="on-tour-remove">🗑 アーカイブから削除（主催者）</button></div>';
   return `<div class="topbar"><button class="btn ghost sm" data-act="on-tour-home">← ホーム</button><div class="where">🌐 オンライン大会</div><div></div></div>
     <div class="panel stack on-tour"><div class="on-th">${t.official ? '<em class="on-off">公式</em>' : ''}<h2 style="margin:0">${esc(t.name)}</h2><em class="on-st ${t.phase === 'prelim' || t.phase === 'final' ? 'live' : open ? 'open' : ''}">${ph}</em></div>
-      <div class="small">${when} 開始・主催 ${esc(t.hostName)} <span class="muted" id="ot-clock"></span></div>
-      ${t.desc ? `<p style="margin:0;white-space:pre-wrap">${esc(t.desc)}</p>` : ''}
-      <div class="on-facts small muted">${t.daily ? `🏅 デイリーは人数にかかわらず、順位でシーズンポイント（予選は「16−グループ内の順位」、決勝は順位で60・40・30・20・10を追加）、上位3位にデイリーのバッジと称号・1日4部のうち1部だけ・エントリーは開始の15分前から・15人ずつのグループ（空きはAI）・予選${t.sets}セット×${t.games}ゲーム・上位${t.finalists}人で決勝（${t.finalGames || t.games}ゲーム）・1手${t.limit}秒・セットの合間は最大${t.waitMin || 5}分` : `${t.awardOk === true ? `🏅 人が${t.awardMin}人以上の大会なので、上位3位にバッジと称号（${t.official ? '公式大会のバッジ' : 'オンライン大会のバッジ'}）・` : t.awardOk === false ? `人が${t.awardMin}人未満だったので、バッジはなし・` : `🏅 人が${t.awardMin}人以上集まれば、上位3位にバッジと称号・`}${t.entry === 'invite' ? '招待した人だけ' : '誰でもエントリー'}・${t.min}〜${t.max}人（いま${t.n}人）・予選${t.sets}セット×${t.games}ゲーム・${t.finalists ? `上位${t.finalists}人で決勝` : '決勝なし'}・1手${t.limit >= 60 ? '1分' : t.limit + '秒'}・セットの合間は最大${t.waitMin || 15}分・${{ before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚'}・${t.aiFill ? `足りなければ${t.aiRes ? 'AI研究員と' : ''}AI（${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}）で補充` : '足りなければ中止'}・表彰台は${t.podAi === false ? '人だけで数える' : 'AIも含めて数える'}・得点 ${t.points.join('/')}`}</div>
-      ${body}</div>`;
+      ${otHeadHTML(t, when)}
+      ${body}
+      ${otInfoHTML(t)}</div>`;
+}
+// 大会の画面：条件をアイコンつきの小さな枠で（どの大会も同じ並び）。デイリーは見出しつきで「ルール」「もらえるポイント・バッジ」に分ける
+function otHeadHTML(t, when) { return `<div class="ot-when"><span>📅 ${when} 開始</span><span>👤 主催 ${esc(t.hostName)}</span>${t.phase === 'entry' ? '' : '<span class="muted" id="ot-clock"></span>'}</div>${t.desc && !t.daily ? `<p class="ot-desc">${esc(t.desc)}</p>` : ''}`; } // デイリーの長い説明文は出さず、下の「ルール」「もらえるポイント」で見せる。受付中は開始までの時間を大きく出すので、ここには出さない
+function otInfoHTML(t) {
+  const I = (ic, k, v) => `<div class="ot-i"><span class="ot-ic">${ic}</span><span><small>${k}</small><b>${v}</b></span></div>`;
+  const lim = t.limit >= 60 ? '1分' : t.limit + '秒', judge = { before: '式を先に確認', after3: 'お手つき3枚', after2: 'お手つき2枚' }[t.judge] || 'お手つき3枚';
+  const head = '<h4 class="ot-h">📋 大会の条件</h4>';
+  if (t.daily) return `<div class="ot-sec"><h4>📋 ルール</h4><div class="ot-grid">
+      ${I('👥', '人数', '15人ずつのグループ<br><small>空きはAI研究員・AI</small>')}${I('🎫', 'エントリー', '開始の15分前から<br><small>1日4部のうち1部だけ</small>')}
+      ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', `上位${t.finalists}人・${t.finalGames || t.games}ゲーム`)}
+      ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 5}分`)}</div></div>
+    <div class="ot-sec"><h4>🏅 もらえるポイント・バッジ</h4><div class="ot-pts">
+      <div><small>予選ポイント</small><b>16 − グループ内の順位</b><em>1位15pt・2位14pt…（AIも順位に入る）</em></div>
+      <div><small>決勝ボーナス</small><b>1位60・2位40・3位30・4位20・5位10</b></div>
+      <div><small>上位3位</small><b>デイリーのバッジ（優勝・2位・3位）</b><em>人数にかかわらずもらえる</em></div>
+      <div><small>シーズン（毎月前半・後半）</small><b>ポイントの合計で順位</b><em>上位に総ポイント・表彰台のバッジと称号</em></div></div></div>`;
+  const aw = t.awardOk === true ? `上位3位にバッジと称号` : t.awardOk === false ? `人が${t.awardMin}人未満で、なし` : `人が${t.awardMin}人以上なら上位3位に`;
+  return head + `<div class="ot-grid">
+    ${I('👥', '人数', `${t.min}〜${t.max}人<br><small>いま${t.n}人</small>`)}${I('🎫', 'エントリー', t.entry === 'invite' ? '招待した人だけ' : '誰でも')}
+    ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', t.finalists ? `上位${t.finalists}人` : 'なし')}
+    ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 15}分`)}
+    ${I('✋', '式の判定', judge)}${I('🥇', 'セットの得点', t.points.join('・'))}
+    ${I('🤖', '足りないとき', t.aiFill ? `${t.aiRes ? 'AI研究員と' : ''}AIで補充<br><small>${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}</small>` : '中止')}${I('🏅', `バッジ（${t.official ? '公式大会' : 'オンライン大会'}）`, `${aw}<br><small>表彰台は${t.podAi === false ? '人だけで数える' : 'AIも含めて数える'}</small>`)}</div>`;
 }
 function onMe() { return { name: S.settings.name || 'プレイヤー', avatar: myAvatar(), pid: PID }; }
 async function onReq(a, extra) { const c = PID ? plLink(PID) : null; if (!c || !c.token) throw new Error('クラウドに接続できていません'); return cloudReq(a, Object.assign({ token: c.token }, extra || {})); }

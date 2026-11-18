@@ -2678,3 +2678,16 @@ body.rewinding #home-fab{display:none}
 .ol-t{font-variant-numeric:tabular-nums;color:#ffd43b}.ol-n{display:flex;align-items:center;gap:6px;flex-wrap:wrap;min-width:0;font-size:14px}.ol-n small{font-size:11px}
 .ol-go{color:#ffd43b;font-weight:900}
 .on-full{margin-top:8px}.on-full>summary small{display:block;font-size:11px;color:var(--muted);margin-left:0}
+.ot-when{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px}
+.ot-desc{margin:0;white-space:pre-wrap;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:14px}
+.ot-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.ot-i{display:flex;gap:8px;align-items:flex-start;padding:8px 10px;border-radius:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08)}
+.ot-ic{font-size:20px;line-height:1.2}.ot-i small{display:block;font-size:11px;color:var(--muted)}.ot-i b{font-size:13.5px;line-height:1.35;font-weight:700}.ot-i b small{display:inline;font-size:11px;font-weight:400}
+.ot-sec h4{margin:4px 0 6px;font-size:15px;color:#ffd43b}
+.ot-pts{display:flex;flex-direction:column;gap:6px}.ot-pts>div{padding:8px 10px;border-radius:10px;background:rgba(242,182,50,.08);border:1px solid rgba(242,182,50,.25)}
+.ot-pts small{display:block;font-size:11px;color:var(--muted)}.ot-pts b{display:block;font-size:14px}.ot-pts em{display:block;font-style:normal;font-size:11.5px;color:var(--muted)}
+@media (min-width:700px){.ot-grid{grid-template-columns:repeat(3,1fr)}}
+.ot-h{margin:6px 0 0;font-size:15px;color:#ffd43b}
+.ol-row{grid-template-columns:auto 1fr auto}.ol-b{display:flex;flex-direction:column;gap:2px;min-width:0}.ol-s{font-size:11.5px;color:var(--muted);line-height:1.35}.ol-s .on-cd{font-size:12px}
+.ol-season{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:6px 10px;border-radius:10px;background:rgba(255,255,255,.04);font-size:12.5px}
+.ol-note{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;font-size:12.5px;color:#5cd6a0}
