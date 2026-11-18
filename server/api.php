@@ -45,6 +45,8 @@ function db(): PDO {
   $pdo->exec('CREATE INDEX IF NOT EXISTS notes_up ON notes (uid, pid, id)');
   $pdo->exec('CREATE TABLE IF NOT EXISTS glinks (g TEXT NOT NULL, uid TEXT NOT NULL, pid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (g, uid, pid))'); // Googleでまもる：Googleのアカウントの番号（sub）をハッシュにしたもの g と、プレイヤー
   $pdo->exec('CREATE TABLE IF NOT EXISTS xmas (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // サンタからの挑戦状：保護者（Googleでまもっている人）が子どものプレイヤーに仕込む。メッセージは優勝するまで子どもの端末に送らない
+  $pdo->exec('CREATE TABLE IF NOT EXISTS bday (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // 誕生日の挑戦状（サンタと同じ作り。表だけ別）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS famset (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, lim INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // おうちの人メニューの設定（遊ぶ時間の目安：1日の分。0＝なし）
   $pdo->exec('CREATE TABLE IF NOT EXISTS famauth (g TEXT PRIMARY KEY, pw TEXT NOT NULL, fails INTEGER NOT NULL DEFAULT 0, lock_until INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL)'); // おうちの人メニューのパスワード（Googleのアカウントごと。ハッシュだけ持つ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS famrole (uid TEXT NOT NULL, pid TEXT NOT NULL, role TEXT NOT NULL, g TEXT NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // おうちの人メニューで決める区分（adult＝おうちの人・child＝子ども。子どもにはメニューを見せない）
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
@@ -765,7 +767,7 @@ try {
     // ---------- おうちの人メニュー：Google＋パスワード（パスワードを忘れたら作り直せるが、そのGoogleで仕込んだしかけは消える） ----------
     case 'fam_auth': {
       rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? ''));
-      if (!empty($b['reset'])) { db()->prepare('DELETE FROM famauth WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM xmas WHERE g = ?')->execute([$g]); out(['ok' => true, 'has' => false]); }
+      if (!empty($b['reset'])) { db()->prepare('DELETE FROM famauth WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM xmas WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM bday WHERE g = ?')->execute([$g]); db()->prepare('DELETE FROM famset WHERE g = ?')->execute([$g]); out(['ok' => true, 'has' => false]); }
       $q = db()->prepare('SELECT pw FROM famauth WHERE g = ?'); $q->execute([$g]); $has = $q->fetchColumn() !== false;
       if (isset($b['newPw']) && !$has) { $np = (string)$b['newPw']; if (mb_strlen($np) < 4 || mb_strlen($np) > 32) fail('パスワードは4〜32文字にしてください'); db()->prepare('INSERT INTO famauth (g, pw, updated) VALUES (?, ?, ?)')->execute([$g, password_hash($np, PASSWORD_DEFAULT), time()]); out(['ok' => true, 'has' => true, 'pass' => true]); }
       if (isset($b['pw'])) { famPw($g, $b); out(['ok' => true, 'has' => true, 'pass' => true]); }
@@ -774,9 +776,24 @@ try {
     // ---------- サンタからの挑戦状（保護者がGoogleでログインして仕込む。子どもは優勝するとメッセージを受け取る） ----------
     case 'xm_list': { // 保護者：まもっているプレイヤーと、仕込んだ挑戦状
       rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b);
-      $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, x.msg, x.start_at, x.end_at, x.lv, x.losses, x.won_at, f.role FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid LEFT JOIN xmas x ON x.uid = l.uid AND x.pid = l.pid LEFT JOIN famrole f ON f.uid = l.uid AND f.pid = l.pid WHERE l.g = ? ORDER BY l.at'); $q->execute([$g]);
-      $L = []; foreach ($q->fetchAll() as $r) $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: 'プレイヤー', 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'role' => $r['role'] ?: null, 'xm' => $r['msg'] !== null ? ['msg' => $r['msg'], 'start' => (int)$r['start_at'], 'end' => (int)$r['end_at'], 'lv' => (int)$r['lv'], 'losses' => (int)$r['losses'], 'won' => $r['won_at'] ? (int)$r['won_at'] : null] : null];
+      $q = db()->prepare('SELECT l.uid, l.pid, r.name, r.avatar, f.role, s.lim FROM glinks l JOIN players p ON p.uid = l.uid AND p.pid = l.pid LEFT JOIN ranks r ON r.uid = l.uid AND r.pid = l.pid LEFT JOIN famrole f ON f.uid = l.uid AND f.pid = l.pid LEFT JOIN famset s ON s.uid = l.uid AND s.pid = l.pid WHERE l.g = ? ORDER BY l.at'); $q->execute([$g]);
+      $ch = function (string $tbl, string $uid, string $pid) { $q = db()->prepare("SELECT * FROM $tbl WHERE uid = ? AND pid = ?"); $q->execute([$uid, $pid]); $x = $q->fetch(); return $x ? ['msg' => $x['msg'], 'start' => (int)$x['start_at'], 'end' => (int)$x['end_at'], 'lv' => (int)$x['lv'], 'losses' => (int)$x['losses'], 'won' => $x['won_at'] ? (int)$x['won_at'] : null] : null; };
+      $L = []; foreach ($q->fetchAll() as $r) $L[] = ['k' => hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), 'name' => $r['name'] ?: 'プレイヤー', 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'role' => $r['role'] ?: null, 'lim' => (int)($r['lim'] ?? 0), 'xm' => $ch('xmas', $r['uid'], $r['pid']), 'bd' => $ch('bday', $r['uid'], $r['pid'])];
       out(['ok' => true, 'list' => $L]);
+    }
+    case 'fam_set': case 'fam_report': { // おうちの人メニュー：遊ぶ時間の目安（1日の分・15分きざみ）／成長のおたより（子どもの記録を読む）
+      rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
+      $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
+      if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
+      if ($a === 'fam_set') {
+        $lim = (int)($b['lim'] ?? 0); $lim = max(0, min(600, (int)(round($lim / 15) * 15)));
+        db()->prepare('INSERT INTO famset (uid, pid, g, lim, updated) VALUES (?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, lim=excluded.lim, updated=excluded.updated')->execute([$hit['uid'], $hit['pid'], $g, $lim, time()]);
+        out(['ok' => true, 'lim' => $lim]);
+      }
+      $q = db()->prepare('SELECT data, data_at FROM players WHERE uid = ? AND pid = ?'); $q->execute([$hit['uid'], $hit['pid']]); $p = $q->fetch();
+      $d = $p && $p['data'] ? json_decode($p['data'], true) : null; $keys = is_array($d) ? (array)($d['keys'] ?? []) : [];
+      $rk = db()->prepare('SELECT rating, bp, badges FROM ranks WHERE uid = ? AND pid = ?'); $rk->execute([$hit['uid'], $hit['pid']]); $rr = $rk->fetch() ?: null;
+      out(['ok' => true, 'name' => is_array($d) ? (string)($d['name'] ?? '') : '', 'at' => $p ? (int)$p['data_at'] : 0, 'growth' => $keys['growth'] ?? null, 'play' => $keys['playSec'] ?? null, 'rank' => $rr ? ['rating' => $rr['rating'] !== null ? (float)$rr['rating'] : null, 'bp' => (int)$rr['bp'], 'badges' => (int)$rr['badges']] : null]);
     }
     case 'fam_role': { // おうちの人メニュー：まもっているプレイヤーを「おうちの人」か「子ども」にする
       rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
@@ -791,25 +808,27 @@ try {
       rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
       $q = db()->prepare('SELECT uid, pid FROM glinks WHERE g = ?'); $q->execute([$g]); foreach ($q->fetchAll() as $r) if (hash_equals(hash_hmac('sha256', $r['uid'] . ':' . $r['pid'], $g), $k)) $hit = $r;
       if (!$hit) fail('このプレイヤーは、このGoogleアカウントでまもっていません', 403);
-      if ($a === 'xm_del') { db()->prepare('DELETE FROM xmas WHERE uid = ? AND pid = ?')->execute([$hit['uid'], $hit['pid']]); out(['ok' => true]); }
+      $tbl = ($b['kind'] ?? '') === 'bday' ? 'bday' : 'xmas'; // サンタ（xmas）か誕生日（bday）か
+      if ($a === 'xm_del') { db()->prepare("DELETE FROM $tbl WHERE uid = ? AND pid = ?")->execute([$hit['uid'], $hit['pid']]); out(['ok' => true]); }
       $msg = trim(mb_substr(preg_replace('/[\x00-\x08\x0B-\x1F\x7F<>]/u', '', (string)($b['msg'] ?? '')), 0, 200)); if ($msg === '') fail('メッセージを書いてください');
       $st = (int)($b['start'] ?? 0); $en = (int)($b['end'] ?? 0); if ($st <= 0 || $en <= $st || $en - $st > 86400 * 14 || $en < time() - 3600) fail('期間を確かめてください');
       $lv = max(3, min(5, (int)($b['lv'] ?? 5)));
-      db()->prepare('INSERT INTO xmas (uid, pid, g, msg, start_at, end_at, lv, losses, won_at, updated) VALUES (?,?,?,?,?,?,?,0,NULL,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, msg=excluded.msg, start_at=excluded.start_at, end_at=excluded.end_at, lv=excluded.lv, losses=CASE WHEN ' . ((int)!empty($b['reset'])) . ' THEN 0 ELSE xmas.losses END, won_at=CASE WHEN ' . ((int)!empty($b['reset'])) . ' THEN NULL ELSE xmas.won_at END, updated=excluded.updated')->execute([$hit['uid'], $hit['pid'], $g, $msg, $st, $en, $lv, time()]);
+      db()->prepare("INSERT INTO $tbl (uid, pid, g, msg, start_at, end_at, lv, losses, won_at, updated) VALUES (?,?,?,?,?,?,?,0,NULL,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, msg=excluded.msg, start_at=excluded.start_at, end_at=excluded.end_at, lv=excluded.lv, losses=CASE WHEN " . ((int)!empty($b['reset'])) . " THEN 0 ELSE $tbl.losses END, won_at=CASE WHEN " . ((int)!empty($b['reset'])) . " THEN NULL ELSE $tbl.won_at END, updated=excluded.updated")->execute([$hit['uid'], $hit['pid'], $g, $msg, $st, $en, $lv, time()]);
       out(['ok' => true]);
     }
-    case 'xm_get': case 'xm_result': { // 子ども：いま挑戦できる挑戦状（メッセージは優勝してから）／結果を送る
-      $b = body(); $u = authUser($b); $pid = playerPid($u, $b);
-      $q = db()->prepare('SELECT * FROM xmas WHERE uid = ? AND pid = ?'); $q->execute([$u['uid'], $pid]); $x = $q->fetch();
+    case 'xm_get': case 'xm_result': { // 子ども：いま挑戦できる挑戦状（サンタ xm・誕生日 bd。メッセージは優勝してから）／結果を送る（kind）。遊ぶ時間の目安 lim も返す
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $now = time();
       $rq = db()->prepare('SELECT role FROM famrole WHERE uid = ? AND pid = ?'); $rq->execute([$u['uid'], $pid]); $role = $rq->fetchColumn() ?: null; // おうちの人か子どもか（子どもにはおうちの人メニューを見せない）
-      if (!$x) out(['ok' => true, 'xm' => null, 'role' => $role]);
-      $now = time();
+      $lq = db()->prepare('SELECT lim FROM famset WHERE uid = ? AND pid = ?'); $lq->execute([$u['uid'], $pid]); $lim = (int)($lq->fetchColumn() ?: 0);
+      $rd = function (string $tbl) use ($u, $pid) { $q = db()->prepare("SELECT * FROM $tbl WHERE uid = ? AND pid = ?"); $q->execute([$u['uid'], $pid]); return $q->fetch() ?: null; };
+      $view = fn($x) => $x ? ['start' => (int)$x['start_at'], 'end' => (int)$x['end_at'], 'lv' => (int)$x['lv'], 'losses' => (int)$x['losses'], 'won' => $x['won_at'] ? (int)$x['won_at'] : null, 'msg' => $x['won_at'] ? $x['msg'] : null] : null;
       if ($a === 'xm_result') {
+        $tbl = ($b['kind'] ?? '') === 'bday' ? 'bday' : 'xmas'; $x = $rd($tbl); if (!$x) fail('挑戦状がありません');
         if ($now < (int)$x['start_at'] - 60 || $now > (int)$x['end_at'] + 1800) fail('挑戦の期間ではありません');
-        if (!empty($b['won'])) { if (!$x['won_at']) db()->prepare('UPDATE xmas SET won_at = ? WHERE uid = ? AND pid = ?')->execute([$now, $u['uid'], $pid]); $x['won_at'] = $x['won_at'] ?: $now; }
-        else { db()->prepare('UPDATE xmas SET losses = losses + 1 WHERE uid = ? AND pid = ?')->execute([$u['uid'], $pid]); $x['losses'] = (int)$x['losses'] + 1; }
+        if (!empty($b['won'])) { if (!$x['won_at']) db()->prepare("UPDATE $tbl SET won_at = ? WHERE uid = ? AND pid = ?")->execute([$now, $u['uid'], $pid]); }
+        else db()->prepare("UPDATE $tbl SET losses = losses + 1 WHERE uid = ? AND pid = ?")->execute([$u['uid'], $pid]);
       }
-      out(['ok' => true, 'now' => $now, 'role' => $role, 'xm' => ['start' => (int)$x['start_at'], 'end' => (int)$x['end_at'], 'lv' => (int)$x['lv'], 'losses' => (int)$x['losses'], 'won' => $x['won_at'] ? (int)$x['won_at'] : null, 'msg' => $x['won_at'] ? $x['msg'] : null]]);
+      out(['ok' => true, 'now' => $now, 'role' => $role, 'lim' => $lim, 'xm' => $view($rd('xmas')), 'bd' => $view($rd('bday'))]);
     }
     case 'g_unlink': { // Googleでまもるのをやめる（このプレイヤーのひもづけを全部外す）
       $b = body(); $u = authUser($b); $pid = cleanPid($b['pid'] ?? '');
