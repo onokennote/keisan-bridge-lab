@@ -1508,7 +1508,7 @@ const CLOUD_KEEP = { 'kb.cloud': 1, 'kb.cloudAt': 1, 'kb.migDone': 1 }; // 同�
 const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false, dirtyP: new Set() };
 // 記録はプレイヤーごとにクラウドへ保存する（復活の呪文もプレイヤーごと）。端末の鍵（kb.cloud）は、この端末で作ったプレイヤーの保存に使う。
 // 復活の呪文で別の端末から入れたプレイヤーは、そのプレイヤーだけの鍵（kb.p.<pid>.link の token）で保存する
-const PL_LOCAL = { link: 1, cloudAt: 1 }; // プレイヤーの鍵と、最後にクラウドとそろえた時刻（クラウドには送らない）
+const PL_LOCAL = { link: 1, cloudAt: 1, playSec: 1, limShown: 1 }; // プレイヤーの鍵と、最後にクラウドとそろえた時刻（クラウドには送らない）
 const plKey = (pid, k) => 'kb.p.' + pid + '.' + k;
 const plOf = k => { const m = /^kb\.p\.([a-z0-9]+)\.(.+)$/i.exec(k || ''); return m ? { pid: m[1], k: m[2] } : null; };
 function plLink(pid) {
@@ -6725,7 +6725,7 @@ const fmtMin = s => { const m = Math.round((s || 0) / 60); return m >= 60 ? `${M
 async function famReport(pk) {
   const x = (S.xmList || []).find(y => y.k === pk); if (!x) return;
   let j; try { j = await cloudReq('fam_report', { idt: famIdt(), pw: S.famPw, k: pk }); } catch (e) { toast(e.message || '読めませんでした'); return; }
-  let g = null, play = {}; try { g = j.growth ? JSON.parse(j.growth) : null; } catch (e) { } try { play = j.play ? JSON.parse(j.play) || {} : {}; } catch (e) { }
+  let g = null, play = {}; try { g = j.growth ? JSON.parse(j.growth) : null; } catch (e) { } play = j.play && typeof j.play === 'object' ? j.play : {};
   modal(famReportHTML(x, g, play, j.at));
 }
 function famReportHTML(x, g, play, at) {
@@ -6785,8 +6785,16 @@ setInterval(() => {
   try { if (!PID || document.hidden || Date.now() - LIM_INPUT > 120000) return; } catch (e) { return; }
   const p = store.get('playSec', {}) || {}, d = dayKey(); p[d] = (p[d] || 0) + 15;
   const ks = Object.keys(p).sort(); while (ks.length > 14) delete p[ks.shift()];
-  store.set('playSec', p);
+  store.set('playSec', p); // 同期する記録には入れない（PL_LOCAL。ほかの端末の記録とぶつからないように）。クラウドへは5分ごとに別に送る
+  if (++LIM_TICK % 20 === 0) playPut();
 }, 15000);
+let LIM_TICK = 0;
+function playPut() {
+  if (!CLOUD_ON || !PID || !plLink(PID)) return;
+  let dev = raw.get('kb.devId', ''); if (!dev) { dev = Math.random().toString(36).slice(2, 12) + Date.now().toString(36); try { localStorage.setItem('kb.devId', JSON.stringify(dev)); } catch (e) { } }
+  onReq('play_put', { pid: PID, dev, days: store.get('playSec', {}) || {} }).catch(() => { });
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) playPut(); });
 const playToday = () => ((store.get('playSec', {}) || {})[dayKey()] || 0);
 const famLimNow = () => ON.famLim != null ? ON.famLim : (PID ? raw.get(plKey(PID, 'famLim'), 0) : 0) || 0;
 // 目安をこえていたら、マサが声をかける（ゲーム・セットの区切り、ホームを開いたとき）。2回目からは言い方を変える。続けて出しすぎないよう3分あける
@@ -7386,6 +7394,6 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, famTest: { reportHTML: (x, g, pl, at) => famReportHTML(x, g, pl, at), limCheck: w => limCheck(w), bpTotal: g => bpTotal(g), catKeys: () => Object.keys(CAT_INFO), playToday: () => playToday() }, rvAll: scope => ({ dialog: rvdMerge(rvDialog(scope)).map(x => (x.w === 'root' ? '博士：' : 'マサ：') + x.t).join('\n'), root: scope === 'set' ? rvSetSolo('root') : rvGameSolo('root'), masa: scope === 'set' ? rvSetSolo('masa') : rvGameSolo('masa') }), huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, famTest: { reportHTML: (x, g, pl, at) => famReportHTML(x, g, pl, at), limCheck: w => limCheck(w), bpTotal: g => bpTotal(g), catKeys: () => Object.keys(CAT_INFO), playToday: () => playToday(), playPut: () => playPut() }, rvAll: scope => ({ dialog: rvdMerge(rvDialog(scope)).map(x => (x.w === 'root' ? '博士：' : 'マサ：') + x.t).join('\n'), root: scope === 'set' ? rvSetSolo('root') : rvGameSolo('root'), masa: scope === 'set' ? rvSetSolo('masa') : rvGameSolo('masa') }), huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();

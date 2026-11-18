@@ -31,7 +31,7 @@ const srv = http.createServer((q, r) => { r.writeHead(200, { 'content-type': 'te
   await pa.fill('#bio-text', '3枚出しの研究中。目標は全員達人の大会で優勝！' + 'あ'.repeat(200));
   ok(await pa.evaluate(() => [...document.querySelector('#bio-text').value].length === 140), '自己紹介は140文字まで');
   await pa.fill('#bio-text', '3枚出しの研究中。目標は全員達人の大会で優勝！'); await pa.click('#modal [data-act="bio-save"]'); await pa.waitForTimeout(300);
-  ok(await pa.evaluate(() => /3枚出しの研究中/.test(document.querySelector('#modal .pf-bio').innerText)), 'プロフィールに自己紹介が出る');
+  ok(await pa.evaluate(() => /3枚出しの研究中/.test(document.querySelector('#modal .pm-bio').innerText)), 'プロフィールに自己紹介が出る');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'bio_profile.png') });
   await pa.evaluate(() => KBAPP.cloudPush()); await pa.waitForTimeout(500);
   // ランキング

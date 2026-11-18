@@ -32,6 +32,7 @@ const clr = p => p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov'
   await p.evaluate(() => KBAPP.act('g-protect')); await p.waitForTimeout(300); await p.click('#g-test'); await p.waitForTimeout(800);
   const me = await p.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); return { token: KBAPP.plLink(id).token, pid: id }; });
   await p.evaluate(() => KBAPP.cloudPush()); await p.waitForTimeout(800);
+  await p.evaluate(() => KBAPP.famTest.playPut()); await p.waitForTimeout(600); // 遊んだ時間はふつうの記録とは別に送る
   // おうちの人メニュー
   await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.gIdt = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(300);
   await p.click('#g-test'); await p.waitForTimeout(500);
@@ -54,7 +55,7 @@ const clr = p => p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov'
   await p.click('#modal [data-fam="report"]'); await p.waitForTimeout(300);
   await p.click('#modal [data-frep]'); await p.waitForTimeout(1200);
   const rep = await p.evaluate(() => { const m = document.querySelector('#modal .fam-rep'); return m ? m.innerText : ''; });
-  ok(/推定実力/.test(rep) && /この1週間に遊んだ時間/.test(rep) && /得意/.test(rep) && /最近30日のバッジ/.test(rep) && /博士/.test(rep), '成長のおたより（推定実力・遊んだ時間・得意と伸びしろ・バッジ・博士とマサ）');
+  ok(/推定実力/.test(rep) && /この1週間に遊んだ時間/.test(rep) && /合計 4時間45分/.test(rep) && /得意/.test(rep) && /最近30日のバッジ/.test(rep) && /博士/.test(rep), '成長のおたより（推定実力・遊んだ時間・得意と伸びしろ・バッジ・博士とマサ）');
   await (await p.$('#modal .fam-rep')).screenshot({ path: shot('fam_report.png') });
   // ④ 遊ぶ時間の目安
   await p.click('#modal [data-act="fam-rep-back"]'); await p.waitForTimeout(200); await p.click('#modal [data-act="fam-back"]'); await p.waitForTimeout(200);

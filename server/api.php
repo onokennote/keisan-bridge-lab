@@ -47,6 +47,7 @@ function db(): PDO {
   $pdo->exec('CREATE TABLE IF NOT EXISTS xmas (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // サンタからの挑戦状：保護者（Googleでまもっている人）が子どものプレイヤーに仕込む。メッセージは優勝するまで子どもの端末に送らない
   $pdo->exec('CREATE TABLE IF NOT EXISTS bday (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, msg TEXT NOT NULL, start_at INTEGER NOT NULL, end_at INTEGER NOT NULL, lv INTEGER NOT NULL, losses INTEGER NOT NULL DEFAULT 0, won_at INTEGER, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // 誕生日の挑戦状（サンタと同じ作り。表だけ別）
   $pdo->exec('CREATE TABLE IF NOT EXISTS famset (uid TEXT NOT NULL, pid TEXT NOT NULL, g TEXT NOT NULL, lim INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // おうちの人メニューの設定（遊ぶ時間の目安：1日の分。0＝なし）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS famplay (uid TEXT NOT NULL, pid TEXT NOT NULL, dev TEXT NOT NULL, day TEXT NOT NULL, sec INTEGER NOT NULL, PRIMARY KEY (uid, pid, dev, day))'); // 遊んだ時間（端末ごと・日ごと。ふつうの記録とは別に送る＝ほかの端末の記録とぶつからない）
   $pdo->exec('CREATE TABLE IF NOT EXISTS famauth (g TEXT PRIMARY KEY, pw TEXT NOT NULL, fails INTEGER NOT NULL DEFAULT 0, lock_until INTEGER NOT NULL DEFAULT 0, updated INTEGER NOT NULL)'); // おうちの人メニューのパスワード（Googleのアカウントごと。ハッシュだけ持つ）
   $pdo->exec('CREATE TABLE IF NOT EXISTS famrole (uid TEXT NOT NULL, pid TEXT NOT NULL, role TEXT NOT NULL, g TEXT NOT NULL, updated INTEGER NOT NULL, PRIMARY KEY (uid, pid))'); // おうちの人メニューで決める区分（adult＝おうちの人・child＝子ども。子どもにはメニューを見せない）
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
@@ -790,10 +791,11 @@ try {
         db()->prepare('INSERT INTO famset (uid, pid, g, lim, updated) VALUES (?,?,?,?,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, lim=excluded.lim, updated=excluded.updated')->execute([$hit['uid'], $hit['pid'], $g, $lim, time()]);
         out(['ok' => true, 'lim' => $lim]);
       }
+      $pq = db()->prepare('SELECT day, SUM(sec) s FROM famplay WHERE uid = ? AND pid = ? AND day >= ? GROUP BY day'); $pq->execute([$hit['uid'], $hit['pid'], date('Y-m-d', time() - 15 * 86400)]); $play = []; foreach ($pq->fetchAll() as $r) $play[$r['day']] = (int)$r['s'];
       $q = db()->prepare('SELECT data, data_at FROM players WHERE uid = ? AND pid = ?'); $q->execute([$hit['uid'], $hit['pid']]); $p = $q->fetch();
       $d = $p && $p['data'] ? json_decode($p['data'], true) : null; $keys = is_array($d) ? (array)($d['keys'] ?? []) : [];
       $rk = db()->prepare('SELECT rating, bp, badges FROM ranks WHERE uid = ? AND pid = ?'); $rk->execute([$hit['uid'], $hit['pid']]); $rr = $rk->fetch() ?: null;
-      out(['ok' => true, 'name' => is_array($d) ? (string)($d['name'] ?? '') : '', 'at' => $p ? (int)$p['data_at'] : 0, 'growth' => $keys['growth'] ?? null, 'play' => $keys['playSec'] ?? null, 'rank' => $rr ? ['rating' => $rr['rating'] !== null ? (float)$rr['rating'] : null, 'bp' => (int)$rr['bp'], 'badges' => (int)$rr['badges']] : null]);
+      out(['ok' => true, 'name' => is_array($d) ? (string)($d['name'] ?? '') : '', 'at' => $p ? (int)$p['data_at'] : 0, 'growth' => $keys['growth'] ?? null, 'play' => $play ?: new stdClass(), 'rank' => $rr ? ['rating' => $rr['rating'] !== null ? (float)$rr['rating'] : null, 'bp' => (int)$rr['bp'], 'badges' => (int)$rr['badges']] : null]);
     }
     case 'fam_role': { // おうちの人メニュー：まもっているプレイヤーを「おうちの人」か「子ども」にする
       rateLimit('fam', 200); $b = body(); $g = gVerify((string)($b['idt'] ?? '')); famPw($g, $b); $k = (string)($b['k'] ?? ''); $hit = null;
@@ -814,6 +816,14 @@ try {
       $st = (int)($b['start'] ?? 0); $en = (int)($b['end'] ?? 0); if ($st <= 0 || $en <= $st || $en - $st > 86400 * 14 || $en < time() - 3600) fail('期間を確かめてください');
       $lv = max(3, min(5, (int)($b['lv'] ?? 5)));
       db()->prepare("INSERT INTO $tbl (uid, pid, g, msg, start_at, end_at, lv, losses, won_at, updated) VALUES (?,?,?,?,?,?,?,0,NULL,?) ON CONFLICT(uid, pid) DO UPDATE SET g=excluded.g, msg=excluded.msg, start_at=excluded.start_at, end_at=excluded.end_at, lv=excluded.lv, losses=CASE WHEN " . ((int)!empty($b['reset'])) . " THEN 0 ELSE $tbl.losses END, won_at=CASE WHEN " . ((int)!empty($b['reset'])) . " THEN NULL ELSE $tbl.won_at END, updated=excluded.updated")->execute([$hit['uid'], $hit['pid'], $g, $msg, $st, $en, $lv, time()]);
+      out(['ok' => true]);
+    }
+    case 'play_put': { // 遊んだ時間を送る（端末ごと・日ごと。大きいほうを残す）
+      $b = body(); $u = authUser($b); $pid = playerPid($u, $b); $dev = substr(preg_replace('/[^a-z0-9]/i', '', (string)($b['dev'] ?? '')), 0, 24); if ($dev === '') fail('端末がわかりません');
+      $st = db()->prepare('INSERT INTO famplay (uid, pid, dev, day, sec) VALUES (?,?,?,?,?) ON CONFLICT(uid, pid, dev, day) DO UPDATE SET sec = MAX(sec, excluded.sec)');
+      $min = date('Y-m-d', time() - 15 * 86400); $n = 0;
+      foreach ((array)($b['days'] ?? []) as $d => $sec) { if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$d) || $d < $min || ++$n > 15) continue; $st->execute([$u['uid'], $pid, $dev, $d, max(0, min(86400, (int)$sec))]); }
+      db()->prepare('DELETE FROM famplay WHERE day < ?')->execute([date('Y-m-d', time() - 40 * 86400)]);
       out(['ok' => true]);
     }
     case 'xm_get': case 'xm_result': { // 子ども：いま挑戦できる挑戦状（サンタ xm・誕生日 bd。メッセージは優勝してから）／結果を送る（kind）。遊ぶ時間の目安 lim も返す
