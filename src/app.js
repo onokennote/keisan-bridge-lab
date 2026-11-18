@@ -1177,7 +1177,8 @@ function huntDeal(H) {
 }
 function huntStart() {
   const H = S.hunt = { target: store.get('huntT', null) || null, hand: [], field: null, fieldAt: 0, fieldNo: 0, used: new Set(), score: 0, streak: 0, regs: [], autoRegs: [], auto: false, autoLeft: 0, made: [], missed: [], sel: [], msg: null, started: false, over: false };
-  const again = S.view === 'hunt-result'; huntDeal(H); go('hunt'); if (!again) huntIntro(); // もう一度のときは導入を省く
+  const again = S.view === 'hunt-result'; if (again) { huntDeal(H); go('hunt'); return; } // もう一度のときは導入を省く
+  huntIntro(() => { if (S.hunt !== H) return; huntDeal(H); go('hunt'); }); // 説明はいまの画面の上に出し、「次へ」を押してから専用の画面へ（やめたらそのまま）
 }
 function huntGo(aim) {
   const H = S.hunt; if (!H || H.started) return;
@@ -2445,18 +2446,18 @@ function modeIntro(o) {
   (o.extra || []).forEach((x, i) => el.querySelector(`[data-x="e${i}"]`).onclick = () => close(x.on));
   if (!o.noGo) el.querySelector('[data-x="go"]').onclick = () => { KB.sfx('whistle', 1); el.querySelector('.wh-box').innerHTML = `<div class="wh-title">${esc(o.goTitle || 'スタート！')}</div><div class="wh-cast">${bub('masa', o.goLine || 'ほな、いこか！', 0)}</div>`; setTimeout(() => close(o.onGo), 1100); };
 }
-function huntIntro() {
+function huntIntro(next) {
   modeIntro({ title: '式ハンター', sub: `${HUNT_SEC / 60}分間、手札の3枚で場の数を作って、未登録の式を捕まえろ`,
     masa: '狩りの時間や！3枚で場の数を作ったら捕獲や。図鑑にまだない式ほど獲物やで！作れんときは「見送る」でええ！',
     root: '得点や速さで取れるバッジはありません。図鑑に登録した式の数がバッジにつながるので、じっくり考えて大丈夫ですよ。',
     noGo: true, // ここからすぐには始めない：次の画面（標的・ルール）で確かめてから始める（自動照準もそこで選ぶ）
-    extra: [{ label: '次へ（標的を選ぶ・ルール）', primary: true, on: () => { } }], onCancel: () => go('home') });
+    extra: [{ label: '次へ（標的を選ぶ・ルール）', primary: true, on: () => { if (next) next(); } }], onCancel: () => { S.hunt = null; } });
 }
-function outsIntro() {
+function outsIntro(next) {
   modeIntro({ title: 'アウツチャレンジ', sub: '5問連続で正解したらクリア',
     masa: '次の番で上がれる札、いちばん多くなる出し方はどれや？5問連続で当てたらクリア！1問でも外したら最初からやで！',
     root: '「アウツ」とは、次にめくれたら上がれる札のこと。何を残すかで、その数が変わります。問題はだんだん難しくなり、ヒントはありません。',
-    goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { }, onCancel: () => go('home') });
+    goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { if (next) next(); }, onCancel: () => { } });
 }
 function attackIntro(then) {
   const pick = arr => (arr[(Math.random() * arr.length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN);
@@ -3137,7 +3138,7 @@ function mbPopup(id) {
 // 特訓（ミニゲーム）：2×2の小さなタイル。押すとすぐ始まる。右下の 🏅 で、説明・記録・取れるバッジを重ねて見せる
 function miniHTML() {
   const ab = attackBests()[ATTACK_MIN], z = zukanCount(zukanGet()), c = G_().cnt || {};
-  const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start', 'mbAtk'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}`, 'hunt-start', 'mbHunt'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill', 'mbOuts'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open', 'mbChart']];
+  const T = [['⏱️', 'バッジアタック', ab ? `自己ベスト ${ab.bp}BP` : '15分でBP勝負', 'attack-start', 'mbAtk'], ['🎯', '式ハンター', `図鑑 ${z}/${ZUKAN.length}${aimCount() ? `・🎯 自動照準 ×${aimCount()}` : ''}`, 'hunt-start', 'mbHunt'], ['🔍', 'アウツチャレンジ', `クリア ${c.outs5 || 0}回`, 'drill', 'mbOuts'], ['📋', '早見表を作成', `完成 ${chartFullRows().length}/${CHART_ROWS.length}行`, 'chart-open', 'mbChart']];
   return `<div class="mode mini-card" id="h-mini"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🥋</span><div><div class="lbl">MINI GAMES</div><h2>特訓（ミニゲーム）</h2></div></div>
     <div class="mini-tiles">${T.map(([ic, nm, sub, a, mb]) => { const k = mbCount(MB_DEFS[mb][1]()); return `<div class="mini-t"><button class="mt-main" data-act="${a}"><span class="mt-ic">${ic}</span><b>${nm}</b><small>${esc(sub)}</small></button><button class="mt-bdg" data-act="mb-pop" data-mb="${mb}" aria-label="${nm}の説明とバッジ">🏅 ${k.have}/${k.all}</button></div>`; }).join('')}</div>
     <p class="small muted" style="margin:0">タイルを押すとすぐ始まります。🏅 で説明・記録・取れるバッジ。</p></div>`;
@@ -3200,10 +3201,6 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/18/" target="_blank" rel="noopener">公式ルール ↗</a>
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
-  <details class="hf" data-fold="aboutMore" ${foldOpen('aboutMore') ? 'open' : ''}><summary><span>キャラクター・おうちの人メニューなど</span></summary>
-  <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  ${G_ON && ON.famRole !== 'child' ? '<p class="small"><button class="pm-link" data-act="fam-menu">👪 おうちの人メニュー（保護者のGoogleでログインして開きます）</button></p>' : ''}
-  </details>
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
@@ -6291,7 +6288,7 @@ function act(a, el) {
     case 'discard-save': store.del('session'); render(); break;
     case 'show-stats': showStats(); break;
     case 'profiles': profileModal(); break;
-    case 'drill': { const again = S.view === 'drill'; S.drill = newDrill(); go('drill'); if (!again) outsIntro(); break; }
+    case 'drill': { if (S.view === 'drill') { S.drill = newDrill(); go('drill'); break; } outsIntro(() => { S.drill = newDrill(); go('drill'); }); break; } // 説明はいまの画面の上に出し、「始める」を押してから専用の画面へ
     case 'drill-next': drillNext(); break;
     case 'drill-submit': drillSubmit(); break;
     case 'drill-hint': S.drill.hint = true; render(); break;
@@ -6333,6 +6330,7 @@ function act(a, el) {
     case 'g-protect': gProtect(); break;
     case 'xm-parent': xmParent(false, (el && el.dataset || {}).xk); break;
     case 'fam-menu': famMenu(); break;
+    case 'ol-tab': { S.olTab = el.dataset.k; const c = $('.on-card'); if (c) { c.outerHTML = onlineHomeHTML(); document.querySelectorAll('.on-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); } break; }
     case 'mb-pop': mbPopup(el.dataset.mb); break;
     case 'hnav': { const t = document.getElementById(el.dataset.to); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); break; }
     case 'fam-back': famMenuModal(); break;
@@ -6601,16 +6599,32 @@ function onlineHomeHTML() {
   const D = (L || []).filter(v => v.daily), L2 = L ? L.filter(v => !v.daily) : L;
   const row = v => `<button class="on-trow k-${kind(v)} ${v.official ? 'off' : ''} ${v.entered || v.invited ? 'mine' : ''}" data-act="on-tour-open" data-id="${v.id}"><span class="on-ti" aria-hidden="true">${icon(v)}</span><span class="on-tb"><span class="on-tn">${v.official ? '<em class="on-off">公式</em>' : ''}<b>${esc(v.name)}</b>${stat(v)}</span><span class="small muted">${fmt(v.startAt)}・主催 ${esc(v.hostName)}・${v.entry === 'invite' ? (v.invited ? '<b class="on-in">招待されています</b>' : '招待のみ') : '誰でも'}・${v.min}〜${v.max}人・予選${v.sets}セット${v.entered ? '・<b class="on-in">エントリー済み</b>' : ''}${v.phase === 'entry' ? `<br><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b>` : ''}</span></span><span class="on-tgo" aria-hidden="true">›</span></button>`;
   ON.homeRow = row; // 「すべて見る」のポップアップでも同じ行を使う
-  const now = Date.now() / 1000, soon = v => v.phase === 'prelim' || v.phase === 'final' || (v.phase === 'entry' && v.startAt - now <= 3600); // ホームには、1時間以内に始まる大会と開催中の大会だけ
-  const near = L2 ? L2.filter(soon) : null, more = L2 ? L2.length - near.length : 0;
-  const rows = !L2 ? '<p class="small muted" style="margin:0">読み込み中…</p>' : (near.length ? near.map(row).join('') : `<p class="small muted" style="margin:0">${L2.length ? '1時間以内に始まる大会・開催中の大会はありません。' : 'いまひらかれている大会はありません'}</p>`) + (L2.length ? `<button class="btn sm on-all" data-act="on-all">📋 すべての大会を見る（${L2.length}件）</button>` : '');
+  const rows = !L2 ? '<p class="small muted" style="margin:0">読み込み中…</p>' : L2.length ? L2.map(row).join('') : '<p class="small muted" style="margin:0">いまひらかれている大会はありません</p>';
   return `<div class="mode on-card" id="h-online"><div class="mode-head"><span class="mode-ic" aria-hidden="true">🌐</span><div><div class="lbl">ONLINE</div><h2>オンライン大会</h2></div></div>
-    ${xmCardHTML()}${dailyCardHTML(D)}
+    ${xmCardHTML()}${olTodayHTML(D, L2 || [])}
+    <details class="hf on-full" data-fold="onFull" ${foldOpen('onFull') ? 'open' : ''}><summary><span>くわしく・大会をひらく<small class="hf-sub">デイリーの説明・シーズン順位・すべての大会・過去の大会・卓</small></span></summary>
+    ${dailyCardHTML(D)}
     <div class="on-tlist">${rows}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap"><button class="btn primary" data-act="on-tour-new">大会をひらく</button><button class="btn sm" data-act="on-arch">🗂 過去の大会</button></div>
     <details class="on-free"><summary>大会ではなく、卓だけで対局する</summary>
       <div class="on-join"><input id="on-code" class="su-in" maxlength="6" placeholder="卓のコード（6文字）" autocomplete="off" value="${esc(last || '')}"><button class="btn" data-act="on-join">入る</button></div>
-      <button class="btn sm" data-act="on-new">卓をつくる</button></details></div>`;
+      <button class="btn sm" data-act="on-new">卓をつくる</button></details></details></div>`;
+}
+// ホームのオンライン大会：その日にひらかれる大会（デイリー・公式・非公式のタブ）を1行ずつのリストで。押すと大会の画面。くわしいことは「くわしく」の中
+function olTodayHTML(D, L2) {
+  const today = new Date().toDateString(), isToday = v => new Date(v.startAt * 1000).toDateString() === today || v.phase === 'prelim' || v.phase === 'final';
+  const parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
+  const dl = Object.keys(parts).sort().map(k => { const L = parts[k]; const v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0]; return Object.assign({}, v, { _n: L.reduce((a, x) => a + (x.n || 0), 0), _label: `デイリー 第${k}部`, _fmt: (v.cfg && v.cfg.games) || v.games }); }).filter(isToday);
+  const off = L2.filter(v => v.official && isToday(v)), un = L2.filter(v => !v.official && isToday(v));
+  const tabs = [['daily', '📅 デイリー', dl], ['off', '🏅 公式', off], ['un', '🌐 非公式', un]];
+  if (!S.olTab) S.olTab = (tabs.find(t => t[2].some(v => v.entered || v.phase === 'prelim' || v.phase === 'final')) || tabs[0])[0];
+  const cur = tabs.find(t => t[0] === S.olTab) || tabs[0], now = Date.now() / 1000;
+  const hm = t => { const d = new Date(t * 1000); return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`; };
+  const st = v => v.phase === 'entry' ? (now >= v.entryAt ? '<em class="on-st open">受付中</em>' : '<em class="on-st">受付前</em>') : v.phase === 'prelim' || v.phase === 'final' ? '<em class="on-st live">開催中</em>' : v.phase === 'cancel' ? '<em class="on-st">中止</em>' : '<em class="on-st">終了</em>';
+  const row = v => `<button class="ol-row ${v.entered ? 'mine' : ''} ${v.phase === 'prelim' || v.phase === 'final' ? 'live' : ''} ${v.phase === 'done' || v.phase === 'cancel' ? 'end' : ''}" data-act="on-tour-open" data-id="${v.id}"><b class="ol-t">${hm(v.startAt)}</b><span class="ol-n">${esc(v._label || v.name)}${v._label ? `<small>${(v.games || 3) >= 5 ? '🐢' : '⚡'}</small>` : ''}${v.entered ? '<small class="on-in">エントリー済み</small>' : ''}</span>${st(v)}<span class="ol-go">›</span></button>`;
+  const L = cur[2].slice().sort((a, b) => a.startAt - b.startAt);
+  return `<div class="ol-today"><div class="ol-tabs">${tabs.map(([k, l, a]) => `<button class="${k === cur[0] ? 'on' : ''}" data-act="ol-tab" data-k="${k}">${l}<small>${a.length}</small></button>`).join('')}</div>
+    <div class="ol-list">${L.length ? L.map(row).join('') : `<p class="small muted" style="margin:6px 2px">きょうの${cur[1].slice(2)}の大会はありません</p>`}</div></div>`;
 }
 // 開始までの残り時間（すべての大会で同じ書き方）。画面の [data-cd] は30秒ごとに書きかえる
 function cdText(ts) { const s = Math.max(0, Math.round(ts - Date.now() / 1000)); if (!s) return 'まもなく開始'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.ceil(s % 3600 / 60); return '開始まで あと' + (d ? d + '日' : '') + (d || h ? h + '時間' : '') + (m === 60 ? '59分' : m + '分'); }
@@ -6629,9 +6643,7 @@ function dailyCardHTML(D) {
     if (v.phase === 'entry' && myPart && !v.entered) return `<div class="dl-part done-day">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps"><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small></span><span class="dl-joined">✅ きょうは参加済み</span></div>`; // 1日1部：出た人にはエントリーを出さない
     const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : pre ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
     return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`.replace(`btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}`, `btn sm ${v.phase === 'entry' && !myPart && !pre ? 'primary' : ''}`); };
-  const ks = Object.keys(parts).sort(), live1 = k => { const v = parts[k][0]; return v.phase === 'entry' || v.phase === 'prelim' || v.phase === 'final'; };
-  const pk = (myPart && parts[myPart] ? myPart : null) || ks.find(k => ['prelim', 'final'].includes(parts[k][0].phase)) || ks.find(live1) || ks[0], others = ks.filter(k => k !== pk); // いちばん大事な部（出た部・開催中・次の部）だけを出し、ほかはたたむ
-  const rows = (pk ? rowOf(pk) + (others.length ? `<details class="hf dl-more" data-fold="dlMore" ${foldOpen('dlMore') ? 'open' : ''}><summary><span>ほかの部（${others.map(k => '第' + k + '部').join('・')}）</span></summary>${others.map(rowOf).join('')}</details>` : '') : '') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（17:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
+  const rows = Object.keys(parts).sort().map(rowOf).join('') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（17:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
   const me = di && di.me, sl = di ? `<div class="dl-season"><b>🗓 ${esc(di.label)}シーズン</b><span>${me ? `${esc(san(S.settings.name))}は <b>${me.rank}位</b>・<b>${me.pts}pt</b>（${me.n}回）` : 'まだポイントはありません'}</span><small class="muted">シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</small></div>` : '';
   return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日4部（17:30・18:30・19:30・20:30）から1日1部だけ・エントリーは15分前から。15人・予選は17:30・19:30が5ゲーム×3セット、18:30・20:30が3ゲーム×3セット・上位5人で決勝（5ゲーム）・空きはAI</small></div></div>
     <div class="dl-parts">${rows}</div>${myPart ? `<div class="dl-mine"><span>✅ きょうは<b class="on-in">第${myPart}部</b>に${dm && (dm.phase === 'done') ? '参加しました' : dm && (dm.phase === 'prelim' || dm.phase === 'final') ? '参加中です' : 'エントリーしています'}（1日1部まで）</span>${dm && dm.phase === 'done' && !parts[myPart] ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : ''}
