@@ -23,22 +23,27 @@ const shot = n => path.join(__dirname, 'out', n);
   // 子どものプレイヤーを保護者のGoogleでまもる
   await p.evaluate(() => KBAPP.act('g-protect')); await p.waitForTimeout(300); await p.click('#g-test'); await p.waitForTimeout(800);
   const me = await p.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); return { token: KBAPP.plLink(id).token, pid: id }; });
-  // 「おうちの人（大人）」にしたプレイヤーには、ホームにおうちの人メニュー＋おしらせマーク。開くにはGoogle
-  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await p.waitForTimeout(300);
-  await p.check('#pm-adult'); await p.waitForTimeout(200);
-  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await p.waitForTimeout(500);
-  ok(await p.evaluate(() => !!document.querySelector('.pb-fam .nb')), 'おうちの人にしたプレイヤーのホームに「おうちの人メニュー」とおしらせマーク');
-  await (await p.$('.pb-fam')).screenshot({ path: shot('fam_btn.png') });
-  await p.evaluate(() => { KBAPP.S.gIdt = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(300);
+  // おうちの人メニュー：Google＋パスワード。メニューの中で、おうちの人か子どもかを決める
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.gIdt = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(300);
   ok(await p.evaluate(() => !!document.querySelector('#modal #g-test') && !document.querySelector('#modal .fam-list')), '開くにはGoogleでのログインが必要');
   await p.click('#g-test'); await p.waitForTimeout(500);
   ok(await p.evaluate(() => !!document.querySelector('#modal #fam-pw2') && !document.querySelector('#modal .fam-list')), 'Googleのあと、はじめはパスワードを決める（決めるまでメニューは出ない）');
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_pw.png') });
-  await p.fill('#fam-pw', 'santa2026'); await p.fill('#fam-pw2', 'santa2026'); await p.click('#fam-ok'); await p.waitForTimeout(500);
-  ok(await p.evaluate(() => !!document.querySelector('#modal .fam-list [data-fam="xmas"] .fam-new') && !document.querySelector('.pb-fam .nb')), 'ログインすると、しかけの一覧（サンタからの挑戦状 NEW）。おしらせマークは消える');
+  await p.fill('#fam-pw', 'santa2026'); await p.fill('#fam-pw2', 'santa2026'); await p.click('#fam-ok'); await p.waitForTimeout(700);
+  ok(await p.evaluate(() => !!document.querySelector('#modal .fam-list [data-fam="xmas"] .fam-new') && /ユウ/.test(document.querySelector('#modal .xm-kids').innerText)), 'ログインすると、しかけの一覧（サンタからの挑戦状 NEW）と、おうちの人か子どもかの設定');
+  await p.click('#modal [data-role="adult"]'); await p.waitForTimeout(600);
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_menu.png') });
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1800);
+  ok(await p.evaluate(() => !!document.querySelector('.pb-fam')), '「おうちの人」にしたプレイヤーのホームに、おうちの人メニューの入口');
+  await (await p.$('.pb-fam')).screenshot({ path: shot('fam_btn.png') });
+  await p.evaluate(() => { KBAPP.act('fam-menu'); }); await p.waitForTimeout(800);
+  await p.click('#modal [data-role="child"]'); await p.waitForTimeout(600);
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.xmAt = 0; KBAPP.go('home'); }); await p.waitForTimeout(1800);
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('profiles'); }); await p.waitForTimeout(400);
+  ok(await p.evaluate(() => !document.querySelector('.pb-fam') && !document.querySelector('#modal [data-act="fam-menu"]')), '「子ども」にしたプレイヤーには、おうちの人メニューの入口が出ない（ホームにもプレイヤーの画面にも）');
+  await (await p.$('#modal .pm')).screenshot({ path: shot('pm_child.png') });
   // 保護者メニュー：Googleでログイン→子どもが一覧に出る
-  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.S.gIdt = null; KBAPP.act('xm-parent'); }); await p.waitForTimeout(300); await p.click('#g-test'); await p.waitForTimeout(800);
+  await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.act('xm-parent'); }); await p.waitForTimeout(900);
   ok(await p.evaluate(() => /ユウ/.test(document.querySelector('#modal').innerText) && /まだ仕込んでいません/.test(document.querySelector('#modal').innerText)), '保護者メニューに、まもっている子ども（ユウ）が出る');
   await (await p.$('#modal .xm-par')).screenshot({ path: shot('xm_parent.png') });
   // 仕込む（画面から）

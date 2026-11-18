@@ -2575,7 +2575,6 @@ function profileModal() {
       <button class="pm-av" data-act="avatar-edit" aria-label="アバターを変える">${face(PID, cur.name)}<span>🎨</span></button>
       <div class="pm-id"><b>${esc(cur.name)}</b><small>${statOf(PID)}</small><span class="pm-now">いま遊んでいる人</span></div>
       <div class="pm-acts"><button class="btn sm" data-act="rename-profile">✏️ 名前</button><button class="btn sm" data-act="bio-edit">📝 自己紹介</button><button class="btn sm" data-act="avatar-edit">🎨 アバター</button></div>
-      ${CLOUD_ON ? `<label class="pm-adult"><input type="checkbox" id="pm-adult" ${store.get('adult', false) ? 'checked' : ''}> 👪 このプレイヤーはおうちの人（大人）<small>おうちの人メニュー（子ども向けのしかけを用意する画面）のおしらせが届きます。開くにはGoogleでのログインが必要です</small></label>` : ''}
       <p class="pm-bio ${bio ? '' : 'none'}">${bio ? esc(bio).replace(/\n/g, '<br>') : '自己紹介はまだありません（140文字まで）'}</p>
     </section>` : ''}
     ${CLOUD_ON ? `<section class="pm-sec">
@@ -2583,7 +2582,7 @@ function profileModal() {
       <p class="small muted pm-p">記録はクラウドに保存されています。スマホを替えたり、ブラウザのデータを消したりしたときは、<b>復活の呪文</b>${G_ON ? 'か<b>Google</b>' : ''}で戻れます。</p>
       ${code ? `<div class="pm-code"><span class="mono cl-code" id="cl-code" data-code="${esc(code)}">••••-••••-••••</span><button class="btn sm" data-act="cloud-show">表示</button><button class="btn sm" data-act="cloud-copy">コピー</button><button class="btn sm" data-act="bk-open">📜 カード</button></div><p class="small muted pm-p">呪文は人に教えないでね（おうちの人はOK）。</p>` : '<p class="small muted pm-p">復活の呪文は、少し遊んでクラウドに保存されると出ます。</p>'}
       ${G_ON ? (gLinked() ? '<button class="pm-link" data-act="g-unlink">Googleでまもるのをやめる</button>' : '<button class="btn g-pro pm-g" data-act="g-protect">🛡 Googleでまもる</button><p class="small muted pm-p">Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます。</p>') : ''}
-      ${G_ON ? '<button class="pm-link xm-parent-btn" data-act="fam-menu">👪 おうちの人メニュー（Googleでログイン）</button>' : ''}
+      ${G_ON && ON.famRole !== 'child' ? '<button class="pm-link xm-parent-btn" data-act="fam-menu">👪 おうちの人メニュー（Googleでログイン）</button>' : ''}
     </section>` : ''}
     <section class="pm-sec">
       <div class="pm-h">👥 この端末のプレイヤー</div>
@@ -3123,7 +3122,7 @@ function homeHTML() {
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar pb2"><div class="pb-top"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b class="pb-nm" style="--nl:${[...S.settings.name].length}">${esc(S.settings.name)}</b><button class="pb-rate" data-go="growth" aria-label="推定実力（成長記録へ）">${r.ok ? `<span class="pb-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<small>推定実力は測定中（あと${r.need}手）</small>`}</button><span class="pb-sub">${gamesN(g)}ゲーム・連続最善 最長${g.cnt.streakMax || 0}</span></span></div>${CLOUD_ON ? `<div class="pb-meta"><span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span></div>` : ''}<div class="pb-btns2"><button class="btn sm pb-grow" data-go="growth">📈 成長記録</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・切り替え</button></div>
     ${ON_ENABLED() && (ON.myAwards || []).some(a => a.pid === PID && titleOk(a)) ? (() => { const tid = store.get('title', ''), a = (ON.myAwards || []).find(x => x.tid === tid && x.pid === PID && titleOk(x)); return `<button class="pb-title" data-act="title-open">${a ? `${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? ttlTag(a) + '・' : ''}${esc(a.tname)} ${placeJa(+a.place)}` : '👑 称号を選ぶ'}</button>`; })() : ''}
-    ${CLOUD_ON && G_ON && store.get('adult', false) ? `<button class="pb-fam" data-act="fam-menu">👪 おうちの人メニュー${famUnseen() ? '<i class="nb">!</i>' : ''}</button>` : ''}
+    ${CLOUD_ON && G_ON && ON.famRole === 'adult' ? `<button class="pb-fam" data-act="fam-menu">👪 おうちの人メニュー${famUnseen() ? '<i class="nb">!</i>' : ''}</button>` : ''}
     ${(() => { const b = store.get('bio', ''); return `<button class="pb-bio ${b ? '' : 'empty'}" data-act="bio-edit" data-from="home" aria-label="自己紹介を編集">${b ? esc(b).replace(/\n/g, '<br>') : '＋ 自己紹介を書く（140文字まで）'}</button>`; })()}
     <div class="pb-emb">${ACH_GROUPS.map((gr, gi) => { const cp = catProgress(g, gi); return `<button class="pb-em ${cp.done ? 'got' : ''}" data-go="growth" title="${esc(gr[0])}：${esc(cp.name)}">${emblemSVG(gi, cp.done, 40)}<small>${cp.done ? '達成' : `${cp.have}/${cp.all}`}</small></button>`; }).join('')}</div>
     <button class="pb-badges" data-go="growth" aria-label="獲得したバッジ ${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}/${ACH_TOTAL}"><span class="pb-bl">${ACH_GROUPS.flatMap(([, ks]) => ks).map(k => ACH.find(x => x[0] === k)).filter(Boolean).flatMap(a => a[2].map((t, i) => g.ach[a[0] + ':' + t] ? badgeSVG(a, i, true, 18) : '')).join('') || '<span class="small muted">まだバッジはありません</span>'}</span><span class="pb-bc">バッジ <b>${ACH.reduce((n, a) => n + a[2].filter(t => g.ach[a[0] + ':' + t]).length, 0)}</b>/${ACH_TOTAL}・<b class="atk-bp">${bpTotal(g)}</b> BP</span></button></div>`; })() : ''}
@@ -3160,7 +3159,7 @@ ${onlineHomeHTML()}
     <a class="btn sm" href="https://soogackuma.com/keisan-bridge" target="_blank" rel="noopener">公式アプリ ↗</a>
   </div>
   <p class="small muted">このアプリに登場するキャラクター（ルート博士・ナニワのマサ・対戦相手など）は、すべてこのアプリのオリジナルです。公式キャラクターや公式の画像は使っていません。ルールの細かい部分は、公式と異なる場合があります。</p>
-  ${G_ON ? '<p class="small"><button class="pm-link" data-act="fam-menu">👪 おうちの人メニュー（保護者のGoogleでログインして開きます）</button></p>' : ''}
+  ${G_ON && ON.famRole !== 'child' ? '<p class="small"><button class="pm-link" data-act="fam-menu">👪 おうちの人メニュー（保護者のGoogleでログインして開きます）</button></p>' : ''}
   <div class="about-tut"><span class="small">はじめての方へ：博士とマサが、例を使ってルールとコツを説明します。</span><button class="btn primary" data-act="tut-start">ルールの説明を受ける</button><button class="btn" data-go="story">このアプリができるまで</button><button class="btn" data-go="numbers">数字で見る計算ブリッジ</button></div>
 </div>
 ${STAT.admin && STAT.db ? '<div class="stats-foot"><button class="linkish" data-act="show-stats">利用状況</button></div>' : ''}`;
@@ -6495,7 +6494,8 @@ const xmActive = () => { const x = ON.xm; if (!x) return false; const now = Date
 async function xmCheck() {
   if (!CLOUD_ON || !PID || !plLink(PID) || Date.now() - (S.xmAt || 0) < 60000 && S.xmPid === PID) return;
   S.xmAt = Date.now(); S.xmPid = PID;
-  try { const j = await onReq('xm_get', { pid: PID }); ON.xm = j.xm; ON.xmSkew = j.now ? j.now - Date.now() / 1000 : 0; } catch (e) { return; }
+  let roleChanged = false; try { const j = await onReq('xm_get', { pid: PID }); ON.xm = j.xm; ON.xmSkew = j.now ? j.now - Date.now() / 1000 : 0; roleChanged = (ON.famRole || null) !== (j.role || null); ON.famRole = j.role || null; } catch (e) { return; }
+  if (roleChanged && S.view === 'home' && !$('#modal')) { render(); return; } // おうちの人か子どもかで、ホームの「おうちの人メニュー」を出し分ける
   const el = $('#xm-card'); if (S.view === 'home') { const h = xmCardHTML(); if (el) el.outerHTML = h || '<div id="xm-card" hidden></div>';  document.querySelectorAll('#xm-card [data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b)); }
   if (xmActive() && !ON.xm.won && raw.get(plKey(PID, 'xmSeen'), 0) !== ON.xm.start && S.view === 'home' && !$('#modal')) { plSetLocal(PID, 'xmSeen', ON.xm.start); setTimeout(() => { if (S.view === 'home' && !$('#modal')) xmIntro(); }, 1200); }
 }
@@ -6548,8 +6548,6 @@ function xmReveal(msg, test) {
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">閉じる</button></div></div>`);
   try { confetti && confetti(); } catch (e) { }
 }
-// プロフィールの「おうちの人（大人）」のチェック（プレイヤーごと・クラウドにも保存）
-document.addEventListener('change', e => { if (e.target && e.target.id === 'pm-adult') { store.set('adult', !!e.target.checked); toast(e.target.checked ? '👪 おうちの人にしました。ホームに「おうちの人メニュー」が出ます' : 'おうちの人の設定を外しました'); } });
 // おうちの人メニュー：子ども向けのしかけを、ここに順に足していく（いまはサンタからの挑戦状）。
 // プロフィールで「おうちの人（大人）」にしたプレイヤーには、まだ見ていないしかけがあるとホームにおしらせマーク。開くにはGoogleでのログインが必要
 const FAM_FEATURES = [{ id: 'xmas', ic: '🎄', name: 'サンタからの挑戦状', desc: '子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの5ゲームで優勝すると届くようにします', open: () => xmParent() }];
@@ -6557,10 +6555,18 @@ const famUnseen = () => { const sn = store.get('famSeen', []); return FAM_FEATUR
 async function famMenu() {
   let idt; try { idt = await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
   if (!(await famAuth(idt))) return;
-  const sn = store.get('famSeen', []);
+  try { S.xmList = (await cloudReq('xm_list', { idt, pw: S.famPw })).list; } catch (e) { S.xmList = []; }
+  famMenuModal();
+}
+function famMenuModal() {
+  const sn = store.get('famSeen', []), L = S.xmList || [];
   modal(`<div class="stack xm-par"><h3 style="margin:0">👪 おうちの人メニュー</h3><p class="small" style="margin:0">子ども向けのしかけを用意できます。しかけは順に増えていきます。</p>
     <div class="fam-list">${FAM_FEATURES.map(f => `<button class="fam-f" data-fam="${f.id}"><span class="fam-ic">${f.ic}</span><span><b>${esc(f.name)}${sn.includes(f.id) ? '' : '<em class="fam-new">NEW</em>'}</b><small>${esc(f.desc)}</small></span></button>`).join('')}</div>
+    <h4 style="margin:6px 0 0">👥 おうちの人か子どもか</h4><p class="small muted" style="margin:0">このGoogleでまもっているプレイヤーごとに決めます。「おうちの人」はホームにこのメニューの入口（新しいしかけのおしらせつき）、「子ども」にはこのメニューの入口を出しません。</p>
+    ${L.length ? `<div class="xm-kids">${L.map(x => `<div class="xm-kid"><span class="xm-kav">${KB.avatarSVG(Object.assign({}, x.avatar || AVATAR_DEF, { name: x.name }), { mood: 'happy' })}</span><div><b>${esc(x.name)}</b></div><div class="su-seg fam-role">${[['adult', '👪 おうちの人'], ['child', '🧒 子ども']].map(([v, l]) => `<button class="${x.role === v ? 'on' : ''}" data-role="${v}" data-k="${esc(x.k)}">${l}</button>`).join('')}</div></div>`).join('')}</div>` : '<p class="small muted" style="margin:0">このGoogleでまもっているプレイヤーがいません。</p>'}
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
+  document.querySelectorAll('#modal [data-role]').forEach(b => b.onclick = async () => { const x = L.find(y => y.k === b.dataset.k), role = x && x.role === b.dataset.role ? '' : b.dataset.role;
+    try { await cloudReq('fam_role', { idt: S.gIdt && S.gIdt.t, pw: S.famPw, k: b.dataset.k, role }); x.role = role || null; S.xmAt = 0; famMenuModal(); } catch (e) { toast(e.message || '変えられませんでした'); } });
   store.set('famSeen', FAM_FEATURES.map(f => f.id)); const pb = $('.pb-fam .nb'); if (pb) pb.remove();
   document.querySelectorAll('#modal [data-fam]').forEach(b => b.onclick = () => { const f = FAM_FEATURES.find(x => x.id === b.dataset.fam); if (f) f.open(); });
 }
