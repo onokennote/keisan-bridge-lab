@@ -70,7 +70,9 @@
       nums.length = 0; TOK = []; r = look(dig(k5), nums, nm); if (r != null) return r;
     }
     // 「〜（まだ）」は中を訳して（not yet）を付ける
-    if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang !== 'zh' ? ' (not yet)' : '（未获得）'); }
+    if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang === 'zh' ? '（未获得）' : lang === 'hi' ? ' (अभी नहीं)' : ' (not yet)'); }
+    if (core.endsWith('（未獲得）') && core.length > 5) { const a = trCore(core.slice(0, -5), depth + 1); if (a != null) return a + (lang === 'zh' ? '（未获得）' : lang === 'hi' ? ' (अभी नहीं)' : ' (not earned)'); }
+    if (core.endsWith('（獲得済み）') && core.length > 6) { const a = trCore(core.slice(0, -6), depth + 1); if (a != null) return a + (lang === 'zh' ? '（已获得）' : lang === 'hi' ? ' (मिल गया)' : ' (earned)'); }
     // 「…」の中を先に訳して @ にする（「皆勤賞」→ "Perfect Attendance"）
     if (/「[^「」]+」/.test(core)) {
       const nm = []; let ok = true; const k4 = core.replace(/「([^「」]+)」/g, (m, x) => { const t = trCore(x, 9); if (t == null) { ok = false; return m; } nm.push(t); return '「@」'; });

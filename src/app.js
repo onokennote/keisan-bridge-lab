@@ -1915,7 +1915,7 @@ function profHTML(D, o) {
 function pvInfoBind(box, name0, me) {
   const info = box.querySelector('.pv-info'); if (!info) return; const myG = G_(), TIER = ['銅', '銀', '金'];
   box.querySelectorAll('[data-pvi]').forEach(el => el.onclick = () => {
-    const v = el.dataset.pvi, name = el.dataset.who || name0; if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
+    const v = el.dataset.pvi, name = el.dataset.who || name0; if (window.I18N && I18N.lang !== 'ja') I18N.setMe(name); // 英語・中国語：相手の名前も文の中の名前として扱う if (info.dataset.cur === v && !info.hidden) { info.hidden = true; el.classList.remove('sel'); return; }
     box.querySelectorAll('[data-pvi].sel').forEach(x => x.classList.remove('sel')); el.classList.add('sel'); info.dataset.cur = v;
     const q = v.split(':'); let h = '';
     if (q[0] === 'b') { const a = achOf(q[1]), i = +q[2]; if (!a) return; const t = a[2][i], tier = a[5] ? a[5][i] : Math.min(i, 2), mine = !!myG.ach[a[0] + ':' + t];
@@ -3227,13 +3227,13 @@ const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所�
 // 言語の切り替え（日本語／English／中文）。できあがるまではテスト版だけ（I18N.on）
 function langSwHTML() {
   if (!window.I18N || !I18N.on()) return '';
-  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳はまだ途中です。訳されていない文は日本語で出ます。</p>' : ''}`;
+  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
 }
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
     <div class="hf-name">計算ブリッジ作戦研究所 <small>〜打倒OZ家への道〜</small></div>
     <div class="hf-by">produced by <b>onoken</b> <span class="muted">＆ 研究所のなかまたち（博士・マサ・AI研究員）</span></div>
-    <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div>${langSwHTML()}</footer>`;
+    <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div></footer>`;
 }
 function hnavHTML() {
   const cur = homeTab();
@@ -3260,6 +3260,7 @@ function homeHTML() {
   <p><b class="title-expr">${esc((S.titleQ && S.titleQ.expr) || 'J − 4 × A ＝ 7')}</b>。強さも性格もばらばらのAIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、予選を勝ち抜く打ち方を見つけよう。</p>
   <p class="unofficial">非公式のファン制作アプリです　<a href="#about" data-act="about-scroll">このアプリについて</a></p>
   ${MIGRATE_ON && IS_ARTIFACT ? `<div class="panel mig-panel"><b>新しいサイトができました</b><div class="small muted">記録をまるごと持って、${esc(PUBLIC_URL.replace('https://', '').replace(/\/$/, ''))} へ移れます。</div><button class="btn primary" data-act="migrate-out">新しいサイトへ移る</button></div>` : ''}
+  <div class="lang-wrap">${langSwHTML()}</div>
   <div class="cast">${castHTML()}</div>
 </section>
 ${profiles().length ? (() => { const g = G_(), r = ratingOf(g.games); return `<div class="player-bar pb2"><div class="pb-top"><button class="pb-av pb-avatar" data-act="avatar-edit" aria-label="アバターを編集">${KB.avatarSVG(Object.assign(myAvatar(), { name: S.settings.name }), { mood: 'happy' })}<span class="pb-edit">編集</span></button><span class="pb-main"><small>プレイヤー</small><b class="pb-nm" style="--nl:${[...S.settings.name].length}">${esc(S.settings.name)}</b><button class="pb-rate" data-go="growth" aria-label="推定実力（成長記録へ）">${r.ok ? `<span class="pb-stars">${stars(r.r)}</span><b>${r.r.toFixed(1)}</b><small>${rateLabel(r.r)}相当</small>` : `<small>推定実力は測定中（あと${r.need}手）</small>`}</button><span class="pb-sub">${gamesN(g)}ゲーム・連続最善 最長${g.cnt.streakMax || 0}</span></span></div>${CLOUD_ON ? `<div class="pb-meta"><span class="pb-rank" id="pb-rank">${pbRankHTML()}</span><span class="pb-rv" id="pb-rv">${rvcHTML(rivalsOf(), rvByMine(), S.settings.name)}</span></div>` : ''}<div class="pb-btns2"><button class="btn sm pb-grow" data-go="growth">📈 成長記録</button><button class="btn sm pb-bell" data-act="notes-open" aria-label="通知を見る">🔔 通知<i class="nb" id="pb-nb" ${notesUnread() ? '' : 'hidden'}>${notesUnread()}</i></button><button class="btn sm x-btn" data-act="share-open" aria-label="成績をXでシェア"><b>𝕏</b> シェア</button><button class="btn sm pb-prof" data-act="profiles">編集・切り替え</button></div>

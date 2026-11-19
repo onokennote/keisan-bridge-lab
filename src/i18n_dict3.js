@@ -158,5 +158,5 @@ BP（バッジポイント）	BP (badge points)	BP（徽章积分）
 スタート	Start	开始
 🌐 言語	🌐 Language	🌐 语言
 言語	Language	语言
-翻訳はまだ途中です。訳されていない文は日本語で出ます。	Translation is still in progress. Untranslated text appears in Japanese.	翻译仍在进行中。未翻译的文字会以日语显示。
+翻訳は少しずつ増やしています。	Translations are being added little by little.	翻译正在逐步增加。
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
