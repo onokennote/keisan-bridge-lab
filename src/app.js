@@ -7690,7 +7690,7 @@ function onTableHTML(v) {
     <div class="row">${v.tour ? '<button class="btn sm ghost" data-act="on-stand-view">📋 順位</button>' : ''}<button class="btn sm ghost snd-btn ic-btn" data-act="sound" title="${esc(sndLabel())}" aria-label="${esc(sndLabel())}">${sndIcon()}</button></div></div>`;
   const order = g.order, myPos = order.indexOf(pov), cur = g.cur, ordIn = i => order.indexOf(i) + 1;
   const bub = ON.bub || {};
-  const seat = i => {
+  const seat = (i, k) => { // k＝自分の次から数えた位置（ふつうの対局画面と同じく、席の位置と時計回りの矢印を決める）
     const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b0 = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null, bt0 = b0 && (b0.chat ? (window.I18N && I18N.lang !== 'ja' ? I18N.tr(b0.text) : b0.text) : bubT(b0.text)), b = b0 && bt0 ? Object.assign({}, b0, { text: bt0 }) : null; // 英語・中国語：AIのふきだしは訳せるものだけ（ひとことは訳せればそのまま訳す）
     let act;
     if (cur === i && v.phase === 'play') act = `<div class="act thinking">${s.ai || s.sub ? 'AIが考え中' : '考え中'}<span class="dots"><i></i><i></i><i></i></span></div>`;
@@ -7698,14 +7698,14 @@ function onTableHTML(v) {
     else if (l && l.type === 'draw') act = `<div class="act draw">${l.foul ? `❌ お手つきで${l.n}枚引いた` : l.by === 'timeout' ? '⏰ 時間切れで1枚引いた' : '山札から1枚引いた'}</div>`;
     else act = `<div class="act draw idle">${order.indexOf(i) < g.pos || g.over ? '' : 'この巡はこれから'}</div>`;
     const mood = g.over ? (g.winner === i ? 'happy' : (g.pp && g.pp[i] >= 25 ? 'worried' : 'normal')) : n2 <= 2 ? 'smug' : 'normal';
-    return `<div data-pi="${i}" ${spec ? `data-onpov="${i}" role="button" title="${esc(onName(s))}の席から見る"` : ''} class="seat ${i === order[0] ? 'dealer' : ''} ${cur === i && v.phase === 'play' ? 'turn' : ''} ${ON.acted === i ? 'acted' : ''} ${g.over ? (g.winner === i ? 'out winner' : 'loser') : ''}">${i === order[0] ? dealerChip('dbtn seat-chip') : ''}
+    return `<div data-pi="${i}" data-k="${k}" ${spec ? `data-onpov="${i}" role="button" title="${esc(onName(s))}の席から見る"` : ''} class="seat ${i === order[0] ? 'dealer' : ''} ${cur === i && v.phase === 'play' ? 'turn' : ''} ${ON.acted === i ? 'acted' : ''} ${g.over ? (g.winner === i ? 'out winner' : 'loser') : ''}">${i === order[0] ? dealerChip('dbtn seat-chip') : ''}
       <div class="av">${onAv(s, mood)}${b ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''}${g.over && g.winner === i ? confettiHTML() : ''}</div>
       <div class="nm"><span>${esc(onName(s))}</span><span class="ord">${ordIn(i)}番手</span></div>
       <div class="meta">${s.ai ? (s.char ? `<span class="chip on-reschip" title="ポイントを持つAI研究員（ランキングの競走相手）">AI研究員★${s.lv || 2}</span>` : `<span class="chip lvchip" title="空いた席をうめるAI">AI補充★${s.lv || 2}</span>`) : s.sub ? `<span class="chip on-subchip">🤖 ${s.auto ? `AI★${s.subLv}に任せ中` : 'AIが代打ち'}</span>` : '<span class="chip on-humanchip">オンライン</span>'}</div>
       <div class="stats"><span class="handcount"><span>手札</span><b class="tnum">${n2}</b>${g.over ? '' : handBacks(n2)}</span><span>${g.over && g.pp ? `<small>このゲーム</small> PP <b class="tnum">${g.pp[i]}</b>` : `PP <b class="tnum">${tot(i)}</b>`}</span></div>
       ${act}${g.over && g.hands && g.hands[i].length ? `<div class="played"><span class="pl-l">残り手札</span><span class="pg">${onCards(g.hands[i]).map(miniCard).join('')}</span></div>` : ''}${onPlayedHTML(g, i)}</div>`;
   };
-  const opp = []; for (let k = 1; k < n; k++) opp.push(seat(order[(myPos + k) % n]));
+  const opp = []; for (let k = 1; k < n; k++) opp.push(seat(order[(myPos + k) % n], k - 1));
   const f = g.field ? { v: g.field[0], s: g.field[1] } : null;
   const flipped = ON.lastRound !== `${v.gameNo}:${g.round}`; ON.lastRound = `${v.gameNo}:${g.round}`;
   const strip = `<div class="order-strip" aria-label="手番の順"><span class="cw">時計回り</span>${order.map((i, k) => `${k ? '<span class="arr">→</span>' : ''}<span class="os ${cur === i && v.phase === 'play' ? 'now' : g.over || k < g.pos ? 'done' : ''} ${i === me ? 'meos' : ''}">${k === 0 ? dealerChip('dbtn inline') : ''}${esc(i === me ? 'あなた' : onName(v.seats[i]))}</span>`).join('')}</div>`;
@@ -7726,6 +7726,7 @@ function onTableHTML(v) {
   const handHTML = spec ? (g.over && g.hands ? onCards(g.hands[pov]).map(c => cardHTML(c, { extra: 'disabled' })).join('') : [...Array(g.handN[pov])].map(() => '<span class="card back"></span>').join(''))
     : hand.map(c => cardHTML(c, { cls: (ON.sel.includes(c.id) ? 'sel ' : '') + ((ON.newIds || []).includes(c.id) ? 'new' : ''), extra: `data-oncard="${c.id}" ${myTurn ? '' : 'disabled'} aria-pressed="${ON.sel.includes(c.id)}"` })).join('');
   const meBox = `<div data-pi="${pov}" class="me ${cur === pov && v.phase === 'play' ? 'turn' : ''} ${g.over && g.winner === pov ? 'winner' : ''}">
+      <span class="me-arrow out" aria-hidden="true">▲</span>
       ${pov === order[0] ? dealerChip('dbtn seat-chip') : ''}${g.over && g.winner === pov ? confettiHTML() : ''}
       <div class="head"><span class="me-id"><span class="av me-av">${onAv(ps, g.over ? (g.winner === pov ? 'happy' : 'normal') : (g.handN[pov] <= 2 ? 'smug' : 'normal'))}${(() => { const b = bub[pov]; return b && Date.now() - b.at < (b.dur || 2600) ? `<div class="bubble me-bub ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : ''; })()}</span><b>${esc(spec ? onName(ps) : ps.name)}</b><span class="me-info">手札 <b class="tnum">${g.handN[pov]}</b>枚${spec ? '' : `・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b>`}</span></span><span class="me-pp">${spec ? '' : '<button class="btn sm felt-btn on-chat-btn" data-act="on-chat" aria-label="ひとことを送る">💬</button>'}セットPP <b class="tnum">${tot(pov)}</b></span></div>
       ${spec ? '<div class="on-watch">👀 観戦中（手札は見えません）・ほかの席を押すと、その人の席から見られます</div>' : ''}
