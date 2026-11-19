@@ -3214,7 +3214,7 @@ function miniHTML() {
     <p class="small muted" style="margin:0">タイルを押すとすぐ始まります。🏅 で説明・記録・取れるバッジ。</p></div>`;
 }
 // ホームの下半分はタブで切り替える（オンライン・練習・大会・特訓・このアプリ）。選んだタブは端末ごとに覚える kb.homeTab
-const HTABS = () => [['h-online', '🌐', 'オンライン', ON_ENABLED()], ['h-prac', '🃏', '練習', 1], ['h-tour', '🏟️', '大会', 1], ['h-mini', '🥋', '特訓', 1], ['h-about', 'ℹ️', 'このアプリ', 1]].filter(x => x[3]);
+const HTABS = () => [['h-prac', '🃏', '練習', 1], ['h-tour', '🏟️', '大会', 1], ['h-mini', '🥋', '特訓', 1], ['h-online', '🌐', 'オンライン', ON_ENABLED()], ['h-about', 'ℹ️', 'このアプリ', 1]].filter(x => x[3]);
 function homeTab() { const T = HTABS().map(x => x[0]); let t = ''; try { t = JSON.parse(localStorage.getItem('kb.homeTab') || '""'); } catch (e) { } return T.includes(t) ? t : T[0]; }
 // 自動テスト（webdriver）ではタブで隠さない（ホームのボタンをそのまま押せるように。確かめるときは kb.forceTabs）
 const htAuto = () => { try { return !!navigator.webdriver && localStorage.getItem('kb.forceTabs') !== '1'; } catch (e) { return false; } };
