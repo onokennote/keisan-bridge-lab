@@ -95,6 +95,7 @@
   const isFace = el => el && el.matches && el.matches('.card .v, .big, .cn, .mc, .tut-hand .v');
   function hiNode(n) {
     if (lang !== 'hi' || !n.parentElement || n.parentElement.closest(NODEV)) return;
+    if (!deckOn('hi') && n.parentElement.closest('.card, .fieldcard, .mc, .flycard, .df-front, .tut-hand')) return; // ガンジファをオフ（ノーマル）にしたら、札はふつうのトランプ（A・J・Q・K と算用数字）
     let v = n.nodeValue, t = v;
     if (isFace(n.parentElement)) t = t.replace(/^\s*(A|J|Q|K)\s*$/, (m, c) => m.replace(c, FACE[c]));
     t = t.replace(/[0-9]/g, d => DEVA[+d]);

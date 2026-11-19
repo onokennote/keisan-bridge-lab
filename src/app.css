@@ -2752,7 +2752,7 @@ body.rewinding #home-fab{display:none}
 /* 中国語（簡体字）：見出しは太い中国語の字体、本文は Noto Sans SC（日本語の字体に簡体字がなく、細い字が混ざるため） */
 html[lang="zh-CN"]{--f-display:"ZCOOL QingKe HuangYou","Noto Sans SC",system-ui,sans-serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;--f-mono:"JetBrains Mono","Noto Sans SC",ui-monospace,monospace}
 html[lang="zh-CN"] body{font-family:var(--f-body)}
-html[lang="zh-CN"] .card .v,html[lang="zh-CN"] .fieldcard .big,html[lang="zh-CN"] .df-front .big,html[lang="zh-CN"] .flycard,html[lang="zh-CN"] .card:not(.mj) .cn{font-family:"Dela Gothic One","Hiragino Sans",system-ui,sans-serif}
+html[lang="zh-CN"] .card .v,html[lang="zh-CN"] .fieldcard .big,html[lang="zh-CN"] .df-front .big,html[lang="zh-CN"] .flycard,html[lang="zh-CN"] .card:not(.mj) .cn,html[lang="hi"] .card:not(.dk-gj) .v,html[lang="hi"] .fieldcard:not(.dk-gj) .big,html[lang="hi"] .dealfly:not(.dk-gj) .df-front .big,html[lang="hi"] .flycard:not(.dk-gj),html[lang="hi"] .card:not(.dk-gj) .cn{font-family:"Dela Gothic One","Hiragino Sans",system-ui,sans-serif}
 /* 中国語でも札の数字は日本語と同じ字体（ZCOOL の数字は札には読みにくい）。麻雀牌の漢字は .mjf が Noto Serif SC */
 
 /* ヒンディー語：見出しは太いデーヴァナーガリーの字体、本文は Noto Sans Devanagari */
