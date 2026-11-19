@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="afc2408 2026-11-19 23:53"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="8eabf10b8461"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="3c87989 2026-11-20 00:05"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="f20161ffa8fb"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=ZCOOL+QingKe+HuangYou&family=Baloo+2:wght@500;800&family=Noto+Sans+Devanagari:wght@400;700&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2767,7 +2767,7 @@ html[lang="hi"] .card .v,html[lang="hi"] .big,html[lang="hi"] .cn,html[lang="hi"
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='2d96a26ed7';
+window.KB_BUILD='1ae9133aef';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8444,6 +8444,78 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 ・#枚残しは場が§のときしか上がれず、確率は約#%。「§」なら残り#枚の#面待ちで、約#%でした。	· Keeping # card, you only go out if the field is § (about #%). With "§", your last # cards would wait on # fields, about #%.	· 留#张的话，只有场数是§时才能出完，概率约#%。打「§」的话，剩下#张是#面听牌，约#%。
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
 
+// 辞書（お手つきまわり・AIの読みとの比べ・成長記録の判断の実力）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+お手つき	Foul	错算
+お手つき！	Foul!	错算！
+（お手つき）	(foul)	（错算）
+では作れません	can't make it	凑不出来
+ペナルティ：山札から#枚	Penalty: draw # from the deck	罚：从牌堆摸#张
+お手つき（§）→ #枚引いた（残#）	foul (§) → drew # (# left)	错算（§）→ 摸了#张（剩#张）
+お手つき（§）→#枚引く	Foul (§) → draw #	错算（§）→ 摸#张
+「§」では場の#が作れず、お手つきで#枚引きました。	"§" couldn't make the field #, so it was a foul and you drew #.	「§」凑不出场上的#，错算，摸了#张。
+例）§ = #	e.g. § = #	例：§ = #
+お手つきは推定実力で差し引かれます（お手つき#割で−#）。式を出す前に、もう一度計算を確かめよう。	Fouls are deducted from your estimated skill (−#2 for fouls on #10% of moves). Check the math once more before you play.	错算会从推定实力中扣分（错算#成扣#）。出牌前再验算一遍吧。
+判断の実力	Decision skill	判断实力
+最善率	Best-move rate	最佳率
+AIを見た手	Moves after AI reading	看过AI的着法
+平均損失	Average loss	平均损失
+#回	# times	#次
+AIの最善	AI's best	AI最佳
+あなたの手	Your move	你的着法
+セット期待点	Expected set points	本盘期望分
+上がる確率	Chance of going out	出完概率
+期待PP	Expected PP	期望PP
+期待点	Exp. points	期望分
+決勝進出	Final	进决赛
+決勝進出率	Chance of final	决赛晋级率
+優勝率	Chance of winning	夺冠率
+勝ち抜け	Advance	晋级
+勝ち抜け率	Chance of advancing	晋级率
+差	Gap	差
+最善手の方が良い点：	Why the best move is better:	最佳着法更好的地方：
+相手に先に上がられる危険が小さい	lower risk of an opponent going out first	被对手抢先出完的风险更小
+数字の差は小さく、細かな有利の積み重ねです	the numbers are close; it's a pile of small advantages	数字差距不大，是细小优势的积累
+セット期待点が # 高い	expected set points # higher	本盘期望分高#
+セット期待点が #点 高い	expected set points # higher	本盘期望分高#分
+上がる確率が #% 高い	chance of going out #% higher	出完概率高#%
+期待PPが # 小さい	expected PP # lower	期望PP少#
+残る手札で次の場に出せる確率が #%（あなたの手だと #%）	chance to play on the next field with what's left #% (#% with your move)	用剩下的手牌在下一场出牌的概率#%（你的着法是#%）
+決勝進出率が #% 高い	chance of final #% higher	决赛晋级率高#%
+優勝率が #% 高い	chance of winning #% higher	夺冠率高#%
+勝ち抜け率が #% 高い	chance of advancing #% higher	晋级率高#%
+（上がる確率だけなら、あなたの手が #% 上。総合では最善手が上回ります）	(On chance of going out alone, your move is #% higher. Overall, the best move wins.)	（只看出完概率，你的着法高#%。综合来看最佳着法更好）
+総合＝セット期待点×# ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）	Overall = expected set points × # + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (round #: within # pt)	综合＝本盘期望分×# ＋ 出完（%）×# − 期望PP×#。「视同最佳」＝与最佳的差在误差范围内（第#巡在#pt以内）
+総合＝セット期待点×# ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）	Overall = expected set points × # + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (within # pt)	综合＝本盘期望分×# ＋ 出完（%）×# − 期望PP×#。「视同最佳」＝与最佳的差在误差范围内（#pt以内）
+AIの手番の速さ	AI turn speed	AI回合速度
+はやい（押すたびに切り替え）	Fast (tap to change)	快（每按一次切换）
+ゆっくり（押すたびに切り替え）	Slow (tap to change)	慢（每按一次切换）
+ふつう（押すたびに切り替え）	Normal (tap to change)	普通（每按一次切换）
+一瞬（押すたびに切り替え）	Instant (tap to change)	瞬间（每按一次切换）
+これまでの場札	Field cards so far	之前的场牌
+これまでの場札 #	Field cards so far: #	之前的场牌 #
+これまでの場札 §	Field cards so far: §	之前的场牌 §
+切り直し後の場札 #	Field cards since the reshuffle: #	重洗后的场牌 #
+切り直し後の場札 §	Field cards since the reshuffle: §	重洗后的场牌 §
+切り直し後の場札	Field cards since the reshuffle	重洗后的场牌
+切り直し後の場札（それより前は山札に戻っています）	Field cards since the reshuffle (earlier ones went back into the deck)	重洗后的场牌（之前的已回到牌堆）
+直前の自分の手まで巻き戻す	Rewind to your previous move	倒回到自己的上一手
+§（切り直しで山札に戻った札）	§ (went back into the deck in the reshuffle)	§（重洗时回到了牌堆）
+#（切り直しで山札に戻った札）	# (went back into the deck in the reshuffle)	#（重洗时回到了牌堆）
+これまでの場札 A	Field cards so far: A	之前的场牌 A
+これまでの場札 J	Field cards so far: J	之前的场牌 J
+これまでの場札 Q	Field cards so far: Q	之前的场牌 Q
+これまでの場札 K	Field cards so far: K	之前的场牌 K
+推定実力の推移	Estimated skill over time	推定实力变化
+次の自分の番までに誰かが上がる確率 #%	Chance someone goes out before your next turn: #%	到你下一轮前有人出完的概率 #%
+#	#	#
+第#巡 場#	Round #, field #	第#巡 场#
+コンボ終了	Combo over	连击结束
+図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
+ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？
+ほな、大会の準備や！どんな相手がおるか楽しみやな！	Time to get the tournament ready! Can't wait to see who's in it!	来，准备比赛吧！真期待会遇到什么对手！
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
 // 実況・解説のセリフ（型）の英語・中国語。日本語の型 → [英語, 中文]。ない型は英語・中国語では出さない
 window.I18N_LINES = {
 "第{g}ゲーム、開始です。序盤は枚数よりも「残す札の柔軟さ」が効いてきます。": [
@@ -10088,6 +10160,37 @@ Object.assign(window.I18N_HI, {
 "・@が残り#枚。上がられる可能性が高い場面では、手札の合計を減らす「§」が優先でした（残り合計 #→#）。": "· @ के # पत्ते बचे हैं। जब कोई जीतने वाला हो, तो हाथ का कुल घटाने वाला \"§\" पहले आता है (बचा कुल # → #)।",
 "・#枚残しは場が#のときしか上がれず、確率は約#%。「§」なら残り#枚の#面待ちで、約#%でした。": "· # पत्ता रखने पर मैदान # हो तभी जीतते (लगभग #%)। \"§\" से आख़िरी # पत्ते # मैदानों का इंतज़ार करते, लगभग #%।",
 "・#枚残しは場が§のときしか上がれず、確率は約#%。「§」なら残り#枚の#面待ちで、約#%でした。": "· # पत्ता रखने पर मैदान § हो तभी जीतते (लगभग #%)। \"§\" से आख़िरी # पत्ते # मैदानों का इंतज़ार करते, लगभग #%।"
+});
+Object.assign(window.I18N_HI, {
+"お手つき": "फ़ाउल", "お手つき！": "फ़ाउल!", "（お手つき）": "(फ़ाउल)", "では作れません": "से नहीं बनता",
+"ペナルティ：山札から#枚": "सज़ा: गड्डी से # उठाएँ",
+"お手つき（§）→ #枚引いた（残#）": "फ़ाउल (§) → # उठाए (# बचे)",
+"お手つき（§）→#枚引く": "फ़ाउल (§) → # उठाएँ",
+"「§」では場の#が作れず、お手つきで#枚引きました。": "\"§\" से मैदान # नहीं बना, तो फ़ाउल हुआ और आपने # उठाए।",
+"例）§ = #": "जैसे: § = #",
+"お手つきは推定実力で差し引かれます（お手つき#割で−#）。式を出す前に、もう一度計算を確かめよう。": "फ़ाउल अनुमानित कौशल से घटाए जाते हैं (#0% चालों में फ़ाउल पर −#)। चलने से पहले हिसाब एक बार और जाँचो।",
+"判断の実力": "फ़ैसले का कौशल", "最善率": "सबसे अच्छी चाल की दर", "AIを見た手": "AI देखने के बाद की चालें", "平均損失": "औसत नुकसान", "#回": "# बार",
+"AIの最善": "AI की सबसे अच्छी", "あなたの手": "आपकी चाल", "セット期待点": "अपेक्षित सेट अंक", "上がる確率": "जीतने की संभावना", "期待PP": "अपेक्षित PP",
+"期待点": "अपेक्षित अंक", "決勝進出": "फ़ाइनल", "決勝進出率": "फ़ाइनल की संभावना", "優勝率": "चैंपियन की संभावना", "勝ち抜け": "आगे बढ़ना", "勝ち抜け率": "आगे बढ़ने की संभावना", "差": "अंतर",
+"最善手の方が良い点：": "सबसे अच्छी चाल बेहतर क्यों है:",
+"相手に先に上がられる危険が小さい": "विरोधी के पहले जीतने का ख़तरा कम",
+"数字の差は小さく、細かな有利の積み重ねです": "अंकों का फ़र्क छोटा है; यह छोटे-छोटे फ़ायदों का जोड़ है",
+"セット期待点が # 高い": "अपेक्षित सेट अंक # ज़्यादा", "セット期待点が #点 高い": "अपेक्षित सेट अंक # ज़्यादा",
+"上がる確率が #% 高い": "जीतने की संभावना #% ज़्यादा", "期待PPが # 小さい": "अपेक्षित PP # कम",
+"残る手札で次の場に出せる確率が #%（あなたの手だと #%）": "बचे हाथ से अगले मैदान पर चल पाने की संभावना #% (आपकी चाल से #%)",
+"決勝進出率が #% 高い": "फ़ाइनल की संभावना #% ज़्यादा", "優勝率が #% 高い": "चैंपियन की संभावना #% ज़्यादा", "勝ち抜け率が #% 高い": "आगे बढ़ने की संभावना #% ज़्यादा",
+"（上がる確率だけなら、あなたの手が #% 上。総合では最善手が上回ります）": "(सिर्फ़ जीतने की संभावना में आपकी चाल #% ऊपर है। कुल मिलाकर सबसे अच्छी चाल आगे है।)",
+"総合＝セット期待点×# ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）": "कुल = अपेक्षित सेट अंक × # + जीत (%) × # − अपेक्षित PP × #। \"सबसे अच्छा माना\" = सबसे अच्छे की त्रुटि सीमा में (राउंड #: # pt के अंदर)",
+"総合＝セット期待点×# ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）": "कुल = अपेक्षित सेट अंक × # + जीत (%) × # − अपेक्षित PP × #। \"सबसे अच्छा माना\" = सबसे अच्छे की त्रुटि सीमा में (# pt के अंदर)",
+"AIの手番の速さ": "AI की बारी की रफ़्तार",
+"はやい（押すたびに切り替え）": "तेज़ (दबाकर बदलें)", "ゆっくり（押すたびに切り替え）": "धीमी (दबाकर बदलें)", "ふつう（押すたびに切り替え）": "सामान्य (दबाकर बदलें)", "一瞬（押すたびに切り替え）": "तुरंत (दबाकर बदलें)",
+"これまでの場札": "अब तक के मैदान के पत्ते", "これまでの場札 #": "अब तक के मैदान के पत्ते: #", "これまでの場札 §": "अब तक के मैदान के पत्ते: §",
+"切り直し後の場札": "फेंटने के बाद के मैदान के पत्ते", "切り直し後の場札 #": "फेंटने के बाद के मैदान के पत्ते: #", "切り直し後の場札 §": "फेंटने के बाद के मैदान के पत्ते: §",
+"切り直し後の場札（それより前は山札に戻っています）": "फेंटने के बाद के मैदान के पत्ते (पहले वाले गड्डी में वापस गए)",
+"直前の自分の手まで巻き戻す": "अपनी पिछली चाल तक पीछे जाएँ", "§（切り直しで山札に戻った札）": "§ (फेंटते समय गड्डी में वापस गए)", "#（切り直しで山札に戻った札）": "# (फेंटते समय गड्डी में वापस गए)", "これまでの場札 A": "अब तक के मैदान के पत्ते: A", "これまでの場札 J": "अब तक के मैदान के पत्ते: J", "これまでの場札 Q": "अब तक के मैदान के पत्ते: Q", "これまでの場札 K": "अब तक के मैदान के पत्ते: K", "推定実力の推移": "समय के साथ अनुमानित कौशल", "次の自分の番までに誰かが上がる確率 #%": "आपकी अगली बारी से पहले किसी के जीतने की संभावना #%",
+"第#巡 場#": "राउंड #, मैदान #", "コンボ終了": "कॉम्बो ख़त्म", "図鑑に登録（#/#）": "संग्रह में जोड़ा (#/#)",
+"ほな、卓をつくろか！今日はどの相手と打つ？": "चलो मेज़ लगाते हैं! आज किससे खेलोगे?",
+"ほな、大会の準備や！どんな相手がおるか楽しみやな！": "चलो टूर्नामेंट की तैयारी करें! देखते हैं कौन-कौन आता है!"
 });
 
 // ---------- 多言語（英語・中国語 簡体字）：画面に出た日本語を、表示するときに辞書で差し替える ----------
@@ -14264,7 +14367,7 @@ function fieldMiniHTML(g, flipped) {
   const h = boardHist(g); let live = h.fields.filter(f => !f.ret);
   if (S.showRound) live = live.slice(0, -1);
   if (!live.length) return h.reshuffled ? '<div class="fh-mini" title="切り直し後の場札"><span class="fh-rs">切直</span></div>' : '';
-  return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('、')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
+  return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('・')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
 }
 // 手を打ったあとに残る手札（引く手は今の手札＋裏向きの1枚）。解説の手の一覧で「残り○枚」の横に並べる
 function restCardsHTML(counts, m) {
@@ -15187,7 +15290,7 @@ function whyHTML(d) {
   if (best.m && mine.m && pb - pm > 0.05) diffs.push(`残る手札で次の場に出せる確率が ${pct(pb)}（あなたの手だと ${pct(pm)}）`);
   return `<div class="why">
     <p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger)}</p>
-    <p style="margin:0"><b>最善手の方が良い点：</b>${diffs.length ? esc(diffs.join('、')) : '数字の差は小さく、細かな有利の積み重ねです'}。${mine.win - best.win > 0.03 ? `<br><span class="small">（上がる確率だけなら、あなたの手が ${pct(mine.win - best.win)} 上。総合では最善手が上回ります）</span>` : ''}</p>
+    <p style="margin:0"><b>最善手の方が良い点：</b>${diffs.length ? diffs.map(x => `<span>${esc(x)}</span>`).join('、') : '<span>数字の差は小さく、細かな有利の積み重ねです</span>'}<span>。</span>${mine.win - best.win > 0.03 ? `<br><span class="small">（上がる確率だけなら、あなたの手が ${pct(mine.win - best.win)} 上。総合では最善手が上回ります）</span>` : ''}</p>
     <div class="why-grid">${row(best, 'AIの最善', 'best')}${row(mine, 'あなたの手', 'mine')}</div>${cands}</div>`;
 }
 // 判断の質と結果（運）を分けて判定する
