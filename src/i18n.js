@@ -125,7 +125,7 @@
       el.dataset.mj = '1'; el.classList.add('mj'); be.innerHTML = mjFace(v, s); if (va) va.textContent = v;
     } else if (el.matches('.mc')) {
       const v = mjVal(el.textContent); if (!v) return;
-      el.dataset.mj = '1'; el.classList.add('mj'); el.innerHTML = mjFace(v, +el.dataset.s || 0) + (v >= 10 ? `<sub>${v}</sub>` : '');
+      el.dataset.mj = '1'; el.classList.add('mj'); el.innerHTML = mjFace(v, +el.dataset.s || 0).replace('<i>萬</i>', '') + (v >= 10 ? `<sub>${v}</sub>` : ''); // 捨て札は漢数字だけ
     }
   }
   const MJ_SEL = '.card:not(.back), .fieldcard, .mc';
