@@ -72,6 +72,9 @@ KB.commentLine = function (mode, kind, d) {
   // 実は出せたのに引いた（あえて引いた・見逃した）ときは、「作れなかった」と言い切るセリフを使わない
   if (d.couldPlay) { const ok = usable.filter(x => !/作れ|出せず|出せなかった|しかなかった|しかない|できへん|作れへん/.test(x)); usable.splice(0, usable.length, ...ok); }
   if (kind === 'draw' && d.h != null && d.h < 6) { const light = usable.filter(s => !/重|PPのリスク|PPも重く/.test(s)); if (light.length) usable.splice(0, usable.length, ...light); }
+  // 英語・中国語：訳のある型だけを使う（チェックは日本語の型でしたあと、訳した型に数字や名前を入れる）
+  const LT = G.I18N && G.I18N.lang !== 'ja' ? (G.I18N_LINES || {}) : null;
+  if (LT) { const ok = usable.filter(x => LT[x]); usable.splice(0, usable.length, ...ok); }
   if (!usable.length) return null;
   // 同じセリフが続かないよう、最近使ったセリフ（候補の6割ほど）は避ける
   const rk = who + ':' + kind, rec = RECENT[rk] = RECENT[rk] || [];
@@ -79,13 +82,13 @@ KB.commentLine = function (mode, kind, d) {
   const pick = R(fresh.length ? fresh : usable);
   rec.push(pick); const keep = Math.max(1, Math.floor(arr.length * 0.6)); while (rec.length > keep) rec.shift();
   saveRecent();
-  let text = fill(pick, d);
+  let text = LT ? fill(LT[pick][G.I18N.lang === 'zh' ? 1 : 0], Object.fromEntries(Object.entries(d).map(([k, v]) => [k, typeof v === 'string' ? G.I18N.tr(v) : v]))) : fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
   const noPrefix = { kanataOn: 1, kanataAgain: 1, shadowClear: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];
-  if (pf && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
+  if (pf && !LT && !noPrefix[kind] && Math.random() < (who === 'masa' ? 0.3 : 0.2)) text = R(pf) + text;
   // 博士はごくたまに、哲学的なひと言を添える
-  if (who === 'root' && KB.PHILO && /good|bad|ok|round|field|win|result|table|streak|BigPP/.test(kind) && Math.random() < 0.07) text += ' ' + R(KB.PHILO);
+  if (who === 'root' && !LT && KB.PHILO && /good|bad|ok|round|field|win|result|table|streak|BigPP/.test(kind) && Math.random() < 0.07) text += ' ' + R(KB.PHILO);
   return { who, text, prio: PRIO[kind] || 1, kind, mood: /almostWinBig|almostWin|foul|bad|Bad|draw|heavy|Heavy|Stuck|BigPP|trail|Streak|myHeavy|Unlucky/.test(kind) ? 'worried' : /good|win|play3|streak|SmallPP|lead|Reach|div|Lucky|Both|oppNice|bigWait|missLucky|namedWin/.test(kind) ? 'happy' : 'normal' };
 };
 KB.countLines = function () { let n = 0; const L = LINES(); for (const w in L) for (const k in L[w]) n += L[w][k].length; return n; };

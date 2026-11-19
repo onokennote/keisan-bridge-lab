@@ -2,7 +2,7 @@
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.exitCode = 1; };
 const src = path.join(__dirname, '..', 'src');
-global.window = {}; ['i18n_names', 'i18n_dict', 'i18n_dict2', 'i18n_dict3', 'i18n_dict4'].forEach(f => eval(fs.readFileSync(path.join(src, f + '.js'), 'utf8')));
+global.window = {}; eval(fs.readFileSync(path.join(src, 'i18n_lines.js'), 'utf8')); const LN = window.I18N_LINES; ok(Object.values(LN).every(v => v.length === 2 && v[0] && v[1]), `実況の型 ${Object.keys(LN).length}個に英語・中文がある`); ['i18n_names', 'i18n_dict', 'i18n_dict2', 'i18n_dict3', 'i18n_dict4', 'i18n_dict5', 'i18n_dict6', 'i18n_dict7'].forEach(f => eval(fs.readFileSync(path.join(src, f + '.js'), 'utf8')));
 const R = window.I18N_ROWS;
 ok(R.every(r => r.length === 3 && r[1] && r[2]), `辞書の行はどれも「日本語・英語・中文」の3つ（${R.length}行・名前${window.I18N_NAMES.length}）`);
 const cnt = (s, re) => (s.match(re) || []).length, refs = s => { const m = s.match(/#([1-9])?/g) || []; return Math.max(m.length ? Math.max(...m.map(x => x.length > 1 ? +x[1] : 0)) : 0, cnt(s.replace(/#[1-9]/g, ''), /#/g)); };
@@ -29,6 +29,8 @@ ok(!R.some(r => JA.test(r[2]) && !/上野晋太郎|すうがっくま/.test(r[2]
     await p.evaluate(() => KBAPP.go('setup-practice')); await p.evaluate(() => KBAPP.act('start-practice')); await p.waitForTimeout(4000);
     await p.screenshot({ path: path.join(__dirname, 'out', `i18n_${lang}_game.png`) });
     ok(await p.evaluate(() => /Hand|手牌/.test(document.body.innerText)), `${lang} 対局画面が訳される`);
+    const cm = await p.evaluate(() => ['start', 'play3', 'draw', 'good', 'bad', 'win', 'roundBig'].map(k => { const c = KB.commentLine('both', k, { g: 1, n: 'ゴウ', e: '5 + 6 + 1', t: 12, h: 3, best: '5 + 7', r: 2 }); return c ? c.text : ''; }));
+    ok(cm.every(t => t && !/[\u3040-\u309f\u30a0-\u30fa]/.test(t)), `${lang} 実況が訳される：${cm[2]}`);
     ok(!errs.length, `${lang} エラーなし ` + errs.join(' / '));
     await p.close();
   }

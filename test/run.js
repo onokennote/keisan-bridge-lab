@@ -6,6 +6,7 @@ const fs = require('fs');
   const b = await chromium.launch();
   const pg = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = [];
+  if (process.env.KB_LANG) await pg.addInitScript(l => localStorage.setItem('kb.lang', l), process.env.KB_LANG); // 英語・中国語で通すとき
   pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await pg.goto('file://' + require('path').join(__dirname, 'page.html'));
   await pg.waitForTimeout(500);
@@ -16,7 +17,9 @@ const fs = require('fs');
   else { await pg.click('[data-go="setup-tour"]'); await pg.click('[data-act="start-tour"]'); await pg.waitForTimeout(100); await pg.evaluate(() => { if (KBAPP.S.view === 'opening') KBAPP.act('opening-start'); }); }
   await pg.waitForTimeout(400);
   let shots = 0;
+  const LEFT = new Set(); const grabLeft = async () => { if (!process.env.KB_LANG) return; (await pg.evaluate(() => { const re = /[\u3040-\u309f\u30a0-\u30fa]/, o = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.nodeValue.trim(); if (t.length > 1 && re.test(t) && !n.parentElement.closest('script,style')) o.push(t); } return o; })).forEach(x => LEFT.add(x)); };
   for (let step = 0; step < 4000; step++) {
+    if (step % 7 === 0) await grabLeft();
     const st = await pg.evaluate(() => {
       const S = KBAPP.S; const wk = document.querySelector('[data-act="win-ok"]'); if (wk) { wk.click(); return 'modal'; } const m = document.querySelector('#modal');
       if (m) { const b = m.querySelector('[data-act="win-ok"],[data-act="next-game"],[data-act="start-final"],#tb-ok'); if (b) { b.click(); return 'modal'; } return 'modal-noop:' + m.innerText.slice(0, 80); }
@@ -51,5 +54,6 @@ const fs = require('fs');
   }
   await pg.screenshot({ path: require('path').join(__dirname, 'out', 'end.png'), fullPage: true });
   console.log('errors', errs, await pg.evaluate(() => JSON.stringify(window.__stats)));
+  if (process.env.KB_LANG) { await pg.waitForTimeout(1500); const left = await pg.evaluate(() => { const re = /[\u3040-\u309f\u30a0-\u30fa]/, o = []; const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT); let n; while ((n = w.nextNode())) { const t = n.nodeValue.trim(); if (t.length > 1 && re.test(t) && !n.parentElement.closest('script,style')) o.push(t); } return o; }); left.forEach(x => LEFT.add(x)); console.log('lang left', LEFT.size); [...LEFT].forEach(x => console.log('  ', x.slice(0, 160))); await pg.screenshot({ path: require('path').join(__dirname, 'out', 'setend_' + process.env.KB_LANG + '.png'), fullPage: true }); }
   await b.close();
 })();

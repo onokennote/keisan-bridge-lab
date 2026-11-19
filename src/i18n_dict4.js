@@ -1,5 +1,55 @@
 // 辞書（説明の長い文・設定の要約）
 window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+第#巡の途中から再開や！続きいこか！	Resuming from the middle of round #! Let's keep going!	从第#巡中途继续！接着来！
+第#巡の途中から再開します。	Resuming from the middle of round #.	从第#巡中途继续。
+一手前、第#巡の@の番まで戻したで！さっきとちゃう手、試してみ！	Rewound one move to @'s turn in round #! Try something different!	退回一步，回到第#巡@的回合！试试不一样的着法！
+一手前、第#巡の@の番に戻しました。別の手を試してみましょう。	Rewound one move to @'s turn in round #. Try another move.	退回一步，回到第#巡@的回合。试试别的着法吧。
+あえて引く	draw on purpose	故意摸牌
+AI総評	AI review	AI点评
+博士とマサ	Dr. Root & Masa	博士和阿正
+このセットの総括	Set summary	本盘总结
+決勝戦の総括	Final summary	决赛总结
+総評を作っています…	Writing the review…	正在生成点评…
+上がる確率#%→#%	chance of going out #%→#%	出完概率#%→#%
+決勝進出率#%→#%	chance of reaching the final #%→#%	进入决赛概率#%→#%
+優勝率#%→#%	chance of winning #%→#%	夺冠概率#%→#%
+勝ち抜け率#%→#%	chance of advancing #%→#%	晋级概率#%→#%
+期待点#%→#%	expected points #%→#%	期望分#%→#%
+セット期待点#点→#点	expected set points # → #	本盘期望分# → #
+次の番で出せる確率#%→#%	chance to play next turn #%→#%	下一轮能出牌的概率#%→#%
+期待PP#→#	expected PP # → #	期望PP # → #
+実況席から見守ります。	Watching from the booth.	在解说席上观战。
+@さん	@	@
+卓内 #位	#th at the table	本桌第#名
+決勝 #位	#th in the final	决赛第#名
+セットPP #	Set PP #	本盘PP #
+得点 +#	Points +#	得分 +#
+総合 #位（#点）	Overall #th (# pts)	总排名第#名（#分）
+結果発表です。決勝は@が#人中#位、優勝です！	Results! In the final, @ placed #2 of #1. Champion!	公布结果！决赛中@在#1人中获得第#2名，夺得冠军！
+決勝の結果です。@、#人中#位で優勝です。おめでとうございます。	Final results: @ placed #2 of #1 and won. Congratulations!	决赛结果：@在#1人中获得第#2名，夺冠了。恭喜！
+結果発表です。決勝は#人中#位、決勝PPは#でした。	Results! In the final you placed #2 of #1, with final PP #3.	公布结果！决赛中#1人里第#2名，决赛PP为#3。
+決勝の結果です。@は#人中#位でした。	Final results: @ placed #2 of #1.	决赛结果：@在#1人中获得第#2名。
+ほな「最終結果へ」で、表彰式と大会の振り返りを見にいこか！	Now tap "Final results" for the award ceremony and the tournament review!	来，点「最终结果」去看颁奖典礼和比赛回顾吧！
+最終結果で、大会ぜんぶの成績を確かめよか！	Let's check the whole tournament in the final results!	在最终结果里看看整场比赛的成绩吧！
+結果発表です。@は#人中#位、セットPP#でした。	Results! @ placed #2 of #1 with set PP #3.	公布结果！@在#1人中获得第#2名，本盘PP为#3。
+このセットは@が#位です。セットPPは#でした。	@ took #1 place this set. Set PP was #2.	这一盘@获得第#1名。本盘PP为#2。
+このセットの結果は#人中#位、セットPPは#です。	This set: #2 of #1, set PP #3.	本盘结果：#1人中第#2名，本盘PP为#3。
+下の表で各ゲームの失点を確かめたら、総評で分かれ道をチェックや！同じ設定でもう#セットもいけるで！	Check each game's losses in the table below, then find the turning points in the review! You can play another set with the same settings too!	在下面的表里确认每局失分，再到点评里看看分歧点！用同样设置再来一盘也行！
+表で失点の流れを見て、いちばん下の総評で振り返りや。もう#セット行くなら下のボタンや！	Follow the losses in the table, then look back with the review at the bottom. For another set, hit the button below!	看看表里的失分走势，再用最下面的点评复盘！想再来一盘就点下面的按钮！
+まずは表で、どのゲームで点を取られたか見てみ。総評で次の課題もわかるで！	First, see in the table which games cost you points. The review will show your next challenge too!	先在表里看看哪一局丢了分。点评里还能看到下一个课题！
+結果発表です。第#セットは卓内#位、#点を獲得しました。総合は#位です。	Results! In set #, you placed #2 at the table and earned #3 points. Overall: #4th.	公布结果！第#盘本桌第#2名，获得#3分。总排名第#4名。
+第#セットの結果です。卓内#位で+#点、ここまでの総合は#位です。	Set # results: #2 at the table, +#3 points. Overall so far: #4th.	第#盘结果：本桌第#2名，+#3分，目前总排名第#4名。
+予選終了や！総合#位、決勝圏内で終えたで！次は予選結果と決勝進出者の発表や！	Qualifiers over! #th overall, inside the final zone! Next: the qualifier results and the finalists!	预选赛结束！总排名第#名，留在决赛圈内！接下来公布预选结果和决赛名单！
+予選ぜんぶ終わったで！#位、決勝進出の発表を見にいこか！	All qualifiers done! #th. Let's go see who made the final!	预选赛全部结束！第#名，去看决赛名单吧！
+予選終了や。総合#位、決勝ラインまで#点やった…。予選結果を見にいこか。	Qualifiers over. #th overall, # points short of the final line… Let's look at the results.	预选赛结束。总排名第#名，距决赛线差#分……去看看预选结果吧。
+予選はここまでや。#位、決勝進出者の発表を確かめよか。	That's the end of the qualifiers. #th. Let's check the finalists.	预选赛到此为止。第#名，去确认决赛名单吧。
+次は第#セット、席替えや！総合#位で決勝圏内、このまま逃げ切るで！	Next is set #, new seats! #th overall and inside the final zone. Hold on!	下一盘是第#盘，换座位！总排名第#名，在决赛圈内，保持住！
+第#セットへ行こか！いまは決勝圏内の#位や、守りすぎず攻めていこ！	On to set #! You're #th, inside the final zone. Don't defend too much, keep attacking!	进入第#盘！现在是决赛圈内的第#名，别太保守，继续进攻！
+次は第#セット、席替えや！決勝ラインまであと#点、まだ巻き返せるで！	Next is set #, new seats! # points to the final line, you can still come back!	下一盘是第#盘，换座位！距决赛线还差#分，还能扳回来！
+第#セットで取り返そ！決勝ラインの#位まで#点差や！	Win it back in set #1! #3 points behind #2th place, the final line!	在第#1盘扳回来！距决赛线第#2名差#3分！
+この卓（@）	This table (@)	本桌（@）
+同じ設定でもう#セット	Another set, same settings	同样设置再来一盘
+バッジ	Badges	徽章
 迷ったらおれや！	Stuck? Ask me!	拿不定就找我！
 速さ	Speed	速度
 判定	Judging	判定

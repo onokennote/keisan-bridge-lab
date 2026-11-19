@@ -2464,7 +2464,7 @@ body.rewinding #home-fab{display:none}
 /* セットの結果発表（表の前） */
 .set-ann{display:flex;flex-direction:column;gap:6px;text-align:center;border:1.5px solid rgba(255,214,102,.45);background:linear-gradient(180deg,rgba(255,214,102,.12),rgba(255,214,102,.02))}
 .set-ann.top{border-color:#ffd666;box-shadow:0 0 18px rgba(255,214,102,.25)}
-.sa-big{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-size:40px;line-height:1.15;color:#ffd666;letter-spacing:1px}
+.sa-big{font-family:var(--f-display);font-size:40px;line-height:1.15;color:#ffd666;letter-spacing:1px}
 .sa-sub{font-size:16px;font-weight:700;color:#e9dfc0}
 .set-ann .op-lines{text-align:left;margin-top:6px}
 
@@ -2748,3 +2748,7 @@ body.rewinding #home-fab{display:none}
 .lang-sw button{border:0;border-radius:999px;padding:5px 12px;background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer}
 .lang-sw button.on{background:var(--gold,#f5c542);color:#2a1a00;font-weight:800}
 .lang-note{margin:6px 0 0}
+
+/* 中国語（簡体字）：見出しは太い中国語の字体、本文は Noto Sans SC（日本語の字体に簡体字がなく、細い字が混ざるため） */
+html[lang="zh-CN"]{--f-display:"ZCOOL QingKe HuangYou","Noto Sans SC",system-ui,sans-serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;--f-mono:"JetBrains Mono","Noto Sans SC",ui-monospace,monospace}
+html[lang="zh-CN"] body{font-family:var(--f-body)}

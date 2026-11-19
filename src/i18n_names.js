@@ -28,6 +28,5 @@ window.I18N_NAMES = [
   // 性格・強さ
   ['ガンガンいこうぜ', 'All-out attack', '全力进攻'], ['いのちだいじに', 'Safety first', '安全第一'], ['いろいろやろうぜ', 'Mix it up', '随机应变'], ['じっくりけいさん', 'Careful calculator', '仔细计算'],
   ['ガンガン', 'Attack', '进攻'], ['いのちだ', 'Safe', '稳健'], ['いろいろ', 'Mixed', '多变'], ['じっくり', 'Careful', '仔细'],
-  ['入門', 'Novice', '入门'], ['初級', 'Beginner', '初级'], ['中級', 'Intermediate', '中级'], ['上級', 'Advanced', '高级'], ['達人', 'Master', '高手'],
-  ['AI研究員', 'AI researcher', 'AI研究员'], ['AI補充', 'AI filler', 'AI补位'], ['あなた', 'You', '你']
+  ['あなた', 'You', '你']
 ];

@@ -419,6 +419,7 @@ function fabHome() {
   go('home');
 }
 function render() {
+  if (window.I18N && I18N.lang !== 'ja') I18N.setMe(S.settings.name); // 英語・中国語：プレイヤーの名前を文の中の名前として扱う
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); xmCheck(); limCheck('home'); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); else if (PID && !S.homeGreetDone) setTimeout(homeGreet, 2200); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
@@ -3637,9 +3638,16 @@ function say(kind, d) {
   c.at = now; S.cm = c;
   S.cmHoldUntil = now + holdMs(c);
 }
+// 英語・中国語：訳せない実況（その場で組み立てた日本語）は出さない
+const KANA_RE = /[\u3040-\u309f\u30a0-\u30fa]/;
+const bubT = t => { // キャラのふきだし：口ぐせの語尾（〜ピヨ・〜かっぱ）やカタカナ口調を外して引く。訳せないものは出さない
+  if (!window.I18N || I18N.lang === 'ja') return t;
+  const tries = [t, t.replace(/(にゃ|じゃ|ぽん|かっぱ|でござる|ワン|ピヨ|ピポ|ケロ)(?=[。！？!?…♪〜ー]*$)/, '')]; tries.push(tries[1].replace(/[\u30a1-\u30f6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60)));
+  for (const s2 of tries) { const x = I18N.tr(s2); if (!KANA_RE.test(x)) return x; } return null; }; // キャラのふきだし：訳せないものは出さない
+const cmLangOk = c => { if (!c || !window.I18N || I18N.lang === 'ja') return c; const t = I18N.tr(c.text); return /[\u3040-\u309f\u30a0-\u30fa]/.test(t) ? null : Object.assign({}, c, { text: t }); };
 function cmHTML() {
   if (!S.settings.commentary || S.settings.commentary === 'off') return null;
-  const c = S.cm; const who = c ? c.who : (S.settings.commentary === 'masa' || S.settings.commentary === 'tetsu' ? 'masa' : 'root');
+  const c = cmLangOk(S.cm); const who = c ? c.who : (S.settings.commentary === 'masa' || S.settings.commentary === 'tetsu' ? 'masa' : 'root');
   const fresh = c && Date.now() - c.at < 500;
   return `<div class="commentary ${fresh ? 'fresh' : ''}" data-key="${c ? c.at + ':' + c.who : 'idle-' + who}"><div class="cm-av">${KB.casterSVG(who, c ? c.mood : 'normal')}</div><div class="cm-body"><span class="cm-name">${esc(KB.CASTERS[who].role)}・${esc(KB.CASTERS[who].name)}</span><span class="cm-text">${esc(c ? yo(c.text) : '実況席から見守ります。')}</span></div></div>`;
 }
@@ -3925,7 +3933,7 @@ function renderGame0() {
     else act = `<div class="act draw idle">${order.indexOf(i) < g.pos || g.over ? '' : 'この巡はこれから'}</div>`;
     if (S.thinking === i) act = `<div class="act thinking">考え中<span class="dots"><i></i><i></i><i></i></span></div>`;
     const b = S.bubbles[p.id];
-    const bubble = b && (S.winShow || Date.now() - b.at < 2600) ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(b.text)}</div>` : '';
+    const bt = b && bubT(b.text), bubble = bt && (S.winShow || Date.now() - b.at < 2600) ? `<div class="bubble ${Date.now() - b.at < 400 ? 'fresh' : ''}">${esc(bt)}</div>` : '';
     const n = g.hands[i].length;
     const setpp = S.tiebreak ? 0 : setTotal(T, p.id);
     opp.push(`<div data-pi="${i}" data-k="${k - 1}" class="seat ${i === g.order[0] ? 'dealer' : ''} ${cur === i ? 'turn' : ''} ${S.thinking === i ? 'thinking' : ''} ${S.justActed === i ? 'acted' : ''} ${g.over && g.winner === i ? 'out winner' : g.over ? 'loser' : ''}">${i === g.order[0] ? dealerChip('dbtn seat-chip' + (S.chipSpun === S.gameNo ? '' : ' spin')) : ''}${S.winShow && g.winner === i ? confettiHTML() : ''}
@@ -3973,7 +3981,7 @@ function renderGame0() {
     <div data-pi="${me}" class="me ${cur === me && !g.over ? 'turn' : ''} ${g.over && g.winner === me ? 'winner' : ''}">
       <span class="me-arrow out" aria-hidden="true">▲</span>
       ${me === g.order[0] ? dealerChip('dbtn seat-chip' + (S.chipSpun === S.gameNo ? '' : ' spin')) : ''}${S.winShow && g.winner === me ? confettiHTML() : ''}
-      <div class="head"><span class="me-id"><span class="av me-av">${av(g.players[me], g.over ? moodOf(g, me) : (hand.length <= 2 ? 'smug' : 'normal'))}${S.bubbles[0] && S.winShow ? `<div class="bubble">${esc(S.bubbles[0].text)}</div>` : ''}</span><b>${esc(nm(g.players[me]))}</b><span class="me-info">手札 <b class="tnum">${hand.length}</b>枚・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b><span class="hide-sm">（負けたときのPP）</span></span></span><span>セットPP <b class="tnum">${setppMe}</b>${mel && mel.type === 'play' ? ` ・ 前の手 ${esc(mel.expr)}` : ''}</span></div>
+      <div class="head"><span class="me-id"><span class="av me-av">${av(g.players[me], g.over ? moodOf(g, me) : (hand.length <= 2 ? 'smug' : 'normal'))}${S.bubbles[0] && S.winShow && bubT(S.bubbles[0].text) ? `<div class="bubble">${esc(bubT(S.bubbles[0].text))}</div>` : ''}</span><b>${esc(nm(g.players[me]))}</b><span class="me-info">手札 <b class="tnum">${hand.length}</b>枚・合計 <b class="tnum">${hand.reduce((a, c) => a + c.v, 0)}</b><span class="hide-sm">（負けたときのPP）</span></span></span><span>セットPP <b class="tnum">${setppMe}</b>${mel && mel.type === 'play' ? ` ・ 前の手 ${esc(mel.expr)}` : ''}</span></div>
       ${g.played[me].length ? `<div class="mine-played"><span>出した札</span>${playedHTML(g, me, true)}</div>` : ''}
       <div class="hand">${hand.map(c => cardHTML(c, { cls: (S.sel.includes(c.id) ? 'sel ' : '') + (S.newCard === c.id || (S.newCards || []).includes(c.id) ? 'new' : '') + ((S.foulIds || []).includes(c.id) ? ' foulc' : ''), extra: `data-card="${c.id}" ${myTurn ? '' : 'disabled'} aria-pressed="${S.sel.includes(c.id)}" aria-label="${KB.vname(c.v)}"` })).join('')}</div>
       ${prev ? `<div class="preview">${prev}</div>` : ''}
@@ -5045,7 +5053,7 @@ async function readReview(who, scope) {
   scope = scope || 'game';
   if (S.review && S.review.busy && S.review.ctl) S.review.ctl.abort();
   // 総評はアプリの判定データから組み立てる（Claudeは使わない）
-  { let text = '', dialog = null; try { text = scope === 'set' ? rvSetSolo(who) : rvGameSolo(who); } catch (e) { text = scope === 'set' ? setLocalReview(who) : localReview(who); } try { dialog = rvdMerge(rvDialog(scope)); } catch (e) { console.error(e); } S.review = { who, scope, text, dialog, busy: false }; rerenderReview(); return; }
+  { let text = '', dialog = null; try { text = scope === 'set' ? rvSetSolo(who) : rvGameSolo(who); } catch (e) { text = scope === 'set' ? setLocalReview(who) : localReview(who); } try { dialog = rvdMerge(window.I18N && I18N.lang !== 'ja' ? rvDialogI18n(scope) : rvDialog(scope)); if (window.I18N && I18N.lang !== 'ja') text = ''; } catch (e) { console.error(e); } S.review = { who, scope, text, dialog, busy: false }; rerenderReview(); return; }
   S.review = { who, scope, text: '', busy: true };
   rerenderReview();
   const local = () => scope === 'set' ? setLocalReview(who) : localReview(who);
@@ -5693,7 +5701,69 @@ function rvDialog(scope) {
   if (fo.length && !tc) R('次は、出す前に式が場の数になるかを確かめる習慣をつけましょう。早見表で式の形に慣れておくのも効果的です。'); else R(tc ? `外した手は「${CATS[tc.k]}」の場面に${tc.n}回。` + (pr ? pr[2] : '') : f.danger && !f.won ? `第${f.danger.round}巡に${f.danger.who}が残り${f.danger.h}枚。相手が残り少ないときは、上がりより失点を減らす手が優先になりやすい局面です。` : RVP(['次のゲームも、残す札の形と手札の合計を意識しましょう。', '次は相手の残り枚数にも目を配ってみましょう。', '大きい札は早めに処分。次のゲームも続けましょう。']));
   return out;
 }
-function rvdMerge(L) { const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
+// 英語・中国語の総評（博士とマサの短い掛け合い）。日本語版と同じ事実から、文の型を少なめにして組み立てる
+const RVI = {
+  en: {
+    neta: { win: ['That\'s a goal! Clinical finishing, like a striker one-on-one with the keeper!', 'You took the pot! Played like you knew the river card!'], lose: ['Every match has ups and downs. Next kickoff, go again!', 'Even the best poker players lose hands. Reset and play the next one!'], goodLose: ['The right choices, just not the right cards. Like hitting the post: no shame in that!', 'A bad beat! You got your chips in good. Keep playing like that!'], luckGood: ['A goal off a deflection! It counts, but it was lucky. Fix the decisions!', 'You sucked out on the river! Nice, but that was luck, not skill.'], losePoor: ['The defense left gaps today. Tighten up the shape next time!', 'Too many loose calls. Fold the bad spots and the chips will follow!'], miss: ['That was an open goal! Next time, put it away!', 'You checked when you should have bet! Grab those chances!'] },
+    hl: { perfect: 'every decision was the best move. A perfect game!', sutemi: 'holding back when you could go out, a brave sacrifice!', divParen: 'that bracketed division was beautiful!', div: 'a smart division!', run: 'a long run of best moves!', fast: 'going out super fast!', aete: 'drawing on purpose, a classy slow play!', one: 'playing just one card on purpose, smart!', defend: 'great defense when an opponent was close to going out!', three: 'a three-card play with a big card, a hat-trick!' }
+  },
+  zh: {
+    neta: { win: ['进球！就像前锋单刀面对门将，冷静推射！', '这一锅你赢了！好像早就知道河牌是什么！'], lose: ['比赛总有起伏。下一次开球，再来！', '再厉害的扑克高手也会输牌。调整心态，打下一手！'], goodLose: ['选择是对的，只是牌不配合。就像打中门柱，不丢人！', '坏运气！你的筹码押得没错，继续这样打！'], luckGood: ['折射进球！算数，但是运气。判断还要改进！', '河牌逆转！不错，但那是运气，不是实力。'], losePoor: ['今天防守漏洞有点多。下次把阵型收紧！', '跟注太随意了。坏的局面就弃牌，筹码自然会来！'], miss: ['那可是空门啊！下次一定要打进！', '该下注的时候你过牌了！抓住机会啊！'] },
+    hl: { perfect: '所有判断都是最佳着法，完美的一局！', sutemi: '能出完却故意不出，勇敢的舍身！', divParen: '那个带括号的除法太漂亮了！', div: '聪明的除法！', run: '最佳着法连续了好多次！', fast: '超快出完！', aete: '故意摸牌，有味道的慢打！', one: '故意只出一张，聪明！', defend: '对手快出完时防守得很好！', three: '带大牌的三张，帽子戏法！' }
+  }
+};
+function rvDialogI18n(scope) {
+  const L = I18N.lang === 'zh' ? 'zh' : 'en', T = RVI[L], out = [], R = t => t && out.push({ w: 'root', t }), M = t => t && out.push({ w: 'masa', t });
+  const pick = a => a[(Math.random() * a.length) | 0], tr = x => I18N.tr(String(x == null ? '' : x)), nmY = S.settings.name && S.settings.name !== 'あなた' ? S.settings.name : (L === 'zh' ? '你' : 'you');
+  const exprT = x => x === 'あえて引く' ? (L === 'zh' ? '故意摸牌' : 'drawing on purpose') : x === '引く' ? (L === 'zh' ? '摸牌' : 'drawing') : x;
+  const gapT = w => { const g = w.gf && w.gf.sh; const t = g ? tr(g) : ''; return t && !/[぀-ゟ゠-ヺ]/.test(t) ? t : ''; };
+  const missLine = (w, where) => { const g = gapT(w); return L === 'zh' ? `分歧点在${where}，场上${w.t}。你选了「${exprT(w.mine)}」，最佳是「${exprT(w.best)}」${g ? `（${g}）` : ''}。` : `The turning point was ${where}, field ${w.t}. You chose "${exprT(w.mine)}"; the best was "${exprT(w.best)}"${g ? ` (${g})` : ''}.`; };
+  const qual = (nDec, nBest, nGood) => rvQual(nDec, nBest, nGood);
+  if (scope === 'set') {
+    const c = setContext(), Lg = S.T.setLog || [], F = Lg.map(x => x.rv);
+    const nDec = Lg.reduce((a, x) => a + (x.nDec || 0), 0), nBest = Lg.reduce((a, x) => a + (x.nBest || 0), 0), nGood = Lg.reduce((a, x) => a + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length, nFoul = Lg.reduce((a, x) => a + ((x.fouls || []).length), 0);
+    const sq0 = qual(nDec, nBest, nGood), sq = nFoul && sq0 === 'good' ? 'mid' : sq0, top1 = c.rank === 1 || c.finalRank === 1;
+    R(L === 'zh' ? (c.phase === 'final' ? `决赛${c.finalists}人中第${c.finalRank}名，决赛PP${c.finalPP}。` : `本桌第${c.rank}名，本盘PP${c.pp}。`) + (nDec ? `最佳着法${nDec}次中${nBest}次${wins ? `，出完${wins}次` : ''}。` : '')
+      : (c.phase === 'final' ? `Final: #${c.finalRank} of ${c.finalists}, final PP ${c.finalPP}. ` : `#${c.rank} at the table, set PP ${c.pp}. `) + (nDec ? `Best moves: ${nBest} of ${nDec}${wins ? `, went out ${wins} time(s)` : ''}.` : ''));
+    const react = top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose');
+    const allHl = []; F.forEach((f, i) => f && (f.hl || []).forEach(h => allHl.push(Object.assign({ game: Lg[i].game }, h))));
+    const top = allHl[0];
+    M(top ? (L === 'zh' ? `第${top.game}局里${T.hl[top.k] || ''}` : `In game ${top.game}, ${T.hl[top.k] || ''}`) : (L === 'zh' ? `${nmY}，` : `${nmY[0].toUpperCase() + nmY.slice(1)}, `) + pick(T.neta[react]));
+    const ws = []; F.forEach((f, i) => f && (f.misses || []).forEach(w => ws.push(Object.assign({ game: Lg[i].game }, w)))); ws.sort((a, b) => b.loss - a.loss);
+    if (ws[0]) { R(missLine(ws[0], L === 'zh' ? `第${ws[0].game}局第${ws[0].round}巡` : `round ${ws[0].round} of game ${ws[0].game}`)); M(pick(T.neta.miss)); }
+    else if (nDec >= 3) { R(L === 'zh' ? '没有明显失误，判断很稳定。' : 'No big mistakes; your decisions were steady.'); M(pick(T.neta[react])); }
+    if (nFoul) R(L === 'zh' ? `还有${nFoul}次犯规。出牌前先确认算式是否等于场上数字。` : `There were also ${nFoul} foul(s). Check that the formula equals the field number before playing.`);
+    let m2 = '';
+    if (c.kind === 'tournament' && c.phase === 'prelim') m2 = L === 'zh' ? (c.last ? (c.qualified ? `预选赛第${c.overall}名，进入决赛！` : `预选赛第${c.overall}名，差一点没进决赛……下次比赛再拿回来！`) : (c.qualified ? `总排名第${c.overall}名，在决赛圈内！` : `总排名第${c.overall}名，距决赛线${c.gap}分！`)) : (c.last ? (c.qualified ? `#${c.overall} in the qualifiers. You're in the final!` : `#${c.overall} in the qualifiers. Not quite the final… get it back next time!`) : (c.qualified ? `#${c.overall} overall, inside the final zone!` : `#${c.overall} overall, ${c.gap} point(s) from the final line!`));
+    else if (c.phase === 'final') m2 = c.finalRank === 1 ? (L === 'zh' ? '冠军！登顶了！' : 'Champion! You made it to the top!') : (L === 'zh' ? `冠军是${c.winnerName === 'あなた' ? nmY : tr(c.winnerName)}。能走到这里已经很了不起！` : `The champion is ${c.winnerName === 'あなた' ? nmY : tr(c.winnerName)}. Getting this far is great!`);
+    if (m2) M(m2);
+    R(L === 'zh' ? pick(['下一盘也要注意尽早处理大牌，留意对手剩余张数。', '积累判断的质量，名次自然会跟上。']) : pick(['Next set, keep unloading big cards early and watch how many cards opponents have left.', 'Build up the quality of your decisions, and the rankings will follow.']));
+    return out;
+  }
+  const f = S.lastFacts || rvGameFacts(), fo = f.fouls || [], q0 = qual(f.nDec, f.nBest, f.nGood), q = fo.length && q0 === 'good' ? 'mid' : q0;
+  R(L === 'zh' ? (f.won ? `出完，PP0，第${f.round}巡就打完了。` : `PP${f.pp}，${f.n}人中第${f.rank}名。` + (f.winner ? `${tr(f.winner)}在第${f.winnerRound}巡出完了。` : '')) + (f.nDec ? `最佳着法${f.nDec}次中${f.nBest}次。` : '')
+    : (f.won ? `You went out with PP 0, finishing in round ${f.round}. ` : `PP ${f.pp}, #${f.rank} of ${f.n}. ` + (f.winner ? `${tr(f.winner)} went out in round ${f.winnerRound}. ` : '')) + (f.nDec ? `Best moves: ${f.nBest} of ${f.nDec}.` : ''));
+  const react = f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : 'lose');
+  const h = (f.hl || [])[0];
+  M(h ? (L === 'zh' ? (h.round ? `第${h.round}巡` : '') + (T.hl[h.k] || '') : (h.round ? `Round ${h.round}: ` : '') + (T.hl[h.k] || '')) : (L === 'zh' ? `${nmY}，` : `${nmY[0].toUpperCase() + nmY.slice(1)}, `) + pick(T.neta[react]));
+  if (f.worst) { R(missLine(f.worst, L === 'zh' ? `第${f.worst.round}巡` : `round ${f.worst.round}`)); M(pick(T.neta.miss)); }
+  else if (fo.length) { const x = fo[0]; R(L === 'zh' ? `分歧点是第${x.round}巡场上${x.t}的犯规。${x.cards}凑不出场上数字，罚摸${x.n}张。` : `The turning point was a foul in round ${x.round}, field ${x.t}. ${x.cards} didn't make the field number, so you drew ${x.n} as a penalty.`); M(L === 'zh' ? '这就像手球送点球！出牌前先验算一遍！' : 'That\'s like a handball giving away a penalty! Double-check before you play!'); }
+  else if (f.nDec >= 2) R(L === 'zh' ? '没有明显失误，判断很稳定。' : 'No big mistakes; your decisions were steady.');
+  if (f.kanata && !f.won) R(L === 'zh' ? `从第${f.kanata.round}巡起卡纳塔发动了绝对透视。可以争取出完，但为防失分，先处理大牌更有力。` : `From round ${f.kanata.round}, Kanata used Absolute Clairvoyance. You can still aim to go out, but unloading big cards first is the stronger plan.`);
+  let m2 = '';
+  if (f.luck === 'resultLucky') m2 += L === 'zh' ? '结果不错，但只是运气好！' : 'It worked out, but that was just luck! ';
+  if (f.near && f.near.p >= 0.2 && !f.won) m2 += L === 'zh' ? `还剩${f.near.n}张，有${Math.round(f.near.p * 100)}%的牌形，可惜了！` : `${f.near.n} card(s) left with a ${Math.round(f.near.p * 100)}% shape, so close! `;
+  const ea = rvEarned(S.gameT0 || Date.now()); if (ea.badges.length) m2 += L === 'zh' ? `还拿到了${ea.badges.length}个徽章！` : `And you earned ${ea.badges.length} badge(s)! `;
+  if (!h && !f.worst) m2 += '';
+  else m2 += pick(T.neta[react]);
+  M(m2.trim());
+  const tc = rvTopCat(f.missCats, 2);
+  R(fo.length && !tc ? (L === 'zh' ? '下次养成出牌前确认算式的习惯。用速查表熟悉算式的形也很有效。' : 'Next time, make a habit of checking the formula before you play. Getting used to formula shapes with the cheat sheet helps too.')
+    : tc ? (L === 'zh' ? `失误集中在「${tr(CATS[tc.k])}」的场面，共${tc.n}次。可以在成长记录里看看这个场面。` : `Your misses clustered in "${tr(CATS[tc.k])}" (${tc.n} times). Check that situation in your growth record.`)
+    : (L === 'zh' ? pick(['下一局也要注意尽早处理大牌。', '继续按「留什么牌」来选择吧。']) : pick(['Next game, keep unloading big cards early.', 'Keep choosing by what you keep, not what you play.'])));
+  return out;
+}
+function rvdMerge(L) { const sp = window.I18N && I18N.lang === 'en' ? ' ' : ''; const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += sp + x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
 function rvDialogHTML(L) { return `<div class="rvd">${L.map(x => `<div class="rvd-line ${x.w}"><span class="rvd-av">${KB.casterSVG(x.w, 'happy')}</span><p>${esc(x.t)}</p></div>`).join('')}</div>`; }
 function nextGame() {
   S.inSummary = false;

@@ -16,7 +16,12 @@
   }
   const JA = /[぀-ヿ一-鿿]/;
   // # は順に、#2 のように番号つきならその数（訳で数字を省くとき用）。@ は名前を順に
-  function fill(tpl, nums, names) { let i = 0, j = 0; return tpl.replace(/#([1-9])?|@/g, (c, k) => c === '@' ? (names[j++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)); }
+  // § は式・手札などのかたまり（そのまま入れる）
+  let TOK = [];
+  function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)); }
+  const CARD = '(?:[AJQK]|1[0-3]|[2-9])';
+  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
+  function tokens(core) { const L = []; const k = core.replace(TOK_RE, m => { L.push(m); return '§'; }); return { k, L }; }
   function look(key, nums, names) { const h = D.get(key); return h && h[lang] ? fill(h[lang], nums, names) : null; }
   function tr(s) {
     if (lang === 'ja' || !s || !JA.test(s)) return s;
@@ -27,25 +32,35 @@
   }
   function trCore(core, depth) {
     const nums = [], dig = t => t.replace(/\d+(?:\.\d+)?/g, x => { nums.push(x); return '#'; });
-    let r = look(dig(core), nums, []); if (r != null) return r;
+    TOK = []; let r = look(dig(core), nums, []); if (r != null) return r;
+    { const tk = tokens(core); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, []); if (r != null) return r; } TOK = []; }
     // キャラの名前を @ にして引く（名前に数字が入っていても先に名前を取る）
     const pos = [];
-    for (const [ja, en, zh] of NAMES) { let p = core.indexOf(ja); while (p >= 0) { if (!pos.some(([q, l]) => p < q + l && q < p + ja.length)) pos.push([p, ja.length, lang === 'en' ? en : zh]); p = core.indexOf(ja, p + ja.length); } }
+    for (const [ja, en, zh] of NAMES) { let p = core.indexOf(ja); while (p >= 0) { let l = ja.length; if (core.startsWith('さん', p + l) && !/(さん|くん|ちゃん|先生|課長|教授|大将|じいさん)$/.test(ja)) l += 2; if (!pos.some(([q, ql]) => p < q + ql && q < p + l)) pos.push([p, l, lang === 'en' ? en : zh]); p = core.indexOf(ja, p + l); } } // 名前のあとの「さん」も名前に含める
     if (pos.length) {
       pos.sort((a, b) => a[0] - b[0]); let k3 = '', at = 0; const nm = [];
       pos.forEach(([p, l, v]) => { k3 += core.slice(at, p) + '@'; at = p + l; nm.push(v); }); k3 += core.slice(at);
       nums.length = 0; r = look(dig(k3), nums, nm); if (r != null) return r;
+      const tk = tokens(k3); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, nm); if (r != null) return r; TOK = []; }
     }
+    // 末尾の「。」はなくても引く
+    if (core.endsWith('。') && core.length > 1) { const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : '.') : (/[。！？]$/.test(a) ? '' : '。')); }
+    // 文がつながっているとき：「。」で前後に分けて、両方訳せたらつなぐ（説明文のうしろに残り時間が付く など）
+    if (depth < 3) { const parts = core.split(/(?<=。)/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    // 「〜（まだ）」は中を訳して（not yet）を付ける
+    if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang === 'en' ? ' (not yet)' : '（未获得）'); }
     // 「…」の中を先に訳して @ にする（「皆勤賞」→ "Perfect Attendance"）
     if (/「[^「」]+」/.test(core)) {
       const nm = []; let ok = true; const k4 = core.replace(/「([^「」]+)」/g, (m, x) => { const t = trCore(x, 9); if (t == null) { ok = false; return m; } nm.push(t); return '「@」'; });
       if (ok) { nums.length = 0; r = look(dig(k4), nums, nm); if (r != null) return r; }
     }
     // 「名前：説明」は左右を別々に
-    if (depth < 4) for (const sep of ['：', '・', '　', ' ']) {
-      const i = core.indexOf(sep); if (i > 0 && i < core.length - 1) {
+    if (depth < 8) for (const sep of ['／', '：', '・', '　', ' ']) {
+      const inName = i => NAMES.some(([ja]) => { if (!ja.includes(sep)) return false; let p = core.indexOf(ja); while (p >= 0) { if (i > p && i < p + ja.length) return true; p = core.indexOf(ja, p + 1); } return false; });
+      let i = core.indexOf(sep); while (i > 0 && inName(i)) i = core.indexOf(sep, i + 1);
+      if (i > 0 && i < core.length - 1) {
         const a = trCore(core.slice(0, i), depth + 1), b = trCore(core.slice(i + 1), depth + 1);
-        if (a != null && b != null) return a + (sep === '：' ? (lang === 'en' ? ': ' : '：') : sep === '・' ? (lang === 'en' ? ' · ' : '·') : sep) + b;
+        if (a != null && b != null) return a + (sep === '：' ? (lang === 'en' ? ': ' : '：') : sep === '・' ? (lang === 'en' ? ' · ' : '·') : sep === '／' ? ' / ' : sep) + b;
       }
     }
     return null;
@@ -80,6 +95,8 @@
   }
   // 切り替えはできあがるまでテスト版だけ（kb.i18nTry=1 でも出す）
   const on = () => { try { return !!(G.KB_STAGING || localStorage.getItem('kb.i18nTry') === '1' || lang !== 'ja'); } catch (e) { return !!G.KB_STAGING; } };
-  G.I18N = { tr, start, set, on, LANGS, get lang() { return lang; }, walk };
+  // いまのプレイヤーの名前（文の中の名前を @ として引けるように）
+  function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
+  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })(typeof window !== 'undefined' ? window : globalThis);
