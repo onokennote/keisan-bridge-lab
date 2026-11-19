@@ -95,7 +95,7 @@
   const isFace = el => el && el.matches && el.matches('.card .v, .big, .cn, .mc, .tut-hand .v');
   function hiNode(n) {
     if (lang !== 'hi' || !n.parentElement || n.parentElement.closest(NODEV)) return;
-    if (!deckOn('hi') && n.parentElement.closest('.card, .fieldcard, .mc, .flycard, .df-front, .tut-hand')) return; // ガンジファをオフ（ノーマル）にしたら、札はふつうのトランプ（A・J・Q・K と算用数字）
+    if (!(deckActive() && deckActive().cls === 'dk-gj') && n.parentElement.closest('.card, .fieldcard, .mc, .flycard, .df-front, .tut-hand')) return; // ガンジファをオフ（ノーマル）にしたら、札はふつうのトランプ（A・J・Q・K と算用数字）
     let v = n.nodeValue, t = v;
     if (isFace(n.parentElement)) t = t.replace(/^\s*(A|J|Q|K)\s*$/, (m, c) => m.replace(c, FACE[c]));
     t = t.replace(/[0-9]/g, d => DEVA[+d]);
@@ -141,8 +141,15 @@
       face: (v, s, k) => `<span class="gjf s${s}">${v >= 11 ? '<svg class="gjc" viewBox="0 0 20 10"><path d="M2 9L1 2L6 6L10 0L14 6L19 2L18 9Z" fill="#f5d77a"/></svg>' : ''}<b>${v}</b></span>`, val: null }
   };
   const deckOn = l => { const d = DECKS[l || lang]; if (!d) return false; try { const x = localStorage.getItem(d.key); return x == null ? d.def : x !== '0'; } catch (e) { return d.def; } };
-  const deckActive = () => deckOn(lang) ? DECKS[lang] : null;
-  const mjActive = () => lang === 'zh' && deckOn('zh');
+  // 大会をひらく人が札の形式を決めた大会の卓では、言語にかかわらずその札（forced：'normal'＝トランプ・hana・mj・en・gj。null＝各自の設定）
+  const DECK_BY = { hana: 'ja', mj: 'zh', en: 'en', gj: 'hi' }; let forced = null;
+  const deckActive = () => forced ? (forced === 'normal' ? null : DECKS[DECK_BY[forced]] || null) : deckOn(lang) ? DECKS[lang] : null;
+  const mjActive = () => { const d = deckActive(); return !!(d && d.cls === 'mj'); };
+  function forceDeck(k) {
+    k = k && k !== 'own' && (k === 'normal' || DECK_BY[k]) ? k : null; if (k === forced) return;
+    forced = k; const html = document.documentElement; Object.values(DECKS).forEach(d => html.classList.remove(d.cls)); const d = deckActive(); if (d) html.classList.add(d.cls);
+    if (!obs) start(); // 日本語でトランプのときは見張っていないので、ここで始める
+  }
   const deckVal = t => { t = (t || '').trim().replace(/[०-९]/g, d => '०१२३४५६७८९'.indexOf(d)); return { A: 1, J: 11, Q: 12, K: 13, 'इ': 1, 'गु': 11, 'बे': 12, 'बा': 13 }[t] || (/^\d+$/.test(t) ? +t : 0); };
   function mjEl(el) {
     const d = deckActive(); if (!d || el.dataset.mj || el.closest('[data-noi18n]')) return;
@@ -203,6 +210,6 @@
   function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
   function setDeck(on) { const d = DECKS[lang]; if (!d) return; try { localStorage.setItem(d.key, on ? '1' : '0'); } catch (e) {} location.reload(); }
   G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setDeck, setMj: setDeck, get mj() { return deckOn('zh'); }, get mjOn() { return mjActive(); },
-    get deckOn() { return deckOn(lang); }, get deck() { return deckActive(); }, deckLabel: () => DECKS[lang] ? DECKS[lang].label(deckOn(lang)) : '', deckFace: (v, s, k) => { const d = deckActive(); return d ? d.face(v, s || 0, k) : String(v); }, mjFace: v => DECKS.zh.face(v, 0) };
+    get deckOn() { return deckOn(lang); }, get deck() { return deckActive(); }, forceDeck, deckLabel: () => DECKS[lang] ? DECKS[lang].label(deckOn(lang)) : '', deckFace: (v, s, k) => { const d = deckActive(); return d ? d.face(v, s || 0, k) : String(v); }, mjFace: v => DECKS.zh.face(v, 0) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })(typeof window !== 'undefined' ? window : globalThis);

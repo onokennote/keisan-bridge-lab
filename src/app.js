@@ -420,6 +420,7 @@ function fabHome() {
 }
 function render() {
   if (window.I18N && I18N.lang !== 'ja') I18N.setMe(S.settings.name); // 英語・中国語：プレイヤーの名前を文の中の名前として扱う
+  if (window.I18N && I18N.forceDeck) I18N.forceDeck(S.view === 'online' && ON.v && ON.v.tour && ON.v.cfg ? ON.v.cfg.deck : null); // 大会で札の形式が決まっていれば、その卓ではその札
   const app = $('#app'); syncFab(); syncStg();
   if (ARTIFACT_CLOSED) { app.innerHTML = closedHTML(); closedBind(); return; }
   if (S.view === 'home') { app.innerHTML = homeHTML(); homeCastLoad(); xmCheck(); limCheck('home'); if (backupDue()) setTimeout(() => { if (S.view === 'home' && !$('#modal')) backupNag(); }, 1500); else if (PID && !S.homeGreetDone) setTimeout(homeGreet, 2200); if (G_ON && PID && S.gStatPid !== PID) { S.gStatPid = PID; gStatusSync(); } if (CLOUD_ON && PID && (S.srvNotesPid !== PID || Date.now() - (S.srvNotesAt || 0) > 60000)) notesFetch().then(notesBadge); if (CLOUD_ON && PID && (S.rvByPid !== PID || Date.now() - (S.rvByAt || 0) > 60000)) rvByFetch(true).then(() => { const b = $('#pb-rv'); if (b && S.view === 'home') { b.innerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); b.querySelectorAll('[data-act]').forEach(x => x.onclick = () => act(x.dataset.act, x)); } }); if (ON_ENABLED() && Date.now() - (ON.toursAt || 0) > 10000) { ON.toursAt = Date.now(); onToursLoad(); } }
@@ -6602,7 +6603,7 @@ function act(a, el) {
     case 'on-new': onNewModal(); break;
     case 'on-tour-new': S.onTourEdit = null; S.onTour = null; S.inv = null; onTourNewModal(); break;
     case 'on-tour-edit': { const t = ON.t, d = new Date(t.startAt * 1000), loc = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16); const pk = (PTS_PRE.find(x => x[2].join() === (t.points || []).join()) || PTS_PRE[0])[0];
-      S.inv = null; S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', aiRes: !!t.aiRes, aiResSet: true, podAi: t.podAi !== false, entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, waitMin: t.waitMin || 15, pts: pk };
+      S.inv = null; S.onTour = { name: t.name, desc: t.desc || '', start: loc, limit: t.limit, judge: t.judge || 'after3', min: t.min, max: t.max, aiFill: t.aiFill, aiLv: t.aiLv, aiMix: t.aiMix || 'even', aiRes: !!t.aiRes, aiResSet: true, podAi: t.podAi !== false, deck: t.deck || 'own', entry: t.entry, invites: (t.invites || []).join('\n'), official: t.official, sets: t.sets, games: t.games, finalists: t.finalists, waitMin: t.waitMin || 15, pts: pk };
       S.onTourEdit = t.id; onTourNewModal(); break; }
     case 'on-arch': onArchiveOpen(); break;
     case 'title-open': titleModal(); break;
@@ -7254,7 +7255,7 @@ async function onToursLoad() {
 function onTourNewModal() {
   const d0 = new Date(Date.now() + 20 * 60000); d0.setMinutes(Math.ceil(d0.getMinutes() / 5) * 5, 0, 0);
   const loc = d => new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', min: 4, max: 15, aiFill: true, aiLv: 2, aiMix: 'even', entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, waitMin: 15, pts: 'std', aiRes: true, podAi: true };
+  const c = S.onTour = S.onTour || { name: `${S.settings.name || ''}杯`, desc: '', start: loc(d0), limit: 30, judge: 'after3', deck: 'own', min: 4, max: 15, aiFill: true, aiLv: 2, aiMix: 'even', entry: 'open', invites: '', official: false, sets: 3, games: 5, finalists: 5, waitMin: 15, pts: 'std', aiRes: true, podAi: true };
   const seg = (k, opts) => `<div class="su-seg">${opts.map(([v, l]) => `<button class="${String(c[k]) === String(v) ? 'on' : ''}" data-ot="${k}" data-v="${v}">${l}</button>`).join('')}</div>`;
   const num = (k, mn, mx) => `<div class="su-step"><button class="su-pm" data-otn="${k}" data-v="-1" ${c[k] <= mn ? 'disabled' : ''}>−</button><b class="tnum">${c[k]}</b><button class="su-pm" data-otn="${k}" data-v="1" ${c[k] >= mx ? 'disabled' : ''}>＋</button></div>`;
   modal(`<div class="stack on-new"><h3 style="margin:0">🌐 ${S.onTourEdit ? '大会を編集' : '大会をひらく'}</h3>
@@ -7272,6 +7273,7 @@ function onTourNewModal() {
     <div class="su-row"><b>予選のセット数</b>${num('sets', 1, 6)}</div><div class="su-row"><b>1セットのゲーム数</b>${num('games', 1, 10)}</div>
     <div class="su-row col"><b>決勝</b>${seg('finalists', [[0, 'なし'], [3, '上位3人'], [4, '上位4人'], [5, '上位5人']])}</div>
     <div class="su-row col"><b>セットの合間の待ち時間</b>${seg('waitMin', [[3, '3分'], [5, '5分'], [10, '10分'], [15, '15分'], [30, '30分']])}<small class="muted">全員が「準備OK」を押せばすぐ次のセット。そろわなくてもこの時間で始まり、来ていない人の席はAIが打ちます</small></div>
+    <div class="su-row col"><b>🃏 札の形式</b>${seg('deck', OT_DECKS)}<small class="muted">「各自の設定」は、それぞれが言語の切り替えの下で選んだ札。ほかを選ぶと、この大会の卓では全員がその札で打ちます</small></div>
     <div class="su-row col"><b>セット順位の得点</b>${seg('pts', PTS_PRE.map(([k, l, a]) => [k, `${l}<small>${a.join('・')}</small>`]))}</div>
     ${ON.canOfficial ? `<div class="su-row col"><b>公式大会</b>${seg('official', [['false', 'ふつうの大会'], ['true', '公式大会']])}</div>${c.official === true ? `<label class="su-row col"><b>入賞した人の総ポイント（1位から。AIも順位に入る）</b><input id="ot-tpts" class="su-in" value="${esc(c.tpts || '100,70,50,40,20')}"></label>` : ''}` : ''}
     ${c.official === true ? '<div class="su-row col"><b>🏆 表彰台の順位</b><small class="muted">公式大会は、バッジ・称号・総ポイントとも AIも含めた順位で数えます（AIが1位なら、人の最高は2位）</small></div>' : ''}<div class="su-row col" ${c.official === true ? 'hidden' : ''}><b>🏆 表彰台の順位</b>${seg('podAi', [['true', 'AIも含めて数える'], ['false', '人だけで数える']])}<small class="muted">含める：AIが1位なら、人の最高は2位（準優勝）。AIの順位にはバッジなし。人だけ：AIを飛ばして、人の中の1〜3位にバッジと称号</small></div>
@@ -7318,11 +7320,12 @@ async function onTourCreate() {
   if (!c.name.trim()) { toast('大会の名前を入れてください'); return; }
   if (!startAt || startAt < Date.now() / 1000 - 60) { toast('開始日時を確かめてください'); return; }
   try {
-    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, waitMin: c.waitMin, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, aiRes: c.aiFill && c.aiRes !== false, podAi: c.podAi !== false, entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, tpts: String(c.tpts || '100,70,50,40,20').split(/[,、\s]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x)), sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
+    const j = await onReq(S.onTourEdit ? 'on_tour_act' : 'on_tour_new', Object.assign(onMe(), S.onTourEdit ? { id: S.onTourEdit, act: 'edit' } : {}, { tname: c.name, desc: c.desc, startAt, limit: c.limit, waitMin: c.waitMin, judge: c.judge, min: c.min, max: c.max, aiFill: c.aiFill, aiLv: c.aiLv, aiMix: c.aiMix, aiRes: c.aiFill && c.aiRes !== false, podAi: c.podAi !== false, deck: c.deck || 'own', entry: c.entry, invites: c.invites.split(/[\n、,]+/).map(x => x.trim()).filter(Boolean), official: c.official, tpts: String(c.tpts || '100,70,50,40,20').split(/[,、\s]+/).map(x => parseInt(x, 10)).filter(x => !isNaN(x)), sets: c.sets, games: c.games, finalists: c.finalists, points: (PTS_PRE.find(x => x[0] === c.pts) || PTS_PRE[0])[2] }));
     closeModal(); S.onTour = null; if (S.onTourEdit) toast('変更しました'); S.onTourEdit = null; onTourShow(j.tour);
   } catch (e) { toast(e.message || 'ひらけませんでした'); }
 }
 // ---- 大会の画面（詳細・エントリー・進み具合・順位）----
+const OT_DECKS = [['own', '各自の設定'], ['normal', '🃏 トランプ'], ['hana', '🎴 花札'], ['mj', '🀄 麻雀牌'], ['en', '🔤 数のことば'], ['gj', '🪷 ガンジファ']];
 function onTourShow(t) { ON.t = t; go('otour'); onTourPollStart(); }
 function onTourPollStart() { clearInterval(ON.ttimer); ON.ttimer = setInterval(onTourPoll, 3000); }
 async function onTourPoll() {
@@ -7428,7 +7431,7 @@ function otInfoHTML(t) {
   const aw = t.awardOk === true ? `上位3位にバッジと称号` : t.awardOk === false ? `人が${t.awardMin}人未満で、なし` : `人が${t.awardMin}人以上なら上位3位に`;
   return head + `<div class="ot-grid">
     ${I('👥', '人数', `${t.min}〜${t.max}人<br><small>いま${t.n}人</small>`)}${I('🎫', 'エントリー', t.entry === 'invite' ? '招待した人だけ' : '誰でも')}
-    ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', t.finalists ? `上位${t.finalists}人` : 'なし')}
+    ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${t.deck && t.deck !== 'own' ? I('🎴', '札の形式', (OT_DECKS.find(x => x[0] === t.deck) || [, ''])[1]) : ''}${I('🏆', '決勝', t.finalists ? `上位${t.finalists}人` : 'なし')}
     ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 15}分`)}
     ${I('✋', '式の判定', judge)}${I('🥇', 'セットの得点', t.points.join('・'))}
     ${I('🤖', '足りないとき', t.aiFill ? `${t.aiRes ? 'AI研究員と' : ''}AIで補充<br><small>${t.aiMix && MIX[t.aiMix] ? MIX[t.aiMix].label : '★' + t.aiLv}</small>` : '中止')}${I('🏅', `バッジ（${t.official ? '公式大会' : 'オンライン大会'}）`, `${aw}<br><small>表彰台は${t.podAi === false && !t.official ? '人だけで数える' : 'AIも含めて数える'}</small>`)}</div>`;

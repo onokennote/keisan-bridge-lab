@@ -68,6 +68,15 @@ AIの手番の速さ	AI turn speed	AI回合速度
 あなたは暫定#位	You're provisionally #th	你暂列第#
 決勝圏内	in the final zone	决赛圈内
 決勝ラインまであと#点	# pts to the final line	距决赛线还差#分
+🃏 札の形式	🃏 Card style	🃏 牌的样式
+札の形式	Card style	牌的样式
+各自の設定	Each player's choice	各自的设置
+🃏 トランプ	🃏 Playing cards	🃏 扑克牌
+🎴 花札	🎴 Hanafuda	🎴 花札
+🀄 麻雀牌	🀄 Mahjong tiles	🀄 麻将牌
+🔤 数のことば	🔤 Number words	🔤 数字单词
+🪷 ガンジファ	🪷 Ganjifa	🪷 甘吉法牌
+「各自の設定」は、それぞれが言語の切り替えの下で選んだ札。ほかを選ぶと、この大会の卓では全員がその札で打ちます	"Each player's choice" uses the cards each player picked under the language switch. Pick another and everyone plays with those cards at this tournament's tables	「各自的设置」使用每个人在语言切换下方选择的牌。选择其他样式时，本赛事的牌桌上所有人都用那种牌
 コンボ終了	Combo over	连击结束
 図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
 ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？

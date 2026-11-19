@@ -373,6 +373,7 @@ function obView(array $st, string $uid, string $id, int $ver): array {
 
 // ---------- オンライン大会：予選（何セットか・毎セット席替え）→ 決勝（上位の人で1セット）----------
 function obTableSizes(int $n, int $max = 5): array { $t = (int)ceil($n / $max); $base = intdiv($n, $t); $extra = $n % $t; $s = []; for ($i = 0; $i < $t; $i++) $s[] = $base + ($i < $extra ? 1 : 0); return $s; }
+const OB_DECKS = ['own', 'normal', 'hana', 'mj', 'en', 'gj'];
 function obNewRoom(array $seats, array $cfg, string $tid, string $label, float $now): string {
   $d = db(); for ($i = 0; $i < 30; $i++) { $id = ''; for ($k = 0; $k < 6; $k++) $id .= CODE_CHARS[random_int(0, strlen(CODE_CHARS) - 1)]; $q = $d->prepare('SELECT 1 FROM rooms WHERE id = ?'); $q->execute([$id]); if (!$q->fetch()) break; }
   $n = count($seats);
@@ -395,7 +396,7 @@ function obTourDeal(array &$t, array $keys, string $label, float $now, array $ab
   for ($tr = 0; $tr < (count($sizes) > 1 ? 200 : 0) && $bc > 0; $tr++) { $ks = $keys; shuffle($ks); $c = $cost($ks); if ($c < $bc) { $bc = $c; $best = $ks; } }
   $keys = $best; $k = 0; foreach ($sizes as $sz) { $tb = array_slice($keys, $k, $sz); $k += $sz; for ($i = 0; $i < $sz; $i++) for ($j = $i + 1; $j < $sz; $j++) { $x = $pk($tb[$i], $tb[$j]); $met[$x] = ($met[$x] ?? 0) + 1; } }
   if (count($sizes) > 1) $t['met'] = $met;
-  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3', 'aiAvoid' => $t['aiAvoid'] ?? []];
+  $t['rooms'] = []; $k = 0; $cfg = ['n' => 5, 'games' => ($t['phase'] === 'final' && !empty($t['cfg']['finalGames'])) ? (int)$t['cfg']['finalGames'] : $t['cfg']['games'], 'limit' => $t['cfg']['limit'], 'judge' => $t['cfg']['judge'] ?? 'after3', 'aiAvoid' => $t['aiAvoid'] ?? [], 'deck' => $t['cfg']['deck'] ?? 'own'];
   foreach (obTableSizes(count($keys)) as $ti => $sz) { $seats = []; for ($i = 0; $i < $sz; $i++) { $st0 = obPlayerSeat($byKey[$keys[$k]]); if (in_array($keys[$k], $absent, true)) $st0['miss'] = 3; $seats[] = $st0; $k++; } obShadowSeats($seats); $t['rooms'][] = obNewRoom($seats, $cfg, $t['id'], $label . (count($keys) > 5 ? '・' . chr(65 + $ti) . '卓' : ''), $now); }
 }
 function obTourStart(array &$t, float $now): void {
@@ -611,6 +612,7 @@ function obTourCfg(array $b, array $u): array {
   'entry' => ($b['entry'] ?? 'open') === 'invite' ? 'invite' : 'open', 'invites' => array_slice(array_values(array_filter(array_map(fn($x) => trim(mb_substr((string)$x, 0, 10)), (array)($b['invites'] ?? [])))), 0, 40),
   'official' => !empty($b['official']) && obCanOfficial($u, $b), 'sets' => max(1, min(6, (int)($b['sets'] ?? 3))), 'games' => max(1, min(10, (int)($b['games'] ?? 5))), 'finalists' => max(0, min(5, (int)($b['finalists'] ?? 5))), 'waitMin' => in_array((int)($b['waitMin'] ?? 15), OB_WAITS, true) ? (int)$b['waitMin'] : 15, 'points' => $pts ?: [10, 8, 5, 2, 0]];
   $cfg['aiRes'] = array_key_exists('aiRes', $b) ? !empty($b['aiRes']) : $cfg['entry'] === 'open'; // AI研究員を呼ぶ（はじめは、誰でもの大会はON・招待だけの大会はOFF）
+  $cfg['deck'] = in_array($b['deck'] ?? '', OB_DECKS, true) ? $b['deck'] : 'own'; // 札の形式（own＝各自の設定・normal＝トランプ・hana＝花札・mj＝麻雀牌・en＝数のことば・gj＝ガンジファ）
   $cfg['podAi'] = array_key_exists('podAi', $b) ? !empty($b['podAi']) : true; // 表彰台の順位にAIを含む（はじめは含む）
   if ($cfg['official']) { $tp = array_values(array_map(fn($x) => max(0, min(1000, (int)$x)), array_slice((array)($b['tpts'] ?? OFFICIAL_TPTS), 0, 10))); $cfg['tpts'] = $tp ?: OFFICIAL_TPTS; }
   return $cfg;
@@ -655,7 +657,7 @@ function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'aiAvoid' => $t['aiAvoid'] ?? [], 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
     'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
-    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'aiRes' => !empty($c['aiRes']), 'podAi' => !array_key_exists('podAi', $c) || !empty($c['podAi']), 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
+    'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'aiRes' => !empty($c['aiRes']), 'podAi' => !array_key_exists('podAi', $c) || !empty($c['podAi']), 'deck' => $c['deck'] ?? 'own', 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
     if (!empty($t['players'])) {
