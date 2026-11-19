@@ -122,15 +122,15 @@ const SFX = {
   // 巻き戻し：テープを逆回しするように、上がっていくキュルキュル音
   rewind: t => { for (let k = 0; k < 14; k++) { const u = t + k * 0.065; tone(500 + k * 70, u, 0.06, { type: 'square', vol: 0.05, to: 900 + k * 110 }); } noise(t, 0.95, { f: 2600, q: 0.6, vol: 0.12 }); tone(220, t + 0.98, 0.12, { type: 'triangle', vol: 0.22, to: 110 }); },
   back: t => { tone(700, t, 0.06, { type: 'triangle', vol: 0.18 }); tone(470, t + 0.06, 0.1, { type: 'triangle', vol: 0.16 }); },
-  // 麻雀牌（中国語の麻将牌のとき play・play3・deal・draw の代わり）：牌を卓に打つ「カチッ」・めくる「コトッ」
-  mj_play: (t, n) => {
-    for (let k = 0; k < (n || 1); k++) { const u = t + k * 0.12; noise(u, 0.035, { f: 3800, q: 5, vol: 0.55, a: 0.001 }); tone(2300, u, 0.03, { type: 'triangle', vol: 0.16, to: 1700 }); noise(u + 0.012, 0.05, { f: 1400, q: 3, vol: 0.3, a: 0.001 }); tone(140, u, 0.07, { type: 'sine', vol: 0.3, to: 70 }); }
-  },
-  mj_play3: t => { SFX.mj_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.42 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); },
-  mj_draw: t => { noise(t, 0.12, { f: 1600, fto: 2600, q: 2, vol: 0.18, a: 0.03 }); noise(t + 0.13, 0.03, { f: 3200, q: 5, vol: 0.3, a: 0.001 }); tone(1900, t + 0.13, 0.025, { type: 'triangle', vol: 0.1 }); },
+  // 麻雀牌（中国語の麻将牌のとき play・play3・deal・draw の代わり）：牌を卓に打つ「タン」
+  // 牌を卓に打つ「タン」：木の胴鳴り（700Hz前後で少し下がる）＋短い打撃音＋低い響き。複数枚はタン・タン・タンと間をあけて
+  mj_tan: (t, v) => { v = v || 1; noise(t, 0.035, { f: 1300, q: 1.8, vol: 0.5 * v, a: 0.001 }); tone(760, t, 0.11, { type: 'triangle', vol: 0.34 * v, to: 600, a: 0.002 }); tone(1520, t, 0.05, { type: 'sine', vol: 0.07 * v, a: 0.002 }); tone(125, t, 0.12, { type: 'sine', vol: 0.32 * v, to: 70, a: 0.002 }); },
+  mj_play: (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.mj_tan(t + k * 0.16); },
+  mj_play3: t => { SFX.mj_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.5 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); },
+  mj_draw: t => { noise(t, 0.1, { f: 1400, fto: 2200, q: 1.5, vol: 0.14, a: 0.03 }); SFX.mj_tan(t + 0.11, 0.55); },
   mj_deal: t => { noise(t, 0.3, { f: 1100, fto: 2600, q: 1.4, vol: 0.2, a: 0.08 }); },
   // 牌をめくる：コトッ（低めの木の音）
-  mj_flip: t => { noise(t, 0.05, { f: 2200, q: 4, vol: 0.45, a: 0.001 }); tone(420, t, 0.09, { type: 'triangle', vol: 0.22, to: 300 }); tone(160, t, 0.08, { type: 'sine', vol: 0.25, to: 90 }); }
+  mj_flip: t => { SFX.mj_tan(t, 0.6); }
 };
 const MJ_SFX = { play: 'mj_play', play3: 'mj_play3', draw: 'mj_draw', deal: 'mj_deal' };
 KB.sfx = function (name, arg) {
