@@ -6355,6 +6355,7 @@ function act(a, el) {
     case 'hnav': htabSet(el.dataset.to); break;
     case 'foot-egg': { const [w, t] = FOOT_LINES[(S.footI = ((S.footI == null ? Math.floor(Math.random() * FOOT_LINES.length) : S.footI) + 1) % FOOT_LINES.length)]; KB.sfx && KB.sfx('select'); toast(`${w === 'root' ? '🦉 博士' : '🧢 マサ'}「${t}」`); document.querySelectorAll('.hf-suits span').forEach((x, i) => { x.style.animation = 'none'; void x.offsetWidth; x.style.animation = `hfJump .5s ${i * 0.06}s ease-out`; }); break; }
     case 'fam-back': famMenuModal(); break;
+    case 'fam-forget': { const d = famDevGet(); if (d) cloudReq('fam_auth', { dev: d, forget: 1 }).catch(() => { }); famDevSet(null); S.famCred = { idt: S.gIdt && S.gIdt.t }; toast('この端末の記憶を消しました。次はGoogleでログインして開きます'); famMenuModal(); break; }
     case 'fam-rep-back': famReportPick(); break;
     case 'lim-home': closeModal(); go('home'); break;
     case 'xm-edit': xmEdit(el.dataset.k); break;
@@ -6783,12 +6784,16 @@ const FAM_FEATURES = [
   { id: 'family', ic: '👨‍👩‍👧', name: '家族大会', desc: 'このGoogleでまもっているプレイヤーだけを招待したオンライン大会を、すぐにひらけます（招待した人にだけ見えます）', open: () => famTour() }
 ];
 const famUnseen = () => { const sn = store.get('famSeen', []); return FAM_FEATURES.some(f => !sn.includes(f.id)); };
-const famIdt = () => S.gIdt && S.gIdt.t;
-const famReload = async () => { const j = await cloudReq('xm_list', { idt: famIdt(), pw: S.famPw }); S.xmList = j.list; S.xmAt = 0; return j.list; };
+const famC = () => S.famCred || { idt: S.gIdt && S.gIdt.t }; // おうちの人の確認：Googleのトークンか、この端末の合い鍵（kb.famDev）
+const famDevGet = () => { try { return JSON.parse(localStorage.getItem('kb.famDev') || 'null'); } catch (e) { return null; } };
+const famDevSet = d => { try { d ? localStorage.setItem('kb.famDev', JSON.stringify(d)) : localStorage.removeItem('kb.famDev'); } catch (e) { } };
+const famReload = async () => { const j = await cloudReq('xm_list', { ...famC(), pw: S.famPw }); S.xmList = j.list; S.xmAt = 0; return j.list; };
 async function famMenu() {
-  let idt; try { idt = await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
-  if (!(await famAuth(idt))) return;
-  try { S.xmList = (await cloudReq('xm_list', { idt, pw: S.famPw })).list; } catch (e) { S.xmList = []; }
+  const dev = famDevGet(); // 一度Google＋パスワードで開いた端末は、Googleを省いてパスワードだけで開ける
+  if (dev) S.famCred = { dev };
+  else { let idt; try { idt = await gSignIn('👪 おうちの人の確認', '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; } S.famCred = { idt }; }
+  if (!(await famAuth())) return;
+  try { S.xmList = (await cloudReq('xm_list', Object.assign({}, famC(), { pw: S.famPw }))).list; } catch (e) { S.xmList = []; }
   famMenuModal();
 }
 const famKidAv = x => `<span class="xm-kav">${KB.avatarSVG(Object.assign({}, x.avatar || AVATAR_DEF, { name: x.name }), { mood: 'happy' })}</span>`;
@@ -6799,18 +6804,21 @@ function famMenuModal() {
     <div class="fam-list">${FAM_FEATURES.map(f => `<button class="fam-f" data-fam="${f.id}"><span class="fam-ic">${f.ic}</span><span><b>${esc(f.name)}${sn.includes(f.id) ? '' : '<em class="fam-new">NEW</em>'}</b><small>${esc(f.desc)}</small></span></button>`).join('')}</div>
     <h4 style="margin:6px 0 0">👥 おうちの人か子どもか</h4><p class="small muted" style="margin:0">このGoogleでまもっているプレイヤーごとに決めます。「おうちの人」はホームにこのメニューの入口（新しいしかけのおしらせつき）、「子ども」にはこのメニューの入口を出しません。</p>
     ${L.length ? `<div class="xm-kids">${L.map(x => `<div class="xm-kid">${famKidAv(x)}<div><b>${esc(x.name)}</b></div><div class="su-seg fam-role">${[['adult', '👪 おうちの人'], ['child', '🧒 子ども']].map(([v, l]) => `<button class="${x.role === v ? 'on' : ''}" data-role="${v}" data-k="${esc(x.k)}">${l}</button>`).join('')}</div></div>`).join('')}</div>` : '<p class="small muted" style="margin:0">このGoogleでまもっているプレイヤーがいません。</p>'}
+    ${famDevGet() ? '<p class="small muted" style="margin:0">🔒 この端末は、次からパスワードだけで開けます。<button class="linkish" data-act="fam-forget">この端末の記憶を消す</button></p>' : ''}
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
   document.querySelectorAll('#modal [data-role]').forEach(b => b.onclick = async () => { const x = L.find(y => y.k === b.dataset.k), role = x && x.role === b.dataset.role ? '' : b.dataset.role;
-    try { await cloudReq('fam_role', { idt: famIdt(), pw: S.famPw, k: b.dataset.k, role }); x.role = role || null; S.xmAt = 0; famMenuModal(); } catch (e) { toast(e.message || '変えられませんでした'); } });
+    try { await cloudReq('fam_role', { ...famC(), pw: S.famPw, k: b.dataset.k, role }); x.role = role || null; S.xmAt = 0; famMenuModal(); } catch (e) { toast(e.message || '変えられませんでした'); } });
   store.set('famSeen', FAM_FEATURES.map(f => f.id)); const pb = $('.pb-fam .nb'); if (pb) pb.remove();
   document.querySelectorAll('#modal [data-fam]').forEach(b => b.onclick = () => { const f = FAM_FEATURES.find(x => x.id === b.dataset.fam); if (f) f.open(); });
 }
 const famBack = `<button class="btn" data-act="fam-back">← メニュー</button>`;
 // Googleのあとにパスワード（子どもに見られないように）。はじめは決めてもらう。忘れたら作り直せるが、そのGoogleで仕込んだしかけは消える
-function famAuth(idt) {
+function famAuth() {
   S.famPw = null; // 子どもも同じ端末で遊ぶので、メニューを開くたびに毎回パスワードを確かめる（覚えておかない）
   return new Promise(async res => {
-    let j; try { j = await cloudReq('fam_auth', { idt }); } catch (e) { toast(e.message || 'ひらけませんでした'); return res(false); }
+    let j; try { j = await cloudReq('fam_auth', famC()); } catch (e) {
+      if (S.famCred && S.famCred.dev) { famDevSet(null); S.famCred = null; toast('この端末の記憶が切れていました。Googleでログインしてください'); closeModal(); return res(false); } // 合い鍵が使えなくなっていたら、次はGoogleから
+      toast(e.message || 'ひらけませんでした'); return res(false); }
     const ask = has => {
       modal(`<div class="stack xm-par"><h3 style="margin:0">🔑 おうちの人のパスワード</h3><p class="small" style="margin:0">${has ? 'おうちの人メニューのパスワードを入れてください。' : '子どもに開かれないように、おうちの人メニューのパスワードを決めてください（4〜32文字）。'}</p>
         <input id="fam-pw" type="password" class="su-in" maxlength="32" autocomplete="${has ? 'current-password' : 'new-password'}" placeholder="パスワード">${has ? '' : '<input id="fam-pw2" type="password" class="su-in" maxlength="32" autocomplete="new-password" placeholder="もう一度">'}
@@ -6819,10 +6827,10 @@ function famAuth(idt) {
       $('#fam-x').onclick = () => { closeModal(); res(false); };
       $('#fam-ok').onclick = async () => {
         const v = pw.value; if (!has && v !== ($('#fam-pw2') || {}).value) { toast('2回のパスワードがちがいます'); return; }
-        try { await cloudReq('fam_auth', has ? { idt, pw: v } : { idt, newPw: v }); closeModal(); S.famPw = v; res(true); } catch (e) { toast(e.message || 'パスワードを確かめられませんでした'); }
+        try { const r = await cloudReq('fam_auth', Object.assign({}, famC(), has ? { pw: v } : { newPw: v }, { remember: 1 })); if (r.dev) famDevSet(r.dev); closeModal(); S.famPw = v; res(true); } catch (e) { toast(e.message || 'パスワードを確かめられませんでした'); }
       };
       pw.onkeydown = e => { if (e.key === 'Enter' && has) $('#fam-ok').click(); };
-      const fg = $('#fam-forgot'); if (fg) fg.onclick = async () => { if (!confirm('パスワードを作り直します。このGoogleで仕込んだしかけ（サンタ・誕生日の挑戦状、遊ぶ時間の目安など）はすべて消えます。よろしいですか？')) return; try { await cloudReq('fam_auth', { idt, reset: 1 }); ask(false); } catch (e) { toast(e.message || '作り直せませんでした'); } };
+      const fg = $('#fam-forgot'); if (fg) fg.onclick = async () => { if (!confirm('パスワードを作り直します。このGoogleで仕込んだしかけ（サンタ・誕生日の挑戦状、遊ぶ時間の目安など）はすべて消えます。よろしいですか？')) return; try { let idt = S.famCred && S.famCred.idt; if (!idt) { idt = await gSignIn('🔑 パスワードの作り直し', 'パスワードを作り直すには、Googleでログインしてください。'); S.famCred = { idt }; famDevSet(null); } await cloudReq('fam_auth', { idt, reset: 1 }); ask(false); } catch (e) { toast(e.message || '作り直せませんでした'); } };
     };
     ask(j.has);
   });
@@ -6830,8 +6838,7 @@ function famAuth(idt) {
 // 挑戦状の保護者画面（Googleでログイン）
 async function xmParent(inMenu, k) {
   S.xk = xkOf(k);
-  let idt; try { idt = await gSignIn(`${XK[S.xk].ic} おうちの人の確認`, '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; }
-  if (!(inMenu && S.famPw) && !(await famAuth(idt))) return; // メニューの中から開いたときは、さっき入れたパスワードのまま
+  if (!(inMenu && S.famPw)) { const dev = famDevGet(); if (dev) S.famCred = { dev }; else { let idt; try { idt = await gSignIn(`${XK[S.xk].ic} おうちの人の確認`, '子どものプレイヤーを「Googleでまもる」で守っているGoogleアカウントでログインしてください。'); } catch (e) { return; } S.famCred = { idt }; } if (!(await famAuth())) return; } // メニューの中から開いたときは、さっき入れたパスワードのまま
   try { await famReload(); } catch (e) { toast(e.message || 'ひらけませんでした'); return; }
   xmParentModal();
 }
@@ -6861,10 +6868,10 @@ function xmEdit(pk) {
 async function xmSave(pk) {
   const k = xkOf(S.xk), msg = $('#xm-msg').value.trim(), st = new Date($('#xm-st').value).getTime() / 1000, en = new Date($('#xm-en').value).getTime() / 1000, lv = +(($('#xm-lv .on') || {}).dataset || {}).v || 5;
   if (!msg) { toast('メッセージを書いてください'); return; } if (!(en > st)) { toast('期間を確かめてください'); return; }
-  try { await cloudReq('xm_set', { idt: famIdt(), pw: S.famPw, k: pk, kind: k, msg, start: Math.round(st), end: Math.round(en), lv, reset: !!($('#xm-reset') && $('#xm-reset').checked) }); toast(`仕込みました ${XK[k].ic}`); await famReload(); xmParentModal(); }
+  try { await cloudReq('xm_set', { ...famC(), pw: S.famPw, k: pk, kind: k, msg, start: Math.round(st), end: Math.round(en), lv, reset: !!($('#xm-reset') && $('#xm-reset').checked) }); toast(`仕込みました ${XK[k].ic}`); await famReload(); xmParentModal(); }
   catch (e) { toast(e.message || '保存できませんでした'); }
 }
-async function xmDel(pk) { if (!confirm('この挑戦状を取り消しますか？')) return; try { await cloudReq('xm_del', { idt: famIdt(), pw: S.famPw, k: pk, kind: xkOf(S.xk) }); await famReload(); xmParentModal(); } catch (e) { toast(e.message || '取り消せませんでした'); } }
+async function xmDel(pk) { if (!confirm('この挑戦状を取り消しますか？')) return; try { await cloudReq('xm_del', { ...famC(), pw: S.famPw, k: pk, kind: xkOf(S.xk) }); await famReload(); xmParentModal(); } catch (e) { toast(e.message || '取り消せませんでした'); } }
 function xmTestMenu() {
   const K = XK[xkOf(S.xk)];
   modal(`<div class="stack xm-par"><h3 style="margin:0">🎮 演出をためす（テストプレイ）</h3><p class="small" style="margin:0">子どもと同じ流れを、おうちの人がためせます。記録やランキングには残らず、子どもの挑戦の回数にも数えません。</p>
@@ -6905,7 +6912,7 @@ const dayKey = (d) => (d || new Date()).toLocaleDateString('sv-SE');
 const fmtMin = s => { const m = Math.round((s || 0) / 60); return m >= 60 ? `${Math.floor(m / 60)}時間${m % 60 ? m % 60 + '分' : ''}` : `${m}分`; };
 async function famReport(pk) {
   const x = (S.xmList || []).find(y => y.k === pk); if (!x) return;
-  let j; try { j = await cloudReq('fam_report', { idt: famIdt(), pw: S.famPw, k: pk }); } catch (e) { toast(e.message || '読めませんでした'); return; }
+  let j; try { j = await cloudReq('fam_report', { ...famC(), pw: S.famPw, k: pk }); } catch (e) { toast(e.message || '読めませんでした'); return; }
   let g = null, play = {}; try { g = j.growth ? JSON.parse(j.growth) : null; } catch (e) { } play = j.play && typeof j.play === 'object' ? j.play : {};
   modal(famReportHTML(x, g, play, j.at));
 }
@@ -6956,7 +6963,7 @@ function famLimitModal() {
     <div class="row" style="justify-content:space-between">${famBack}<button class="btn" data-act="close">閉じる</button></div></div>`);
   document.querySelectorAll('#modal [data-lim]').forEach(b => b.onclick = async () => {
     const x = L.find(y => y.k === b.dataset.lim); if (!x) return; const v = Math.max(0, Math.min(600, (x.lim || 0) + +b.dataset.v));
-    try { const j = await cloudReq('fam_set', { idt: famIdt(), pw: S.famPw, k: x.k, lim: v }); x.lim = j.lim; S.xmAt = 0; famLimitModal(); } catch (e) { toast(e.message || '保存できませんでした'); }
+    try { const j = await cloudReq('fam_set', { ...famC(), pw: S.famPw, k: x.k, lim: v }); x.lim = j.lim; S.xmAt = 0; famLimitModal(); } catch (e) { toast(e.message || '保存できませんでした'); }
   });
 }
 // 遊んだ時間を数える（15秒ごと。画面が見えていて、2分以内に操作があったときだけ）。プレイヤーごと・日ごと（14日分）。記録はクラウドにも保存され、おたよりで見られる

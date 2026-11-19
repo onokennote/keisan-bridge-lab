@@ -71,6 +71,26 @@ const clr = p => p.evaluate(() => document.querySelectorAll('#modal,.whistle-ov'
   ok(ft && ft.entry === 'invite' && ft.modal && /家族大会/.test(ft.name) && ft.fin === 0, '家族大会：招待だけの大会の設定がすぐ開く ' + JSON.stringify(ft));
   await (await p.$('#modal .on-new')).screenshot({ path: shot('fam_tour.png') });
   ok(await p.evaluate(() => KBAPP.S.famPw === null), '家族大会の画面へ出たら、パスワードは忘れる');
+  // 2回目からは、この端末ならパスワードだけ（Googleを省く）
+  ok(await p.evaluate(() => !!localStorage.getItem('kb.famDev')), 'Google＋パスワードのあと、この端末を覚える');
+  await clr(p); await p.evaluate(() => { KBAPP.S.gIdt = null; KBAPP.S.famCred = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !document.querySelector('#g-test') && !!document.querySelector('#fam-pw')), '2回目はGoogleなしでパスワードだけ聞く');
+  await p.evaluate(() => document.querySelectorAll('.toast').forEach(e => e.remove())); await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_pwonly.png') });
+  await p.fill('#fam-pw', 'xx'); await p.click('#fam-ok'); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !!document.querySelector('#fam-pw')), 'パスワードがちがえば開かない');
+  await p.fill('#fam-pw', 'pw2026'); await p.click('#fam-ok'); await p.waitForTimeout(800);
+  ok(await p.evaluate(() => !!document.querySelector('#modal [data-fam="report"]') && /この端末の記憶を消す/.test(document.querySelector('#modal').innerText)), 'パスワードだけでメニューが開く（「この端末の記憶を消す」も）');
+  await (await p.$('#modal .xm-par')).screenshot({ path: shot('fam_menu_dev.png') });
+  await p.click('#modal [data-act="fam-forget"]'); await p.waitForTimeout(500);
+  ok(await p.evaluate(() => !localStorage.getItem('kb.famDev')), '記憶を消せる');
+  await clr(p); await p.evaluate(() => { KBAPP.S.gIdt = null; KBAPP.S.famCred = null; KBAPP.act('fam-menu'); }); await p.waitForTimeout(400);
+  ok(await p.evaluate(() => !!document.querySelector('#g-test')), '消したあとはまたGoogleから');
+  await p.click('#g-test'); await p.waitForTimeout(500); await p.fill('#fam-pw', 'pw2026'); await p.click('#fam-ok'); await p.waitForTimeout(800);
+  const dv = await p.evaluate(() => JSON.parse(localStorage.getItem('kb.famDev')));
+  const badL = await post('xm_list', { dev: dv.replace(/.$/, c => c === 'a' ? 'b' : 'a'), pw: 'pw2026' }); ok(!badL.list, 'ちがう合い鍵では読めない');
+  const okL = await post('xm_list', { dev: dv, pw: 'pw2026' }); ok(okL.list && okL.list.length > 0, '合い鍵＋パスワードで一覧が読める');
+  let nop = 0; try { const r = await post('xm_list', { dev: dv }); nop = r && r.list ? 0 : 1; } catch (e) { nop = 1; } ok(nop, '合い鍵だけ（パスワードなし）では読めない');
+  await clr(p);
   // 遊ぶ時間をこえたら、マサがひと声（2回目からは言い方を変える）
   await clr(p); await p.evaluate(() => { const k = 'kb.p.' + JSON.parse(localStorage.getItem('kb.profile')) + '.playSec', pl = JSON.parse(localStorage.getItem(k)); pl[new Date().toLocaleDateString('sv-SE')] = 65 * 60; localStorage.setItem(k, JSON.stringify(pl)); KBAPP.S.xmAt = 0; KBAPP.ON.famLim = 60; KBAPP.S.limAt = 0; KBAPP.famTest.limCheck('game'); }); await p.waitForTimeout(1600);
   const l1 = await p.evaluate(() => { const m = document.querySelector('#modal .lim-modal'); return m ? m.innerText : ''; });
