@@ -2876,7 +2876,7 @@ html.dk-gj .title .fan .card{width:62px;height:62px;aspect-ratio:auto}
 html.dk-gj .title .fan .card .v{font-size:30px;position:absolute;inset:0}
 html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 /* 花札の13（役の札）：札の地の色ごと変える */
-.card.dk-hana.hk0,.fieldcard.dk-hana.hk0{background:linear-gradient(180deg,#d9261c,#f0743a);color:#fff6d8}
+.card.dk-hana.hk0,.fieldcard.dk-hana.hk0{background:linear-gradient(180deg,#b3261e,#6e1410);color:#fff1d0}
 .card.dk-hana.hk1,.fieldcard.dk-hana.hk1{background:linear-gradient(180deg,#f6c25a,#d2692a);color:#2a1408}
 .card.dk-hana.hk2,.fieldcard.dk-hana.hk2{background:linear-gradient(180deg,#b3261e,#6e1410);color:#fff1d0}
 .card.dk-hana.hk3,.fieldcard.dk-hana.hk3{background:linear-gradient(180deg,#fde4ea,#f6c8a8);color:#5a1420}
