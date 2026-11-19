@@ -112,8 +112,7 @@
     if (!LANGS[l]) return; try { localStorage.setItem('kb.lang', l); } catch (e) { }
     location.reload();
   }
-  // 切り替えはできあがるまでテスト版だけ（kb.i18nTry=1 でも出す）
-  const on = () => { try { return !!(G.KB_STAGING || localStorage.getItem('kb.i18nTry') === '1' || lang !== 'ja'); } catch (e) { return !!G.KB_STAGING; } };
+  const on = () => true; // 2026-11-19 本番にも切り替えを出した
   // いまのプレイヤーの名前（文の中の名前を @ として引けるように）
   function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
   G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk };
