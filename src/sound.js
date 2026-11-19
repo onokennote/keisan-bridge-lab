@@ -123,8 +123,8 @@ const SFX = {
   rewind: t => { for (let k = 0; k < 14; k++) { const u = t + k * 0.065; tone(500 + k * 70, u, 0.06, { type: 'square', vol: 0.05, to: 900 + k * 110 }); } noise(t, 0.95, { f: 2600, q: 0.6, vol: 0.12 }); tone(220, t + 0.98, 0.12, { type: 'triangle', vol: 0.22, to: 110 }); },
   back: t => { tone(700, t, 0.06, { type: 'triangle', vol: 0.18 }); tone(470, t + 0.06, 0.1, { type: 'triangle', vol: 0.16 }); },
   // 麻雀牌（中国語の麻将牌のとき play・play3・deal・draw の代わり）：牌を卓に打つ「タン」
-  // 牌を卓に打つ「タンッ」：音程のある響きは入れず（ポッとならないように）、叩いた瞬間の雑音を短く切る。高めの打撃＋低めの胴の雑音＋ごく短いノック
-  mj_tan: (t, v) => { v = v || 1; noise(t, 0.02, { f: 1100, q: 0.9, vol: 0.55 * v, a: 0.0005 }); noise(t, 0.075, { ft: 'lowpass', f: 380, vol: 1.4 * v, a: 0.0008 }); tone(140, t, 0.05, { type: 'sine', vol: 0.6 * v, to: 65, a: 0.001 }); },
+  // 牌を卓に打つ「タンッ」（試聴で選んだ「案4・9」：重く硬い作りを2.9倍の高さに）。音程の響きは入れず、角の当たる音＋木の音＋胴の雑音＋短いノック
+  mj_tan: (t, v) => { v = v || 1; const m = 2.9; noise(t, 0.015, { f: 1600 * m, q: 1.2, vol: 0.7 * v, a: 0.0003 }); noise(t, 0.03, { f: 650 * m, q: 1.5, vol: 0.7 * v, a: 0.0005 }); noise(t, 0.12, { ft: 'lowpass', f: 260 * m, vol: 1.9 * v, a: 0.0008 }); tone(100 * m, t, 0.1, { type: 'sine', vol: 1.0 * v, to: 50 * m, a: 0.001 }); },
   mj_play: (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.mj_tan(t + k * 0.13); },
   mj_play3: t => { SFX.mj_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.45 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); },
   mj_draw: t => { noise(t, 0.1, { f: 1400, fto: 2200, q: 1.5, vol: 0.14, a: 0.03 }); SFX.mj_tan(t + 0.11, 0.55); },
