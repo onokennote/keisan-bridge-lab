@@ -610,6 +610,12 @@ function tipAt(i) { for (let k = 0; k < TIPS.length; k++) { const t = TIPS[(i + 
 const tipOrder = () => { const d = Math.floor((Date.now() + 9 * 3600000) / 86400000); let x = d * 9301 + 49297; const o = TIPS.map((_, i) => i); for (let i = o.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
 const tipCache = {};
 function tipText(n) { const o = tipOrder(), i = o[((n % o.length) + o.length) % o.length]; const key = new Date().toDateString() + ':' + i; return tipCache[key] || (tipCache[key] = tipAt(i)); }
+// アドバイスの下：1日1つ（端末ごとに完全ランダム。その日は同じ豆知識）
+function tipToday() {
+  const d = new Date().toDateString(); let o = null; try { o = JSON.parse(localStorage.getItem('kb.tipDay') || 'null'); } catch (e) { }
+  if (!o || o.d !== d || !o.s) { const i = (Math.random() * TIPS.length) | 0; o = { d, s: tipAt(i) }; try { localStorage.setItem('kb.tipDay', JSON.stringify(o)); } catch (e) { } }
+  return o.s;
+}
 const tipBoxHTML = (s, extra) => `<div class="tip-box"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>💡 マサの豆知識</small><p>${esc(s)}</p>${extra || ''}</div></div>`;
 // 待ち時間は25秒ごとに次の豆知識（描き直しても同じものが出る）
 const tipWaitHTML = () => tipBoxHTML(tipText(Math.floor(Date.now() / 25000)));
@@ -651,7 +657,7 @@ function masaAdvice(more) {
   const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
   advModal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(intro)}</b></div></div>
     <div class="adv-list">${pick.map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${advText(t)}</p>${t.btn ? `<button class="btn sm" data-act="adv-go" ${t.btn.go ? `data-go="${t.btn.go}"` : `data-a="${t.btn.a}"`}>${esc(t.btn.l)} →</button>` : ''}</div></div>`).join('')}</div>
-    <div id="adv-tip">${tipBoxHTML(tipText(S.tipN || 0), '<button class="pm-link" data-act="tip-next">次の豆知識 ›</button>')}</div>
+    <div id="adv-tip">${tipBoxHTML(tipToday(), '<small class="muted">豆知識は1日1つ。また明日な！</small>')}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end">${CLOUD_ON ? '<button class="btn" data-act="masa-rival">⚔ ライバルと比較</button>' : ''}<button class="btn" data-act="masa-more">🔄 ほかには？</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
@@ -6485,7 +6491,6 @@ function act(a, el) {
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
-    case 'tip-next': { S.tipN = (S.tipN || 0) + 1; const b = $('#adv-tip'); if (b) b.innerHTML = tipBoxHTML(tipText(S.tipN), '<button class="pm-link" data-act="tip-next">次の豆知識 ›</button>'); break; }
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
