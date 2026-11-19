@@ -173,7 +173,7 @@ function makeHuman(id) {
 const P = id => S.T.players.find(p => p.id === id);
 function nm(p) { return p.human && !p.spectator ? (S.settings.name || 'あなた') : p.ch.name; }
 // 呼び名に「さん」を付ける（すでに敬称・肩書きで終わる名前には付けない）
-const san = s => /(さん|くん|君|ちゃん|様|先生|博士|大将|師匠|親方|課長|部長|社長|会長|名人|先輩)$/.test(s) ? s : s + 'さん';
+const san = s => /(さん|くん|君|ちゃん|様|先生|博士|教授|大将|師匠|親方|課長|部長|社長|会長|名人|先輩)$/.test(s) ? s : s + 'さん';
 function av(p, mood, small) {
   const lvShow = S.settings.showLevel || S.T && S.T.revealAll;
   const stShow = S.settings.showStyle || S.T && S.T.revealAll;
@@ -3172,7 +3172,7 @@ function titleShuffle(byTap) {
   const q = titleNewQ(); if (!q) return; S.titleQ = q;
   const reduce = (() => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } })();
   const cards = [...fan.querySelectorAll('.card')], ex = $('.title .title-expr');
-  const paint = (el, c) => { el.classList.toggle('red', c.s === 1 || c.s === 2); el.querySelector('.v').textContent = KB.vname(c.v); el.querySelector('.s').textContent = KB.SUITS[c.s]; const cn = el.querySelector('.cn'); if (cn) cn.innerHTML = `${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small>`; };
+  const paint = (el, c) => { el.classList.toggle('red', c.s === 1 || c.s === 2); el.querySelector('.v').textContent = KB.vname(c.v); el.querySelector('.s').textContent = KB.SUITS[c.s]; const cn = el.querySelector('.cn'); if (cn) cn.innerHTML = `${KB.vname(c.v)}<small>${KB.SUITS[c.s]}</small>`; if (el.dataset.mj && window.I18N) { delete el.dataset.mj; I18N.walk(el); } };
   cards.forEach((el, i) => { if (reduce) { paint(el, q.cards[i]); return; } setTimeout(() => { el.classList.remove('flip'); void el.offsetWidth; el.classList.add('flip'); setTimeout(() => paint(el, q.cards[i]), 230); setTimeout(() => el.classList.remove('flip'), 520); }, i * 140); });
   if (ex) { if (reduce) ex.textContent = q.expr; else { ex.classList.add('fade'); setTimeout(() => { ex.textContent = q.expr; ex.classList.remove('fade'); }, 1500); } } // 式はじんわり入れ替える（目立たせない）
   if (byTap) { const say = $('.title .host-r .host-say'); if (say) say.textContent = RVP([`3枚で場の${KB.vname(q.t)}を作るんや！`, `この3枚で${KB.vname(q.t)}、作れるか？`, `答えは下や！${KB.vname(q.t)}、作れたか？`]); }
@@ -3227,7 +3227,7 @@ const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所�
 // 言語の切り替え（日本語／English／中文）。できあがるまではテスト版だけ（I18N.on）
 function langSwHTML() {
   if (!window.I18N || !I18N.on()) return '';
-  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
+  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang === 'zh' ? `<button class="mj-sw ${I18N.mj ? 'on' : ''}" data-act="mj-set" data-noi18n>🀄 麻将牌：${I18N.mj ? '开' : '关'}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
 }
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
@@ -4044,7 +4044,7 @@ function restCardsHTML(counts, m) {
   if (!vs.length && m) return '';
   return `<span class="rest-cards">${vs.map(v => `<i class="mc">${KB.vname(v)}</i>`).join('')}${m ? '' : '<i class="mc back">?</i>'}</span>`;
 }
-function miniCard(c) { return `<i class="mc ${c.s === 1 || c.s === 2 ? 'red' : ''}">${KB.vname(c.v)}</i>`; }
+function miniCard(c) { return `<i class="mc ${c.s === 1 || c.s === 2 ? 'red' : ''}" data-s="${c.s}">${KB.vname(c.v)}</i>`; }
 function playedHTML(g, i, bare) {
   const ps = g.played[i], rt = boardHist(g).ret[i] || 0;
   const inner = ps.length ? ps.map((pl, k) => `<span class="pg ${k < rt ? 'ret' : ''}" title="第${pl.round}巡 場${pl.t}：${esc(pl.expr)}${k < rt ? '（切り直しで山札に戻った札）' : ''}">${pl.cards.map(miniCard).join('')}</span>`).join('') : '<span class="none">まだ出していません</span>';
@@ -6571,6 +6571,7 @@ function act(a, el) {
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
     case 'lang-set': if (window.I18N) I18N.set(el.dataset.l); break;
+    case 'mj-set': if (window.I18N) I18N.setMj(!I18N.mj); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;

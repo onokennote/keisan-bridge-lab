@@ -64,6 +64,10 @@ AIの手番の速さ	AI turn speed	AI回合速度
 次の自分の番までに誰かが上がる確率 #%	Chance someone goes out before your next turn: #%	到你下一轮前有人出完的概率 #%
 #	#	#
 第#巡 場#	Round #, field #	第#巡 场#
+第#卓（#人）	Table # (# players)	第#桌（#人）
+あなたは暫定#位	You're provisionally #th	你暂列第#
+決勝圏内	in the final zone	决赛圈内
+決勝ラインまであと#点	# pts to the final line	距决赛线还差#分
 コンボ終了	Combo over	连击结束
 図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
 ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？

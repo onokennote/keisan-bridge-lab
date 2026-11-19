@@ -26,7 +26,7 @@
   let TOK = [];
   function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)).replace(/\u0002/g, '#'); }
   const CARD = '(?:[AJQK]|1[0-3]|[2-9])';
-  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[A-Z](?=卓)|[AJQK](?=のとき)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
+  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})*(?= を出す)|${CARD}(?= の\\d+つ)|[A-Z](?=卓)|[AJQK](?=のとき)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
   function tokens(core) { const L = []; const k = core.replace(TOK_RE, m => { L.push(m); return '§'; }); return { k, L }; }
   function look(key, nums, names) { const h = D.get(key), t = h && (h[lang] || (lang === 'hi' ? h.en : null)); return t ? fill(t, nums, names) : null; }
   function tr(s) {
@@ -100,23 +100,60 @@
     t = t.replace(/[0-9]/g, d => DEVA[+d]);
     if (t !== v) n.nodeValue = t;
   }
+  // 中国語：札を麻雀牌で見せる（1〜9＝萬子・10＝花牌 春夏秋冬（マークごと）・11 白・12 發・13 中。隅に小さく数字）。kb.mj（はじめはON）
+  const mjOn = () => { try { return localStorage.getItem('kb.mj') !== '0'; } catch (e) { return true; } };
+  const MJN = '一二三四五六七八九', MJF = '東南西北', SU = '♠♥♦♣';
+  const mjVal = t => { t = (t || '').trim(); return { A: 1, J: 11, Q: 12, K: 13 }[t] || (/^\d+$/.test(t) ? +t : 0); };
+  function mjFace(v, s) {
+    if (v >= 1 && v <= 9) return `<span class="mjf"><b>${MJN[v - 1]}</b><i>萬</i></span>`;
+    if (v === 10) return `<span class="mjf hz fl"><b>${MJF[s] || '東'}</b></span>`;
+    if (v === 11) return '<span class="mjf hz bai"><b></b></span>';
+    if (v === 12) return '<span class="mjf hz fa"><b>發</b></span>';
+    return '<span class="mjf hz zh"><b>中</b></span>';
+  }
+  const mjActive = () => lang === 'zh' && mjOn();
+  function mjEl(el) {
+    if (el.dataset.mj || el.closest('[data-noi18n]')) return;
+    if (el.matches('.card:not(.back)')) {
+      const ve = el.querySelector(':scope > .v'), v = ve && mjVal(ve.textContent); if (!v) return;
+      const se = el.querySelector(':scope > .s'), s = se ? SU.indexOf(se.textContent.trim()) : 0;
+      el.dataset.mj = '1'; el.classList.add('mj'); ve.innerHTML = mjFace(v, s);
+      const cn = el.querySelector(':scope > .cn'); if (cn) cn.textContent = v; else el.insertAdjacentHTML('beforeend', `<span class="mjn">${v}</span>`);
+    } else if (el.matches('.fieldcard')) {
+      const be = el.querySelector(':scope > .big'), v = be && mjVal(be.textContent); if (!v) return;
+      const va = el.querySelector(':scope > .val'), m = va && va.textContent.match(/[♠♥♦♣]/), s = m ? SU.indexOf(m[0]) : 0;
+      el.dataset.mj = '1'; el.classList.add('mj'); be.innerHTML = mjFace(v, s); if (va) va.textContent = v;
+    } else if (el.matches('.mc')) {
+      const v = mjVal(el.textContent); if (!v) return;
+      el.dataset.mj = '1'; el.classList.add('mj'); el.innerHTML = mjFace(v, +el.dataset.s || 0) + (v >= 10 ? `<sub>${v}</sub>` : '');
+    }
+  }
+  const MJ_SEL = '.card:not(.back), .fieldcard, .mc';
+  // タイトルの式（J − 4 × A = 7）は札の文字を数字に
+  function mjText(n) {
+    if (!mjActive() || !n.parentElement || n.parentElement.closest(NODEV)) return; const pe = n.parentElement, v = n.nodeValue; let t = v.replace(/🃏/g, '🀄');
+    if (pe.closest('.title-expr')) t = t.replace(/\b([AJQK])\b/g, c => ({ A: 1, J: 11, Q: 12, K: 13 })[c]);
+    if (pe.closest('.hf-suits')) t = t.replace(/[♠♥♦♣]/g, c => MJF[SU.indexOf(c)]);
+    if (t !== v) n.nodeValue = t;
+  }
   // DOM：描き直しのたびに、新しく出た文字と属性を訳す
   const ATTR = ['placeholder', 'aria-label', 'title'];
   function walk(root) {
     if (lang === 'ja' || !root) return;
-    if (root.nodeType === 3) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; hiNode(root); return; }
+    if (root.nodeType === 3) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; hiNode(root); mjText(root); return; }
     if (root.nodeType !== 1 || root.closest && root.closest('script,style,[data-noi18n]')) return;
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     let n = root;
     do {
-      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } hiNode(n); }
-      else if (n.nodeType === 1) ATTR.forEach(a => { const v = n.getAttribute && n.getAttribute(a); if (v && JA.test(v)) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } });
+      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } hiNode(n); mjText(n); }
+      else if (n.nodeType === 1) { if (mjActive() && n.matches && n.matches(MJ_SEL)) mjEl(n); } if (n.nodeType === 1) ATTR.forEach(a => { const v = n.getAttribute && n.getAttribute(a); if (v && JA.test(v)) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } });
     } while ((n = w.nextNode()));
   }
   let obs = null;
   function start() {
     if (lang === 'ja' || obs || typeof MutationObserver === 'undefined' || !document.body) return;
     document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi' : 'en';
+    if (mjActive()) document.documentElement.classList.add('mj');
     walk(document.body);
     if (document.title) document.title = tr(document.title);
     obs = new MutationObserver(ms => { for (const m of ms) { if (m.type === 'childList') m.addedNodes.forEach(walk); else if (m.type === 'characterData') walk(m.target); else if (m.type === 'attributes') walk(m.target); } });
@@ -131,6 +168,7 @@
   const on = () => true; // 2026-11-19 本番にも切り替えを出した
   // いまのプレイヤーの名前（文の中の名前を @ として引けるように）
   function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
-  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk };
+  function setMj(on) { try { localStorage.setItem('kb.mj', on ? '1' : '0'); } catch (e) {} location.reload(); }
+  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setMj, get mj() { return mjOn(); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })(typeof window !== 'undefined' ? window : globalThis);
