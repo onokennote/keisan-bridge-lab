@@ -5669,7 +5669,7 @@ function rvDialog(scope) {
     const c = setContext(), Lg = S.T.setLog || [], F = Lg.map(x => x.rv);
     const nDec = Lg.reduce((a, x) => a + (x.nDec || 0), 0), nBest = Lg.reduce((a, x) => a + (x.nBest || 0), 0), nGood = Lg.reduce((a, x) => a + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length, nHint = Lg.reduce((a, x) => a + (x.nHint || 0), 0);
     const nFoul = Lg.reduce((a, x) => a + ((x.fouls || []).length), 0), sq0 = rvQual(nDec, nBest, nGood), sq = nFoul && sq0 === 'good' ? 'mid' : sq0, top1 = c.rank === 1 || c.finalRank === 1;
-    R((c.phase === 'final' ? `決勝は${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}。` : `卓内${c.rank}位、セットPP${c.pp}。`) + (nDec ? `最善は${nDec}回中${nBest}回${wins ? `、上がり${wins}回` : ''}でした。` : nHint ? `判断はすべてAIの読みを見て打ったので、採点はしていません。` : `上がりは${wins}回でした。`));
+    R((c.phase === 'final' ? `決勝は${c.finalists}人中${c.finalRank}位、決勝PP${c.finalPP}。` : `卓内${c.rank}位、セットPP${c.pp}。`) + (nDec ? `最善は${nDec}回中${nBest}回${nHint ? `（AIの読みを見た${nHint}回は採点外）` : ''}${wins ? `、上がり${wins}回` : ''}でした。` : nHint ? `判断はすべてAIの読みを見て打ったので、採点はしていません。` : `上がりは${wins}回でした。`));
     const allHl = []; F.forEach((f, i) => f && (f.hl || []).forEach(h => allHl.push(Object.assign({ game: Lg[i].game }, h))));
     const order = ['perfect', 'sutemi', 'divParen', 'run', 'fast', 'aete', 'one', 'div', 'defend', 'three'], top = allHl.sort((a, b) => order.indexOf(a.k) - order.indexOf(b.k))[0];
     const react = top1 ? (sq === 'poor' ? 'luckGood' : 'win') : (sq === 'good' ? 'goodLose' : sq === 'poor' ? 'losePoor' : 'lose');
@@ -5693,7 +5693,7 @@ function rvDialog(scope) {
     return out;
   }
   const f = S.lastFacts || rvGameFacts(), fo = f.fouls || [], q0 = rvQual(f.nDec, f.nBest, f.nGood), q = fo.length && q0 === 'good' ? 'mid' : q0;
-  R((f.won ? `上がりでPP0、第${f.round}巡で上がり切りました。` : `PP${f.pp}で${f.n}人中${f.rank}位。` + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられました。` : '')) + (f.nDec ? `最善は${f.nDec}回中${f.nBest}回。` : f.nHint ? 'AIの読みを見て打ったので採点はなしです。' : '') + (f.luck === 'resultUnlucky' ? '判断は最善、札運が悪かっただけです。' : ''));
+  R((f.won ? `上がりでPP0、第${f.round}巡で上がり切りました。` : `PP${f.pp}で${f.n}人中${f.rank}位。` + (f.winner ? `${f.winner}に第${f.winnerRound}巡で上がられました。` : '')) + (f.nDec ? `最善は${f.nDec}回中${f.nBest}回${f.nHint ? `（AIの読みを見た${f.nHint}回は採点外）` : ''}。` : f.nHint ? 'AIの読みを見て打ったので採点はなしです。' : '') + (f.luck === 'resultUnlucky' ? '判断は最善、札運が悪かっただけです。' : ''));
   const react = f.won ? (q === 'poor' ? 'luckGood' : 'win') : (q === 'good' ? 'goodLose' : q === 'poor' ? 'losePoor' : f.luck === 'resultUnlucky' ? 'luckBad' : 'lose');
   const h = (f.hl || [])[0];
   M(h ? (h.round ? `第${h.round}巡の` : '') + rvdHl(h.k, h.mine) : `${nmY}、` + NM(react));
