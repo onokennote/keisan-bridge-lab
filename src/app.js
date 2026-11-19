@@ -576,6 +576,7 @@ function masaAdvice(more) {
   if (r.ok) { const nx = [3, 4, 4.5].find(t => !g.ach['rating:' + t]); if (nx && r.r >= nx && r.n < 40) add(3, `推定実力は★${r.r.toFixed(1)}、もう★${nx}に届いとる！「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」は判断が40回たまったら判定やから、あと${40 - r.n}回、このまま打ち続けよ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); else if (nx && r.r < nx && r.r >= nx - 0.6) add(3, `推定実力★${r.r.toFixed(1)}、★${nx}のバッジ「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」まであと少しや！直近100手の最善率と損失で決まるから、AIの読みを見ずに自分で読み切る手を増やそ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); }
   // 大会
   if (nG >= 10 && !c.qualify) add(3, '練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。', { go: 'setup-tour', l: '大会へ' });
+  { const tn = suT().nPlayers, m = tour4N(tn); if (nG >= 10 && m) add(3, `ええこと教えたるわ。大会練習モードの参加人数、いま${tn}人やろ？${m}人にしてみ。なんでか分かるか？……${m}人やと卓がぜんぶ4人卓になるんや。相手が1人減るぶん卓内1位が取りやすうなって、「セット優勝」やPP0の「パーフェクトセット」が近づくで！ポーカーでも少人数のテーブルのほうが勝ちやすいやろ？`, { a: 'tour4', l: `${m}人の大会へ` }); }
   if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' }, [advB('qualify_strong', 0)]);
   if (CLOUD_ON && nG >= 3 && !rivalsOf().length) add(4, `${nm}、ライバルはまだおらんな？ランキングで実力が近い人をライバル視してみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！`, { go: 'ranking', l: 'ランキングで選ぶ' });
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
@@ -3317,6 +3318,7 @@ function suTourRefresh() {
   const c = Object.assign(suT(), readTourCfg()), sizes = KB.splitTables(c.nPlayers, 5), tb = $('#t-tables');
   if (tb) tb.innerHTML = `${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small>`;
   [['tn', c.nPlayers, 5, 40], ['tsets', c.sets, 1, 8], ['tgames', c.games, 1, 10], ['tfin', c.finalists, 2, 5]].forEach(([su, v, mn, mx]) => { const m = $(`[data-su="${su}"][data-v="-1"]`), p = $(`[data-su="${su}"][data-v="1"]`); if (m) m.disabled = v <= mn; if (p) p.disabled = v >= mx; });
+  { const tp = $('#t-tip'); if (tp && tp.dataset.n !== String(c.nPlayers)) { tp.dataset.n = c.nPlayers; tp.innerHTML = tour4TipHTML(c.nPlayers); } }
   renderEst(); renderRuleBox();
 }
 // 設定画面のタップ
@@ -3343,6 +3345,7 @@ function suTap(d) {
     case 'games': c.games = +v; break;
     case 'gstep': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
+    case 'tnset': c.nPlayers = Math.max(5, Math.min(40, +v)); toast(`${c.nPlayers}人・4人卓×${c.nPlayers / 4}にしました`); break;
     case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
     case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tfin': c.finalists = Math.max(2, Math.min(5, c.finalists + (+v))); break;
@@ -3388,6 +3391,15 @@ if (typeof document !== 'undefined') document.addEventListener('click', e => {
 }, true);
 const judgeAfter = () => (S.settings.judge || 'before') !== 'before';
 const foulN = () => S.settings.judge === 'after2' ? 2 : 3;
+// マサの豆知識：5人卓があるときは「4人卓にそろえる人数」をすすめる（16人なら4人卓×4。卓内1位・パーフェクトセットが取りやすい）
+const tour4N = n => { if (!KB.splitTables(n, 5).some(x => x >= 5)) return 0; const m = 4 * Math.ceil(n / 4); return m <= 16 ? m : 0; };
+function tour4TipHTML(n) {
+  const m = tour4N(n); if (!m) return '';
+  const k = m / 4;
+  return `<details class="su-tip"><summary><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><span><b>ええこと教えたるわ。</b>参加人数を${n}人やなくて${m}人にしてみ。なんでか分かるか？<em>答えを見る ›</em></span></summary>
+  <p>${m}人やと、${k}卓ぜんぶが<b>4人卓</b>になるんや。相手が1人減るぶん、卓内1位の確率はざっと1/5から1/4に上がる。せやから「セット優勝」「全セット優勝」や、ぜんぶのゲームで上がるPP0の「パーフェクトセット」が狙いやすうなるんや！ポーカーでも、人数の少ないテーブルのほうが勝ちやすいやろ？そのかわり決勝の枠をあらそう人は増えるから、そこは油断したらあかんで。</p>
+  <button class="btn sm" data-su="tnset" data-v="${m}">${m}人にする</button></details>`;
+}
 function setupTourHTML() {
   const c = suT(), sizes = KB.splitTables(c.nPlayers, 5);
   const step = (su, id, val, min, max, label) => `<div class="su-row"><div class="su-rl"><b>${label}</b></div><div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric" aria-label="${esc(label)}"><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>`;
@@ -3399,6 +3411,7 @@ function setupTourHTML() {
 ${suPresetHTML('tour')}
 <section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
   <div class="su-step big"><button class="su-pm" data-su="tsets" data-v="-1" ${c.sets <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="t-sets" type="number" min="1" max="8" value="${c.sets}" inputmode="numeric" aria-label="予選のセット数"><small>セット</small></span><button class="su-pm" data-su="tsets" data-v="1" ${c.sets >= 8 ? 'disabled' : ''} aria-label="増やす">＋</button></div>
+  <div id="t-tip">${tour4TipHTML(c.nPlayers)}</div>
   <details class="est-box est-tg" id="t-est-wrap" ${S.estOpen ? 'open' : ''}><summary><b>決勝進出率の目安</b><span class="est-hint">押すと開く</span></summary><div id="t-est" aria-live="polite"></div></details></section>
 ${suStartHTML('start-tour', '大会を開始')}
 ${suCustomHTML('tour', size)}
@@ -6420,6 +6433,7 @@ function act(a, el) {
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
+    case 'tour4': { const c = suT(), m = tour4N(c.nPlayers); if (m) { c.nPlayers = m; store.set('cfgTour', Object.assign({}, store.get('cfgTour', DEF_T), { nPlayers: m })); } go('setup-tour'); break; }
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
