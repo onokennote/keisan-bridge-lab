@@ -123,8 +123,8 @@ const SFX = {
   rewind: t => { for (let k = 0; k < 14; k++) { const u = t + k * 0.065; tone(500 + k * 70, u, 0.06, { type: 'square', vol: 0.05, to: 900 + k * 110 }); } noise(t, 0.95, { f: 2600, q: 0.6, vol: 0.12 }); tone(220, t + 0.98, 0.12, { type: 'triangle', vol: 0.22, to: 110 }); },
   back: t => { tone(700, t, 0.06, { type: 'triangle', vol: 0.18 }); tone(470, t + 0.06, 0.1, { type: 'triangle', vol: 0.16 }); },
   // 麻雀牌（中国語の麻将牌のとき play・play3・deal・draw の代わり）：牌を卓に打つ「タン」
-  // 牌を卓に打つ「タン」：木の胴鳴り（700Hz前後で少し下がる）＋短い打撃音＋低い響き。複数枚はタン・タン・タンと間をあけて
-  mj_tan: (t, v) => { v = v || 1; noise(t, 0.035, { f: 1300, q: 1.8, vol: 0.5 * v, a: 0.001 }); tone(760, t, 0.11, { type: 'triangle', vol: 0.34 * v, to: 600, a: 0.002 }); tone(1520, t, 0.05, { type: 'sine', vol: 0.07 * v, a: 0.002 }); tone(125, t, 0.12, { type: 'sine', vol: 0.32 * v, to: 70, a: 0.002 }); },
+  // 牌を卓に打つ「タン」：木の胴鳴り（480Hzから少し下がる）＋短い打撃音＋低い響き。複数枚はタン・タン・タンと間をあけて
+  mj_tan: (t, v) => { v = v || 1; noise(t, 0.04, { f: 900, q: 1.4, vol: 0.7 * v, a: 0.001 }); noise(t, 0.02, { f: 2600, q: 2, vol: 0.25 * v, a: 0.001 }); tone(480, t, 0.13, { type: 'triangle', vol: 0.45 * v, to: 380, a: 0.002 }); tone(960, t, 0.05, { type: 'sine', vol: 0.08 * v, a: 0.002 }); tone(95, t, 0.16, { type: 'sine', vol: 0.55 * v, to: 55, a: 0.002 }); },
   mj_play: (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.mj_tan(t + k * 0.16); },
   mj_play3: t => { SFX.mj_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.5 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); },
   mj_draw: t => { noise(t, 0.1, { f: 1400, fto: 2200, q: 1.5, vol: 0.14, a: 0.03 }); SFX.mj_tan(t + 0.11, 0.55); },
