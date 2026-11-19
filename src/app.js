@@ -4035,7 +4035,7 @@ function fieldMiniHTML(g, flipped) {
   const h = boardHist(g); let live = h.fields.filter(f => !f.ret);
   if (S.showRound) live = live.slice(0, -1);
   if (!live.length) return h.reshuffled ? '<div class="fh-mini" title="切り直し後の場札"><span class="fh-rs">切直</span></div>' : '';
-  return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('、')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
+  return `<div class="fh-mini" aria-label="${h.reshuffled ? '切り直し後の' : 'これまでの'}場札 ${live.map(f => KB.vname(f.v)).join('・')}" title="${h.reshuffled ? '切り直し後の場札（それより前は山札に戻っています）' : 'これまでの場札'}">${h.reshuffled ? '<span class="fh-rs">切直</span>' : ''}${live.map((f, i) => `<i class="mc ${f.s === 1 || f.s === 2 ? 'red' : ''} ${flipped && i === live.length - 1 && S.settings.speed !== 'instant' ? 'fly' : ''}">${KB.vname(f.v)}</i>`).join('')}</div>`;
 }
 // 手を打ったあとに残る手札（引く手は今の手札＋裏向きの1枚）。解説の手の一覧で「残り○枚」の横に並べる
 function restCardsHTML(counts, m) {
@@ -4958,7 +4958,7 @@ function whyHTML(d) {
   if (best.m && mine.m && pb - pm > 0.05) diffs.push(`残る手札で次の場に出せる確率が ${pct(pb)}（あなたの手だと ${pct(pm)}）`);
   return `<div class="why">
     <p class="small" style="margin:0">手札 [${d.hand.map(KB.vname).join(' ')}]・場 ${d.t}・相手 ${esc(d.danger)}</p>
-    <p style="margin:0"><b>最善手の方が良い点：</b>${diffs.length ? esc(diffs.join('、')) : '数字の差は小さく、細かな有利の積み重ねです'}。${mine.win - best.win > 0.03 ? `<br><span class="small">（上がる確率だけなら、あなたの手が ${pct(mine.win - best.win)} 上。総合では最善手が上回ります）</span>` : ''}</p>
+    <p style="margin:0"><b>最善手の方が良い点：</b>${diffs.length ? diffs.map(x => `<span>${esc(x)}</span>`).join('、') : '<span>数字の差は小さく、細かな有利の積み重ねです</span>'}<span>。</span>${mine.win - best.win > 0.03 ? `<br><span class="small">（上がる確率だけなら、あなたの手が ${pct(mine.win - best.win)} 上。総合では最善手が上回ります）</span>` : ''}</p>
     <div class="why-grid">${row(best, 'AIの最善', 'best')}${row(mine, 'あなたの手', 'mine')}</div>${cands}</div>`;
 }
 // 判断の質と結果（運）を分けて判定する

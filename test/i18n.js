@@ -2,7 +2,7 @@
 const { chromium } = require('playwright'); const fs = require('fs'), path = require('path');
 const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.exitCode = 1; };
 const src = path.join(__dirname, '..', 'src');
-global.window = {}; eval(fs.readFileSync(path.join(src, 'i18n_lines.js'), 'utf8')); const LN = window.I18N_LINES; ok(Object.values(LN).every(v => v.length === 2 && v[0] && v[1]), `実況の型 ${Object.keys(LN).length}個に英語・中文がある`); ['i18n_names', 'i18n_dict', 'i18n_dict2', 'i18n_dict3', 'i18n_dict4', 'i18n_dict5', 'i18n_dict6', 'i18n_dict7', 'i18n_dict8', 'i18n_dict9', 'i18n_dict10', 'i18n_dict11', 'i18n_dict12', 'i18n_dict13', 'i18n_dict14', 'i18n_dict15', 'i18n_dict16', 'i18n_dict17'].forEach(f => eval(fs.readFileSync(path.join(src, f + '.js'), 'utf8')));
+global.window = {}; eval(fs.readFileSync(path.join(src, 'i18n_lines.js'), 'utf8')); const LN = window.I18N_LINES; ok(Object.values(LN).every(v => v.length === 2 && v[0] && v[1]), `実況の型 ${Object.keys(LN).length}個に英語・中文がある`); ['i18n_names', 'i18n_dict', 'i18n_dict2', 'i18n_dict3', 'i18n_dict4', 'i18n_dict5', 'i18n_dict6', 'i18n_dict7', 'i18n_dict8', 'i18n_dict9', 'i18n_dict10', 'i18n_dict11', 'i18n_dict12', 'i18n_dict13', 'i18n_dict14', 'i18n_dict15', 'i18n_dict16', 'i18n_dict17', 'i18n_dict18'].forEach(f => eval(fs.readFileSync(path.join(src, f + '.js'), 'utf8')));
 const R = window.I18N_ROWS;
 ok(R.every(r => r.length === 3 && r[1] && r[2]), `辞書の行はどれも「日本語・英語・中文」の3つ（${R.length}行・名前${window.I18N_NAMES.length}）`);
 const cnt = (s, re) => (s.match(re) || []).length, refs = s => { const m = s.match(/#([1-9])?/g) || []; return Math.max(m.length ? Math.max(...m.map(x => x.length > 1 ? +x[1] : 0)) : 0, cnt(s.replace(/#[1-9]/g, ''), /#/g)); };
