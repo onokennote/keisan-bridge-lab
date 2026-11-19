@@ -100,61 +100,93 @@
     t = t.replace(/[0-9]/g, d => DEVA[+d]);
     if (t !== v) n.nodeValue = t;
   }
-  // 中国語：札を麻雀牌で見せる（1〜9＝萬子・10＝花牌 春夏秋冬（マークごと）・11 白・12 發・13 中。隅に小さく数字）。kb.mj（はじめはON）
-  const mjOn = () => { try { return localStorage.getItem('kb.mj') !== '0'; } catch (e) { return true; } };
-  const MJN = '一二三四五六七八九', MJF = '東南西北', SU = '♠♥♦♣';
-  const mjVal = t => { t = (t || '').trim(); return { A: 1, J: 11, Q: 12, K: 13 }[t] || (/^\d+$/.test(t) ? +t : 0); };
-  function mjFace(v, s) {
-    if (v >= 1 && v <= 9) return `<span class="mjf"><b>${MJN[v - 1]}</b><i>萬</i></span>`;
-    if (v === 10) return `<span class="mjf hz fl"><b>${MJF[s] || '東'}</b></span>`;
-    if (v === 11) return '<span class="mjf hz bai"><b></b></span>';
-    if (v === 12) return '<span class="mjf hz fa"><b>發</b></span>';
-    return '<span class="mjf hz zh"><b>中</b></span>';
-  }
-  const mjActive = () => lang === 'zh' && mjOn();
+  // 言語ごとの札（デッキ）：中国語＝麻雀牌・英語＝数のことばカード・日本語＝花札・ヒンディー語＝ガンジファ。
+  // 端末ごと・言語ごとにオン／オフ（kb.deck.<lang>。中国語は前からの kb.mj）。はじめは日本語だけオフ（ノーマルのトランプ）
+  const SU = '♠♥♦♣', MJN = '一二三四五六七八九', MJF = '東南西北';
+  const EW = ['', 'ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'TEN', 'ELEVEN', 'TWELVE', 'THIRTEEN'];
+  const HM = ['', '松', '梅', '桜', '藤', '菖蒲', '牡丹', '萩', '芒', '菊', '紅葉', '柳', '桐', '鬼'];
+  // 花札の絵（月ごとの草花。光＝♠は赤い空、短冊＝♥は赤い短冊、タネ＝♦は青い短冊、カス＝♣は草花だけ）
+  const HP = {
+    1: '<path d="M20 50V30" stroke="#5b3a1e" stroke-width="3"/><ellipse cx="20" cy="22" rx="15" ry="6" fill="#1f5e2e"/><ellipse cx="12" cy="31" rx="10" ry="4.5" fill="#2c7a3d"/><ellipse cx="28" cy="34" rx="10" ry="4.5" fill="#2c7a3d"/>',
+    2: '<path d="M4 44Q16 30 22 18T36 6" stroke="#3a2516" stroke-width="2.5" fill="none"/>' + [[12, 34], [20, 22], [28, 12], [8, 40], [31, 22]].map(([x, y]) => `<g fill="#d0213a">${[0, 72, 144, 216, 288].map(a => `<circle cx="${x + 2.6 * Math.cos(a * Math.PI / 180)}" cy="${y + 2.6 * Math.sin(a * Math.PI / 180)}" r="2"/>`).join('')}<circle cx="${x}" cy="${y}" r="1" fill="#f5d77a"/></g>`).join(''),
+    3: [[10, 14], [22, 10], [32, 18], [16, 26], [28, 30], [8, 36], [22, 40]].map(([x, y]) => `<g fill="#f4a6bd">${[0, 72, 144, 216, 288].map(a => `<circle cx="${x + 2.8 * Math.cos(a * Math.PI / 180)}" cy="${y + 2.8 * Math.sin(a * Math.PI / 180)}" r="2.2"/>`).join('')}<circle cx="${x}" cy="${y}" r="1" fill="#d0213a"/></g>`).join(''),
+    4: '<path d="M2 6Q20 2 38 8" stroke="#3a2516" stroke-width="2.5" fill="none"/>' + [8, 16, 24, 32].map((x, k) => Array.from({ length: 6 }, (_, i) => `<circle cx="${x + (i % 2 ? 1.5 : -1.5)}" cy="${10 + i * 5 + k * 2}" r="${2.6 - i * 0.25}" fill="#7a4fb0"/>`).join('')).join(''),
+    5: '<path d="M10 50L14 20M20 50L20 14M30 50L26 22" stroke="#2c7a3d" stroke-width="2.5"/>' + [[14, 18], [20, 12], [26, 20]].map(([x, y]) => `<path d="M${x} ${y - 7}L${x + 5} ${y}L${x} ${y + 3}L${x - 5} ${y}Z" fill="#5b3fa8"/><circle cx="${x}" cy="${y}" r="1.4" fill="#f5d77a"/>`).join(''),
+    6: '<ellipse cx="11" cy="36" rx="8" ry="4" fill="#2c7a3d" transform="rotate(-30 11 36)"/><ellipse cx="29" cy="36" rx="8" ry="4" fill="#2c7a3d" transform="rotate(30 29 36)"/><circle cx="20" cy="24" r="11" fill="#c8213a"/><circle cx="20" cy="24" r="7" fill="#e0405a"/><circle cx="20" cy="24" r="3.5" fill="#f5d77a"/>',
+    7: '<path d="M4 46Q14 10 38 6M8 48Q22 24 36 22" stroke="#3a2516" stroke-width="1.6" fill="none"/>' + [[10, 30], [14, 20], [20, 13], [27, 9], [33, 7], [14, 40], [20, 32], [26, 26], [32, 23]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="2.2" fill="#c8213a"/>`).join(''),
+    8: '<path d="M0 50V32Q20 18 40 32V50Z" fill="#222"/><path d="M6 32Q8 22 10 30M16 26Q18 14 20 26M28 26Q30 16 32 30" stroke="#f3ecd8" stroke-width="1.2" fill="none"/>',
+    9: '<circle cx="20" cy="22" r="11" fill="#f2c230"/><circle cx="20" cy="22" r="11" fill="none" stroke="#c88a10" stroke-width="2" stroke-dasharray="3 2"/><circle cx="20" cy="22" r="4" fill="#c88a10"/><path d="M20 33V50M20 42L12 38M20 44L28 40" stroke="#2c7a3d" stroke-width="2"/>',
+    10: [[12, 16, 0], [27, 14, 20], [20, 30, -15], [9, 38, 10], [31, 36, -25]].map(([x, y, r]) => `<path transform="translate(${x} ${y}) rotate(${r})" d="M0 -7L2 -2L7 -3L3 1L5 6L0 3L-5 6L-3 1L-7 -3L-2 -2Z" fill="#d23a1e"/>`).join(''),
+    11: '<path d="M6 0Q4 20 8 46M14 0Q12 22 16 44M24 0Q22 20 25 42M32 0Q31 18 33 40" stroke="#4e8a3a" stroke-width="1.6" fill="none"/>' + [[10, 10], [20, 22], [30, 14], [12, 32], [28, 34]].map(([x, y]) => `<path d="M${x} ${y}l-3 6" stroke="#222" stroke-width="1.2"/>`).join(''),
+    12: '<ellipse cx="20" cy="38" rx="15" ry="9" fill="#2c7a3d"/><path d="M20 30V46" stroke="#1f5e2e" stroke-width="1.2"/>' + [[14, 12], [20, 8], [26, 12], [17, 18], [23, 18], [20, 24]].map(([x, y]) => `<circle cx="${x}" cy="${y}" r="3" fill="#8a5bc0"/>`).join(''),
+    13: '<path d="M10 14L6 2L15 10M30 14L34 2L25 10" fill="#f2c230" stroke="#222" stroke-width="1"/><circle cx="20" cy="26" r="15" fill="#c8213a" stroke="#222" stroke-width="1.5"/><circle cx="14" cy="23" r="3" fill="#fff"/><circle cx="26" cy="23" r="3" fill="#fff"/><circle cx="14" cy="23" r="1.4" fill="#222"/><circle cx="26" cy="23" r="1.4" fill="#222"/><path d="M12 33Q20 39 28 33" stroke="#222" stroke-width="1.6" fill="#fff"/><path d="M16 34l1 3M24 34l-1 3" stroke="#222"/>'
+  };
+  const hanaSvg = (v, s) => `<svg viewBox="0 0 40 50" preserveAspectRatio="xMidYMid meet">${s === 0 && v !== 13 ? '<rect x="0" y="0" width="40" height="18" fill="#d0402a"/>' + (v === 8 ? '<circle cx="20" cy="13" r="8" fill="#fff6d8"/>' : v === 1 ? '<circle cx="31" cy="9" r="6" fill="#ffd14a"/>' : '') : ''}${HP[v] || ''}${(s === 1 || s === 2) && v !== 13 ? `<rect x="15" y="14" width="10" height="26" rx="1" fill="${s === 1 ? '#c8213a' : '#2a4fa8'}" stroke="#222" stroke-width=".8"/>` : ''}</svg>`;
+  const DECKS = {
+    zh: { cls: 'mj', key: 'kb.mj', def: true, label: on => `🀄 麻将牌：${on ? '开' : '关'}`,
+      face(v, s, k) {
+        if (k === 'mc') return this.face(v, s).replace('<i>萬</i>', '') + (v >= 10 ? `<sub>${v}</sub>` : ''); // 捨て札は漢数字だけ
+        if (v >= 1 && v <= 9) return `<span class="mjf"><b>${MJN[v - 1]}</b><i>萬</i></span>`;
+        if (v === 10) return `<span class="mjf hz fl"><b>${MJF[s] || '東'}</b></span>`;
+        if (v === 11) return '<span class="mjf hz bai"><b></b></span>';
+        if (v === 12) return '<span class="mjf hz fa"><b>發</b></span>';
+        return '<span class="mjf hz zh"><b>中</b></span>';
+      }, val: v => v },
+    en: { cls: 'dk-en', key: 'kb.deck.en', def: true, label: on => `🔤 Number words: ${on ? 'ON' : 'OFF'}`,
+      face: (v, s, k) => k === 'mc' || k === 'fly' ? String(v) : `<span class="ewf"><b>${v}</b><i>${EW[v]}</i></span>`, val: null },
+    ja: { cls: 'dk-hana', key: 'kb.deck.ja', def: false, label: on => `🎴 花札：${on ? 'オン' : 'オフ'}`,
+      face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${HM[v][0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf">${hanaSvg(v, s)}<i>${HM[v]}${v === 13 ? '札' : ''}</i></span>`, val: v => v <= 12 ? `${v}月` : '鬼札・13' },
+    hi: { cls: 'dk-gj', key: 'kb.deck.hi', def: true, label: on => `🪷 गंजीफ़ा: ${on ? 'चालू' : 'बंद'}`,
+      face: (v, s, k) => `<span class="gjf s${s}">${v >= 11 ? '<svg class="gjc" viewBox="0 0 20 10"><path d="M2 9L1 2L6 6L10 0L14 6L19 2L18 9Z" fill="#f5d77a"/></svg>' : ''}<b>${v}</b></span>`, val: null }
+  };
+  const deckOn = l => { const d = DECKS[l || lang]; if (!d) return false; try { const x = localStorage.getItem(d.key); return x == null ? d.def : x !== '0'; } catch (e) { return d.def; } };
+  const deckActive = () => deckOn(lang) ? DECKS[lang] : null;
+  const mjActive = () => lang === 'zh' && deckOn('zh');
+  const deckVal = t => { t = (t || '').trim().replace(/[०-९]/g, d => '०१२३४५६७८९'.indexOf(d)); return { A: 1, J: 11, Q: 12, K: 13, 'इ': 1, 'गु': 11, 'बे': 12, 'बा': 13 }[t] || (/^\d+$/.test(t) ? +t : 0); };
   function mjEl(el) {
-    if (el.dataset.mj || el.closest('[data-noi18n]')) return;
+    const d = deckActive(); if (!d || el.dataset.mj || el.closest('[data-noi18n]')) return;
     if (el.matches('.card:not(.back)')) {
-      const ve = el.querySelector(':scope > .v'), v = ve && mjVal(ve.textContent); if (!v) return;
-      const se = el.querySelector(':scope > .s'), s = se ? SU.indexOf(se.textContent.trim()) : 0;
-      el.dataset.mj = '1'; el.classList.add('mj'); ve.innerHTML = mjFace(v, s);
+      const ve = el.querySelector(':scope > .v'), v = ve && deckVal(ve.textContent); if (!v) return;
+      const se = el.querySelector(':scope > .s'), s = se ? Math.max(0, SU.indexOf(se.textContent.trim())) : 0;
+      el.dataset.mj = '1'; el.classList.add(d.cls); ve.innerHTML = d.face(v, s, 'card');
       const cn = el.querySelector(':scope > .cn'); if (cn) cn.textContent = v; else el.insertAdjacentHTML('beforeend', `<span class="mjn">${v}</span>`);
     } else if (el.matches('.fieldcard')) {
-      const be = el.querySelector(':scope > .big'), v = be && mjVal(be.textContent); if (!v) return;
+      const be = el.querySelector(':scope > .big'), v = be && deckVal(be.textContent); if (!v) return;
       const va = el.querySelector(':scope > .val'), m = va && va.textContent.match(/[♠♥♦♣]/), s = m ? SU.indexOf(m[0]) : 0;
-      el.dataset.mj = '1'; el.classList.add('mj'); be.innerHTML = mjFace(v, s); if (va) va.textContent = v;
+      el.dataset.mj = '1'; el.classList.add(d.cls); be.innerHTML = d.face(v, s, 'field'); if (va && d.val) va.textContent = d.val(v);
     } else if (el.matches('.mc')) {
-      const v = mjVal(el.textContent); if (!v) return;
-      el.dataset.mj = '1'; el.classList.add('mj'); el.innerHTML = mjFace(v, +el.dataset.s || 0).replace('<i>萬</i>', '') + (v >= 10 ? `<sub>${v}</sub>` : ''); // 捨て札は漢数字だけ
+      const v = deckVal(el.textContent); if (!v) return;
+      el.dataset.mj = '1'; el.classList.add(d.cls); el.innerHTML = d.face(v, +el.dataset.s || 0, 'mc');
     }
   }
   const MJ_SEL = '.card:not(.back), .fieldcard, .mc';
-  // タイトルの式（J − 4 × A = 7）は札の文字を数字に
+  // タイトルの式（J − 4 × A = 7）は札の文字を数字に。中国語の麻雀牌は🃏→🀄・フッターの♠♥♦♣→東南西北
   function mjText(n) {
-    if (!mjActive() || !n.parentElement || n.parentElement.closest(NODEV)) return; const pe = n.parentElement, v = n.nodeValue; let t = v.replace(/🃏/g, '🀄');
+    if (!deckActive() || !n.parentElement || n.parentElement.closest(NODEV)) return; const pe = n.parentElement, v = n.nodeValue; let t = v;
     if (pe.closest('.title-expr')) t = t.replace(/\b([AJQK])\b/g, c => ({ A: 1, J: 11, Q: 12, K: 13 })[c]);
-    if (pe.closest('.hf-suits')) t = t.replace(/[♠♥♦♣]/g, c => MJF[SU.indexOf(c)]);
+    if (mjActive()) { t = t.replace(/🃏/g, '🀄'); if (pe.closest('.hf-suits')) t = t.replace(/[♠♥♦♣]/g, c => MJF[SU.indexOf(c)]); }
     if (t !== v) n.nodeValue = t;
   }
   // DOM：描き直しのたびに、新しく出た文字と属性を訳す
   const ATTR = ['placeholder', 'aria-label', 'title'];
   function walk(root) {
-    if (lang === 'ja' || !root) return;
-    if (root.nodeType === 3) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; hiNode(root); mjText(root); return; }
+    if (!root || (lang === 'ja' && !deckActive())) return; const tx = lang !== 'ja';
+    if (root.nodeType === 3) { if (tx) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; hiNode(root); } mjText(root); return; }
     if (root.nodeType !== 1 || root.closest && root.closest('script,style,[data-noi18n]')) return;
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     let n = root;
     do {
-      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } hiNode(n); mjText(n); }
-      else if (n.nodeType === 1) { if (mjActive() && n.matches && n.matches(MJ_SEL)) mjEl(n); } if (n.nodeType === 1) ATTR.forEach(a => { const v = n.getAttribute && n.getAttribute(a); if (v && JA.test(v)) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } });
+      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; if (tx) { const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } hiNode(n); } mjText(n); }
+      else if (n.nodeType === 1) { if (n.matches && n.matches(MJ_SEL)) mjEl(n); } if (tx && n.nodeType === 1) ATTR.forEach(a => { const v = n.getAttribute && n.getAttribute(a); if (v && JA.test(v)) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } });
     } while ((n = w.nextNode()));
   }
   let obs = null;
   function start() {
-    if (lang === 'ja' || obs || typeof MutationObserver === 'undefined' || !document.body) return;
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi' : 'en';
-    if (mjActive()) document.documentElement.classList.add('mj');
+    if ((lang === 'ja' && !deckActive()) || obs || typeof MutationObserver === 'undefined' || !document.body) return;
+    if (lang !== 'ja') document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi' : 'en';
+    const dk = deckActive(); if (dk) document.documentElement.classList.add(dk.cls);
     walk(document.body);
+    if (lang === 'ja') { obs = new MutationObserver(ms => { for (const m of ms) if (m.type === 'childList') m.addedNodes.forEach(walk); else if (m.type === 'characterData') walk(m.target); }); obs.observe(document.body, { childList: true, subtree: true, characterData: true }); return; } // 日本語は花札の置きかえだけ
     if (document.title) document.title = tr(document.title);
     obs = new MutationObserver(ms => { for (const m of ms) { if (m.type === 'childList') m.addedNodes.forEach(walk); else if (m.type === 'characterData') walk(m.target); else if (m.type === 'attributes') walk(m.target); } });
     obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ATTR });
@@ -168,7 +200,8 @@
   const on = () => true; // 2026-11-19 本番にも切り替えを出した
   // いまのプレイヤーの名前（文の中の名前を @ として引けるように）
   function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
-  function setMj(on) { try { localStorage.setItem('kb.mj', on ? '1' : '0'); } catch (e) {} location.reload(); }
-  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setMj, get mj() { return mjOn(); }, get mjOn() { return mjActive(); }, mjFace: v => mjFace(v, 0) };
+  function setDeck(on) { const d = DECKS[lang]; if (!d) return; try { localStorage.setItem(d.key, on ? '1' : '0'); } catch (e) {} location.reload(); }
+  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setDeck, setMj: setDeck, get mj() { return deckOn('zh'); }, get mjOn() { return mjActive(); },
+    get deckOn() { return deckOn(lang); }, get deck() { return deckActive(); }, deckLabel: () => DECKS[lang] ? DECKS[lang].label(deckOn(lang)) : '', deckFace: (v, s, k) => { const d = deckActive(); return d ? d.face(v, s || 0, k) : String(v); }, mjFace: v => DECKS.zh.face(v, 0) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })(typeof window !== 'undefined' ? window : globalThis);

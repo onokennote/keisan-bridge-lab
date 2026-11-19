@@ -3227,7 +3227,7 @@ const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所�
 // 言語の切り替え（日本語／English／中文）。できあがるまではテスト版だけ（I18N.on）
 function langSwHTML() {
   if (!window.I18N || !I18N.on()) return '';
-  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang === 'zh' ? `<button class="mj-sw ${I18N.mj ? 'on' : ''}" data-act="mj-set" data-noi18n>🀄 麻将牌：${I18N.mj ? '开' : '关'}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
+  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.deckLabel ? `<button class="mj-sw ${I18N.deckOn ? 'on' : ''}" data-act="mj-set" data-noi18n>${I18N.deckLabel()}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
 }
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
@@ -4790,8 +4790,8 @@ function flyCard(fromEl, toEl, html, delay, dur, force) {
   const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
   const el = document.createElement('div'); el.className = 'flycard'; el.innerHTML = html || '';
   if (!html) el.classList.add('back');
-  const mj = !!(window.I18N && I18N.mjOn); // 中国語の麻雀牌：牌は回さず、すべらせて卓に打つ
-  if (mj) { el.classList.add('mj'); const sp = el.querySelector('span'), v = sp && ({ A: 1, J: 11, Q: 12, K: 13 }[sp.textContent.trim()] || +sp.textContent); if (v) el.innerHTML = I18N.mjFace(v); }
+  const dk = window.I18N && I18N.deck, mj = !!(dk && dk.cls === 'mj'); // 言語ごとの札。中国語の麻雀牌は回さず、すべらせて卓に打つ
+  if (dk && html) { el.classList.add(dk.cls); const sp = el.querySelector('span'), v = sp && ({ A: 1, J: 11, Q: 12, K: 13 }[sp.textContent.trim()] || +sp.textContent); if (v) el.innerHTML = I18N.deckFace(v, 0, 'fly'); } else if (dk) el.classList.add(dk.cls);
   document.body.appendChild(el);
   const w = 34, h = 48;
   const x0 = a.left + a.width / 2 - w / 2, y0 = a.top + a.height / 2 - h / 2;
@@ -4842,9 +4842,9 @@ function dealFieldAnim(f) {
   const red = f.s === 1 || f.s === 2;
   const el = document.createElement('div'); el.className = 'dealfly';
   el.style.left = t.left + 'px'; el.style.top = t.top + 'px'; el.style.width = t.width + 'px'; el.style.height = t.height + 'px';
-  const mj = !!(window.I18N && I18N.mjOn); // 中国語の麻雀牌：牌を前へ倒すようにめくり、卓に打つ
-  if (mj) el.classList.add('mj');
-  el.innerHTML = `<div class="df-inner"><div class="df-face df-back"></div><div class="df-face df-front ${red ? 'red' : ''}"><span class="big">${mj ? I18N.mjFace(f.v) : KB.vname(f.v)}</span><span class="val">${mj ? f.v : `${KB.SUITS[f.s]} ${f.v}`}</span></div></div>`;
+  const dk = window.I18N && I18N.deck, mj = !!(dk && dk.cls === 'mj'); // 言語ごとの札。中国語の麻雀牌は前へ倒すようにめくり、卓に打つ
+  if (dk) el.classList.add(dk.cls);
+  el.innerHTML = `<div class="df-inner"><div class="df-face df-back"></div><div class="df-face df-front ${red ? 'red' : ''}"><span class="big">${dk ? I18N.deckFace(f.v, f.s, 'field') : KB.vname(f.v)}</span><span class="val">${dk && dk.val ? dk.val(f.v) : `${KB.SUITS[f.s]} ${f.v}`}</span></div></div>`;
   document.body.appendChild(el);
   top.style.visibility = 'hidden';
   const dx0 = d.left + d.width / 2 - (t.left + t.width / 2), dy0 = d.top + d.height / 2 - (t.top + t.height / 2);
@@ -6582,7 +6582,7 @@ function act(a, el) {
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
     case 'lang-set': if (window.I18N) I18N.set(el.dataset.l); break;
-    case 'mj-set': if (window.I18N) I18N.setMj(!I18N.mj); break;
+    case 'mj-set': if (window.I18N) I18N.setDeck(!I18N.deckOn); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;

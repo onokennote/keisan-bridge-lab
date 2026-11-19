@@ -132,11 +132,21 @@ const SFX = {
   // 牌をめくる：コトッ（低めの木の音）
   mj_flip: t => { SFX.mj_tan(t, 0.6); }
 };
-const MJ_SFX = { play: 'mj_play', play3: 'mj_play3', draw: 'mj_draw', deal: 'mj_deal' };
+// 英語の数のことばカード：チョークで書く「カッ」／花札：場に打ちつける「ピシッ」／ガンジファ：タブラのような「トン」
+SFX.en_chalk = (t, v) => { v = v || 1; noise(t, 0.03, { ft: 'highpass', f: 2600, vol: 0.5 * v, a: 0.001 }); noise(t + 0.01, 0.07, { f: 4500, q: 3, vol: 0.18 * v, a: 0.005 }); tone(1200, t, 0.025, { type: 'triangle', vol: 0.08 * v, to: 900 }); };
+SFX.en_play = (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.en_chalk(t + k * 0.12); };
+SFX.en_play3 = t => { SFX.en_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.42 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); };
+SFX.hana_slap = (t, v) => { v = v || 1; noise(t, 0.025, { f: 2400, q: 1, vol: 0.8 * v, a: 0.0005 }); noise(t, 0.05, { ft: 'lowpass', f: 320, vol: 0.9 * v, a: 0.001 }); tone(820, t, 0.03, { type: 'triangle', vol: 0.12 * v, to: 520 }); };
+SFX.hana_play = (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.hana_slap(t + k * 0.14); };
+SFX.hana_play3 = t => { SFX.hana_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.48 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); };
+SFX.gj_tun = (t, v) => { v = v || 1; tone(210, t, 0.22, { type: 'sine', vol: 0.5 * v, to: 150, a: 0.002 }); tone(420, t, 0.08, { type: 'sine', vol: 0.12 * v, to: 300, a: 0.002 }); noise(t, 0.03, { ft: 'lowpass', f: 900, vol: 0.4 * v, a: 0.001 }); };
+SFX.gj_play = (t, n) => { for (let k = 0; k < (n || 1); k++) SFX.gj_tun(t + k * 0.15); };
+SFX.gj_play3 = t => { SFX.gj_play(t, 3); [660, 880, 1320].forEach((f, i) => tone(f, t + 0.5 + i * 0.07, 0.25, { type: 'triangle', vol: 0.12 })); };
+const DECK_SFX = { mj: { play: 'mj_play', play3: 'mj_play3', draw: 'mj_draw', deal: 'mj_deal' }, 'dk-en': { play: 'en_play', play3: 'en_play3' }, 'dk-hana': { play: 'hana_play', play3: 'hana_play3' }, 'dk-gj': { play: 'gj_play', play3: 'gj_play3' } };
 KB.sfx = function (name, arg) {
   try {
     const c = ac(); if (!c || !SFX[name]) return;
-    if (MJ_SFX[name] && G.I18N && G.I18N.mjOn) name = MJ_SFX[name];
+    const dk = G.I18N && G.I18N.deck; if (dk) { const m = (DECK_SFX[dk.cls] || {})[name]; if (m) name = m; }
     SFX[name](c.currentTime + 0.01, arg); return true;
   } catch (e) { return e.message; }
 };
