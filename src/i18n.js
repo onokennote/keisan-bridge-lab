@@ -98,9 +98,12 @@
     if (!(deckActive() && deckActive().cls === 'dk-gj') && n.parentElement.closest('.card, .fieldcard, .mc, .flycard, .df-front, .tut-hand')) return; // ガンジファをオフ（ノーマル）にしたら、札はふつうのトランプ（A・J・Q・K と算用数字）
     let v = n.nodeValue, t = v;
     if (isFace(n.parentElement)) t = t.replace(/^\s*(A|J|Q|K)\s*$/, (m, c) => m.replace(c, FACE[c]));
-    t = t.replace(/[0-9]/g, d => DEVA[+d]);
+    const gj = deckActive() && deckActive().cls === 'dk-gj';
+    // ガンジファをオフ（ノーマル）にしたら、式（10 ÷ 10 + A = 2 など）の数字も算用数字のまま。式の外の数字だけデーヴァナーガリーに
+    t = gj ? t.replace(/[0-9]/g, d => DEVA[+d]) : t.split(EXPR_HI).map((x, i) => i % 2 ? x : x.replace(/[0-9]/g, d => DEVA[+d])).join('');
     if (t !== v) n.nodeValue = t;
   }
+  const EXPR_HI = /([(\dAJQK][\dAJQK\s+\-−×÷()=＝]*[+\-−×÷=＝][\dAJQK\s+\-−×÷()=＝]*[\dAJQK)])/;
   // 言語ごとの札（デッキ）：中国語＝麻雀牌・英語＝数のことばカード・日本語＝花札・ヒンディー語＝ガンジファ。
   // 端末ごと・言語ごとにオン／オフ（kb.deck.<lang>。中国語は前からの kb.mj）。はじめは日本語だけオフ（ノーマルのトランプ）
   const SU = '♠♥♦♣', MJN = '一二三四五六七八九', MJF = '東南西北';
