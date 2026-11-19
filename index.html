@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="85cfa69 2026-11-19 21:37"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="6fec93e72d42"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="fd8cf84 2026-11-19 22:28"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="b8e555fa039b"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=ZCOOL+QingKe+HuangYou&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2758,7 +2758,7 @@ html[lang="zh-CN"] body{font-family:var(--f-body)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='89535f6a46';
+window.KB_BUILD='3ac1d5bb39';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -6374,6 +6374,7 @@ window.I18N_NAMES = [
   ['ダイチ', 'Daichi', '大地'], ['ヒュードロ', 'Hyudoro', '呼噜噜'], ['ハナコ', 'Hanako', '花子'], ['ヤマダ課長', 'Manager Yamada', '山田科长'], ['ブーコ', 'Buko', '小猪布可'], ['テツ', 'Tetsu', '阿铁'],
   ['ポチ', 'Pochi', '小柴'], ['ミオ', 'Mio', '美绪'], ['ササ', 'Sasa', '笹笹'], ['ピヨ', 'Piyo', '叽叽'], ['ユキオ', 'Yukio', '雪男'], ['ピポ', 'Pipo', '皮波'], ['ヘイキチじいさん', 'Grandpa Heikichi', '平吉爷爷'],
   ['タマ', 'Tama', '小玉'], ['スイスイ', 'Suisui', '溜溜'], ['シャドー', 'Shadow', '影子'], ['ケロスケ', 'Kerosuke', '呱助'],
+  ['ユイ', 'Yui', '小唯'], ['ケンジ', 'Kenji', '健二'], ['ミサキ', 'Misaki', '美咲'], ['ゲンゾウ', 'Genzo', '源藏'],
   ['サンタ？？', 'Santa??', '圣诞老人？？'], ['パティシエ？？', 'Pâtissier??', '甜点师？？'],
   // 肩書き
   ['小学生', 'Kid', '小学生'], ['学生', 'Student', '学生'], ['大人', 'Adult', '大人'], ['シニア', 'Senior', '老人'],
@@ -7477,7 +7478,873 @@ AIの読みを見たので、このゲームは結果のバッジの対象外で
 損失pt＝最善手との総合評価の差（勝ち抜け率を#点満点とし、上がり率と期待PPを少し加味）。#pt以内は誤差として最善扱い。	Loss pt = difference in overall score from the best move (chance of advancing out of #, with a little weight on going out and expected PP). Within # pt counts as best (margin of error).	损失pt＝与最佳着法的综合评价差（晋级概率满分#分，稍加考虑出完概率和期望PP）。#pt以内视为误差，按最佳计。
 理由と候補	Reasons & options	理由与候选
 損失 #pt	Loss #pt	损失 #pt
+総合＝決勝進出率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）	Overall = chance of final (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (round #: within # pt)	综合＝进入决赛概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（第#巡在#pt以内）
+総合＝決勝進出率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）	Overall = chance of final (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (within # pt)	综合＝进入决赛概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（#pt以内）
+総合＝優勝率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）	Overall = chance of winning (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (round #: within # pt)	综合＝夺冠概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（第#巡在#pt以内）
+総合＝優勝率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）	Overall = chance of winning (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (within # pt)	综合＝夺冠概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（#pt以内）
+この卓	This table	本桌
+・#枚残し。上がれるのは場が§のときだけ（約#%）ですが、手札の合計は#まで軽くなりました。	· Keeping # card. You go out only if the field is § (about #%), but your hand total dropped to #.	· 留#张。只有场数为§时才能出完（约#%），但手牌合计降到了#。
 総合評価	overall score	综合评价
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（第3段：アドバイス・ミニゲームの導入・フッター・ルールの画面・チュートリアル）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+ほな、別の角度からもう一個いこか！	OK, here's another angle!	好，换个角度再来一个！
+まだあるで！	There's more!	还有呢！
+ほんならこれはどうや！	Then how about this!	那这个怎么样！
+よっしゃ、@のデータ見たで！	Alright, I've looked at @'s data!	好嘞，@的数据我看过了！
+@、まずは「はじめて」のセットで#セット打ってみよか！相手は★#〜#や。迷ったら「AIの読み」を開いて、最善手と見比べるんがいちばんの近道やで。	@, start with one set on "First time"! Opponents are ★#–#. If you're stuck, open "AI reading" and compare with the best move. That's the fastest way to improve!	@，先用「初次」打一盘吧！对手是★#～#。拿不准就打开「AI分析」和最佳着法比较，这是最快的捷径！
+@、もうほとんどやり尽くしとるやんけ！あとは推定実力を上げて、ランキングのてっぺんを狙うだけや！	@, you've done almost everything! Now just raise your estimated skill and go for the top of the rankings!	@，你几乎全都玩遍了！接下来就是提升推定实力，冲击排行榜第一！
+@、ライバルはまだおらんな？ランキングで実力が近い人をライバル視してみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！	@, no rivals yet? Mark someone with similar skill in the rankings! You'll see their moves on your home screen, and I'll show you how to close the gap. It's way more fun, just like a soccer derby!	@，还没有对手吗？在排行榜上把实力相近的人视为对手吧！主页会收到对方的动态，我还会教你怎么追上。有了竞争更带劲，足球也是德比战最燃！
+ルールがあやふやなら、博士とおれのチュートリアルや。#分で式の作り方と「あえて引く」のコツまで分かるで！	Not sure about the rules? Try the tutorial with Dr. Root and me. In # minutes you'll learn how to make formulas and when to draw on purpose!	规则还不太清楚的话，来听博士和我的教程。#分钟就能学会凑算式和「故意摸牌」的诀窍！
+達人の打ち方を見るのもええ練習や。「観戦」で★#がどこで引いて、どこで#枚出すか見てみ！サッカーでもうまい人の試合を見るのが上達の早道や。	Watching a master is great practice too. In "Watch", see when the ★# draws and when they play # cards! In soccer too, watching good players is the fastest way to improve.	看高手怎么打也是很好的练习。在「观战」里看看★#什么时候摸牌、什么时候出#张！足球也是，看高手比赛是进步的捷径。
+早見表を#行だけ作ってみ。「A・#・#」みたいな待ちの広い組み合わせが分かると、手札の残し方が変わるで！	Make just # row of the cheat sheet. Once you know wide-wait combos like "A·#·#", the way you keep cards changes!	先做#行速查表试试。知道了「A·#·#」这种听牌宽的组合，留牌的方式就会改变！
+早見表、いま#行完成や。完成した行は対局中に見返せるから、作れば作るほど本番で得するで！	Cheat sheet: # rows done. Finished rows can be checked during games, so the more you make, the more it helps!	速查表现在完成了#行。完成的行在对局中可以查看，做得越多实战越有利！
+式ハンターで式を集めると、図鑑も早撃ちのバッジも進むで。#分だけでもええ、リフティングみたいなもんや！	Collecting formulas in Formula Hunter advances both the collection and the quick-draw badges. Even # minutes helps, like juggling a ball!	在算式猎人收集算式，图鉴和快枪手徽章都会进步。哪怕#分钟也好，就像颠球一样！
+アウツチャレンジ、まだ手ぇつけてへんな？「次の場でいくつ上がれるか」を当てる練習や。ポーカーのアウツ計算と同じで、強い人はみんなこれが速いで！	Haven't tried Outs Challenge yet? It trains you to count how many next fields let you go out. Like counting outs in poker, strong players are all fast at this!	还没碰过听牌挑战吧？这是练习判断「下个场数有几种能出完」的。和扑克算听牌一样，高手都算得很快！
+バッジアタック（#分）でどれだけBPを稼げるか、いっぺん挑戦してみ！ランキングにも載るで！	See how much BP you can earn in Badge Attack (# min)! It goes on the rankings too!	挑战一下徽章冲刺（#分钟）能赚多少BP！还会上排行榜！
+練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。	You've played a lot of practice. Time to aim for the final in a tournament! In the qualifiers, choose moves by "chance of reaching the final".	练习打得不少了。该在比赛中冲击决赛了！预选赛的诀窍是按「进入决赛概率」选着法。
+大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！	Reach the final against a "Strong field" for the "Ticket of the strong". A perfect test!	把比赛对手设成「强手云集」并进入决赛，就能拿到「强者门票」。正好试试身手！
+いま「@」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！	"@" is open for entry now! Feel the thrill of playing real people in an online tournament!	现在「@」可以报名了！在在线比赛中感受和真人对局的紧张感吧！
+バッジアタックへ →	To Badge Attack →	去徽章冲刺 →
+ランキングで選ぶ →	Pick in the rankings →	去排行榜选 →
+成長記録へ →	To growth record →	去成长记录 →
+早見表は、#枚・#枚の札でどの場の数が作れるかの一覧や。行を選んで、札と記号で式を作ったら○が付く。まずは#行、ぜんぶ埋めてみよか！	The cheat sheet lists which field numbers you can make with # or # cards. Pick a row, make a formula with cards and symbols, and it gets a ○. Start by filling one whole row!	速查表是用#张、#张牌能凑出哪些场数的一览。选一行，用牌和符号凑出算式就会打○。先把#行全部填满吧！
+完成した行は、ゲーム中に「まだ見えていないカードを見る」の横のボタンから見られるで。サッカーの作戦ボードみたいなもんや、試合中に見られたら心強いやろ！	Finished rows can be viewed during games from the button next to "See unseen cards". Like a soccer tactics board, it's reassuring to have mid-match!	完成的行在对局中可以从「查看还没出现的牌」旁边的按钮查看。就像足球的战术板，比赛中能看到很安心吧！
+早見表を作る	Make the cheat sheet	制作速查表
+早見表を完成させる	Finish the cheat sheet	完成速查表
+狩りの時間や！#枚で場の数を作ったら捕獲や。図鑑にまだない式ほど獲物やで！作れんときは「見送る」でええ！	Hunting time! Make the field number with # cards to capture it. New formulas for the collection are the best prey! If you can't make it, just "Skip"!	狩猎时间到！用#张牌凑出场上数字就能捕获。图鉴里没有的算式才是好猎物！凑不出来就「跳过」！
+次の番で上がれる札、いちばん多くなる出し方はどれや？#問連続で当てたらクリア！#問でも外したら最初からやで！	Which play leaves the most cards that let you go out next turn? Get # in a row right to clear! Miss even # and you start over!	怎么出才能让下一轮能出完的牌最多？连续答对#题就通关！错#题就从头开始！
+観戦をやめる	Stop watching	停止观战
+達人の観戦	Watching a master	观看高手对局
+手元は★#「@」@。#人の打ち方の違いに注目	At the bottom: ★# "@" @. Watch how the # players differ	手边是★#「@」@。注意#个人打法的不同
+🦉 博士「確率は裏切りません。ただし、ときどき運が裏切ります。」	🦉 Dr. Root: "Probability never betrays you. Luck sometimes does."	🦉 博士「概率不会背叛你。只是运气偶尔会。」
+🧢 マサ「♠も♥も♦も♣も、数字は数字や！」	🧢 Masa: "♠, ♥, ♦ or ♣, a number's a number!"	🧢 阿正「♠也好♥也好♦也好♣也好，数字就是数字！」
+🦉 博士「最善手を選んでも負けることはあります。それが計算ブリッジの奥深さです。」	🦉 Dr. Root: "You can lose even with the best moves. That is the depth of Keisan Bridge."	🦉 博士「即使选了最佳着法也可能输。这正是算式桥牌的深奥之处。」
+🧢 マサ「サッカーもポーカーも計算ブリッジも、最後は場数や！」	🧢 Masa: "Soccer, poker, Keisan Bridge: in the end it's all about experience!"	🧢 阿正「足球也好扑克也好算式桥牌也好，最后靠的都是经验！」
+🧢 マサ「おのけん、また夜ふかしして研究所いじっとるで…」	🧢 Masa: "onoken's up late tinkering with the lab again…"	🧢 阿正「onoken又熬夜在折腾研究所了…」
+🦉 博士「このアプリは、悔しさから生まれました。」	🦉 Dr. Root: "This app was born from frustration."	🦉 博士「这个应用诞生于不甘心。」
+🦉 博士「数字は道しるべ。歩くのは、あなたです。」	🦉 Dr. Root: "Numbers are signposts. You are the one who walks."	🦉 博士「数字是路标，走路的是你。」
+🧢 マサ「打倒OZ家！合言葉はこれや！」	🧢 Masa: "Beat the OZ family! That's our motto!"	🧢 阿正「打倒OZ家！这就是我们的口号！」
+🧢 マサ「打倒OZ家！研究所、全員で挑むで！」	🧢 Masa: "Beat the OZ family! The whole lab's going for it!"	🧢 阿正「打倒OZ家！研究所全员出击！」
+計算ブリッジのルール：トランプ#枚（A=#,J=#,Q=#,K=#）。各自#枚。毎巡、山札から#枚めくって「場の数」にし、手番順に、手札#〜#枚を四則演算（かっこ自由・割り算は割り切れるときのみ）で場の数にして出す。作れなければ山札から#枚引く（作れても、あえて出さずに引くのはOK）。誰かの手札が#枚になった瞬間にゲーム終了、他の人は残り手札の合計がPP（ペナルティ）。#ゲームで#セット、セットのPP合計が少ない順に順位。	Keisan Bridge rules: a #-card deck (A=#, J=#, Q=#, K=#). Each player gets # cards. Each round, flip # card from the deck as the "field number". In turn order, play #–# cards that make the field number with + − × ÷ (brackets allowed; division only when exact). If you can't, draw # card (you may also draw on purpose). The game ends the moment someone's hand reaches # cards; everyone else scores their remaining cards as PP (penalty). # games make # set; lower set PP ranks higher.	算式桥牌规则：一副#张扑克（A=#，J=#，Q=#，K=#）。每人#张。每一巡从牌堆翻开#张作为「场上数字」，按顺序用#～#张手牌通过四则运算（括号自由，除法只能整除）凑出场上数字出牌。凑不出就从牌堆摸#张（能凑出也可以故意摸牌）。有人手牌变成#张的瞬间游戏结束，其他人剩余手牌合计为PP（罚分）。#局为#盘，按本盘PP合计从少到多排名。
+ジョーカーなし#枚。山札が尽きたら捨て札を切り直して使います。	# cards, no jokers. When the deck runs out, the discards are reshuffled.	不含王共#张。牌堆用完就把弃牌重新洗入。
+手番は時計回り。#ゲーム目の親（最初の手番・場札をめくる人）は抽選、#ゲーム目からは前のゲームでPPが一番多かった人が親です（同点は抽選）。	Turns go clockwise. In game #, the dealer (who plays first and flips the field card) is drawn by lot; from game # on, the player with the most PP in the previous game deals (ties by lot).	出牌顺时针。第#局的庄家（第一个出牌、翻场牌的人）抽签决定，第#局起由上一局PP最多的人当庄家（同分抽签）。
+セット内でPP合計が同じ人は、上の順位を分け合います（得点も同じ）。	Players tied on set PP share the higher place (and the same points).	本盘PP合计相同的人共享较高名次（得分也相同）。
+大会の総合順位は「得点 → 累計PP の少ない順」。それでも同じで決勝ラインをまたぐときはジャンケン（またはサドンデス#ゲーム）。	Tournament standings: points first, then lowest total PP. If still tied across the final line: rock-paper-scissors (or a #-game sudden death).	比赛总排名按「得分 → 累计PP少」排序。仍然相同且跨决赛线时猜拳（或#局突然死亡赛）。
+決勝はその#セットのPPだけで順位を決め、同点はジャンケン／サドンデスで決めます。	The final is ranked only by that # set's PP; ties go to rock-paper-scissors / sudden death.	决赛只按那#盘的PP排名，同分用猜拳／突然死亡赛决定。
+他の卓はあなたのゲームと同時に#ゲームずつ進みます（達人も速さ優先の簡易思考で打ちます）。	Other tables advance # game at a time alongside yours (masters there use a faster, simplified search).	其他桌和你的对局同步每次进行#局（高手也用速度优先的简化思考）。
+名前つきの待ち（このアプリでの呼び名）	Named waits (names used in this app)	有名字的听牌（本应用中的叫法）
+ミラクルセット：A・#・#。#枚で出し切れる場が#〜K（A以外）の#通りある、#枚で唯一の#面待ち。	Miracle set: A·#·#. It goes out on # fields, #–K (all but A): the only #-card combo with a #-way wait.	奇迹组合：A·#·#。#张能出完的场数从#～K（A以外）共#种，是#张中唯一的#面听牌。
+ベストペア：#・#。#・#・#・Qの#通りで出し切れる、#枚で唯一の#面待ち。	Best pair: #·#. It goes out on #, #, # or Q (# ways): the only #-card combo with a #-way wait.	最佳对子：#·#。在#、#、#、Q共#种场数能出完，是#张中唯一的#面听牌。
+多面待ち：#枚で#面以上の待ち（A・#・#、A・#・# の#面など）。	Multi-way wait: a #-card wait on # or more fields (e.g. A·#·# and A·#·# with # ways).	多面听牌：#张能听#面以上（A·#·#、A·#·#的#面等）。
+AIの読みのしくみ	How the AI reading works	AI分析的原理
+候補手ごとに、見えていないカードから相手の手札と山札を何千通りも割り振り、最後まで打ち切ってみて結果を集計します（モンテカルロ法）。	For each candidate move, the unseen cards are dealt to opponents' hands and the deck thousands of ways, each game is played to the end, and the results are totaled (Monte Carlo method).	对每个候选着法，把看不见的牌以数千种方式分配给对手手牌和牌堆，打到最后再统计结果（蒙特卡洛方法）。
+相手が今の場で「引いた」なら、その数を作れない手札だったと推理して割り振ります。	If an opponent "drew" on the current field, the AI infers their hand couldn't make that number and deals accordingly.	如果对手在当前场数「摸牌」了，就推理他的手牌凑不出这个数字再进行分配。
+相手は表示中の強さ・性格どおりに打つと仮定します。非表示なら「中級の平均的な打ち手」と仮定します。	Opponents are assumed to play by their shown strength and style. If hidden, they're assumed to be "average intermediate players".	假设对手按显示的强度和性格出牌。不显示时假设是「中级的普通玩家」。
+比べる物差しは状況で変わります：練習＝セット期待点、予選＝決勝進出率（他卓の進み具合と残りセットも推定）、決勝＝優勝率。	The yardstick depends on the situation: practice = expected set points, qualifiers = chance of reaching the final (also estimating other tables and remaining sets), final = chance of winning.	比较的标准随情况变化：练习＝本盘期望分，预选赛＝进入决赛概率（也估计其他桌进度和剩余盘数），决赛＝夺冠概率。
+出し切った人が「上がり」や！サッカーで言うたら先制ゴールやな！	Whoever empties their hand "goes out"! In soccer terms, that's the opening goal!	出完的人就是「出完」！用足球来说就是首开纪录！
+毎巡、山札から#枚めくった札が「場」になります。この数を、手札で作るのです。A＝#、J＝#、Q＝#、K＝# として数えます。	Each round, the card flipped from the deck is the "field". You make this number with your hand. A = #, J = #, Q = #, K = #.	每一巡从牌堆翻开的#张牌就是「场」。用手牌凑出这个数字。A＝#，J＝#，Q＝#，K＝#。
+場がJなら#を作る、ってことやな！	So if the field is J, you make #!	也就是说场上是J就要凑#！
+手札の#〜#枚を、＋ − × ÷ とかっこで組み合わせて、場の数を作れば出せます。やってみましょう。場は#。手札から札を選んでください。	Combine #–# cards from your hand with + − × ÷ and brackets to make the field number, and you can play them. Let's try. The field is #. Pick cards from your hand.	用手牌中的#～#张配合 ＋ − × ÷ 和括号凑出场上数字就能出牌。来试试吧。场上是#。请从手牌中选牌。
+タップで選ぶんや！選んだら「出す」！	Tap to pick! Then hit "Play"!	点一下就能选！选好就点「出牌」！
+札を#〜#枚タップ	Tap #–# cards	点选#～#张牌
+#枚タップ	Tap # card	点选#张
+§ ＝ #　出せます！	§ = #　You can play it!	§ ＝ #　可以出！
+§ では # を作れません	§ can't make #	§ 凑不出 #
+§ ＝ #　ナイス！ ほかにも §、J − # × A など、作り方はいろいろあります。	§ = #　Nice! There are other ways too, like § or J − # × A.	§ ＝ #　漂亮！还有 §、J − # × A 等很多凑法。
+作れないときは、山札から#枚引きます。手札が増えるので、できれば出したいところ。では問題です。場はK（#）、手札は A・#・#。どうしますか？	If you can't make it, draw # card. Your hand grows, so you'd rather play if you can. Quiz time: the field is K (#) and your hand is A·#·#. What do you do?	凑不出来时从牌堆摸#张。手牌会增加，所以能出最好。问题来了：场上是K（#），手牌是A·#·#。怎么办？
+よう考えてや〜	Think carefully~	好好想想～
+そのとおり。A・#・# では、どう組み合わせても#は作れません。こういうときは引くしかありません。	Exactly. A·#·# can't make # no matter how you combine them. You have to draw.	没错。A·#·#怎么组合都凑不出#。这时候只能摸牌。
+実は、A・#・# では#は作れないのです。# ×（# ＋ A）でも#まで。こういうときは引きます。	Actually, A·#·# can't make #. Even # × (# + A) only reaches #. In this case, you draw.	其实A·#·#凑不出#。# ×（# ＋ A）也只到#。这时候要摸牌。
+だれかが上がると、そのゲームは終わり。残った人は、手札の数字の合計が「PP（ペナルティポイント）」、つまり失点になります。PPは少ないほど良い点です。問題。残りが K と # なら、PPはいくつ？	When someone goes out, the game ends. Everyone else scores the total of their cards as "PP (penalty points)": lost points. Lower PP is better. Quiz: with K and # left, what's your PP?	有人出完，这一局就结束。剩下的人手牌数字的合计就是「PP（罚分）」，也就是失分。PP越少越好。问题：剩下K和#的话，PP是多少？
+Kは#やで！	K is #!	K是#哦！
+正解です。# ＋ # で#。大きい札が残るほど、失点は大きくなります。	Correct. # + # = #. The bigger the cards left, the more you lose.	正确。# ＋ # ＝ #。剩下的牌越大，失分越多。
+K（#）＋# で#です。大きい札が残るほど、失点は大きくなります。	K (#) + # = #. The bigger the cards left, the more you lose.	K（#）＋#＝#。剩下的牌越大，失分越多。
+順番は「親」から時計回りに#人#回ずつ。全員が打ったら、次の場をめくります（これを「巡」と数えます）。親は、最初のゲームは抽選、#ゲーム目からは前のゲームでいちばんPPが多かった人。負けた人へのささやかな救済です。	Turns go clockwise from the "dealer", # turn each. When everyone has played, the next field is flipped (that's one "round"). The first game's dealer is drawn by lot; from game # on, it's whoever had the most PP last game. A small consolation for the loser.	从「庄家」开始顺时针，每人#次。所有人打完后翻开下一个场数（这叫一「巡」）。第一局庄家抽签，第#局起由上一局PP最多的人当。这是给输家的小小补偿。
+ほんで大事なんは、だれかが上がったら、その場で試合終了ってことや！自分の番が回ってくる前に上がられることもある。せやから順番はけっこう大事なんやで！	And the key thing: the moment someone goes out, the match is over! Someone may go out before your turn even comes. That's why turn order really matters!	而且关键是，有人出完比赛就当场结束！可能轮不到你就被出完了。所以顺序很重要！
+次の場へ	Next field	下一个场数
+だれかが上がった瞬間にゲーム終了	The game ends the moment someone goes out	有人出完的瞬间游戏结束
+ここでコツその#。出せる手が複数あるなら、大きい札から処分するのが基本です。場は#、手札は Q・#・#・#。どちらを出しますか？	Tip #: if you have several plays, the basic rule is to unload big cards first. The field is # and your hand is Q·#·#·#. Which do you play?	技巧#：能出的着法有好几种时，基本是先处理大牌。场上是#，手牌是Q·#·#·#。出哪个？
+ここが分かれ道や！どっちの札が手に残るかも考えてな！	This is the fork in the road! Think about which cards stay in your hand too!	这里是分歧点！也想想哪些牌会留在手里！
+お見事。Q − # なら手札の合計が#減り、上がられたときの失点もぐっと小さくなります。しかも残るのは #・#。小さい札は組み合わせやすく、次の場で出せる＝上がれることが多いのです。	Well done. Q − # cuts your hand total by #, so you lose much less if someone goes out. And you keep #·#. Small cards combine easily, so you can often play next field, and go out.	漂亮。Q − #能让手牌合计减少#，被出完时的失分也小很多。而且留下的是#·#。小牌容易组合，下个场数常常能出＝能出完。
+# + # でも出せますが、Q − # なら合計が#減ります。それに、残る札にも差が出ます。Q・# よりも #・# のような小さい札のほうが組み合わせやすく、上がりやすいことが多いのです。	# + # also works, but Q − # cuts your total by #. The cards you keep differ too: small cards like #·# combine more easily than Q·# and often let you go out.	# + #也能出，但Q − #能让合计减少#。留下的牌也有差别：比起Q·#，#·#这样的小牌更容易组合，常常更容易出完。
+コツその#。式の作り方は自由です。#枚出しは一気に減らせますが、小さい札まで使い切ると、次の場で困ることもあります。出す枚数より、何を残すかで選びましょう。大きい札は、割り算で小さな数にすると処分しやすくなります。	Tip #: formulas are free-form. A #-card play cuts a lot at once, but using up your small cards can leave you stuck next field. Choose by what you keep, not how many you play. Big cards are easier to unload when division turns them into small numbers.	技巧#：算式怎么凑都行。出#张能一口气减很多，但把小牌都用完，下个场数可能会为难。比起出几张，要按留下什么来选。大牌用除法变成小数字更容易处理。
+でかい札を割って逃がす、ここが計算ブリッジの気持ちええとこや！	Dividing big cards away: that's the most satisfying part of Keisan Bridge!	把大牌除掉送走，这就是算式桥牌最爽的地方！
+#枚出し：一気に減るが、残る札しだい	#-card play: big cut, but depends on what's left	出#张：一下子减很多，但要看留下什么
+割り算で大きい札を処分	Unload big cards with division	用除法处理大牌
+かっこや×÷も自由に	Brackets, × and ÷ are all fair game	括号和×÷都可以自由使用
+コツその#。手札が#〜#枚になったら「待ち」を意識します。たとえば A・#・# の#枚は、#個の数のうち#個で上がれる、すごい形です。	Tip #: when you're down to #–# cards, think about your "wait". For example, A·#·# (# cards) goes out on # of the # numbers. An amazing shape.	技巧#：手牌剩#～#张时要注意「听牌」。比如A·#·#这#张，在#个数字中有#个能出完，是很厉害的牌形。
+ポーカーで言うたら、どのカードが来てもええ最強の待ちや！	In poker terms, that's the ultimate draw: any card is fine!	用扑克来说，就是来什么牌都行的最强听牌！
+A・#・# ＝ #面待ち（#〜Kで上がれる）	A·#·# = #-way wait (out on #–K)	A·#·# ＝ #面听牌（#～K都能出完）
+#ゲームで#セット。セットのPPの合計で順位が決まります。大会では、予選を何セットか戦って、上位が決勝に進みます。	# games make # set. Rankings are decided by total PP for the set. In tournaments, you play several qualifier sets and the top players reach the final.	#局为#盘。按本盘PP合计决定名次。比赛中先打几盘预选赛，前几名进入决赛。
+#ゲームの負けは取り返せる、長丁場の勝負や！	You can make up for losing # game. It's a long contest!	输掉#局也能扳回来，这是持久战！
+#ゲーム	# game	#局
+#ゲームで#セット	# games = # set	#局为#盘
+大会：予選→決勝	Tournament: qualifiers → final	比赛：预选赛→决赛
+この研究所でできることを紹介しましょう。	Let me show you what you can do in this lab.	来介绍一下在这个研究所能做什么吧。
+ぜんぶ遊びながら強くなれるで！	You get stronger while having fun with all of it!	全都能边玩边变强！
+#セット練習	#-set practice	#盘练习
+：相手の強さを選んで打つ。手ごとにAIの読みと比べられます	: choose your opponents' strength and play. Compare each move with the AI reading	：选择对手强度来打，每一步都能和AI分析比较
+：予選から決勝まで。思わぬ強敵も…	: from qualifiers to the final. Watch out for a surprise opponent…	：从预选赛到决赛。还会有意想不到的强敌…
+：式ハンター（#分で式集め）・アウツチャレンジ（上がれる札を数える）・バッジアタック（#分の腕試し）	: Formula Hunter (collect formulas in # min) · Outs Challenge (count the cards that let you go out) · Badge Attack (#-minute test)	：算式猎人（#分钟收集算式）· 听牌挑战（数能出完的牌）· 徽章冲刺（#分钟试身手）
+：多面待ちの札を、自分の式で埋めていく	: fill in multi-way waits with your own formulas	：用自己的算式填满多面听牌
+バッジ・図鑑・アバター	Badges · collection · avatar	徽章 · 图鉴 · 头像
+：がんばりが形になって残ります	: your effort stays with you in visible form	：你的努力会以看得见的形式留下来
+：達人の打ち方を見る	: watch how a master plays	：看高手怎么打
+観戦	Watch	观战
+説明は以上です。とはいえ、こればかりは打ってみるのがいちばん。	That's all for the explanation. Still, the best way to learn is to play.	讲解就到这里。不过，这种事还是实际打一打最好。
+せや、いっぺんやってみんと分からんかもな！設定はワイらにまかせとき。まずは弱めの相手#人と、短めの#ゲームや。横で実況したるで！	Right, you might not get it until you try! Leave the settings to us: # easy opponents and a short # games. I'll commentate right beside you!	对，不试一次可能不明白！设置交给我们：先和#个较弱的对手打短短的#局。我在旁边给你实况！
+相手#人（★#〜#）	# opponents (★#–#)	对手#人（★#～#）
+博士とマサの実況つき	With commentary by Dr. Root & Masa	附博士和阿正的实况
+あとで	Later	以后再说
+打ってみる！	Let's play!	来打打看！
+ほな、楽しんでな！ 分からんことがあったら、ルールの画面からいつでも呼んでや！	Have fun! If anything's unclear, call us anytime from the Rules screen!	那就好好玩吧！有不懂的随时在规则页面叫我们！
+良い一局を。達人の打ち方は、練習カードの「観戦」で見られますよ。	Have a good game. You can watch a master play from "Watch" on the practice card.	祝你对局愉快。在练习卡片的「观战」里可以看高手怎么打。
+了解や！ ほな、気が向いたらいつでもキックオフしてな！	Got it! Kick off whenever you feel like it!	了解！想打的时候随时开球吧！
+ホームの「#セット練習」から、いつでも始められます。	You can start anytime from "#-set practice" on the home screen.	随时可以从主页的「#盘练习」开始。
+出す	Play	出牌
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（このアプリができるまで・数字で見る計算ブリッジ）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+悔しかったので、	Out of frustration,	因为不甘心，
+作りました。	I made this.	所以做了这个。
+計算ブリッジ作戦研究所（非公式ファン制作）	Keisan Bridge Strategy Lab (unofficial fan-made)	算式桥牌战术研究所（非官方粉丝自制）
+#年#月#日、第#回計算ブリッジ・日本一決定戦。息子と初めて出て、ふたりとも決勝に行けずに惨敗しました。正直、なめてました。ガチ勢はほんとにガチだった。	On #/#/#, at the #th Keisan Bridge Japan Championship, I entered for the first time with my son. Neither of us made the final; we were crushed. Honestly, I underestimated it. The serious players were seriously good.	#年#月#日，第#届算式桥牌日本第一决定战。我第一次和儿子参赛，两个人都没进决赛，惨败而归。说实话，是我太小看了。认真的玩家是真的认真。
+その中に、家族#人（うち子ども#人）で参加して、#人が#人枠の決勝に進み、優勝までかっさらうというガチ家族がいて、これは練習しないと勝てないなと。	Among them was one serious family: # members (# of them kids) entered, # made the #-player final, and they even took the title. I realized we'd never win without practice.	其中有一个认真的家庭：一家#口（其中#个孩子）参赛，#人进入#人名额的决赛，还拿下了冠军。我想，不练习是赢不了的。
+悔しかったので、特訓用のアプリを作りはじめました。AI（Claude）に「こういう特訓用アプリを作って」と言っては試し、また言っては試し。息子が飽きないように、遊びも入れて。	Frustrated, I started making a training app. I'd ask an AI (Claude) to "make a training app like this", try it, ask again, try again. I added fun parts too, so my son wouldn't get bored.	因为不甘心，我开始做特训用的应用。对AI（Claude）说「帮我做一个这样的特训应用」，试一试，再说，再试。为了不让儿子玩腻，还加了游戏元素。
+特訓のつもりが、思いのほか遊べるものになったので、みなさんにも遊んでもらうことにしました。	It was meant for training, but it turned out to be surprisingly fun, so I decided to share it with everyone.	本来是为了特训，没想到做得挺好玩，于是决定也让大家来玩。
+一緒に日本一を目指しましょう！	Let's aim for No. 1 in Japan together!	一起冲击日本第一吧！
+「計算ブリッジ」は上野晋太郎さん（すうがっくま）が考案したゲームです。このアプリは非公式のファン制作で、キャラクターはすべてオリジナルです。	"Keisan Bridge" is a game created by 上野晋太郎さん (すうがっくま). This app is an unofficial fan creation, and all characters are original.	「算式桥牌」是上野晋太郎さん（すうがっくま）设计的游戏。本应用是非官方粉丝自制，所有角色均为原创。
+要するに、負けず嫌いが止まらんかったっちゅうことや！	In short, the competitive streak just wouldn't stop!	说白了，就是不服输停不下来！
+くやしさは、いちばん強い学びの入り口です。	Frustration is the strongest doorway to learning.	不甘心，是最有力的学习入口。
+数字で見る	In numbers	用数字看
+勘を、数字にしてみました	We turned gut feeling into numbers	把直觉变成了数字
+「このまま進んだら何点失うか」の見込み	An estimate of "how many points you'll lose from here"	「照这样下去会失多少分」的估计
+たとえば期待PP # の手は、同じ場面を何度もくり返したら、平均で#点くらい失うという意味です。上がれた回は#点、上がられた回は残った札の合計。それを全部ならした数字です。「AIの読み」は、出せる手ごとにこの期待PPと上がれる確率を出して比べています。	For example, a move with expected PP # means that if the same spot were replayed many times, you'd lose about # points on average. Going out counts as #; getting caught counts your leftover cards. It's the average of all of those. "AI reading" computes this expected PP and the chance of going out for each playable move and compares them.	比如期望PP #的着法，意思是同样的场面重复多次，平均会失#分左右。出完算#分，被出完算剩余牌合计，把这些全部平均。「AI分析」对每个能出的着法计算期望PP和出完概率进行比较。
+AIの読みと同じ計算です。候補手ごとに、まだ見えていないカードを相手の手札と山札に何千通りも割り振り、最後まで打ち切ってみて失点を平均します（モンテカルロ法）。	The same calculation as the AI reading: for each candidate move, the unseen cards are dealt to opponents' hands and the deck thousands of ways, played to the end, and the losses averaged (Monte Carlo method).	和AI分析是同样的计算：对每个候选着法，把还看不见的牌以数千种方式分给对手手牌和牌堆，打到最后再平均失分（蒙特卡洛方法）。
+#ゲームの平均の失点（打ち方別）	Average loss per game (by play style)	每局平均失分（按打法）
+AIの最善手どおりに打つと、#ゲームの失点は平均#。★#相当の打ち方なら#。差は#ゲームでは#点でも、#ゲームの#セットなら約#点。順位がひっくり返る差です。	Playing the AI's best moves, you lose # per game on average; at ★# level, #. Only # points per game, but about # over a #-game set. Enough to flip the standings.	按AI最佳着法打，每局平均失分#；★#水平的打法是#。每局只差#分，但#局的一盘就差约#分，足以颠倒名次。
+最善手どおり	Best moves	按最佳着法
+★#相当	★# level	★#水平
+最善手どおりの#は、人の席をAIの最善手で打たせた大会#回のシミュレーションで測った値。★#・★#相当の値は、大会の設定画面の決勝進出率の目安と同じものです。	The best-move value of # was measured in # simulated tournaments with the human seat played by the AI's best moves. The ★# and ★# values are the same as the estimates on the tournament setup screen.	按最佳着法的#，是让AI最佳着法代打真人席位、模拟#场比赛测得的值。★#、★#水平的值与比赛设置画面的进入决赛概率估计相同。
+「セット期待点」＝#セットで取れる得点の見込み	"Expected set points" = the points you can expect from # set	「本盘期望分」＝一盘能拿到的得分估计
+「決勝進出率」＝予選を勝ち抜く確率	"Chance of reaching the final" = the probability of getting through the qualifiers	「进入决赛概率」＝闯过预选赛的概率
+参加者の平均は#%	Field average: #%	参赛者平均为#%
+親（#番手）の上がり率	Dealer's (#st to play) going-out rate	庄家（第#个出牌）的出完率
+★#どうしの#人卓を、AIだけで実際に#,#ゲーム打たせ、上がった人の順番を数えました。	We had AIs play #,# games at #-player tables of ★# players and counted the turn position of whoever went out.	让★#水平的AI在#人桌实际打了#,#局，统计出完者的出牌顺序。
+上がりまでの平均	Average time to go out	出完的平均回合
+上と同じ#,#ゲームで、上がった巡と、上がれなかった人の失点を平均しました。	From the same #,# games, we averaged the round when someone went out and the losses of those who didn't.	用上面同样的#,#局，平均了出完的巡数和没出完的人的失分。
+#枚の手札の、平均の待ち	Average wait with # cards	#张手牌的平均听牌
+の#面。弱い組は#面しかありません。残す札で、上がりやすさは何倍も変わります。	, with # ways. Weak combos have only #. What you keep changes your odds of going out several times over.	，#面。弱的组合只有#面。留下的牌不同，出完的难易度会差好几倍。
+面数ごとの組の数（全#通り）	Number of combos by wait count (# total)	按听牌面数统计的组合数（共#种）
+#枚の組#通りすべてについて、場#〜#のどれで#枚とも出し切れるかを調べ上げた数です（見込みではなく、計算で確定した値）。	For all #-card combos (#), we checked which fields #–# let you play all # cards (exact values, not estimates).	对#张牌的全部#种组合，逐一检查场数#～#中哪些能把#张全部出完（是计算确定的值，不是估计）。
+大会で優勝する確率（最善手どおりの場合）	Chance of winning a tournament (with best moves)	比赛夺冠概率（按最佳着法时）
+参加者の平均は優勝#%・決勝#%	Field average: win #% · final #%	参赛者平均：夺冠#% · 决赛#%
+決勝進出率と同じ#,#大会で、決勝（進出した#人で#セット。PPの合計が最少の人が優勝）まで続けた割合です。	From the same #,# tournaments as the final-chance estimate, played through the final (# finalists, # set, lowest total PP wins).	用和进入决赛概率相同的#,#场比赛，一直打到决赛（#名决赛选手打#盘，PP合计最少者夺冠）统计的比例。
+※ 平均や確率は、このアプリのAIどうしの対戦と、その結果から作ったモデルで計算した見込みです。実際の大会の結果ではありません。	* Averages and probabilities are estimates from games between this app's AIs and a model built from them. They are not real tournament results.	※ 平均值和概率是根据本应用AI之间的对战及其结果建立的模型计算出的估计，不是实际比赛的结果。
+勘で打っていたところに、数字の裏づけがあると、迷いが減ります。	When numbers back up what you used to play by feel, you hesitate less.	在凭直觉打的地方有了数字支撑，犹豫就会减少。
+数字は裏切らへん！でも#ゲームは運も大きいで。そこがおもろいんや！	Numbers don't lie! But a single game has a lot of luck. That's what makes it fun!	数字不会骗人！不过一局里运气也很重要。这才有意思！
+セットはPPの合計が少ない順に#位#点・#位#点・#位#点・#位#点。セット期待点は、同じセットを何度もくり返したときの得点の平均です。練習のAIの読みは、失点の少なさ（期待PP）だけでなく、この点数で手を比べます。大きくリードしていれば無理をしない手、離されていれば上がりを狙う手が上に来るのはそのためです。#人卓・#ゲーム（相手はまんべんなく）なら、最善手どおりで平均#点・#位#%、★#相当で#点です。	In a set, lower total PP ranks higher: #st # pts, #nd # pts, #rd # pts, #th # pts. Expected set points is the average score if the same set were replayed many times. In practice, the AI reading compares moves by these points, not just by low losses (expected PP). That's why, with a big lead, safe moves rise to the top, and when far behind, moves that aim to go out do. At a #-player table over # games (balanced opponents), best moves average # pts with #st place #% of the time; ★# level averages # pts.	一盘按PP合计从少到多排名：第#名#分、第#名#分、第#名#分、第#名#分。本盘期望分是同一盘重复多次时得分的平均。练习中的AI分析不只看失分少（期望PP），也用这个分数比较着法。所以大幅领先时稳妥的着法会排前面，被拉开时争取出完的着法会排前面。#人桌、#局（对手均衡）的话，按最佳着法平均#分、第#名#%，★#水平平均#分。
+相手#人の強さを「まんべんなく」の割合（★#〜★#を#：#：#：#：#）で選び、★ごとの#ゲームのPP（平均とばらつき。AIだけの大会#回で測定）から#ゲームの合計を作って順位を決めます。これを#,#セットくり返した平均です。	The # opponents' strengths are picked in the "balanced" mix (★# to ★# at #:#:#:#:#). From each ★'s per-game PP (mean and spread, measured in # AI-only tournaments), we build #-game totals and decide ranks. This is the average over #,# sets.	#个对手的强度按「均衡」比例（★#～★#为#：#：#：#：#）选择，用各★每#局的PP（平均和波动，在#场纯AI比赛中测得）合成#局的合计并决定名次。这是重复#,#盘的平均值。
+大会の予選では、AIの読みは「この手で決勝に進める確率」で手を比べます。今のセットの残りのゲーム、ほかの卓の進み具合、残りのセットの席替えまで何千回も試して、総合順位（得点→累計PP）が決勝ラインの内側に入った割合を出します。ラインより十分上なら安全な手、ぎりぎりや下なら、PPが少し増えても順位を上げる手が上に来ます。参加#人・予選#セット・上位#人が決勝なら、最善手どおりで#%、★#相当で#%です。	In tournament qualifiers, the AI reading compares moves by "the chance this move gets you to the final". It simulates the rest of the set, the other tables and the reseating of later sets thousands of times, and counts how often your overall rank (points → total PP) lands inside the final line. Well above the line, safe moves rise; near or below it, moves that climb places even at some PP cost rise. With # players, # qualifier sets and the top # in the final: #% with best moves, #% at ★# level.	在比赛预选赛中，AI分析按「这一手能进决赛的概率」比较着法。把本盘剩余对局、其他桌的进度、后面几盘的换座位都模拟数千次，计算总排名（得分→累计PP）进入决赛线以内的比例。远高于线时稳妥的着法排前面；接近或低于线时，即使PP稍增也能提升名次的着法排前面。#人参赛、预选#盘、前#名进决赛的话，按最佳着法#%，★#水平#%。
+参加者の強さを「まんべんなく」の割合で選び、セットごとに卓を作り直して予選#セットを行い、総合順位（得点→累計PP）を決めます。#,#大会のうち上位#人に入った割合です。自分の#ゲームのPPは打ち方別の平均（ばらつき#）を使います。	Participants' strengths are picked in the "balanced" mix, tables are redrawn every set, # qualifier sets are played, and the overall ranking (points → total PP) is decided. It's the share of #,# tournaments where you finished in the top #. Your own per-#-game PP uses the average for each play style (spread #).	参赛者强度按「均衡」比例选择，每盘重新分桌进行#盘预选赛，决定总排名（得分→累计PP）。这是#,#场比赛中进入前#名的比例。自己每#局的PP使用各打法的平均值（波动#）。
+だれかが上がったら、その場で終わり。だから順番が大事です。★#どうしの#人卓を#,#ゲーム打たせると、上がった人のうち親が#%、#番手は#%。前のゲームで負けた人が親になるのは、ささやかな救済です。	When someone goes out, the game is over right there. That's why turn order matters. In #,# games at #-player tables of ★# players, the dealer accounted for #% of outs, the #th seat #%. Making the previous game's loser the dealer is a small consolation.	有人出完就当场结束，所以顺序很重要。让★#水平的#人桌打#,#局，出完的人里庄家占#%，第#个出牌的占#%。让上一局的输家当庄家，算是小小的补偿。
+ゲームは平均で第#巡に終わります。#枚の手札を#〜#回の手番で出し切る計算。#回の手番でおよそ#枚ずつ減らしていく速さが目安です。上がれずにいる人の失点は、平均#点でした。	Games end in round # on average: # cards played out over #–# turns. Dropping about # cards per # turn is the pace to aim for. Players who didn't go out lost # points on average.	游戏平均在第#巡结束：#张手牌分#～#回合出完。每#回合减约#张是标准速度。没出完的人平均失分#。
+残り#枚になったとき、#種類の場のうち平均#種類で上がれます。最強は	With # cards left, you go out on # of the # field numbers on average. The strongest is	剩#张时，#种场数中平均有#种能出完。最强的是
+上と同じ大会で、決勝まで含めて最善手どおりに打ち続けた場合の見込みです。決勝はその#セットのPPだけで決まり、価値があるのは#位だけ。だから決勝のAIの読みは「優勝率」で手を比べ、#位を守るより#位を狙う手を選びます（上がれるのにあえて上がらない「捨て身」が最善になることも）。打ち方の差は、大会の結果にここまで響きます。	The estimate for playing best moves all the way through the final in the same tournament. The final is decided only by that # set's PP, and only #st place counts. So in the final the AI reading compares moves by "chance of winning" and goes for #st over protecting #nd (sometimes even holding back from going out, a "sacrifice", is best). This is how much play style affects tournament results.	在同样的比赛中，包括决赛都一直按最佳着法打时的估计。决赛只看那#盘的PP，有价值的只有第#名。所以决赛中AI分析按「夺冠概率」比较着法，比起守住第#名更会选择冲击第#名（有时能出完却故意不出的「舍身」反而最佳）。打法的差距会对比赛结果产生这么大的影响。
+静かなる天才	The Quiet Genius	沉静的天才
+無敗の演算機	The Undefeated Calculator	不败的演算机
+理詰めの鬼	The Logic Demon	逻辑之鬼
+箱の中の天才	The Genius in the Box	箱中的天才
+不沈の甲羅	The Unsinkable Shell	不沉之壳
+完璧なる守り	Perfect Defense	完美的防守
+北極の壁	The Arctic Wall	北极之墙
+福を呼ぶ守り神	The Lucky Guardian	招福的守护神
+百獣の計算王	King of Calculating Beasts	百兽的计算王
+音速の老婆	The Supersonic Granny	音速老奶奶
+一閃の剣豪	The Flash Swordmaster	一闪的剑豪
+九つの星を奪った男	The Man Who Stole Nine Stars	夺走九颗星的男人
+宇宙から来た数学者	The Mathematician from Space	来自宇宙的数学家
+笑う天才	The Laughing Genius	欢笑的天才
+千の顔を持つ	The Thousand Faces	千面之人
+月夜の怪盗	The Moonlight Thief	月夜怪盗
+計算番長	Calculation Boss	计算老大
+鉄の生徒会長	The Iron Class President	铁血学生会长
+双子の右	The Right Twin	双胞胎之右
+双子の左	The Left Twin	双胞胎之左
+元プロ棋士	Former Pro Shogi Player	前职业棋手
+氷の微笑	The Icy Smile	冰之微笑
+損得勘定のプロ	Pro of Profit and Loss	精打细算的专家
+山の暴れ天狗	The Wild Mountain Tengu	山中的暴躁天狗
+未来予報機	The Future Forecaster	未来预报机
+電脳ゲーマー	The Cyber Gamer	电脑玩家
+鉄壁の消防士	The Iron-Wall Firefighter	铁壁消防员
+写し身	The Mirror Image	复制之身
+🥋 日本一への道	🥋 Road to No. 1 in Japan	🥋 日本第一之路
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（場面の解説・ミニゲームのプレイ画面・バッジアタック）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+特別バッジ 皆勤賞	Special badge: Perfect Attendance	特别徽章 全勤奖
+特別バッジ 常勝の冠	Special badge: Crown of Victory	特别徽章 常胜之冠
+特別バッジ 精密の極み	Special badge: Peak Precision	特别徽章 精密之极
+特別バッジ 計算の匠	Special badge: Master Calculator	特别徽章 计算名匠
+特別バッジ 神速	Special badge: Godspeed	特别徽章 神速
+特別バッジ 確率の賢者	Special badge: Sage of Probability	特别徽章 概率贤者
+特別バッジ 時の覇者	Special badge: Ruler of Time	特别徽章 时间霸者
+特別バッジ 式の宝庫	Special badge: Treasury of Formulas	特别徽章 算式宝库
+特別バッジ 頂点の証	Special badge: Proof of the Summit	特别徽章 巅峰之证
+特別バッジ 宿命の好敵手	Special badge: Destined Rival	特别徽章 宿命劲敌
+特別バッジ 日輪の覇者	Special badge: Ruler of the Sun	特别徽章 日轮霸者
+第#・#巡の判断です。手札が#枚前後あり、選択肢がいちばん多い時期です。	Decisions in rounds #–#. You hold about # cards, so this is when you have the most options.	第#・#巡的判断。手牌约#张，是选择最多的时期。
+序盤は上がりよりも、重い札を処分しつつ「次の場で出せる形」を残すことが大切です。	Early on, rather than going out, it matters to unload heavy cards while keeping a shape that can play on the next field.	开局时比起出完，更重要的是一边处理重牌，一边留下「下个场数能出的形」。
+第#巡以降で、まだ手札が#枚以上ある場面です。	Round # or later, still holding # or more cards.	第#巡以后，手牌还有#张以上的场面。
+相手の残り枚数が減ってくる時期です。上がりを急ぐか、PPを抑えるかの切り替えを意識しましょう。	Opponents' hands are shrinking. Be mindful of switching between racing to go out and keeping PP down.	对手剩余张数在减少。注意在抢着出完和压低PP之间切换。
+自分の手札が#枚以下の終盤です。	The endgame, with # or fewer cards in your hand.	自己手牌#张以下的终盘。
+残す札の組み合わせで、次の番に上がれる場の数（アウツ）が決まります。#枚残しより#〜#枚残しの方が待ちが広いことも多いです。	The cards you keep decide how many fields let you go out next turn (outs). Keeping #–# cards often gives a wider wait than keeping #.	留下的牌的组合决定了下一轮能出完的场数（听牌）。留#～#张往往比留#张听得更宽。
+手札が#枚以上にふくらんだ場面です。	Your hand has swollen to # or more cards.	手牌膨胀到#张以上的场面。
+負けたときのPPが大きくなりやすいので、大きい札を含む#枚出しで一気に軽くする判断が重要です。	Your PP if you lose tends to be large, so it's key to lighten up fast with #-card plays that include big cards.	输的时候PP容易变大，所以用包含大牌的出#张一口气减轻很重要。
+相手の誰かが残り#枚以下の場面です。	Someone has # or fewer cards left.	有对手只剩#张以下的场面。
+上がられる可能性が高いので、手札の合計（PP）を減らす手が優先になりやすい局面です。	Someone's likely to go out, so moves that cut your hand total (PP) usually take priority.	被出完的可能性高，减少手牌合计（PP）的着法往往优先。
+相手の誰かが残り#枚の場面です。	Someone has # cards left.	有对手剩#张的场面。
+まだ少し余裕がありますが、次の巡で一気に上がられることもあります。PPの重い札は早めに。	There's still a little room, but they could go out next round. Unload heavy PP cards early.	还有一点余裕，但下一巡也可能一下子被出完。PP重的牌要尽早处理。
+場の数が#以下の場面です。	The field number is # or less.	场上数字在#以下的场面。
+小さい場でも、引き算や割り算を使えば大きい札を絡められます。K−Qのような差も狙い目です。	Even small fields can use big cards via subtraction or division. Differences like K−Q are a good target.	小场数也能用减法或除法带上大牌。K−Q这样的差值也值得瞄准。
+場の数が#〜#の場面です。	The field number is #–#.	场上数字在#～#的场面。
+選択肢がいちばん多くなりやすい場です。#枚か#枚か、残す札の形で比べましょう。	These fields tend to have the most options. Compare # vs # cards by the shape of what you keep.	这类场数选择往往最多。出#张还是#张，按留下的牌形来比较。
+場の数が#以上の場面です。	The field number is # or more.	场上数字在#以上的场面。
+大きい場は、大きい札をそのまま、または足し算でまとめて処分できる好機です。	Big fields are a chance to unload big cards directly or several at once by adding.	大场数是直接或用加法一起处理大牌的好机会。
+#枚で出せる組み合わせがある場面です（実際に#枚出すかどうかは問いません）。	Spots where a #-card combo was available (whether or not you actually played #).	有能出#张的组合的场面（不论实际是否出了#张）。
+#枚出しは枚数が一気に減りますが、残る札の柔軟さが落ちることもあります。いつも#枚が正解とは限りません。	A #-card play cuts your count fast, but can reduce the flexibility of what's left. # cards isn't always right.	出#张能一口气减少张数，但留下的牌的灵活性可能下降。并不总是出#张最好。
+AIの評価で、#枚出しが最善だった場面です。	Spots where the AI rated a #-card play as best.	AI评价中出#张最佳的场面。
+ここで#枚以下にしてしまうと、枚数とPPの両方で損をしやすくなります。	Playing # or fewer here tends to cost you in both card count and PP.	这里出#张以下的话，张数和PP两方面都容易吃亏。
+複数枚の出し方もあるのに、#枚だけ出すのが最善だった場面です。	Spots where playing just # card was best even though multi-card plays existed.	明明有出多张的方法，却只出#张最佳的场面。
+あえて札を残すことで、次の場に対応しやすい形や広い待ちを保てます。気づきにくい好手です。	Keeping cards on purpose preserves a shape that handles the next field or a wide wait. An easy-to-miss good move.	故意留牌能保持容易应对下个场数的形或宽听牌。是不容易发现的好手。
+最善手を選ぶと手札が#枚だけ残る場面です。	Spots where the best move leaves you with just # card.	选最佳着法后手牌只剩#张的场面。
+#枚残しは、その数字の場が来ないと上がれません。残す#枚の数字と、残り枚数をよく見て選びましょう。	With # card left, you only go out if that exact field comes. Check the number you keep and how many are left unseen.	留#张的话，不来那个数字的场就出不完。好好看留下的#张数字和剩余张数再选。
+あえて引くのが最善だった場面と、あなたが出さずに引いた場面です。	Spots where drawing on purpose was best, and spots where you drew instead of playing.	故意摸牌最佳的场面，以及你没出牌而摸牌的场面。
+出せるときでも、出すと形が崩れるなら引く方が良いことがあります。逆に、出せるのに引くのは損になりやすいので注意。	Even when you can play, drawing can be better if playing breaks your shape. But drawing when you could play often costs you, so be careful.	即使能出，如果出了会破坏牌形，摸牌可能更好。反过来，能出却摸牌往往吃亏，要注意。
+割り算やかっこを使う式が最善だった場面です。	Spots where a formula with division or brackets was best.	用除法或括号的算式最佳的场面。
+思いつきにくい式ほど、大きい札をまとめて処分できることがあります。かっこの使い方を覚えておきましょう。	The harder a formula is to spot, the more it may unload big cards together. Learn how to use brackets.	越难想到的算式，越可能一起处理掉大牌。记住括号的用法吧。
+まだ回数が少ないので、傾向は見えていません。	Not enough data yet to see a trend.	次数还少，看不出倾向。
+あなたの平均損失は#pt。全体の平均（#pt）より小さく、得意な場面と言えます。	Your average loss is # pt, smaller than your overall average (# pt). This is a strength.	你的平均损失是#pt，比整体平均（#pt）小，可以说是擅长的场面。
+あなたの平均損失は#pt。全体の平均（#pt）より大きいので、伸びしろのある場面です。	Your average loss is # pt, larger than your overall average (# pt). Room to grow here.	你的平均损失是#pt，比整体平均（#pt）大，是有提升空间的场面。
+あなたの平均損失は#pt。全体の平均（#pt）とほぼ同じです。	Your average loss is # pt, about the same as your overall average (# pt).	你的平均损失是#pt，和整体平均（#pt）差不多。
+損失#pt以上の判断は#回中#回でした。	# of # decisions had a loss of #+ pt.	损失#pt以上的判断在#次中有#次。
+#分間で、どれだけバッジを取れるか	How many badges can you earn in # minutes?	#分钟内能拿到多少徽章
+さあ、#分間のバッジアタックや！取れるだけ取ったろ！準備はええか？	Here we go, the #-minute Badge Attack! Grab all you can! Ready?	来吧，#分钟的徽章冲刺！能拿多少拿多少！准备好了吗？
+持ち時間は#分。速さと正確さ、両方が問われる勝負ですね。	You have # minutes. Speed and accuracy are both on trial.	时间是#分钟。速度和准确都要考验。
+← ホーム	← Home	← 主页
+アウツチャレンジ #/#	Outs Challenge #/#	听牌挑战 #/#
+難しさ ★	Difficulty ★	难度 ★
+難しさ ★★	Difficulty ★★	难度 ★★
+難しさ ★★★	Difficulty ★★★	难度 ★★★
+次の番で上がれる札（アウツ）がいちばん多くなるように、出す札を選んでください。	Choose the cards to play so that you have the most cards that let you go out next turn (outs).	请选择要出的牌，让下一轮能出完的牌（听牌）最多。
+アウツ＝残った札をちょうど出し切れる場の数字の、まだ見えていない札の枚数。	Outs = the number of unseen cards whose value lets you play out all your remaining cards exactly.	听牌＝能把剩余手牌正好出完的场上数字，在看不见的牌中的张数。
+これまでに出た札（#枚）	Cards played so far (#)	已经出过的牌（#张）
+前の場札	Previous field cards	之前的场牌
+見えていない札（山札と他の人の手札）は合計#枚。	# unseen cards in total (deck and other players' hands).	看不见的牌（牌堆和其他人的手牌）共#张。
+ヒント：残り枚数を見る	Hint: see remaining counts	提示：查看剩余张数
+あなたの手札	Your hand	你的手牌
+出す札を#〜#枚タップしてください	Tap #–# cards to play	请点选要出的#～#张牌
+これで決定	Confirm	就这样决定
+正解！	Correct!	正确！
+残念…	Too bad…	可惜…
+出し方の一覧（アウツの多い順）	All plays (most outs first)	出法一览（按听牌数排序）
+アウツがいちばん多い出し方です。	This play has the most outs.	这是听牌最多的出法。
+まだ見えていない札（残り枚数）	Unseen cards (remaining counts)	还没出现的牌（剩余张数）
+アウツ	Outs	听牌
+式ハンター 結果	Formula Hunter results	算式猎人 结果
+狩りを始める	Start hunting	开始狩猎
+もう一度狩りに出る	Hunt again	再去狩猎
+図鑑を見る	See collection	查看图鉴
+標的（場の数）	Target (field number)	目标（场上数字）
+標的	Target	目标
+新しい標的！	New target!	新目标！
+獲物の気配	Prey nearby	猎物气息
+獲物なし	No prey	没有猎物
+捕獲	Captured	捕获
+式を捕獲	Formula captured	捕获算式
+捕獲した式（図鑑に登録）	Captured formulas (added to collection)	捕获的算式（已登录图鉴）
+逃した獲物	Escaped prey	逃走的猎物
+見送る	Skip	跳过
+見送りも手	Skipping is a move too	跳过也是一种策略
+作った式	Your formula	凑出的算式
+手札の#枚	Your # cards	手牌的#张
+場	Field	场
+得点	Score	得分
+連続	Streak	连续
+最多	Most	最多
+制覇済み	Conquered	已制霸
+自己ベスト更新！	New personal best!	刷新个人最佳！
+匹	caught	只
+くわしいルール	Detailed rules	详细规则
+じっくり考えてOK	Take your time	慢慢想也没关系
+この手札に	In this hand:	这手牌中有
+(未登録の式)	(new formulas)	（未登录的算式）
+（未登録の式）	(new formulas)	（未登录的算式）
+数字を選ぶと、標的がずっとその数になります（「図鑑の場」バッジを狙うときに）。残りは、手札#枚で作れる未登録の式の数。	Pick a number to keep the target fixed to it (for the "Collection field" badges). The remaining count is the number of new formulas makeable with # cards.	选择数字后，目标会一直是这个数（瞄准「图鉴场数」徽章时用）。剩余数是用#张手牌能凑出的未登录算式数量。
+札を選ぶと、獲物（未登録の式）の筋があるか色でわかります。	As you pick cards, the color shows whether there's a path to prey (a new formula).	选牌时，颜色会显示是否有通往猎物（未登录算式）的路线。
+見送った標的や最後の標的で、手札から作れた未登録の式です。	New formulas you could have made from your hand on skipped targets or the last target.	在跳过的目标或最后的目标中，手牌能凑出的未登录算式。
+🎯 自動照準を使って始める	🎯 Start with auto-aim	🎯 使用自动瞄准开始
+🎯 自動照準 作動中　自動捕獲	🎯 Auto-aim active · auto-capturing	🎯 自动瞄准运行中　自动捕获
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（おうちの人メニュー・挑戦状・成長のおたより・遊ぶ時間・大会の画面・デイリー・通知・Googleでまもる）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+🌐 オンライン大会	🌐 Online tournament	🌐 在线比赛
+👤 主催 @	👤 Host: @	👤 主办 @
+👤 主催 #	👤 Host: #	👤 主办 #
+開始まで あと#分	Starts in # min	距开始还有#分钟
+開始まで あと#時間#分	Starts in #h #m	距开始还有#小时#分
+開始まで あと#日#時間#分	Starts in #d #h #m	距开始还有#天#小时#分
+まだエントリーした人はいません	No entries yet	还没有人报名
+エントリーは #:# から（開始の#分前）	Entry opens at #:# (# min before the start)	#:#开始报名（开始前#分钟）
+📋 大会の条件	📋 Tournament conditions	📋 比赛条件
+いま#人	# so far	目前#人
+エントリー	Entry	报名
+エントリーする	Enter	报名
+エントリーを取り消す	Cancel entry	取消报名
+エントリーしています	You're entered	已报名
+エントリー済み	Entered	已报名
+#セット×#ゲーム	# sets × # games	#盘×#局
+#手の時間	Time per move	每手时间
+セットの合間	Between sets	盘间
+セットの得点	Set points	盘局得分
+足りないとき	If short of players	人数不足时
+AI研究員とAIで補充	Fill with AI researchers and AI	由AI研究员和AI补位
+AIで補充	Fill with AI	由AI补位
+バッジ（オンライン大会）	Badges (online tournament)	徽章（在线比赛）
+人が#人以上なら上位#位に	Top # if # or more humans	真人#人以上时前#名
+表彰台はAIも含めて数える	Podium counts AIs too	领奖台也计入AI
+表彰台は人だけで数える	Podium counts humans only	领奖台只算真人
+今すぐ始める（主催者）	Start now (host)	立即开始（主办方）
+✏️ 編集	✏️ Edit	✏️ 编辑
+🗑 削除	🗑 Delete	🗑 删除
+中止する	Cancel	取消
+受付前	Not open yet	报名未开始
+受付中	Open	报名中
+開催中	In progress	进行中
+終了	Finished	已结束
+中止（参加者なし）	Cancelled (no entries)	取消（无人参加）
+招待されています	You're invited	你已受邀
+招待のみ	Invite only	仅限受邀
+自分の卓へ	To my table	去我的桌
+▶ 自分の卓へ	▶ To my table	▶ 去我的桌
+👀 観戦する卓を選ぶ	👀 Choose a table to watch	👀 选择观战的桌
+大会の画面へ	To the tournament page	去比赛页面
+決勝の対局中	Final in progress	决赛进行中
+✅ きょうは参加済み	✅ Already played today	✅ 今天已参加
+きょうのデイリーは全部終わりました。次は明日の朝#時に出ます（#:#の部から・エントリーは各部の開始#分前から）	Today's daily tournaments are all done. The next ones appear tomorrow at # a.m. (from the #:# session; entry opens # min before each session)	今天的每日赛全部结束了。下一批明天早上#点公布（从#:#场开始；每场开始前#分钟可报名）
+きょうのデイリーは朝#時に出ます（エントリーは各部の開始#分前から）	Today's daily tournaments appear at # a.m. (entry opens # min before each session)	今天的每日赛早上#点公布（每场开始前#分钟可报名）
+（あしたの部は朝#時に出ます）	(tomorrow's sessions appear at # a.m.)	（明天的场次早上#点公布）
+毎日#部：#:#・#:#・#:#・#:#	# sessions daily: #:# · #:# · #:# · #:#	每天#场：#:#·#:#·#:#·#:#
+📖 デイリートーナメントとは（ルール・ポイント）	📖 What is the daily tournament? (rules · points)	📖 什么是每日赛（规则·积分）
+🗓 しくみ	🗓 How it works	🗓 机制
+🃏 試合の流れ	🃏 How a tournament runs	🃏 比赛流程
+🏅 もらえるポイント・バッジ	🏅 Points and badges	🏅 可获得的积分·徽章
+デイリートーナメント	Daily tournament	每日赛
+#日#部だけ	Only # session per day	每天仅#场
+#人ずつ	# per group	每组#人
+#人数にかかわらずもらえる	Earned regardless of player count	不论人数都能获得
+人数にかかわらずもらえる	Earned regardless of player count	不论人数都能获得
+上位#位にバッジと称号	Badges and titles for the top #	前#名获得徽章和称号
+上位に総ポイント・表彰台のバッジと称号	Total points, podium badges and titles for top finishers	前几名获得总积分、领奖台徽章和称号
+予選ポイント	Qualifier points	预选积分
+決勝ボーナス	Final bonus	决赛加分
+ポイントの合計で順位	Ranked by total points	按积分合计排名
+シーズン（毎月前半・後半）	Season (first/second half of each month)	赛季（每月上半月·下半月）
+デイリーのバッジ（優勝・#位・#位）	Daily badges (win, #nd, #rd)	每日赛徽章（冠军·第#名·第#名）
+#位#pt・#位#pt…（AIも順位に入る）	#st # pt · #nd # pt … (AIs count in the ranking)	第#名#pt·第#名#pt…（AI也计入名次）
+#位#・#位#・#位#・#位#・#位#	#st # · #nd # · #rd # · #th # · #th #	第#名#·第#名#·第#名#·第#名#·第#名#
+# − グループ内の順位	# − rank within group	# − 组内名次
+まだポイントなし	No points yet	还没有积分
+まだポイントはありません	No points yet	还没有积分
+参加しました	Played	已参加
+参加中です	Playing now	参加中
+🛡 Googleでまもる	🛡 Protect with Google	🛡 用Google保护
+🛡 Googleでまもりました	🛡 Protected with Google	🛡 已用Google保护
+@の記録を、Googleのアカウントでまもります。スマホを替えたり、ブラウザのデータを消したりしても、Googleでログインすれば戻れます。	Protect @'s record with your Google account. Even if you change phones or clear browser data, you can come back by signing in with Google.	用Google账号保护@的记录。即使换手机或清除浏览器数据，用Google登录就能找回。
+（テスト）Googleでログイン	(Test) Sign in with Google	（测试）用Google登录
+研究所が受け取るのは、Googleのアカウントを見分ける番号だけです（メールアドレス・名前・写真は受け取りません）。Googleアカウントを持っていない人は、復活の呪文を控えておいてください。	The lab only receives a number that identifies your Google account (no email, name or photo). If you don't have a Google account, keep your revival code somewhere safe.	研究所只接收识别Google账号的编号（不接收邮箱、名字和照片）。没有Google账号的人，请记下复活咒语。
+🔑 おうちの人のパスワード	🔑 Parent password	🔑 家长密码
+🔑 パスワードの作り直し	🔑 Reset password	🔑 重设密码
+子どもに開かれないように、おうちの人メニューのパスワードを決めてください（#〜#文字）。	Set a password for the parent menu so kids can't open it (#–# characters).	为了不让孩子打开，请设置家长菜单的密码（#～#个字符）。
+おうちの人メニューのパスワードを入れてください。	Enter the parent menu password.	请输入家长菜单的密码。
+決める	Set	设置
+パスワード	Password	密码
+もう一度	Again	再输入一次
+パスワードを忘れた	Forgot password	忘记密码
+#回のパスワードがちがいます	The two passwords don't match	两次密码不一致
+パスワードを確かめられませんでした	Couldn't verify the password	无法确认密码
+パスワードを作り直します。このGoogleで仕込んだしかけ（サンタ・誕生日の挑戦状、遊ぶ時間の目安など）はすべて消えます。よろしいですか？	Reset the password? Everything set up with this Google account (Santa and birthday challenges, play-time limits, etc.) will be deleted.	要重设密码吗？用这个Google设置的所有内容（圣诞老人·生日挑战书、游戏时间目标等）都会删除。
+パスワードを作り直すには、Googleでログインしてください。	Sign in with Google to reset the password.	重设密码需要用Google登录。
+この端末の記憶が切れていました。Googleでログインしてください	This device's memory expired. Please sign in with Google	这台设备的记忆已失效。请用Google登录
+👪 おうちの人メニュー	👪 Parent menu	👪 家长菜单
+子ども向けのしかけを用意できます。しかけは順に増えていきます。	Set up surprises for your kids. More will be added over time.	可以为孩子准备一些惊喜机关，会陆续增加。
+サンタからの挑戦状	Santa's Challenge	圣诞老人的挑战书
+誕生日の挑戦状	Birthday Challenge	生日挑战书
+成長のおたより	Growth report	成长通讯
+遊ぶ時間の目安	Play-time guide	游戏时间目标
+家族大会	Family tournament	家庭比赛
+子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込み、謎のサンタと達人たちの#ゲームで優勝すると届くようにします	Set up a message for your child (like a hint to where the present is hidden) that arrives when they win # games against the mysterious Santa and the masters	为孩子设置一条讯息（比如礼物藏在哪里的提示），在与神秘圣诞老人和高手们的#局中夺冠就能收到
+お誕生日に、メッセージ（プレゼントのありか・お祝いのことばなど）を仕込み、謎のパティシエと達人たちの#ゲームで優勝すると届くようにします	On their birthday, set up a message (where the present is, birthday wishes, etc.) that arrives when they win # games against the mysterious pâtissier and the masters	在生日时设置一条讯息（礼物在哪里、祝福的话等），在与神秘甜点师和高手们的#局中夺冠就能收到
+子どもの推定実力の伸び・得意な場面と苦手な場面・最近のバッジ・この#週間に遊んだ時間を、博士とマサがおうちの人向けにまとめます	Dr. Root and Masa summarize your child's skill growth, strong and weak situations, recent badges and play time this # week for parents	博士和阿正为家长总结孩子的推定实力成长、擅长和不擅长的场面、最近的徽章以及这#周的游戏时间
+#日に遊ぶ時間の目安を#分きざみで決めます。時間をこえると、ゲームの区切りやホームでマサが「今日はここまでにしとこか」と声をかけます（遊べなくはしません）	Set a daily play-time guide in #-minute steps. When it's exceeded, Masa says "let's call it a day" at the end of a game or on the home screen (play isn't blocked)	以#分钟为单位设置每#天的游戏时间目标。超过时，阿正会在对局间隙或主页说「今天就到这里吧」（不会禁止玩）
+このGoogleでまもっているプレイヤーだけを招待したオンライン大会を、すぐにひらけます（招待した人にだけ見えます）	Instantly host an online tournament inviting only the players protected by this Google account (visible only to invitees)	立即举办只邀请此Google所保护玩家的在线比赛（只有受邀者能看到）
+👥 おうちの人か子どもか	👥 Parent or child	👥 家长还是孩子
+このGoogleでまもっているプレイヤーごとに決めます。「おうちの人」はホームにこのメニューの入口（新しいしかけのおしらせつき）、「子ども」にはこのメニューの入口を出しません。	Set this for each player protected by this Google account. "Parent" shows this menu on the home screen (with alerts for new features); "Child" doesn't show it.	为此Google所保护的每个玩家设置。「家长」会在主页显示此菜单入口（附新机关提醒），「孩子」则不显示。
+👪 おうちの人	👪 Parent	👪 家长
+🧒 子ども	🧒 Child	🧒 孩子
+🔒 この端末は、次からパスワードだけで開けます。	🔒 This device opens with just the password from now on.	🔒 这台设备下次起只需密码就能打开。
+この端末の記憶を消す	Forget this device	清除这台设备的记忆
+このGoogleでまもっているプレイヤーがいません。	No players are protected by this Google account.	没有被此Google保护的玩家。
+このGoogleアカウントでまもっているプレイヤーがいません。子どものプレイヤーで「🛡 Googleでまもる」をしてから、もう一度開いてください。	No players are protected by this Google account. Use "🛡 Protect with Google" on your child's player first, then open this again.	没有被此Google账号保护的玩家。请先在孩子的玩家上使用「🛡 用Google保护」，再打开一次。
+🎄 サンタからの挑戦状	🎄 Santa's Challenge	🎄 圣诞老人的挑战书
+🎂 誕生日の挑戦状	🎂 Birthday Challenge	🎂 生日挑战书
+サンタの代わりに、子どもへのメッセージ（プレゼントの隠し場所のヒントなど）を仕込めます。当日、子どもが謎のサンタ（正体はカナタ・★#・絶対透視）と達人たちの#ゲームで優勝すると、メッセージが届きます。	Set up a message for your child on Santa's behalf (like a hint to where the present is hidden). On the day, when your child wins # games against the mysterious Santa (secretly Kanata, ★#, Absolute Clairvoyance) and the masters, the message arrives.	可以代替圣诞老人给孩子设置一条讯息（比如礼物藏在哪里的提示）。当天孩子在与神秘圣诞老人（真身是卡纳塔·★#·绝对透视）和高手们的#局中夺冠，就会收到讯息。
+お誕生日に、子どもへのメッセージ（プレゼントのありか・お祝いのことばなど）を仕込めます。当日、子どもが謎のパティシエ（正体はカナタ・★#・絶対透視。コック帽）と達人たちの#ゲームで優勝すると、メッセージが届きます。	Set up a birthday message for your child (where the present is, birthday wishes, etc.). On the day, when your child wins # games against the mysterious pâtissier (secretly Kanata, ★#, Absolute Clairvoyance, in a chef's hat) and the masters, the message arrives.	可以在生日时给孩子设置一条讯息（礼物在哪里、祝福的话等）。当天孩子在与神秘甜点师（真身是卡纳塔·★#·绝对透视，戴厨师帽）和高手们的#局中夺冠，就会收到讯息。
+まだ仕込んでいません	Not set up yet	还没设置
+仕込む	Set up	设置
+仕込み済み	Set up	已设置
+🎮 演出をためす	🎮 Try the show	🎮 试看演出
+📖 使い方・うちの使い方	📖 How to use · how we use it	📖 使用方法·我家的用法
+← メニュー	← Menu	← 菜单
+🎄 @への挑戦状	🎄 Challenge for @	🎄 给@的挑战书
+🎂 @への挑戦状	🎂 Challenge for @	🎂 给@的挑战书
+サンタからのメッセージ（#文字まで）	Message from Santa (up to # characters)	圣诞老人的讯息（最多#字）
+お誕生日のメッセージ（#文字まで）	Birthday message (up to # characters)	生日讯息（最多#字）
+挑戦できる期間（はじめ）	Challenge period (start)	可挑战期间（开始）
+挑戦できる期間（おわり）	Challenge period (end)	可挑战期间（结束）
+謎のサンタといっしょに打つ#人	The # players with the mysterious Santa	和神秘圣诞老人同桌的#人
+謎のパティシエといっしょに打つ#人	The # players with the mysterious pâtissier	和神秘甜点师同桌的#人
+達人ぞろい（★#×#）	All masters (★# × #)	全员高手（★#×#）
+強め（★#×#）	Strong (★# × #)	较强（★#×#）
+ふつう（★#×#）	Normal (★# × #)	普通（★#×#）
+#回目の挑戦から、負けるたびに少しずつ手加減します（#人が弱く→サンタの絶対透視なし→さらに弱く）	From the #rd try, it gets a little easier after each loss (# players weaker → no Santa clairvoyance → even weaker)	从第#次挑战起，每输一次就稍微放水（#人变弱→圣诞老人不用绝对透视→再变弱）
+#回目の挑戦から、負けるたびに少しずつ手加減します。何回でも挑戦できます。	From the #rd try, it gets a little easier after each loss. Unlimited tries.	从第#次挑战起，每输一次就稍微放水。可以无限次挑战。
+もどる	Back	返回
+保存	Save	保存
+例）メリークリスマス！プレゼントは、本棚のいちばん上の段の奥にあるよ。	e.g. Merry Christmas! Your present is at the back of the top shelf of the bookcase.	例）圣诞快乐！礼物在书架最上层的最里面哦。
+例）お誕生日おめでとう！プレゼントは冷蔵庫のいちばん下の段にかくれているよ。	e.g. Happy birthday! Your present is hiding on the bottom shelf of the fridge.	例）生日快乐！礼物藏在冰箱最下层哦。
+研究所が受け取るのは、Googleのアカウントを見分ける番号だけです（メールアドレス・名前・写真は受け取りません）。Googleアカウントを持っていない人は、おうちの人のGoogleでまもれます（#つのGoogleで何人でも）。	The lab only receives a number that identifies your Google account (no email, name or photo). If you don't have a Google account, a parent's Google account can protect you (any number of players per account).	研究所只接收识别Google账号的编号（不接收邮箱、名字和照片）。没有Google账号的人，可以用家长的Google保护（一个Google可以保护任意多人）。
+メッセージは優勝するまで子どもの端末には届きません。	The message isn't sent to your child's device until they win.	在夺冠之前，讯息不会发送到孩子的设备。
+保存できませんでした	Couldn't save	无法保存
+変えられませんでした	Couldn't change it	无法修改
+作り直せませんでした	Couldn't reset	无法重设
+ひらけませんでした	Couldn't open	无法打开
+📈 成長のおたより	📈 Growth report	📈 成长通讯
+だれのおたよりを見ますか？（クラウドに保存された記録から作ります）	Whose report would you like to see? (Built from records saved in the cloud)	要看谁的通讯？（根据云端保存的记录生成）
+推定実力のうつりかわり	Estimated skill over time	推定实力的变化
+推定実力は、判断が#回たまると出ます。	Estimated skill appears after # decisions.	判断累计#次后会显示推定实力。
+最高到達	Highest	最高达到
+ゲーム数	Games	局数
+⏰ この#週間に遊んだ時間	⏰ Play time this # week	⏰ 这#周的游戏时间
+得意な場面・伸びしろの場面	Strong situations · room to grow	擅长的场面·有提升空间的场面
+得意	Strong	擅长
+伸びしろ	Room to grow	提升空间
+🏅 最近#日のバッジ	🏅 Badges in the last # days	🏅 最近#天的徽章
+この#日は、新しいバッジはありません。	No new badges in the last # days.	这#天没有新徽章。
+この#週間はお休みやったな。また気が向いたら卓に戻ってきてや！	Taking a break this # week, huh. Come back to the table whenever you feel like it!	这#周休息了啊。想玩的时候随时回到牌桌吧！
+コツコツ続けとるのが何よりや。結果より、考えて選べたかを見たってな！	Steady practice beats everything. Look at whether they chose thoughtfully, not just the results!	坚持不懈最重要。比起结果，要看是不是经过思考做出的选择！
+まずは#セット、いっしょに遊んでみてな！	Try playing one set together first!	先一起玩一盘看看吧！
+遊んだ時間は、画面を開いて操作していた時間の目安です（このアプリの記録が端末からクラウドに届いた分）。	Play time is an estimate of time spent with the screen open and in use (as far as the records have reached the cloud).	游戏时间是打开画面并操作的时间估计（以从设备上传到云端的记录为准）。
+⏰ 遊ぶ時間の目安	⏰ Play-time guide	⏰ 游戏时间目标
+目安なし	No limit	不设目标
+#日 #分まで	Up to # min per day	每#天最多#分钟
+#日に遊ぶ時間の目安を、プレイヤーごとに#分きざみで決めます。その日に遊んだ時間が目安をこえると、ゲームやセットの区切り・ホームを開いたときに、マサが「今日はここまでにしとこか」と声をかけます（#回目からは言い方を変えます）。遊べなくすることはしません。時間は日付が変わると#に戻ります。	Set a daily play-time guide for each player in #-minute steps. When the day's play time goes over, Masa says "let's call it a day" at the end of a game or set, or when the home screen opens (with different wording from the #nd time). Play is never blocked. The count resets to # at midnight.	为每个玩家以#分钟为单位设置每#天的游戏时间目标。当天游戏时间超过目标时，阿正会在对局或盘局结束、打开主页时说「今天就到这里吧」（第#次起换说法）。不会禁止玩。日期变更后时间归#。
+遊んだ時間は、画面を開いて操作していた時間で数えます（しばらく操作がないと数えません）。同じプレイヤーなら別の端末でも同じ目安です（その端末で遊んだ時間で数えます）。	Play time counts while the screen is open and in use (idle time doesn't count). The same guide applies on other devices for the same player (each device counts its own time).	游戏时间按打开画面并操作的时间计算（一段时间不操作就不计）。同一玩家在其他设备上也适用相同目标（按该设备的游戏时间计算）。
+今日はここまでにしとこか	Let's call it a day	今天就到这里吧
+わかった	Got it	知道了
+もう一度挑戦	Try again	再挑战一次
+挑戦する	Take the challenge	挑战
+🔔 通知	🔔 Notifications	🔔 通知
+まだ通知はありません。バッジを取ったり、ライバルに指定されたりすると、ここに届きます。	No notifications yet. They'll arrive here when you earn badges or someone marks you as a rival.	还没有通知。拿到徽章或被视为对手时会在这里收到。
+もっと見る	See more	查看更多
+バッジを取りました	Badge earned	获得了徽章
+お知らせ	Notice	通知
+メッセージはサーバーにだけ置き、優勝するまで子どもの端末には届きません。同じプレイヤーなら、別の端末で開いても同じ挑戦状です。	The message stays on the server and isn't sent to your child's device until they win. The same player gets the same challenge on any device.	讯息只保存在服务器上，在夺冠之前不会发送到孩子的设备。同一玩家在其他设备上打开也是同样的挑战书。
+「🎮 演出をためす」で、子どもと同じ流れを先にためせます。	Use "🎮 Try the show" to preview the same flow your child will see.	用「🎮 试看演出」可以提前体验孩子会看到的流程。
+（テストプレイ：記録は残りません）	(Test play: nothing is recorded)	（试玩：不会保留记录）
+📖 サンタからの挑戦状　使い方	📖 Santa's Challenge: how to use	📖 圣诞老人的挑战书　使用方法
+📖 誕生日の挑戦状　使い方	📖 Birthday Challenge: how to use	📖 生日挑战书　使用方法
+🏠 うちではこんな使い方	🏠 How we use it at home	🏠 我家是这样用的
+子どものプレイヤーで「🛡 Googleでまもる」をしておきます（おうちの人のGoogleで大丈夫）。	First use "🛡 Protect with Google" on your child's player (the parent's Google account is fine).	先在孩子的玩家上使用「🛡 用Google保护」（用家长的Google就可以）。
+おうちの人メニューの「🎄 サンタからの挑戦状」で子どもを選び、サンタからのメッセージと期間（はじめは#/#の#時から#時間）を書きます。きょうだいそれぞれに別のメッセージを仕込めます。	In the parent menu, open "🎄 Santa's Challenge", choose your child, and write Santa's message and the period (by default # hours from #:00 on #/#). Each sibling can get a different message.	在家长菜单的「🎄 圣诞老人的挑战书」中选择孩子，写下圣诞老人的讯息和期间（默认#/#的#点起#小时）。兄弟姐妹可以各设不同的讯息。
+おうちの人メニューの「🎂 誕生日の挑戦状」で子どもを選び、メッセージと期間（お誕生日の日）を書きます。きょうだいそれぞれに、それぞれのお誕生日で仕込めます。	In the parent menu, open "🎂 Birthday Challenge", choose your child, and write the message and period (their birthday). Each sibling can have one on their own birthday.	在家长菜单的「🎂 生日挑战书」中选择孩子，写下讯息和期间（生日当天）。兄弟姐妹可以各自在自己的生日设置。
+開始の#日前から、子どものオンライン大会の一覧に「🎄 サンタからの挑戦状」が出ます（開始までの残り時間つき）。当日はエントリーして挑戦します。サンタ（正体はカナタ・★#・奥義「絶対透視」。白いあごひげとサンタ帽）と達人#人の#ゲームで卓内#位になると、メッセージが届きます。	From # days before, "🎄 Santa's Challenge" appears in your child's online tournament list (with a countdown). On the day they enter and play. If they finish #st at the table in # games against Santa (secretly Kanata, ★#, secret art "Absolute Clairvoyance", with a white beard and Santa hat) and # masters, the message arrives.	开始前#天起，孩子的在线比赛列表会出现「🎄 圣诞老人的挑战书」（附倒计时）。当天报名挑战。与圣诞老人（真身是卡纳塔·★#·奥义「绝对透视」，白胡子加圣诞帽）和#名高手打#局获得本桌第#名，就会收到讯息。
+開始の#日前から、子どものオンライン大会の一覧に「🎂 誕生日の挑戦状」が出ます。当日はエントリーして挑戦します。謎のパティシエ（正体はカナタ・★#・奥義「絶対透視」。コック帽）と達人#人の#ゲームで卓内#位になると、メッセージが届きます。	From # days before, "🎂 Birthday Challenge" appears in your child's online tournament list. On the day they enter and play. If they finish #st at the table in # games against the mysterious pâtissier (secretly Kanata, ★#, secret art "Absolute Clairvoyance", in a chef's hat) and # masters, the message arrives.	开始前#天起，孩子的在线比赛列表会出现「🎂 生日挑战书」。当天报名挑战。与神秘甜点师（真身是卡纳塔·★#·奥义「绝对透视」，戴厨师帽）和#名高手打#局获得本桌第#名，就会收到讯息。
+#回目の挑戦から、負けるたびに少しずつ手加減します（#人が#段弱く→サンタの絶対透視なし→#人がもう#段弱く→サンタも弱く）。何回でも挑戦できます。	From the #rd try, it gets a little easier after each loss (# players drop # level → no Santa clairvoyance → # players drop # more level → Santa gets weaker too). Unlimited tries.	从第#次挑战起，每输一次就稍微放水（#人降#级→圣诞老人不用绝对透视→#人再降#级→圣诞老人也变弱）。可以无限次挑战。
+わが家では毎年、サンタがプレゼントの隠し場所をクイズにしたカードを仕込んでいます。上の子が小さいころは、Scratchで冒険ゲームを作り、とらわれたサンタを救い出すとプレゼントのありかが分かるようにしました。今年は、カナタがふんするサンタを含む達人ぞろいのセットで優勝すると、隠し場所のメッセージを受け取れるようにしています。このしかけを、ほかのおうちでも使えるようにお裾分けしました。	Every year at our house, Santa leaves a card with a quiz about where the present is hidden. When our oldest was little, I made an adventure game in Scratch where rescuing a captured Santa revealed the present's location. This year, winning a set full of masters, including Santa played by Kanata, reveals the hiding place. I'm sharing this so other families can use it too.	我家每年圣诞老人都会留下一张卡片，用问答提示礼物藏在哪里。老大小时候，我用Scratch做了冒险游戏，救出被困的圣诞老人就能知道礼物在哪。今年，只要在包括卡纳塔扮演的圣诞老人在内的全员高手盘局中夺冠，就能收到藏礼物地点的讯息。把这个机关分享出来，让其他家庭也能用。
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（通知・ひとことのスタンプ・遊ぶ時間のひと声・挑戦状のカード・シーズン発表・復活の呪文・サーバーのメッセージ）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+@と宿敵になりました（お互いにライバル視）	You and @ became nemeses (rivals both ways)	你和@成了宿敌（互相视为对手）
+@に@がライバル視されています	@ marked @ as a rival	@把@视为对手
+ライバル視している@が、BPで@を抜きました（#BP）	@, whom you rival, passed @ in BP (# BP)	你视为对手的@在BP上超过了@（#BP）
+ライバル視している@が「@」を取りました	@, whom you rival, earned "@"	你视为对手的@获得了「@」
+@からオンライン大会「@」に招待されました	@ invited you to the online tournament "@"	@邀请你参加在线比赛「@」
+オンライン大会「@」に招待されました	You were invited to the online tournament "@"	你受邀参加在线比赛「@」
+エントリーした「@」がまもなく始まります（#:#）	"@", which you entered, starts soon (#:#)	你报名的「@」即将开始（#:#）
+推定実力の最高が★#になりました	Your highest estimated skill is now ★#	推定实力最高达到★#
+連続最善の自己ベストを#回に更新しました	New best-move streak record: #	连续最佳刷新个人纪录：#次
+総合ランキング（@）が#位から#位に上がりました	Overall ranking (@): up from #th to #th	综合排行榜（@）从第#名升到第#名
+人だけ	Humans only	只算真人
+AI込み	AIs included	含AI
+よろしく！	Hi there!	请多关照！
+よろしくお願いします	Nice to meet you	请多多指教
+おつかれさま！	Good game!	辛苦了！
+ありがとう	Thanks	谢谢
+またね！	See you!	再见！
+GG！	GG!	GG！
+ナイス！	Nice!	漂亮！
+うまい！	Good one!	厉害！
+すごい！	Amazing!	太强了！
+おしい！	So close!	可惜！
+なるほど〜	I see~	原来如此～
+やられた〜	Got me~	被你打败了～
+あちゃ〜	Oops~	哎呀～
+さすが！	As expected!	不愧是你！
+いい勝負！	Good match!	好比赛！
+考え中…	Thinking…	思考中…
+ドキドキ…	Nervous…	好紧张…
+お先に失礼！	Going out first!	我先走一步！
+次は負けへんで！	I won't lose next time!	下次不会输！
+あいさつ	Greetings	问候
+反応	Reactions	反应
+対局中	During play	对局中
+絵文字	Emoji	表情
+@、今日はここまでにしとこか！おうちの人と決めた#分になったで。続きはまた明日、楽しみにしとるで！	@, let's call it a day! You've reached the # minutes you agreed on with your family. I'll look forward to more tomorrow!	@，今天就到这里吧！已经到了和家人约定的#分钟。明天继续，期待哦！
+おっと@、#回目のお知らせや。サッカーでもアディショナルタイムは決まっとるんやで。今日はここで試合終了にしよか！	Whoa @, this is your second reminder. Even soccer has a set amount of stoppage time. Let's blow the final whistle for today!	哎呀@，这是第#次提醒了。足球的补时也是有限的。今天就在这里结束比赛吧！
+延長戦はもう十分やで、@！ポーカーでも引き際がいちばん大事なんや。いったん休憩しよか	Enough extra time, @! In poker, knowing when to walk away matters most. Let's take a break	加时已经够多了，@！扑克里最重要的就是见好就收。先休息一下吧
+マサ、そろそろ声がかれてきたで…@、目と頭を休めるのも作戦のうちや。明日もっと強なっとるで！	Masa's voice is getting hoarse… @, resting your eyes and brain is part of the strategy. You'll be stronger tomorrow!	阿正的嗓子都快哑了…@，让眼睛和大脑休息也是战术的一部分。明天会更强！
+ほんまに今日はおしまいや！@の読みは、寝とる間に育つんやで。また明日な！	That's really it for today! @'s reading grows while you sleep. See you tomorrow!	今天真的结束啦！@的判断力会在睡觉时成长。明天见！
+@、今日はここまでにしとこか！おうちの人と決めた#時間になったで。続きはまた明日、楽しみにしとるで！	@, let's call it a day! You've reached the # hour(s) you agreed on with your family. I'll look forward to more tomorrow!	@，今天就到这里吧！已经到了和家人约定的#小时。明天继续，期待哦！
+@、今日はここまでにしとこか！おうちの人と決めた#時間#分になったで。続きはまた明日、楽しみにしとるで！	@, let's call it a day! You've reached the #h #m you agreed on with your family. I'll look forward to more tomorrow!	@，今天就到这里吧！已经到了和家人约定的#小时#分钟。明天继续，期待哦！
+⏰ 今日はここまでにしとこか	⏰ Let's call it a day	⏰ 今天就到这里吧
+@と達人たちの#ゲーム。優勝すると@が届く！	# games against @ and the masters. Win and @ arrives!	和@以及高手们打#局。夺冠就能收到@！
+優勝するまで何度でも挑戦できる！	Try as many times as you like until you win!	在夺冠之前可以无限次挑战！
+@に勝って受け取ったメッセージです	The message you received by beating @	战胜@后收到的讯息
+🎁 サンタからのメッセージ	🎁 Message from Santa	🎁 圣诞老人的讯息
+🎁 お誕生日のメッセージ	🎁 Birthday message	🎁 生日讯息
+謎のサンタ	the mysterious Santa	神秘圣诞老人
+謎のパティシエ	the mysterious pâtissier	神秘甜点师
+サンタからのメッセージ	a message from Santa	圣诞老人的讯息
+お誕生日のメッセージ	a birthday message	生日讯息
+@シーズンのデイリートーナメントが終わりました。結果発表です。@は#人中#位、シーズンポイントは#pt（#回出場）でした。	The @ season of daily tournaments is over. Here are the results: @ placed # of #, with # season points (# appearances).	@赛季的每日赛结束了。公布结果：@在#人中获得第#名，赛季积分#pt（参加#次）。
+#位で表彰台や！シーズン通して積み上げた結果や、リーグ戦を戦い抜いたチームの勲章やで！	#th place, on the podium! Built up over the whole season, like a medal for a team that fought through the league!	第#名，登上领奖台！这是整个赛季积累的成果，就像打完联赛的球队的勋章！
+#位、上位半分に入ったで！新しいシーズンもまた毎日コツコツいこか！	#th, in the top half! Keep at it every day in the new season!	第#名，进入前一半了！新赛季也每天坚持吧！
+上位半分でフィニッシュや！長いリーグ戦、よう走り切ったな。次のシーズンは表彰台や！	Finished in the top half! You ran the whole long league. Next season, the podium!	以前一半的成绩收官！漫长的联赛跑完了。下个赛季冲领奖台！
+今シーズンは#位。リーグ戦は#試合ずつの積み重ねや、新しいシーズンで巻き返そ！	#th this season. A league is built one match at a time. Bounce back next season!	本赛季第#名。联赛是一场一场积累的，新赛季扳回来！
+#位やったな。出場#回、新しいシーズンは出る回数を増やしたら順位も上がるで！	#th this time. # appearances; play more next season and you'll climb!	这次第#名。参加#次，新赛季多参加几次名次就会上升！
+シーズン表彰台のバッジも獲得です。	You also earned the season podium badge.	还获得了赛季领奖台徽章。
+順位に応じて、総ポイント#ptが入ります。	You receive # total points for your rank.	根据名次获得总积分#pt。
+シーズンの表彰台	Season podium	赛季领奖台
+📊 最終順位を見る	📊 See final standings	📊 查看最终排名
+@、「復活の呪文」は控えとるか？ スマホを替えたり、ブラウザのデータを消したりすると、これがないと記録に戻れへんのや。スクショでもメモでもええから、控えといてな！	@, have you saved your "revival code"? If you change phones or clear browser data, you can't get your record back without it. A screenshot or a note is fine, just keep it!	@，「复活咒语」记下来了吗？换手机或清除浏览器数据时，没有它就找不回记录。截图或记笔记都行，一定要记下来！
+@の「復活の呪文」や。スマホを替えたり、ブラウザのデータを消したりしたら、これで記録に戻れるで！	Here's @'s "revival code". If you change phones or clear browser data, this brings your record back!	这是@的「复活咒语」。换手机或清除浏览器数据时，用它就能找回记录！
+📤 おうちの人などに送る	📤 Send to a family member	📤 发送给家人等
+📱 iPhone・iPadは、#日ほど開かないとブラウザのデータが消えることがあります。共有ボタン（□↑）→「ホーム画面に追加」で開くと消えにくくなります。	📱 On iPhone/iPad, browser data may be erased if you don't open the app for about # days. Use the Share button (□↑) → "Add to Home Screen" to keep it safer.	📱 iPhone·iPad如果大约#天不打开，浏览器数据可能会被删除。用分享按钮（□↑）→「添加到主屏幕」打开就不容易丢失。
+復活の呪文は、少し遊んでクラウドに保存されると出ます	Your revival code appears after you play a bit and it's saved to the cloud	玩一会儿保存到云端后就会显示复活咒语
+✅ 控えた	✅ Saved it	✅ 已记下
+📜 呪文カード	📜 Code card	📜 咒语卡
+コピー	Copy	复制
+コピーしました	Copied	已复制
+#つのGoogleアカウントでまもれるのは#人までです	One Google account can protect up to # players	一个Google账号最多保护#人
+Googleでログインしてください	Please sign in with Google	请用Google登录
+Googleのログインはまだ準備中です	Google sign-in isn't ready yet	Google登录尚在准备中
+Googleのログインを確かめられませんでした	Couldn't verify the Google sign-in	无法确认Google登录
+おうちの人メニューのパスワードが、まだ決まっていません	The parent menu password hasn't been set yet	家长菜单的密码还没有设置
+このGoogleアカウントでまもっているプレイヤーではありません	This player isn't protected by this Google account	这不是此Google账号保护的玩家
+このプレイヤーの鍵ではありません	This isn't this player's key	这不是这个玩家的钥匙
+このプレイヤーは、このGoogleアカウントでまもっていません	This player isn't protected by this Google account	这个玩家没有用此Google账号保护
+このプレイヤーは、作った端末でだけ消せます	This player can only be deleted on the device that created it	这个玩家只能在创建它的设备上删除
+この卓はもう始まっています	This table has already started	这桌已经开始了
+この卓は満員です	This table is full	这桌已满
+この端末の記憶が切れました。Googleでログインしてください	This device's memory expired. Please sign in with Google	这台设备的记忆已失效。请用Google登录
+しばらく待ってからもう一度どうぞ	Please wait a moment and try again	请稍等后再试
+その卓は見つかりません	That table wasn't found	找不到这桌
+その大会は見つかりません	That tournament wasn't found	找不到该比赛
+まだクラウドに保存されていません。少し遊んでから、もう一度ためしてください	Not saved to the cloud yet. Play a bit and try again	还没保存到云端。玩一会儿再试
+サーバーでエラーが起きました	A server error occurred	服务器发生错误
+データがありません	No data	没有数据
+データが大きすぎます	The data is too large	数据太大
+パスワードがちがいます	Wrong password	密码错误
+パスワードの作り直しはGoogleでログインしてから	Sign in with Google before resetting the password	重设密码需要先用Google登录
+パスワードは#〜#文字にしてください	The password must be #–# characters	密码须为#～#个字符
+パスワードを何度もまちがえたので、しばらく待ってからためしてください	Too many wrong passwords. Please wait a while and try again	密码错误次数过多，请稍后再试
+プレイヤーがありません	No player	没有玩家
+プレイヤーが見つかりません	Player not found	找不到玩家
+プレイヤーの鍵では、端末の記録は保存できません	A player key can't save the device's records	玩家钥匙无法保存设备的记录
+メッセージを書いてください	Please write a message	请写一条讯息
+ライバルは#人までです	Up to # rivals	对手最多#人
+ログインが切れました	Your session expired	登录已失效
+ログインが必要です	Sign-in required	需要登录
+使えません	Not available	无法使用
+同時にひらける大会は#つまでです	You can host up to # tournaments at once	同时最多举办#场比赛
+大会の名前を確かめてください	Please check the tournament name	请确认比赛名称
+復活の呪文が見つかりません	Revival code not found	找不到复活咒语
+招待された人だけが見られる大会です	This tournament is visible only to invitees	这是仅受邀者可见的比赛
+挑戦の期間ではありません	It's not the challenge period	不在挑战期间
+挑戦状がありません	No challenge	没有挑战书
+期間を確かめてください	Please check the period	请确认期间
+権限がありません	Not permitted	没有权限
+相手が見つかりません	Opponent not found	找不到对方
+端末がわかりません	Unknown device	无法识别设备
+自分はライバルにできません	You can't rival yourself	不能把自己视为对手
+見つかりません	Not found	找不到
+説明にふさわしくない言葉が入っています	The description contains inappropriate words	说明中包含不当词语
+開始日時を確かめてください	Please check the start time	请确认开始时间
+通信エラー	Connection error	通信错误
+サーバーの返事がありません。少しあとでもう一度ためしてください	No response from the server. Please try again a little later	服务器没有回应。请稍后再试
+その名前は使えません。ほかの名前にしてください	That name can't be used. Please choose another	这个名字不能用。请换一个名字
+その名前は、ほかのプレイヤーがもう使っています	That name is already used by another player	这个名字已经被其他玩家使用
+この端末に、同じ名前のプレイヤーがもういます	A player with the same name already exists on this device	这台设备上已经有同名玩家
+名前を入れてください	Please enter a name	请输入名字
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（マサのバッジの説明）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+「@」、銅バッジやで！	"@" is a bronze badge!	「@」是铜徽章！
+「@」、銀バッジやで！	"@" is a silver badge!	「@」是银徽章！
+「@」、金バッジやで！	"@" is a gold badge!	「@」是金徽章！
+「@」、特別な金バッジやで！	"@" is a special gold badge!	「@」是特别的金徽章！
+「@」、特別クエストの記念バッジやで！	"@" is a special quest commemorative badge!	「@」是特别任务纪念徽章！
+条件は「@」や。	The condition: "@".	条件是「@」。
+「@」は銅のバッジや！	"@" is a bronze badge!	「@」是铜徽章！
+「@」は銀のバッジや！	"@" is a silver badge!	「@」是银徽章！
+「@」は金のバッジや！	"@" is a gold badge!	「@」是金徽章！
+条件は「@」。	The condition: "@".	条件是「@」。
+これは「@」やな。	That's "@".	这是「@」。
+「@」でもらえる銅バッジや！	A bronze badge for "@"!	达成「@」可获得铜徽章！
+「@」でもらえる銀バッジや！	A silver badge for "@"!	达成「@」可获得银徽章！
+「@」でもらえる金バッジや！	A gold badge for "@"!	达成「@」可获得金徽章！
+いまは#回、あと#回やで！がんばりや！	You're at #; # more to go! Keep it up!	现在#次，还差#次！加油！
+いまは#個、あと#個やで！がんばりや！	You're at #; # more to go! Keep it up!	现在#个，还差#个！加油！
+いまは#行、あと#行やで！がんばりや！	You're at # rows; # more to go! Keep it up!	现在#行，还差#行！加油！
+いまは#つ、あと#つやで！がんばりや！	You're at #; # more to go! Keep it up!	现在#个，还差#个！加油！
+あと#回！ゴールは見えとるで！	# more! The goal's in sight!	还差#次！终点就在眼前！
+いま#回や。コツコツいこ、ローマは一日にして成らずや！	You're at #. Keep at it: Rome wasn't built in a day!	现在#次。一步一步来，罗马不是一天建成的！
+ゲット済みや！	Got it already!	已经拿到了！
+ちゃんとゲット済みや！胸張ってええで！	Got it! Be proud!	已经拿到了！挺起胸膛吧！
+この系統はもう最高ランクや、文句なしや！	This series is already at the top rank. Nothing more to say!	这个系列已经是最高级了，无可挑剔！
+もう持っとるやん！#/#/#にゲットしたで、ナイスや！	You already have it! Earned on #/#/#. Nice!	已经有了！在#/#/#拿到的，漂亮！
+AIの読みを見た手は連続に数えへんで（途切れもせえへん）。	Moves after seeing the AI reading don't count toward the streak (and don't break it).	看过AI分析的着法不计入连续（也不会中断）。
+ちなみに、AIの読みを見たゲームやセット（大会のバッジは大会）では、このバッジは数えへんで！自分の読みで取りにいこ！	By the way, games and sets where you saw the AI reading (or the whole tournament, for tournament badges) don't count for this badge! Go get it with your own reading!	顺便说一下，看过AI分析的对局和盘局（比赛徽章则是整场比赛）不计这个徽章！靠自己的判断去拿吧！
+バッジアタックを#分やり切ったときだけ数えるで。途中で中断したら数えへんからな！	It only counts when you finish the full # minutes of Badge Attack. Stopping early doesn't count!	只有坚持完#分钟的徽章冲刺才算。中途停止不算哦！
+時間は自分の番になった瞬間から数えるで。速さだけやなくて、最善手（即断即決は好手以上）やないとアカンからな！AIの読みを見た手は数えへんで。	Time counts from the moment your turn starts. It's not just speed: it has to be the best move (good or better for snap decisions)! Moves after seeing the AI reading don't count.	时间从轮到你的那一刻开始算。不只是快，还必须是最佳着法（当机立断类要好手以上）！看过AI分析的着法不算。
+まずはPP#以下のセットを目指そか！でかい札から逃がすんやで！	First, aim for a set with PP # or less! Get rid of big cards first!	先以PP#以下的盘局为目标吧！先把大牌送走！
+これまでのベストは#セットPP#や！あと#点削ったら届くで！	Your best so far is set PP #2! Shave off #3 more points to get it!	目前最好是单盘PP #2！再减#3分就够了！
+まずはバッジアタックを最後までやり切ってみよか！	First, try finishing a whole Badge Attack!	先试着把徽章冲刺坚持到最后吧！
+シーズンは毎月前半（#〜#日）と後半や。デイリートーナメントで貯めたポイントで、シーズンの最終順位が#位以内で銅、#位以内で銀、#位で金や！毎日#部のうち#部、コツコツ出るのが近道や！	Seasons run for the first half (days #–#) and second half of each month. With points from daily tournaments, finishing the season in the top # is bronze, top # silver, #st gold! Playing one of the # daily sessions steadily is the shortcut!	赛季分每月上半月（#～#日）和下半月。用每日赛积累的积分，赛季最终排名前#名铜、前#名银、第#名金！每天#场里坚持参加#场是捷径！
+ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！	Join from "Online tournaments" on the home screen. Go for the podium!	从主页的「在线比赛」参加。冲击领奖台吧！
+ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日#:#・#:#・#:#・#:#の#部から#部選んで出られる。決勝の順位で決まるんや！	Go for it in the daily tournament above "Online tournaments" on the home screen. Pick # of the # daily sessions (#:#, #:#, #:#, #:#). It's decided by your rank in the final!	在主页「在线比赛」上方的每日赛冲击。每天从#:#·#:#·#:#·#:#这#场中选#场参加。按决赛名次决定！
+上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！	Holding back when you could go out is the boldest move. When the AI reading says a sacrifice is best, go for it and hold back!	能出完却故意不出，这是最大的胜负手。AI分析显示舍身最佳时，大胆地放弃出完吧！
+人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！	You get it by placing high in a tournament with lots of people. Check "Online tournaments" on the home screen!	在人多的比赛中进入前几名就能拿到。看看主页的「在线比赛」吧！
+回数やなくて、#回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！	It's not about count: pull it off once and it's yours! Spots where the AI says "don't go out on purpose" tend to come late in a set or in the final. When it does, be brave and hold back!	不看次数，成功一次就能拿到！AI分析显示「故意不出完」最佳的场面，常出现在盘局后段或决赛。那时就鼓起勇气放弃出完吧！
+大会の設定で、相手を「強豪ぞろい」にしたら銀、「全員達人」にしたら金や！腕試しにはもってこいやで！	In tournament settings, "Strong field" opponents give silver, "All masters" give gold! Perfect for testing yourself!	在比赛设置里，对手选「强手云集」是银，选「全员高手」是金！正好试试身手！
+捨て身はもう決めとるで！	You've already pulled off a sacrifice!	你已经成功舍身过了！
+推定実力が上がったら自然と付いてくるで。判断の質を積み上げていこ！	It comes naturally as your estimated skill rises. Keep building decision quality!	推定实力提升后自然会拿到。继续积累判断质量吧！
+最善手を重ねていけば届くで！焦らんでええ！	Keep stacking best moves and you'll get there! No rush!	不断积累最佳着法就能达到！不用着急！
+最善率は届いとる、あとは外したときの損失を抑えたら来るで！	Your best-move rate is there; just keep the losses small when you miss!	最佳率已经够了，接下来控制失误时的损失就行！
+最善率があと#%や、最善を積み上げていこ！	Your best-move rate needs # more %. Keep stacking best moves!	最佳率还差#%，继续积累最佳着法吧！
+ポカ（疑問手・悪手）を減らすのが先や	First cut down on blunders (dubious and bad moves)	先减少失误（疑问手·恶手）
+外してええのは#手で#手まで、疑問手・悪手は#〜#回までや	You can miss up to # in #, with at most #–# dubious or bad moves	每#手最多失误#手，疑问手·恶手最多#～#次
+外すときも好手（差#pt以内）で止めるんやで	When you miss, keep it to a good move (within # pt)	失误时也要控制在好手（差#pt以内）
+目安は、直近#手で最善（最善扱いも入れて）が#%！これが最低ラインや！#手の損失の平均も#pt以内にしときたい。	The guide: #% best moves (including "counted as best") over your last # moves! That's the minimum! You also want an average loss of # pt or less per # move.	标准是最近#手中最佳（含按最佳计）达到#%！这是最低线！每#手的平均损失也最好在#pt以内。
+いまの推定実力は最善率#%・平均損失#ptや。	Your current estimated skill: #% best moves, # pt average loss.	你现在的推定实力：最佳率#%，平均损失#pt。
+いまの最高は#人、あと#人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！	Your best so far is #, # more to go! Mark someone in the rankings as a rival. It makes it more fun!	目前最高是#人，还差#人！在排行榜上把在意的人视为对手吧。更有动力！
+いまは#回、あと#回や！デイリートーナメントは毎日#:#・#:#・#:#・#:#の#部から、都合のええ#部に出られるで。ホームの「オンライン大会」の上のカードからや！	You're at #, # more! The daily tournament runs # sessions a day (#:#, #:#, #:#, #:#); join whichever # suits you, from the card above "Online tournaments" on the home screen!	现在#次，还差#次！每日赛每天有#:#·#:#·#:#·#:#共#场，选方便的#场参加。从主页「在线比赛」上方的卡片进入！
+まずは#つ、そろえてみよか！	Start by completing one!	先集齐一个看看吧！
+まずは#行、そろえてみよか！	Start by completing one row!	先完成一行看看吧！
+対局	Games	对局
+ベストペア	Best pair	最佳对子
+ミラクルセット	Miracle set	奇迹组合
+大会完走	Tournaments finished	比赛完赛
+低PPセット	Low-PP set	低PP盘局
+全セット優勝	Every set won	全盘第一
+セット優勝	Set win	盘局第一
+決勝進出	Final	进入决赛
+強豪大会 決勝進出	Final vs strong field	强手比赛进入决赛
+強豪大会 優勝	Win vs strong field	强手比赛夺冠
+#連続最善	# best in a row	连续#次最佳
+パーフェクト	Perfect	完美
+溜めと捨て身	Holding & sacrifice	蓄力与舍身
+全手好手セット	All-good set	全好手盘
+ノーミス	No fouls	零失误
+#枚出し	#-card play	出#张
+かっこ割り算	Bracketed division	括号除法
+ミスがハマる	Lucky mistake	失误命中
+電光石火	Lightning fast	电光石火
+即断即決	Snap decisions	当机立断
+クイックドロー	Quick draw	快速拔枪
+アウツ#問目	Outs Q#	听牌第#题
+アタック完走	Attack finished	冲刺完成
+アタック得点	Attack score	冲刺得分
+アタック収集	Attack collection	冲刺收集
+図鑑登録	Collection entries	图鉴登录
+図鑑の場	Collection fields	图鉴场数
+早見表	Cheat sheet	速查表
+オンライン大会 表彰台	Online podium	在线比赛领奖台
+公式大会 表彰台	Official podium	官方比赛领奖台
+デイリー 参加	Daily entries	每日赛参加
+デイリー 優勝	Daily win	每日赛冠军
+デイリー #位	Daily #th	每日赛第#名
+シーズン 表彰台	Season podium	赛季领奖台
+これは「@」やな。「@」でもらえる銅バッジや！	That's "@". A bronze badge for "@"!	这是「@」。达成「@」可获得铜徽章！
+これは「@」やな。「@」でもらえる銀バッジや！	That's "@". A silver badge for "@"!	这是「@」。达成「@」可获得银徽章！
+これは「@」やな。「@」でもらえる金バッジや！	That's "@". A gold badge for "@"!	这是「@」。达成「@」可获得金徽章！
+「@」、銅バッジやで！条件は「@」や。	"@" is a bronze badge! The condition: "@".	「@」是铜徽章！条件是「@」。
+「@」、銀バッジやで！条件は「@」や。	"@" is a silver badge! The condition: "@".	「@」是银徽章！条件是「@」。
+「@」、金バッジやで！条件は「@」や。	"@" is a gold badge! The condition: "@".	「@」是金徽章！条件是「@」。
+「@」は銅のバッジや！条件は「@」。	"@" is a bronze badge! The condition: "@".	「@」是铜徽章！条件是「@」。
+「@」は銀のバッジや！条件は「@」。	"@" is a silver badge! The condition: "@".	「@」是银徽章！条件是「@」。
+「@」は金のバッジや！条件は「@」。	"@" is a gold badge! The condition: "@".	「@」是金徽章！条件是「@」。
+← アドバイスに戻る	← Back to advice	← 返回建议
+← もどる	← Back	← 返回
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（オンラインの卓・デイリーの大会の画面）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+デイリートーナメント #/# 第#部（#:#）	Daily tournament #/# · Session # (#:#)	每日赛 #/# 第#场（#:#）
+🃏 予選 #セット×#ゲーム	🃏 Qualifiers: # sets × # games	🃏 预选赛 #盘×#局
+🏆 上位#人で決勝	🏆 Final: top #	🏆 前#名进入决赛
+出られるのは	You can play	可参加
+エントリーは	Entry opens	报名时间
+開始の#分前	# min before the start	开始前#分钟
+から	from	起
+のグループ（空きはAI研究員・AI）	per group (empty seats: AI researchers and AI)	一组（空位由AI研究员和AI填补）
+上位#人・#ゲーム	Top # · # games	前#名 · #局
+🌐 予選 第#セット・§卓	🌐 Qualifier set # · table §	🌐 预选赛 第#盘 · §桌
+🌐 決勝	🌐 Final	🌐 决赛
+🤖 @の番（AIが打っています）	🤖 @'s turn (AI is playing)	🤖 @的回合（AI出牌中）
+AIが考え中	AI thinking	AI思考中
+🤖 AIに任せる	🤖 Let AI play	🤖 交给AI
+自分で打つ	Play myself	自己出牌
+空いた席をうめるAI	AI filling an empty seat	填补空座的AI
+空いた席をうめるAI（ポイント・ランキングなし）	AI filling an empty seat (no points or ranking)	填补空座的AI（无积分·不上榜）
+これまでの場札	Field cards so far	之前的场牌
+手番の順	Turn order	出牌顺序
+ひとことを送る	Send a message	发送一句话
+いまの推定実力−#の強さ（最低★#）のAIが代わりに打ちます	An AI one level below your estimated skill (min ★#) plays for you	由比你当前推定实力低#级的AI（最低★#）代打
+あなたの番・残り#秒	Your turn · # sec left	你的回合 · 剩#秒
+新しい場	New field	新场数
+次のゲームまで #秒	Next game in # sec	距下一局#秒
+大会の順位へ	To tournament standings	去比赛排名
+🏁 セット終了	🏁 Set over	🏁 本盘结束
+予選 第#/#セット	Qualifier set #/#	预选赛 第#/#盘
+次は 予選 第#セット	Next: qualifier set #	下一盘：预选赛第#盘
+次は 決勝	Next: the final	下一盘：决赛
+そろったら始まります。準備ができたら押してください	It starts when everyone's ready. Tap when you're ready	大家到齐就开始。准备好了请点击
+✋ 準備OK	✋ Ready	✋ 准备好了
+準備OK！ ほかの人を待っています（#/#人）	Ready! Waiting for others (#/#)	准备好了！等待其他人（#/#人）
+出場する人の準備を待っています（#/#人）	Waiting for players to get ready (#/#)	等待参赛者准备（#/#人）
+あと#分#秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）	Starts in #m #s even if not everyone's ready (AI plays for anyone missing)	#分#秒后即使没到齐也会开始（缺席者由AI代打）
+第#セットまでの成績（次は第#セット）	Results through set # (next: set #)	截至第#盘的成绩（下一盘第#盘）
+いま第#セットの対局中（全部の卓が終わると反映）	Set # in progress (updated when all tables finish)	第#盘进行中（所有桌结束后更新）
+予選の最終成績	Final qualifier results	预选赛最终成绩
+最終順位	Final standings	最终排名
+⏳ ほかの卓が終わるのを待っています	⏳ Waiting for other tables to finish	⏳ 等待其他桌结束
+終わった卓 #/#。全部の卓が終わると、このセットの成績が順位に入り、次へ進みます。	Finished tables: #/#. When all tables finish, this set's results go into the standings and we move on.	已结束的桌 #/#。所有桌结束后，本盘成绩计入排名并进入下一步。
+終わった卓 #/#。全部の卓が終わると、このセットの成績が順位に入り、決勝の順位が決まります。	Finished tables: #/#. When all tables finish, this set's results go into the standings and the final ranking is decided.	已结束的桌 #/#。所有桌结束后，本盘成绩计入排名并决定决赛名次。
+🏆 決勝の対局中です	🏆 The final is in progress	🏆 决赛进行中
+決勝の卓が終わると、順位が決まります。下の「観戦する卓を選ぶ」から決勝を見られます。	The ranking is decided when the final table finishes. You can watch the final from "Choose a table to watch" below.	决赛桌结束后决定名次。可以从下面的「选择观战的桌」观看决赛。
+・セットPP #	· Set PP #	· 本盘PP #
+このゲーム PP #	This game PP #	本局 PP #
+📋 順位	📋 Standings	📋 排名
+💬	💬	💬
+対局中	Playing	对局中
+決勝進出	To final	进入决赛
+うーん…	Hmm…	嗯…
+やった！	Yes!	太好了！
+これでどうや	How's this	这样如何
+計算どおり	As calculated	正如计算
+しまった	Oops	糟糕
+いけっ	Go!	上！
+ふふん	Heh	哼哼
+引くしかないか…	Guess I have to draw…	只能摸牌了…
+むむ…	Hmm…	唔…
+ここは引く	Drawing here	这里摸牌
+`.split('\n').filter(Boolean).map(l => l.split('\t')));
+
+// 辞書（キャラのプロフィール）
+window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
+無表情で全通りを暗算する天才小学生。誰も彼が笑ったところを見たことがない。ときどき、まだめくられていない札が「なんとなく」分かるらしい。本人はただの勘だと思っている。	An expressionless young genius who calculates every possibility in his head. No one has ever seen him smile. Sometimes he seems to "just know" cards that haven't been flipped yet. He thinks it's only intuition.	面无表情、在脑中算尽所有可能的天才小学生。谁也没见过他笑。有时似乎能「隐约」知道还没翻开的牌。他本人以为只是直觉。
+全通りを読むという噂の算盤ロボ。話す内容は、だいたい天気。	An abacus robot rumored to read every possibility. Mostly talks about the weather.	传说能算尽所有可能的算盘机器人。聊的大多是天气。
+数学一筋五十年の名誉教授。対局中は、なぜか論文の話しかしない。	A professor emeritus devoted to math for fifty years. During games he only talks about his papers, for some reason.	专注数学五十年的名誉教授。对局时不知为何只聊论文。
+いるのかいないのか分からない、量子の猫。気づくと箱の中で寝ている。	A quantum cat who may or may not be there. You'll find it asleep in a box.	不知在不在的量子猫。回过神来已经在箱子里睡着了。
+千年生きた亀の老師。動きは遅いが、負けない打ち方を極めた。	A thousand-year-old turtle master. Slow-moving, but has perfected the art of never losing.	活了千年的乌龟老师。动作慢，却练就了不败的打法。
+名家に仕える老執事。どんな局面でも紅茶の温度を気にしている。	An old butler serving a noble house. Worried about the tea's temperature no matter the situation.	侍奉名门的老管家。无论什么局面都在意红茶的温度。
+北極から来た白熊の大将。めったに動じず、PPを凍りつかせる。	A polar bear general from the Arctic. Rarely rattled; freezes your PP solid.	来自北极的白熊大将。很少动摇，能把PP冻住。
+古い屋敷に何百年も住む座敷わらし。見た目は子どもだが、誰より長生き。	A house spirit who has lived in an old mansion for centuries. Looks like a child, but is older than anyone.	在老宅里住了几百年的座敷童子。看起来是孩子，却比谁都长寿。
+サバンナを統べる獅子の王。堂々と札を叩きつける。	The lion king who rules the savanna. Slams his cards down with dignity.	统治草原的狮子王。威风凛凛地把牌拍下。
+大型バイクで現れる伝説のおばあちゃん。札を出すのも、とにかく速い。	A legendary granny who shows up on a big motorbike. She plays her cards incredibly fast, too.	骑着大型摩托登场的传奇奶奶。出牌也快得惊人。
+刀を算盤に持ち替えた剣豪。一太刀で三枚を斬る。	A swordmaster who traded his sword for an abacus. Cuts three cards in one stroke.	把刀换成算盘的剑豪。一刀斩三张。
+銀河をまたにかける宇宙海賊の船長。地球には休暇で来たらしい。	Captain of space pirates roaming the galaxy. Apparently on vacation on Earth.	纵横银河的宇宙海盗船长。据说是来地球度假的。
+ある日突然やってきた謎の転校生。たぶん宇宙人。地球の数字を研究中。	A mysterious transfer student who suddenly showed up one day. Probably an alien. Studying Earth's numbers.	某天突然出现的神秘转校生。大概是外星人。正在研究地球的数字。
+いつも笑っている道化師。本気なのか、ふざけているのか、誰にも分からない。	A clown who's always smiling. No one can tell if he's serious or joking.	总是笑着的小丑。谁也看不出他是认真还是开玩笑。
+九本のしっぽを持つ狐。打ち方も顔も、ころころ変える。	A fox with nine tails. Changes play style and face on a whim.	有九条尾巴的狐狸。打法和面孔都变来变去。
+予告状とともに現れる怪盗。盗むのは宝石と、上がりの一手。	A phantom thief who appears with a calling card. Steals jewels, and the winning move.	伴随预告信出现的怪盗。偷的是宝石和出完的一手。
+学ランを羽織った小学校の裏番長。ゼロにだけは勝てない。	The secret boss of an elementary school, in a school jacket. The one person he can't beat is Zero.	披着学生制服的小学校园老大。唯独赢不了零。
+完璧主義の生徒会長。番長カケルとは犬猿の仲。	A perfectionist student council president. Can't stand Kakeru the boss.	完美主义的学生会长。和老大翔水火不容。
+双子の兄。ヒダリとは打ち方も性格も真逆。	The older twin. His play and personality are the exact opposite of Hidari's.	双胞胎哥哥。打法和性格都和小左完全相反。
+双子の弟。慎重派で、兄のミギにいつもあきれている。	The younger twin. Cautious, and always exasperated with his brother Migi.	双胞胎弟弟。谨慎派，总是对哥哥小右无语。
+将棋のプロを引退した猫。三手先まで読むのが口ぐせ。	A cat who retired from professional shogi. Always says he reads three moves ahead.	从职业将棋界退役的猫。口头禅是「看三步棋」。
+雪山から来た雪女。熱くなった者から負けていく、と言う。	A snow woman from the snowy mountains. She says whoever gets heated loses first.	来自雪山的雪女。她说先激动的人先输。
+一流商社のエース。何事もコスパで考える。	The ace of a top trading firm. Thinks about everything in terms of cost-performance.	一流商社的王牌。凡事都看性价比。
+山から下りてきた天狗。鼻と態度がでかい。	A tengu who came down from the mountains. Big nose, bigger attitude.	从山上下来的天狗。鼻子大，架子更大。
+未来を占うロボ。的中率はちょうど半分。	A robot that predicts the future. Exactly half right.	预测未来的机器人。命中率正好一半。
+世界大会常連のプロゲーマー。カードゲームも、だいたい攻略済み。	A pro gamer who's a regular at world championships. Has pretty much mastered card games too.	世界大赛常客的职业玩家。纸牌游戏也基本攻略完了。
+町を守る消防士。火の元とPPには、とにかく慎重。	A firefighter who protects the town. Extremely careful with fire hazards, and PP.	守护小镇的消防员。对火源和PP都格外谨慎。
+天才ゼロの自称ライバル。毎回挑んでは負ける。	Genius Zero's self-proclaimed rival. Challenges him every time and loses.	自称天才零的对手。每次挑战每次输。
+打ち方がころころ化けるタヌキ。たまに葉っぱが混ざる。	A tanuki whose play style keeps shape-shifting. A leaf slips in now and then.	打法变来变去的狸猫。偶尔会混进一片叶子。
+お釣りの計算なら町いちばん。	Best in town at counting change.	算找零是全镇第一。
+水晶玉で次の場を占う。たまに当たる。	Reads the next field in her crystal ball. Sometimes right.	用水晶球预测下一个场数。偶尔会准。
+素材を大事にするイタリア料理人。大きい札から下ごしらえ。	An Italian chef who cares about ingredients. Preps the big cards first.	珍惜食材的意大利厨师。先处理大牌。
+一本勝ちしか狙わない柔道部のエース。	The judo club's ace, who only goes for a clean ippon.	只追求一本胜的柔道部王牌。
+図書委員。計算の本を全部読んだ。	A library committee member who's read every math book.	图书委员。读完了所有计算方面的书。
+川から来た河童。頭の皿が乾くと弱くなる。	A kappa from the river. Gets weaker when the dish on his head dries out.	来自河里的河童。头上的盘子一干就变弱。
+町のポストがロボになった。数字の仕分けが得意。	The town's mailbox turned into a robot. Great at sorting numbers.	镇上的邮筒变成了机器人。擅长分拣数字。
+海の男。豪快に札を出す。	A man of the sea. Plays his cards boldly.	大海的男人。豪迈地出牌。
+ステージ帰りのアイドル。気分で打ち方が変わる。	An idol fresh off the stage. Her play style changes with her mood.	刚下舞台的偶像。打法随心情变化。
+保健室の先生。無理は禁物がモットー。	The school nurse. Her motto: don't overdo it.	保健室的老师。座右铭是「不要勉强」。
+速さは一流、計算は二流の見習い忍者。	A ninja trainee: first-rate speed, second-rate math.	速度一流、计算二流的见习忍者。
+「Kは傷む前に売るんだよ！」大きい札から捨てる。	"Sell the K before it spoils!" Throws away big cards first.	「K要趁没坏之前卖掉！」先扔大牌。
+頭が÷の形をした妖精。「割り切れない世の中だよね〜」	A fairy with a ÷-shaped head. "The world just doesn't divide evenly, huh~"	头是÷形状的精灵。「这世界总是除不尽呢～」
+南極から迷い込んだペンギン。寒いと手が止まる。	A penguin who wandered in from Antarctica. Freezes up when it's cold.	从南极迷路过来的企鹅。一冷手就停了。
+入社#年目。電卓が手放せない。	A first-year employee. Can't let go of his calculator.	入职第一年。离不开计算器。
+野球少年。全部ホームラン狙い。	A baseball kid. Swings for a home run every time.	棒球少年。每次都想打本垒打。
+夜しか元気が出ないおばけ。昼間はずっと眠い。	A ghost who only perks up at night. Sleepy all day.	只有晚上才有精神的幽灵。白天一直很困。
+花屋さん。札も花も、大事に扱う。	A florist. Handles cards and flowers with care.	花店老板。对牌和花都很珍惜。
+カラオケが大好きな課長。勢いだけはある。	A section chief who loves karaoke. All momentum.	爱唱卡拉OK的科长。只有气势。
+のんびり屋の子ブタ。おやつの時間には誰より正確。	A laid-back piglet. More punctual than anyone at snack time.	悠闲的小猪。到了点心时间比谁都准时。
+時刻表を全部覚えている鉄道ファン。	A train fan who's memorized every timetable.	背下了所有时刻表的铁道迷。
+札をかじるのが好きな柴犬。好きな数字は骨の数。	A shiba dog who likes chewing cards. Favorite number: how many bones he has.	喜欢啃牌的柴犬。最喜欢的数字是骨头的数量。
+とにかく#枚出したい小学#年生。	A first grader who just wants to play three cards.	一心只想出三张的小学一年级生。
+笹を食べながら打つパンダ。だいたい眠そう。	A panda who plays while eating bamboo. Usually sleepy.	边吃竹子边打牌的熊猫。大多时候都很困。
+生まれたてのひよこ。数字はまだ#までしか知らない。	A newly hatched chick. Only knows numbers up to # so far.	刚出生的小鸡。数字只知道到#。
+冬のあいだだけ倶楽部に来る雪だるま。暑いと溶ける。	A snowman who visits the club only in winter. Melts when it's hot.	只在冬天来俱乐部的雪人。一热就融化。
+Ωについてきた宇宙人の子ども。地球の数字は勉強中。	An alien kid who followed Ω here. Still learning Earth's numbers.	跟着Ω来的外星小孩。正在学习地球的数字。
+「老眼で数字がよう見えん」が口ぐせのご隠居。	A retired elder whose catchphrase is "My old eyes can't read the numbers."	口头禅是「老花眼看不清数字」的退休老爷。
+気まぐれな三毛猫。札よりひなたが好き。	A whimsical calico cat. Prefers sunny spots to cards.	随性的三花猫。比起牌更喜欢晒太阳。
+掃除のついでに参加しているロボ。たまに札を吸い込む。	A robot that joins in while cleaning. Sometimes vacuums up cards.	一边打扫一边参加的机器人。偶尔会把牌吸进去。
+倶楽部の壁に映る影。自分ではほとんど計算できないが、同じ卓でいちばん強い人の打ち方をそっくり写しとる。達人と同じ卓になると、達人がもう一人増える。	A shadow on the club wall. It can barely calculate on its own, but copies the strongest player at the table perfectly. At a master's table, there are suddenly two masters.	映在俱乐部墙上的影子。自己几乎不会计算，却能完全复制同桌最强者的打法。和高手同桌时，就多出一个高手。
+雨の日だけ元気なカエル。とにかく跳ねるように出す。	A frog who only perks up on rainy days. Plays cards like he's hopping.	只有下雨天才有精神的青蛙。出牌像跳跃一样。
+計算ブリッジ倶楽部の初代チャンピオン。いつから倶楽部にいるのか、誰も知らない。ゼロに計算を教えた師。ふだんは目を閉じたまま打つが、奥義「絶対透視」で目を開くと、山札の底まで見通すという。	The first champion of the Keisan Bridge club. No one knows how long Kanata has been there. The teacher who taught Zero to calculate. Usually plays with eyes closed, but when they open with the secret art "Absolute Clairvoyance", Kanata can see to the bottom of the deck.	算式桥牌俱乐部的初代冠军。谁也不知道卡纳塔从什么时候起就在俱乐部了。是教零计算的老师。平时闭着眼睛打牌，但用奥义「绝对透视」睁开眼时，能看穿牌堆底部。
+強さは対局が終わるまでのお楽しみ。	Their strength is a surprise until the game ends.	强度要等对局结束才揭晓。
+セリフから手の内はまったく読めない。	You can't read their hand from what they say at all.	完全无法从台词读出手牌。
+セリフから手の内はほとんど読めない。	You can hardly read their hand from what they say.	几乎无法从台词读出手牌。
+ときどき本音が漏れる。	Sometimes lets the truth slip.	偶尔会说漏真心话。
+本音がセリフにそのまま出る。よく聞こう。	Says exactly what's in their hand. Listen closely.	真心话直接写在台词里。仔细听吧。
+ライバルがまだおらんな！	No rivals yet!	还没有对手呢！
+ランキングで気になる人を押して、プロフィールの「→ ライバル視する」を押してな。#人まで登録できるで！	Tap someone in the rankings, then "→ Mark as rival" on their profile. You can add up to #!	在排行榜上点你在意的人，再点资料里的「→ 视为对手」。最多可以登记#人！
+ランキングで選ぶ	Pick in the rankings	去排行榜选
+→ ライバル視する	→ Mark as rival	→ 视为对手
+⇄ 宿敵になる	⇄ Become nemeses	⇄ 成为宿敌
+ライバル視をやめる	Stop rivaling	不再视为对手
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
 
 // 実況・解説のセリフ（型）の英語・中国語。日本語の型 → [英語, 中文]。ない型は英語・中国語では出さない
@@ -8828,6 +9695,56 @@ window.I18N_LINES = {
 ]
 };
 
+// マサの豆知識（TIPS と同じ順）の英語・中国語。関数は lang（en／zh）を受け取る
+window.I18N_TIPS = [
+  ['Tournament practice with 16 players gives four 4-player tables. With one fewer opponent, your chance of winning your table goes from about 1/5 to 1/4, so set wins and the PP-0 "Perfect set" get easier. But more players fight for the final spots!', '比赛练习模式设成16人，就是4人桌×4。少一个对手，本桌第一的概率大约从1/5升到1/4，盘局第一和PP为0的「完美盘局」都更容易拿。不过争夺决赛名额的人也变多了！'],
+  ['Two cards left can be better than one! With one card you only go out on that exact number. With two, + − × ÷ give up to four fields that let you finish.', '剩两张有时比剩一张更容易出完！剩一张只能等那一个数字，剩两张用 ＋ − × ÷ 最多有4种场数能出完。'],
+  ['A pair plus one more card can be played when the field equals that extra card: 8−8+5＝5, 8÷8×5＝5. A pair is a handy "connector" anywhere!', '一对加另一张牌，场上是那张牌的数字时就能出：8−8+5＝5，8÷8×5＝5。对子是哪里都能用的「连接器」！'],
+  ['Two consecutive cards (like 6 and 7) can be played when the field is A: 7−6＝1. Everyone struggles with an A field, so remember this one!', '两张连续的牌（比如6和7）在场上是A时能出：7−6＝1。A场大家都头疼，记住了就赚到！'],
+  ['A is a handy card! ×1 or ÷1 keeps the other card\'s value. With 5 and A, you can play on 4, 5 or 6.', 'A是好用的牌！×1、÷1能让搭配的牌保持原值。5和A的话，4、5、6三种场数都能出。'],
+  ['Field numbers are only 1–13. The formula can get big along the way, but combos whose answer is 14+ or 0 can\'t be played.', '场上数字只有1～13。算式中间变大没关系，但答案是14以上或0的组合不能出。'],
+  ['Get rid of big cards first. One K left is 13 PP. Three As left is only 3!', '基本是先减大牌。只剩一张K，PP就是13。剩三张A也才3！'],
+  ['When the field is Q or K, it\'s a chance to dump big cards by adding them. Like 9+4 on a K field. Drop the heavy ones here!', '场上是Q或K时，是用加法一起处理大牌的机会。比如K场出9+4，在这里扔掉重牌！'],
+  ['10–K go over 13 fast when multiplied. Think of them as cards for subtraction and division: Q−9＝3, Q÷4＝3.', '10～K一乘就超过13。把它们当成减法和除法用的牌：Q−9＝3，Q÷4＝3。'],
+  ['Division only when it divides evenly. Primes like 7, 11 and 13 are hard to divide, so use them early with addition or subtraction.', '除法只能整除时用。7、11、13这样的质数很难被除，尽早用加减法打出去是诀窍。'],
+  ['Seven cards played as 3, 3 and 1 lets you go out in just 3 turns. Aim to drop 2+ cards per turn!', '7张手牌按3张、3张、1张出，最快3手就能出完。每回合争取减2张以上！'],
+  ['When someone is down to 1–2 cards, it\'s time to defend. Even if you can\'t go out, play your big cards first to cut your PP. In soccer too, when you\'re behind, stop the bleeding first!', '有人只剩1～2张时就该防守了。就算出不完，也先出大牌减少PP。足球也一样，落后时先防止再失球！'],
+  ['"Drawing on purpose" is an early-game plan. More cards means more formulas you can make. But cards drawn late just become PP!', '「故意摸牌」是开局的战术。手牌多了能凑的算式也多。但终盘摸的牌会直接变成PP！'],
+  ['Counting unseen cards is just like counting outs in poker. Whatever isn\'t on the table or in your hand is what\'s still to come.', '数看不见的牌，就和扑克的听牌计算一样。去掉场上出过的和自己手里的，剩下的就是会来的牌。'],
+  ['The AI compares moves by "chance of reaching the final" in the qualifiers and by "chance of winning" in the final. The best move can change in the same spot!', 'AI在预选赛按「进入决赛概率」、决赛按「夺冠概率」比较着法。同一个场面，最佳着法也可能不同！'],
+  ['Early on, readings vary a lot, so within 3.5 pt in round 1 and 2.0 pt in round 2 counts as "best". Relax in the early game!', '开局时分析的波动很大，所以第1巡差距3.5pt以内、第2巡2.0pt以内都算「按最佳计」。开局放轻松打！'],
+  l => { const L = [['6×4÷3', 8], ['9×4÷6', 6], ['8×3÷6', 4], ['10×6÷5', 12], ['12÷4×3', 9], ['8×9÷6', 12], ['5×8÷10', 4]], x = L[(Math.random() * L.length) | 0]; return l === 'zh' ? `先乘后除的算式很强。像${x[0]}＝${x[1]}这样，乘出大数也能用除法回到场上数字。诀窍是看「除数是不是乘数的约数」。` : `Multiply-then-divide formulas are strong. Like ${x[0]}＝${x[1]}: even after multiplying big, division brings you back to the field number. The trick: is the divisor a factor of what you multiplied?`; },
+  ['6×8÷4＝12, 6×4÷8＝3. The same three cards make different fields depending on the order. For multiply-and-divide, look for factors.', '6×8÷4＝12，6×4÷8＝3。同样三张牌，乘除顺序不同场数就不同。先乘后除的算式，找约数是捷径。'],
+  ['K (13) is prime, so it\'s almost useless for × and ÷. A K field is made by adding, like 9+4, 6+7 or Q+A, or by subtracting.', 'K（13）是质数，乘除几乎用不上。K场要用加法凑，比如9+4、6+7、Q+A，或者用减法。'],
+  ['Q divides by 2, 3, 4 and 6: Q÷3＝4, Q÷4×3＝9, Q÷6+5＝7. A card with lots of uses in division!', 'Q能被2、3、4、6整除：Q÷3＝4，Q÷4×3＝9，Q÷6+5＝7。是除法用途很多的牌！'],
+  ['(A+2)×3＝9, (5−3)×6＝12. Brackets let you multiply after adding or subtracting. Your waits widen fast!', '(A+2)×3＝9，(5−3)×6＝12。用括号就能先加减再乘，听牌一下子变宽！'],
+  (l, PS) => { const a = PS[0].mu, b = PS[2].mu, d = (b - a).toFixed(1), d5 = Math.round((b - a) * 5); return l === 'zh' ? `每局平均失分：按AI最佳着法是${a}，★3水平的打法是${b}。每局只差${d}分，5局就差约${d5}分，足以颠倒名次！` : `Average loss per game: ${a} playing the AI's best moves, ${b} at ★3 level. Only ${d} per game, but about ${d5} over 5 games: enough to flip the standings!`; },
+  ['Expected PP is "how many points you\'d lose on average if you play this move". Going out counts as 0, getting caught counts your leftover cards. Averaged over thousands of games.', '期望PP是「这样出牌平均会失多少分」的估计。出完算0分，被出完算剩余牌合计，再把几千次的结果平均。'],
+  ['There are 455 three-card combos. The ones with the widest waits go out on 9 or more of the 13 fields. Those are the combos in the cheat sheet!', '三张牌的组合有455种。听牌最宽的组合在13种场数中有9种以上能出完。速查表里列的就是这些组合！'],
+  ['The game ends the moment someone goes out. That\'s why the dealer (first to play) goes out more often. The details are in "Keisan Bridge in numbers"!', '有人出完的瞬间游戏就结束了。所以庄家（第一个出牌）更容易出完。详细数字在「用数字看算式桥牌」里！'],
+  ['Games usually end around round 4 or 5: seven cards over 4–5 turns. Aim to drop about 2 cards per turn!', '游戏一般在第4～5巡结束：7张牌分4～5回合出完。每回合减2张左右是标准！'],
+  ['Kanata is the only ★6. Only when the opponents are set to "All masters" does Kanata appear, as a seed in the final only. Skipping the qualifiers and jumping straight to the final… so unfair!', '★6只有卡纳塔一个人。只有把对手设成「全员高手」时，才会作为种子选手只在决赛出现。不打预选直接进决赛……太狡猾了！'],
+  ['Kanata\'s secret art "Absolute Clairvoyance" triggers 50% of the time on each turn. Once it does, Kanata sees every hand and even the deck order until the game ends. So unfair!', '卡纳塔的奥义「绝对透视」每轮有50%的概率发动。发动后到本局结束，能看到所有人的手牌和牌堆顺序。太狡猾了！'],
+  ['With clairvoyance, if Kanata sees someone later in the round can finish, Kanata dumps the heaviest cards before they go out. When Kanata sees through, prepare for losses more than for going out!', '透视中的卡纳塔如果看到后面有人能出完，就会抢先扔掉最重的牌。卡纳塔透视时，比起出完，更要防备失分！'],
+  ['Shadow copies the strongest AI at the table. If Kanata is there, even Shadow uses Absolute Clairvoyance. Just a shadow, yet… so unfair!', '影子会复制本桌★最高的AI。如果卡纳塔在场，连影子都会用绝对透视。明明只是影子……太狡猾了！'],
+  ['Win while facing Kanata\'s Absolute Clairvoyance and you get the "Clairvoyance breaker" badge. Don\'t give up even if it triggers in the final!', '在承受卡纳塔绝对透视的情况下夺冠，就能拿到「破解透视」徽章。就算决赛被发动也不要放弃！'],
+  ['"Last decision", "Cheat sheet" and "Unseen cards" don\'t affect your rating. Use them as much as you like to learn!', '「上次判断」「速查表」「查看还没出现的牌」用了也不影响评价。尽管用来学习吧！'],
+  ['Using "AI reading" or "Undo" excludes that move from your rating. Estimated skill counts it as a loss of "difficulty × 0.65", so you can\'t raise your skill by peeking only at hard spots!', '用了「AI分析」或「悔棋」，那一手就不计入评价。推定实力会按「场面难度×0.65」的损失计算，所以只在难的场面偷看是提升不了实力的！'],
+  ['Estimated skill is based on your last 100 decisions. Old mistakes fade away, so it\'s all about how you play from today!', '推定实力由最近100次判断决定。以前的失误会慢慢消失，就看你从今天起怎么打了！'],
+  ['Skill guide: ★3 is a 63% best-move rate with 2.2 pt average loss, ★4 is 79% and 1.2 pt, ★4.5 is 86% and 0.8 pt.', '推定实力的标准：★3是最佳率63%、平均损失2.2pt，★4是79%、1.2pt，★4.5是86%、0.8pt。'],
+  ['★1–2 AIs give away their hands in what they say. ★3 sometimes, ★4 only catchphrases, and ★5\'s words have nothing to do with their hand. Stronger opponents are harder to read!', '★1～2的AI会在台词里不小心透露真实手牌。★3偶尔会，★4只说口头禅，★5的台词和手牌毫无关系。越强越难读懂！'],
+  ['Overall ranking weights: estimated skill 35, BP 30, best streak 20, Badge Attack 15. First in everything is 100 points!', '综合排行榜的权重：推定实力35、BP30、连续最佳20、徽章冲刺15。全部第一就是100分！'],
+  ['Daily tournaments are 30 seconds per move. You can enter only one session a day, and you can switch sessions before it starts.', '每日赛每手限时30秒。每天只能参加一场，开始前可以换到别的场次。'],
+  ['Daily sessions 1 (17:30) and 3 (19:30) are the slow kind: 5 games per qualifier set.', '每日赛第1场（17:30）和第3场（19:30）是慢节奏型：预选赛每盘5局。'],
+  ['Even 3 minutes of Formula Hunter helps. Like juggling a soccer ball, daily basics become speed in real games!', '算式猎人只玩3分钟也好。就像足球的颠球，每天的基本功会变成实战的速度！'],
+  ['Watch when a ★5 chooses to draw. Watching good players is the fastest way to improve!', '观战时看看★5在什么时候选择摸牌。看高手比赛是进步的捷径！'],
+  ['More badges unlock more avatar items. Faces, outfits, items, pets, backgrounds… so many combos that you won\'t look like anyone else. Build your own researcher!', '徽章越多，头像能用的道具也越多。脸、衣服、手持物、宠物、背景……组合多到不会和别人撞衫。打造你独一无二的研究员吧！'],
+  ['Badges come in bronze, silver and gold. Getting gold often unlocks an avatar item!', '徽章分铜、银、金三级。拿到金徽章，很多都能解锁头像道具！'],
+  ['Crowns are special. Collect every badge in a series and you get one: 500 BP (300 BP for the Rivals crown) plus a whole special avatar set!', '冠是特别的。集齐一个系列的全部徽章就能拿到：500BP（对手类的冠是300BP），再加一整套特别头像！'],
+  ['Each series has its own crown avatar set: panda, lion, robot… even a dragon and a tiger. Which one you get is a surprise until you earn the crown!', '每个系列的冠都有不同的头像套装：熊猫、狮子、机器人……还有龙和老虎。能拿到哪个，等拿到冠就知道了！'],
+  ['Use AI reading or Undo even once in a tournament and that tournament\'s final and win badges won\'t count. Badges earned the hard way feel different!', '比赛中只要用过一次AI分析或悔棋，该比赛的进入决赛和夺冠徽章就不计了。凭真本事拿的徽章，感觉就是不一样！']
+];
+
 // ---------- 多言語（英語・中国語 簡体字）：画面に出た日本語を、表示するときに辞書で差し替える ----------
 // 辞書は I18N_ROWS（i18n_dict.js）。数字は # 、キャラの名前は @ に置きかえて引く（「ゴウのプロフィール」→「@のプロフィール」）。
 // 見つからない文はそのまま日本語で出す（第1段は画面の文字。実況・総評などは順に足す）。
@@ -8841,6 +9758,9 @@ window.I18N_LINES = {
   function build() {
     if (ready) return; ready = true;
     (G.I18N_ROWS || []).forEach(r => { if (r && r[0] && !D.has(r[0])) D.set(r[0], { en: r[1], zh: r[2] }); });
+    // 実況の型も辞書に（数字の {m} などは #、名前の {n} は @。それ以外の入れ物がある型は入れない）
+    const NUMK = /^(m|bp|k|h|g|r|t|d|rk|pp|exp|pct|men|lo|hi|avg|s|tb|mypp)$/;
+    Object.entries(G.I18N_LINES || {}).forEach(([ja, tr2]) => { const ks = [...ja.matchAll(/\{(\w+)\}/g)].map(m => m[1]); if (!ks.every(k => NUMK.test(k) || k === 'n')) return; const nk = ks.filter(k => k !== 'n'); if (nk.length > 9 || new Set(nk).size !== nk.length) return; const key = ja.replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#'); const cv = x => x.replace(/#/g, '\u0002').replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#' + (nk.indexOf(k) + 1)); if (!D.has(key)) D.set(key, { en: cv(tr2[0]), zh: cv(tr2[1]) }); });
     (G.I18N_NAMES || []).forEach(r => { NAMES.push(r); if (!D.has(r[0])) D.set(r[0], { en: r[1], zh: r[2] }); });
     NAMES.sort((a, b) => b[0].length - a[0].length);
   }
@@ -8848,9 +9768,9 @@ window.I18N_LINES = {
   // # は順に、#2 のように番号つきならその数（訳で数字を省くとき用）。@ は名前を順に
   // § は式・手札などのかたまり（そのまま入れる）
   let TOK = [];
-  function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)); }
+  function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)).replace(/\u0002/g, '#'); }
   const CARD = '(?:[AJQK]|1[0-3]|[2-9])';
-  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
+  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[A-Z](?=卓)|[AJQK](?=のとき)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
   function tokens(core) { const L = []; const k = core.replace(TOK_RE, m => { L.push(m); return '§'; }); return { k, L }; }
   function look(key, nums, names) { const h = D.get(key); return h && h[lang] ? fill(h[lang], nums, names) : null; }
   function tr(s) {
@@ -8874,9 +9794,25 @@ window.I18N_LINES = {
       const tk = tokens(k3); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, nm); if (r != null) return r; TOK = []; }
     }
     // 末尾の「。」はなくても引く
-    if (core.endsWith('。') && core.length > 1) { const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : '.') : (/[。！？]$/.test(a) ? '' : '。')); }
+    if (/[。！]$/.test(core) && core.length > 1) { const ex = core.endsWith('！'); const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : ex ? '!' : '.') : (/[。！？]$/.test(a) ? '' : ex ? '！' : '。')); }
     // 文がつながっているとき：「。」で前後に分けて、両方訳せたらつなぐ（説明文のうしろに残り時間が付く など）
-    if (depth < 3) { const parts = core.split(/(?<=。)/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    if (depth < 3) { const parts = core.split(/(?<=[。！？])/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    // 「…」が入れ子になっているとき（条件の中に「強豪ぞろい」など）：いちばん外の「」ごとに訳す
+    if (/「[^」]*「/.test(core)) {
+      const segs = []; let dep = 0, st = -1;
+      for (let i = 0; i < core.length; i++) { if (core[i] === '「') { if (!dep) st = i; dep++; } else if (core[i] === '」' && dep) { dep--; if (!dep) segs.push([st, i + 1]); } }
+      const nm = []; let k6 = '', at = 0, ok = true;
+      for (const [a, b] of segs) { const t = trCore(core.slice(a + 1, b - 1), 9); if (t == null) { ok = false; break; } k6 += core.slice(at, a) + '「@」'; at = b; nm.push(t); }
+      if (ok && segs.length) { k6 += core.slice(at); nums.length = 0; TOK = []; r = look(dig(k6), nums, nm); if (r != null) return r; }
+    }
+    // 名前と「…」が両方あるとき：出てきた順に @ にして引く
+    if (pos.length && /「[^「」]+」/.test(core)) {
+      const sp = pos.map(([p, l, v]) => [p, l, v, 0]); const re = /「([^「」]+)」/g; let m;
+      while ((m = re.exec(core))) { const t = trCore(m[1], 9); if (t != null && !sp.some(([q, l]) => m.index < q + l && q < m.index + m[0].length)) sp.push([m.index, m[0].length, t, 1]); }
+      sp.sort((a, b) => a[0] - b[0]); let k5 = '', at = 0; const nm = [];
+      sp.forEach(([p, l, v, q]) => { if (p < at) return; k5 += core.slice(at, p) + (q ? '「@」' : '@'); at = p + l; nm.push(v); }); k5 += core.slice(at);
+      nums.length = 0; TOK = []; r = look(dig(k5), nums, nm); if (r != null) return r;
+    }
     // 「〜（まだ）」は中を訳して（not yet）を付ける
     if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang === 'en' ? ' (not yet)' : '（未获得）'); }
     // 「…」の中を先に訳して @ にする（「皆勤賞」→ "Perfect Attendance"）
@@ -8889,7 +9825,7 @@ window.I18N_LINES = {
       const inName = i => NAMES.some(([ja]) => { if (!ja.includes(sep)) return false; let p = core.indexOf(ja); while (p >= 0) { if (i > p && i < p + ja.length) return true; p = core.indexOf(ja, p + 1); } return false; });
       let i = core.indexOf(sep); while (i > 0 && inName(i)) i = core.indexOf(sep, i + 1);
       if (i > 0 && i < core.length - 1) {
-        const a = trCore(core.slice(0, i), depth + 1), b = trCore(core.slice(i + 1), depth + 1);
+        const a = trCore(core.slice(0, i).trim(), depth + 1), b = trCore(core.slice(i + 1).trim(), depth + 1);
         if (a != null && b != null) return a + (sep === '：' ? (lang === 'en' ? ': ' : '：') : sep === '・' ? (lang === 'en' ? ' · ' : '·') : sep === '／' ? ' / ' : sep) + b;
       }
     }
@@ -9539,14 +10475,14 @@ const TIPS = [
   '冠のアバターセットは系統ごとにちがうで。パンダ・ライオン・ロボット…ドラゴンや虎までおる。どれが手に入るかは、冠を取ってのお楽しみや。',
   '大会でAIの読みや待ったを1回でも使うと、その大会の決勝進出や優勝のバッジは対象外になるんや。ガチンコで取ったバッジは、ひと味ちがうで。'
 ];
-function tipAt(i) { for (let k = 0; k < TIPS.length; k++) { const t = TIPS[(i + k) % TIPS.length], s = typeof t === 'function' ? t() : t; if (s) return s; } return ''; }
+function tipAt(i) { const TT = window.I18N && I18N.lang !== 'ja' ? window.I18N_TIPS : null; for (let k = 0; k < TIPS.length; k++) { const j = (i + k) % TIPS.length, t = TT ? TT[j] : TIPS[j], s = TT ? (typeof t === 'function' ? t(I18N.lang, PLAY_STYLES) : t && t[I18N.lang === 'zh' ? 1 : 0]) : typeof t === 'function' ? t() : t; if (s) return s; } return ''; } // 英語・中国語は I18N_TIPS（同じ順）
 // 日ごとに並びを変える（同じ日は同じ順）
 const tipOrder = () => { const d = Math.floor((Date.now() + 9 * 3600000) / 86400000); let x = d * 9301 + 49297; const o = TIPS.map((_, i) => i); for (let i = o.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
 const tipCache = {};
 function tipText(n) { const o = tipOrder(), i = o[((n % o.length) + o.length) % o.length]; const key = new Date().toDateString() + ':' + i; return tipCache[key] || (tipCache[key] = tipAt(i)); }
 // アドバイスの下：1日1つ（端末ごとに完全ランダム。その日は同じ豆知識）
 function tipToday() {
-  const d = new Date().toDateString(); let o = null; try { o = JSON.parse(localStorage.getItem('kb.tipDay') || 'null'); } catch (e) { }
+  const d = new Date().toDateString() + (window.I18N ? I18N.lang : ''); let o = null; try { o = JSON.parse(localStorage.getItem('kb.tipDay') || 'null'); } catch (e) { }
   if (!o || o.d !== d || !o.s) { const i = (Math.random() * TIPS.length) | 0; o = { d, s: tipAt(i) }; try { localStorage.setItem('kb.tipDay', JSON.stringify(o)); } catch (e) { } }
   return o.s;
 }
@@ -9584,8 +10520,8 @@ function masaAdvice(more) {
   if (CLOUD_ON && nG >= 3 && !rivalsOf().length) add(4, `${nm}、ライバルはまだおらんな？ランキングで実力が近い人をライバル視してみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！`, { go: 'ranking', l: 'ランキングで選ぶ' });
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
   if (openT.length) add(4, `いま「${openT[0].name}」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！`, null);
-  // 重みつきで3つ（押すたびに少し変わる）
-  const pick = []; const pool = tips.slice();
+  // 重みつきで3つ（押すたびに少し変わる）。英語・中国語は訳せるものだけ
+  const pick = []; const pool = window.I18N && I18N.lang !== 'ja' ? tips.filter(t => !KANA_RE.test(I18N.tr(t.text))) : tips.slice();
   while (pick.length < 3 && pool.length) { const tot = pool.reduce((a, t) => a + t.w, 0); let x = Math.random() * tot, i = 0; for (; i < pool.length; i++) { x -= pool[i].w; if (x <= 0) break; } pick.push(pool.splice(Math.min(i, pool.length - 1), 1)[0]); }
   if (!pick.length) pick.push({ text: `${nm}、もうほとんどやり尽くしとるやんけ！あとは推定実力を上げて、ランキングのてっぺんを狙うだけや！`, btn: { go: 'ranking', l: 'ランキングへ' } });
   const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
@@ -11465,7 +12401,7 @@ function outsIntro(next) {
     goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { if (next) next(); }, onCancel: () => { } });
 }
 function attackIntro(then) {
-  const pick = arr => (arr[(Math.random() * arr.length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN);
+  const pick = arr => { const LT = window.I18N && I18N.lang !== 'ja' && window.I18N_LINES; const a = LT ? arr.filter(x => LT[x]) : arr; return ((a.length ? a : arr)[(Math.random() * (a.length ? a : arr).length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN); };
   const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
   const el = document.createElement('div'); el.className = 'whistle-ov';
   el.innerHTML = `<div class="wh-box"><div class="wh-title">バッジアタック</div><div class="wh-sub">${ATTACK_MIN}分間で、どれだけバッジを取れるか</div>
@@ -15024,7 +15960,7 @@ function charProfile(id) {
   const say = c.lv >= 4 ? (c.idle || []).slice(0, 3) : c.idle ? c.idle.slice(0, 2) : [];
   modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(Math.max(0, 5 - c.lv)) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
     <p style="margin:0">${esc(c.prof || '')}</p>
-    ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
+    ${say.length && !(window.I18N && I18N.lang !== 'ja') ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
@@ -16624,7 +17560,7 @@ function onTableHTML(v) {
   const order = g.order, myPos = order.indexOf(pov), cur = g.cur, ordIn = i => order.indexOf(i) + 1;
   const bub = ON.bub || {};
   const seat = i => {
-    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null;
+    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b0 = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null, bt0 = b0 && (b0.chat ? (window.I18N && I18N.lang !== 'ja' ? I18N.tr(b0.text) : b0.text) : bubT(b0.text)), b = b0 && bt0 ? Object.assign({}, b0, { text: bt0 }) : null; // 英語・中国語：AIのふきだしは訳せるものだけ（ひとことは訳せればそのまま訳す）
     let act;
     if (cur === i && v.phase === 'play') act = `<div class="act thinking">${s.ai || s.sub ? 'AIが考え中' : '考え中'}<span class="dots"><i></i><i></i><i></i></span></div>`;
     else if (l && l.type === 'play') act = `<div class="act">${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}</div>`;
