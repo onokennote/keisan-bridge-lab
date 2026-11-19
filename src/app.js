@@ -606,7 +606,7 @@ const TIPS = [
   '冠のアバターセットは系統ごとにちがうで。パンダ・ライオン・ロボット…ドラゴンや虎までおる。どれが手に入るかは、冠を取ってのお楽しみや。',
   '大会でAIの読みや待ったを1回でも使うと、その大会の決勝進出や優勝のバッジは対象外になるんや。ガチンコで取ったバッジは、ひと味ちがうで。'
 ];
-function tipAt(i) { const TT = window.I18N && I18N.lang !== 'ja' ? window.I18N_TIPS : null; for (let k = 0; k < TIPS.length; k++) { const j = (i + k) % TIPS.length, t = TT ? TT[j] : TIPS[j], s = TT ? (typeof t === 'function' ? t(I18N.lang, PLAY_STYLES) : t && t[I18N.lang === 'zh' ? 1 : 0]) : typeof t === 'function' ? t() : t; if (s) return s; } return ''; } // 英語・中国語は I18N_TIPS（同じ順）
+function tipAt(i) { const TT = window.I18N && I18N.lang !== 'ja' ? window.I18N_TIPS : null; for (let k = 0; k < TIPS.length; k++) { const j = (i + k) % TIPS.length, t = TT ? TT[j] : TIPS[j], s = TT ? (typeof t === 'function' ? t(I18N.lang, PLAY_STYLES) : (I18N.lang === 'hi' && (window.I18N_TIPS_HI || [])[j]) || (t && t[I18N.lang === 'zh' ? 1 : 0])) : typeof t === 'function' ? t() : t; if (s) return s; } return ''; } // 英語・中国語は I18N_TIPS（同じ順）
 // 日ごとに並びを変える（同じ日は同じ順）
 const tipOrder = () => { const d = Math.floor((Date.now() + 9 * 3600000) / 86400000); let x = d * 9301 + 49297; const o = TIPS.map((_, i) => i); for (let i = o.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
 const tipCache = {};
@@ -5763,7 +5763,7 @@ function rvDialogI18n(scope) {
     : (L === 'zh' ? pick(['下一局也要注意尽早处理大牌。', '继续按「留什么牌」来选择吧。']) : pick(['Next game, keep unloading big cards early.', 'Keep choosing by what you keep, not what you play.'])));
   return out;
 }
-function rvdMerge(L) { const sp = window.I18N && I18N.lang === 'en' ? ' ' : ''; const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += sp + x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
+function rvdMerge(L) { const sp = window.I18N && I18N.lang !== 'ja' && I18N.lang !== 'zh' ? ' ' : ''; const o = []; L.forEach(x => { const p = o[o.length - 1]; if (p && p.w === x.w) p.t += sp + x.t; else o.push(Object.assign({}, x)); }); return o; } // 同じ人の行が続いたら1つに
 function rvDialogHTML(L) { return `<div class="rvd">${L.map(x => `<div class="rvd-line ${x.w}"><span class="rvd-av">${KB.casterSVG(x.w, 'happy')}</span><p>${esc(x.t)}</p></div>`).join('')}</div>`; }
 function nextGame() {
   S.inSummary = false;

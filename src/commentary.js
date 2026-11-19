@@ -82,7 +82,7 @@ KB.commentLine = function (mode, kind, d) {
   const pick = R(fresh.length ? fresh : usable);
   rec.push(pick); const keep = Math.max(1, Math.floor(arr.length * 0.6)); while (rec.length > keep) rec.shift();
   saveRecent();
-  let text = LT ? fill(LT[pick][G.I18N.lang === 'zh' ? 1 : 0], Object.fromEntries(Object.entries(d).map(([k, v]) => [k, typeof v === 'string' ? G.I18N.tr(v) : v]))) : fill(pick, d);
+  let text = LT ? fill((G.I18N.lang === 'hi' && (G.I18N_LINES_HI || {})[pick]) || LT[pick][G.I18N.lang === 'zh' ? 1 : 0], Object.fromEntries(Object.entries(d).map(([k, v]) => [k, typeof v === 'string' ? G.I18N.tr(v) : v]))) : fill(pick, d);
   // 口ぐせ：ときどき前置きを付けて言い回しに幅を出す（見出し的な場面は除く）
   const noPrefix = { kanataOn: 1, kanataAgain: 1, shadowClear: 1, atkStart: 1, atkHalf: 1, atk5: 1, atk1: 1, atkSet: 1, foul: 1, start: 1, finalSet: 1, lastGame: 1, final: 1, win: 1, tip: 1 };
   const pf = KB.PREFIX && KB.PREFIX[who];

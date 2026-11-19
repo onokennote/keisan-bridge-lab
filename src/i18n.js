@@ -2,7 +2,7 @@
 // 辞書は I18N_ROWS（i18n_dict.js）。数字は # 、キャラの名前は @ に置きかえて引く（「ゴウのプロフィール」→「@のプロフィール」）。
 // 見つからない文はそのまま日本語で出す（第1段は画面の文字。実況・総評などは順に足す）。
 (function (G) {
-  const LANGS = { ja: '日本語', en: 'English', zh: '中文' };
+  const LANGS = { ja: '日本語', en: 'English', zh: '中文', hi: 'हिन्दी' };
   let lang = 'ja';
   try { lang = localStorage.getItem('kb.lang') || 'ja'; } catch (e) { }
   if (!LANGS[lang]) lang = 'ja';
@@ -15,8 +15,11 @@
     const NUMK = /^(m|bp|k|h|g|r|t|d|rk|pp|exp|pct|men|lo|hi|avg|s|tb|mypp)$/;
     Object.entries(G.I18N_LINES || {}).forEach(([ja, tr2]) => { const ks = [...ja.matchAll(/\{(\w+)\}/g)].map(m => m[1]); if (!ks.every(k => NUMK.test(k) || k === 'n')) return; const nk = ks.filter(k => k !== 'n'); if (nk.length > 9 || new Set(nk).size !== nk.length) return; const key = ja.replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#'); const cv = x => x.replace(/#/g, '\u0002').replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#' + (nk.indexOf(k) + 1)); if (!D.has(key)) D.set(key, { en: cv(tr2[0]), zh: cv(tr2[1]) }); });
     (G.I18N_NAMES || []).forEach(r => { NAMES.push(r); if (!D.has(r[0])) D.set(r[0], { en: r[1], zh: r[2] }); });
+    // ヒンディー語：訳があるものだけ（ないものは英語で出す）
+    Object.entries(Object.assign({}, G.I18N_HI_NAMES || {}, G.I18N_HI || {})).forEach(([ja, hi]) => { const h = D.get(ja); if (h) h.hi = hi; else D.set(ja, { hi }); });
     NAMES.sort((a, b) => b[0].length - a[0].length);
   }
+  const nmOf = (ja, en, zh) => lang === 'zh' ? zh : lang === 'hi' ? ((G.I18N_HI_NAMES || {})[ja] || en) : en;
   const JA = /[぀-ヿ一-鿿]/;
   // # は順に、#2 のように番号つきならその数（訳で数字を省くとき用）。@ は名前を順に
   // § は式・手札などのかたまり（そのまま入れる）
@@ -25,7 +28,7 @@
   const CARD = '(?:[AJQK]|1[0-3]|[2-9])';
   const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[A-Z](?=卓)|[AJQK](?=のとき)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
   function tokens(core) { const L = []; const k = core.replace(TOK_RE, m => { L.push(m); return '§'; }); return { k, L }; }
-  function look(key, nums, names) { const h = D.get(key); return h && h[lang] ? fill(h[lang], nums, names) : null; }
+  function look(key, nums, names) { const h = D.get(key), t = h && (h[lang] || (lang === 'hi' ? h.en : null)); return t ? fill(t, nums, names) : null; }
   function tr(s) {
     if (lang === 'ja' || !s || !JA.test(s)) return s;
     build();
@@ -39,7 +42,7 @@
     { const tk = tokens(core); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, []); if (r != null) return r; } TOK = []; }
     // キャラの名前を @ にして引く（名前に数字が入っていても先に名前を取る）
     const pos = [];
-    for (const [ja, en, zh] of NAMES) { let p = core.indexOf(ja); while (p >= 0) { let l = ja.length; if (core.startsWith('さん', p + l) && !/(さん|くん|ちゃん|先生|課長|教授|大将|じいさん)$/.test(ja)) l += 2; if (!pos.some(([q, ql]) => p < q + ql && q < p + l)) pos.push([p, l, lang === 'en' ? en : zh]); p = core.indexOf(ja, p + l); } } // 名前のあとの「さん」も名前に含める
+    for (const [ja, en, zh] of NAMES) { let p = core.indexOf(ja); while (p >= 0) { let l = ja.length; if (core.startsWith('さん', p + l) && !/(さん|くん|ちゃん|先生|課長|教授|大将|じいさん)$/.test(ja)) l += 2; if (!pos.some(([q, ql]) => p < q + ql && q < p + l)) pos.push([p, l, nmOf(ja, en, zh)]); p = core.indexOf(ja, p + l); } } // 名前のあとの「さん」も名前に含める
     if (pos.length) {
       pos.sort((a, b) => a[0] - b[0]); let k3 = '', at = 0; const nm = [];
       pos.forEach(([p, l, v]) => { k3 += core.slice(at, p) + '@'; at = p + l; nm.push(v); }); k3 += core.slice(at);
@@ -47,9 +50,9 @@
       const tk = tokens(k3); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, nm); if (r != null) return r; TOK = []; }
     }
     // 末尾の「。」はなくても引く
-    if (/[。！]$/.test(core) && core.length > 1) { const ex = core.endsWith('！'); const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : ex ? '!' : '.') : (/[。！？]$/.test(a) ? '' : ex ? '！' : '。')); }
+    if (/[。！]$/.test(core) && core.length > 1) { const ex = core.endsWith('！'); const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang !== 'zh' ? (/[.!?]$/.test(a) ? '' : ex ? '!' : '.') : (/[。！？]$/.test(a) ? '' : ex ? '！' : '。')); }
     // 文がつながっているとき：「。」で前後に分けて、両方訳せたらつなぐ（説明文のうしろに残り時間が付く など）
-    if (depth < 3) { const parts = core.split(/(?<=[。！？])/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    if (depth < 3) { const parts = core.split(/(?<=[。！？])/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang !== 'zh' ? ' ' : '') + b; } }
     // 「…」が入れ子になっているとき（条件の中に「強豪ぞろい」など）：いちばん外の「」ごとに訳す
     if (/「[^」]*「/.test(core)) {
       const segs = []; let dep = 0, st = -1;
@@ -67,7 +70,7 @@
       nums.length = 0; TOK = []; r = look(dig(k5), nums, nm); if (r != null) return r;
     }
     // 「〜（まだ）」は中を訳して（not yet）を付ける
-    if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang === 'en' ? ' (not yet)' : '（未获得）'); }
+    if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang !== 'zh' ? ' (not yet)' : '（未获得）'); }
     // 「…」の中を先に訳して @ にする（「皆勤賞」→ "Perfect Attendance"）
     if (/「[^「」]+」/.test(core)) {
       const nm = []; let ok = true; const k4 = core.replace(/「([^「」]+)」/g, (m, x) => { const t = trCore(x, 9); if (t == null) { ok = false; return m; } nm.push(t); return '「@」'; });
@@ -79,28 +82,39 @@
       let i = core.indexOf(sep); while (i > 0 && inName(i)) i = core.indexOf(sep, i + 1);
       if (i > 0 && i < core.length - 1) {
         const a = trCore(core.slice(0, i).trim(), depth + 1), b = trCore(core.slice(i + 1).trim(), depth + 1);
-        if (a != null && b != null) return a + (sep === '：' ? (lang === 'en' ? ': ' : '：') : sep === '・' ? (lang === 'en' ? ' · ' : '·') : sep === '／' ? ' / ' : sep) + b;
+        if (a != null && b != null) return a + (sep === '：' ? (lang !== 'zh' ? ': ' : '：') : sep === '・' ? (lang !== 'zh' ? ' · ' : '·') : sep === '／' ? ' / ' : sep) + b;
       }
     }
     return null;
+  }
+  // ヒンディー語：数字をデーヴァナーガリー数字に、札の表の A・J・Q・K を頭文字に（コードなど書き写す文字はそのまま）
+  const DEVA = '०१२३४५६७८९', FACE = { A: 'इ', J: 'गु', Q: 'बे', K: 'बा' };
+  const NODEV = 'script,style,input,textarea,[data-noi18n],.mono,.pm-code,.cl-code,.on-code-big';
+  const isFace = el => el && el.matches && el.matches('.card .v, .big, .cn, .mc, .tut-hand .v');
+  function hiNode(n) {
+    if (lang !== 'hi' || !n.parentElement || n.parentElement.closest(NODEV)) return;
+    let v = n.nodeValue, t = v;
+    if (isFace(n.parentElement)) t = t.replace(/^\s*(A|J|Q|K)\s*$/, (m, c) => m.replace(c, FACE[c]));
+    t = t.replace(/[0-9]/g, d => DEVA[+d]);
+    if (t !== v) n.nodeValue = t;
   }
   // DOM：描き直しのたびに、新しく出た文字と属性を訳す
   const ATTR = ['placeholder', 'aria-label', 'title'];
   function walk(root) {
     if (lang === 'ja' || !root) return;
-    if (root.nodeType === 3) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; return; }
+    if (root.nodeType === 3) { const v = root.nodeValue, t = tr(v); if (t !== v) root.nodeValue = t; hiNode(root); return; }
     if (root.nodeType !== 1 || root.closest && root.closest('script,style,[data-noi18n]')) return;
     const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
     let n = root;
     do {
-      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } }
+      if (n.nodeType === 3) { if (n.parentElement && n.parentElement.closest('script,style,[data-noi18n]')) continue; const v = n.nodeValue; if (JA.test(v)) { const t = tr(v); if (t !== v) n.nodeValue = t; } hiNode(n); }
       else if (n.nodeType === 1) ATTR.forEach(a => { const v = n.getAttribute && n.getAttribute(a); if (v && JA.test(v)) { const t = tr(v); if (t !== v) n.setAttribute(a, t); } });
     } while ((n = w.nextNode()));
   }
   let obs = null;
   function start() {
     if (lang === 'ja' || obs || typeof MutationObserver === 'undefined' || !document.body) return;
-    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
+    document.documentElement.lang = lang === 'zh' ? 'zh-CN' : lang === 'hi' ? 'hi' : 'en';
     walk(document.body);
     if (document.title) document.title = tr(document.title);
     obs = new MutationObserver(ms => { for (const m of ms) { if (m.type === 'childList') m.addedNodes.forEach(walk); else if (m.type === 'characterData') walk(m.target); else if (m.type === 'attributes') walk(m.target); } });

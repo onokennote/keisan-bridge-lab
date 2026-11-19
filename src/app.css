@@ -2752,3 +2752,8 @@ body.rewinding #home-fab{display:none}
 /* 中国語（簡体字）：見出しは太い中国語の字体、本文は Noto Sans SC（日本語の字体に簡体字がなく、細い字が混ざるため） */
 html[lang="zh-CN"]{--f-display:"ZCOOL QingKe HuangYou","Noto Sans SC",system-ui,sans-serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;--f-mono:"JetBrains Mono","Noto Sans SC",ui-monospace,monospace}
 html[lang="zh-CN"] body{font-family:var(--f-body)}
+
+/* ヒンディー語：見出しは太いデーヴァナーガリーの字体、本文は Noto Sans Devanagari */
+html[lang="hi"]{--f-display:"Baloo 2","Noto Sans Devanagari",system-ui,sans-serif;--f-body:"Noto Sans Devanagari","Baloo 2",system-ui,sans-serif;--f-mono:"JetBrains Mono","Noto Sans Devanagari",ui-monospace,monospace}
+html[lang="hi"] body{font-family:var(--f-body)}
+html[lang="hi"] .card .v,html[lang="hi"] .big,html[lang="hi"] .cn,html[lang="hi"] .mc{font-family:"Baloo 2","Noto Sans Devanagari",sans-serif;font-weight:800}
