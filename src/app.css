@@ -2741,3 +2741,10 @@ body.rewinding #home-fab{display:none}
 .tip-box small{font-weight:800;color:#f08c00}
 .tip-box p{margin:2px 0 0;font-size:.92em;line-height:1.7}
 .tip-box .pm-link{margin-top:4px}
+
+/* 言語の切り替え */
+.lang-sw{display:inline-flex;align-items:center;gap:4px;margin-top:10px;padding:3px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.18)}
+.lang-sw span{padding:0 4px}
+.lang-sw button{border:0;border-radius:999px;padding:5px 12px;background:none;color:inherit;font:inherit;font-size:13px;cursor:pointer}
+.lang-sw button.on{background:var(--gold,#f5c542);color:#2a1a00;font-weight:800}
+.lang-note{margin:6px 0 0}

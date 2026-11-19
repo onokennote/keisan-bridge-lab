@@ -3223,11 +3223,16 @@ const htAuto = () => { try { return !!navigator.webdriver && localStorage.getIte
 const htHide = id => htAuto() || homeTab() === id ? '' : 'data-off inert';
 // ホームのフッター：produced by onoken。4つのスートを押すと、研究所のなかまがひと言（遊び）
 const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所いじっとるで…'], ['root', 'このアプリは、悔しさから生まれました。'], ['masa', '打倒OZ家！合言葉はこれや！'], ['root', '確率は裏切りません。ただし、ときどき運が裏切ります。'], ['masa', '♠も♥も♦も♣も、数字は数字や！'], ['root', '最善手を選んでも負けることはあります。それが計算ブリッジの奥深さです。'], ['masa', 'サッカーもポーカーも計算ブリッジも、最後は場数や！']];
+// 言語の切り替え（日本語／English／中文）。できあがるまではテスト版だけ（I18N.on）
+function langSwHTML() {
+  if (!window.I18N || !I18N.on()) return '';
+  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳はまだ途中です。訳されていない文は日本語で出ます。</p>' : ''}`;
+}
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
     <div class="hf-name">計算ブリッジ作戦研究所 <small>〜打倒OZ家への道〜</small></div>
     <div class="hf-by">produced by <b>onoken</b> <span class="muted">＆ 研究所のなかまたち（博士・マサ・AI研究員）</span></div>
-    <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div></footer>`;
+    <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div>${langSwHTML()}</footer>`;
 }
 function hnavHTML() {
   const cur = homeTab();
@@ -6494,6 +6499,7 @@ function act(a, el) {
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
+    case 'lang-set': if (window.I18N) I18N.set(el.dataset.l); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
