@@ -549,6 +549,69 @@ function masaBeckon() {
   if (!S.masaBeckonAt) { S.masaBeckonAt = Date.now(); setTimeout(() => { S.masaBeckoned = true; const b = $('.host-r.beckon'); if (b) { b.classList.remove('beckon'); const say = b.querySelector('.host-say'); if (say) say.textContent = 'ほな、いこか！'; } }, 10000); }
   return Date.now() - S.masaBeckonAt < 10000;
 }
+// ---------- マサの豆知識（オンライン大会の待ち時間・マサのアドバイスの下） ----------
+// 文字列か、その場で作る関数（null なら飛ばす）。事実だけを書く
+const TIPS = [
+  // 打ち方
+  '大会練習モードは16人にすると、4人卓×4になるで。相手が1人減るぶん卓内1位の確率はざっと1/5から1/4。セット優勝やPP0の「パーフェクトセット」が狙いやすうなるんや。そのかわり決勝の枠をあらそう人は増えるで。',
+  '残り1枚より2枚のほうが上がりやすいことがあるんや。1枚やと待ちはその数の場だけ。2枚なら ＋ − × ÷ で最大4種類の場で出し切れる。',
+  '同じ数の2枚＋ほかの1枚は、その1枚の数の場で出せるで。8−8+5＝5、8÷8×5＝5。ペアはどこでも使える「つなぎ」や。',
+  '続き番号の2枚（6と7とか）は、場がAのときに出せる。7−6＝1や。A場はみんな困るから、覚えとくと得するで。',
+  'Aは便利な札や。×1・÷1で、組んだ札をそのままの数にできる。5とAなら、4・5・6の3つの場で出せるで。',
+  '場の数は1〜13だけや。式の途中で大きくなるのはええけど、答えが14以上や0になる組み合わせは出されへん。',
+  '大きい札から減らすんが基本や。Kが1枚残るだけでPPは13。Aが3枚残っても3や。',
+  '場がQやKのときは、大きい札を足し算でまとめて処分できるチャンスや。K場に 9+4 とか、ここで重い札を落としとこ。',
+  '10〜Kは、掛け算やとすぐ13をこえる。引き算・割り算で使う札やと思っとき。Q−9＝3、Q÷4＝3。',
+  '割り算は割り切れるときだけや。7・11・13みたいな素数は割られにくいから、足し算・引き算で早めに使うんがコツやで。',
+  '7枚の手札は、3枚・3枚・1枚で出せば最短3手で上がれる。1回の手番で2枚以上減らすペースを意識してみ。',
+  '誰かが残り1〜2枚になったら守りの時間や。上がれへんでも、大きい札を先に出してPPを減らしとこ。サッカーでも、リードされたら失点を防ぐんが先や。',
+  '「あえて引く」は序盤の作戦や。手札が増えると出せる式が広がる。せやけど終盤に引いた札は、そのままPPになるで。',
+  '見えていない札を数えるんは、ポーカーのアウツ計算と同じや。場に出た札・自分の手札を引いた残りが、これから来る札やで。',
+  '予選は「決勝進出率」、決勝は「優勝率」でAIは手を比べる。同じ場面でも、最善手が変わることがあるんや。',
+  '序盤は読みのばらつきが大きいから、1巡目は差3.5pt以内、2巡目は2.0pt以内を「最善扱い」にしとる。序盤は気楽に打ってええで。',
+  // 因数分解の式
+  () => { const L = [['6×4÷3', 8], ['9×4÷6', 6], ['8×3÷6', 4], ['10×6÷5', 12], ['12÷4×3', 9], ['8×9÷6', 12], ['5×8÷10', 4], ['7×6÷3', 14]].filter(x => x[1] <= 13), x = L[(Math.random() * L.length) | 0]; return `掛けて割る式は強いで。${x[0]}＝${x[1]}みたいに、大きい数を掛けても割り算で場の数まで戻せるんや。こつは「割る数が掛けた数の約数か」を見ること。`; },
+  '6×8÷4＝12、6×4÷8＝3。同じ3枚でも、掛ける・割る順番で場が変わる。掛けて割る式は、約数どうしを見つけるんが近道や。',
+  'K（13）は素数やから、掛け算・割り算ではほぼ使えん。K場は 9+4、6+7、Q+A みたいに足し算か、引き算で作るもんや。',
+  'Qは 2・3・4・6 で割り切れる。Q÷3＝4、Q÷4×3＝9、Q÷6+5＝7。割り算で使い道の多い札やで。',
+  '(A+2)×3＝9、(5−3)×6＝12。かっこを使うと、足し算・引き算のあとに掛けられる。待ちが一気に広がるで。',
+  // 数字で見る
+  () => `1ゲームの平均の失点は、AIの最善手どおりで${PLAY_STYLES[0].mu}、★3相当の打ち方で${PLAY_STYLES[2].mu}。差は1ゲーム${(PLAY_STYLES[2].mu - PLAY_STYLES[0].mu).toFixed(1)}点でも、5ゲームなら約${Math.round((PLAY_STYLES[2].mu - PLAY_STYLES[0].mu) * 5)}点や。順位がひっくり返る差やで。`,
+  '期待PPは「この手で進んだら、平均で何点失うか」の見込みや。上がれた回は0点、上がられた回は残りの札の合計。それを何千回分ならした数字やで。',
+  '3枚の組み合わせは455通り。そのうち一番待ちが広い組は、13種類の場のうち9面以上で出し切れる。早見表に並んどるんはその組や。',
+  'だれかが上がった瞬間にゲームは終わる。せやから親（1番手）のほうが上がりやすいんや。くわしい数字は「数字で見る計算ブリッジ」に載っとるで。',
+  'ゲームは平均でだいたい第4〜5巡で終わる。7枚を4〜5回の手番で出し切る計算や。1手番で2枚ずつ減らすのが目安やで。',
+  // カナタ
+  '★6はカナタ1人だけや。大会の相手を「全員達人」にしたときだけ、シード選手として決勝にだけ出てくる。予選は出えへんのに決勝からって…ずっこいわー！',
+  'カナタの奥義「絶対透視」は、番が来るたびに50%で発動する。発動したら、そのゲームの最後まで全員の手札と山札の順番まで見えとるんや。ずっこいわー！',
+  '絶対透視のカナタは、あとの番の誰かが出し切れると見えたら、上がられる前にいちばん重い札を切ってくる。カナタが透視したら、上がりより失点の見込みに備えるんやで。',
+  'シャドーは、卓でいちばん★の高いAIを写す。カナタがおったら、シャドーまで絶対透視を使うんや。影のくせに…ずっこいわー！',
+  'カナタの絶対透視を受けながら優勝すると、バッジ「透視破り」や。決勝で発動されても、あきらめたらあかんで。',
+  // ほか
+  '「前回の判断」「早見表」「まだ見えていないカード」は、使うても評価に影響せえへん。どんどん使うて覚えたらええ。',
+  '「AIの読み」と「待った」は、使うとその手は評価の対象外や。推定実力には「場面の難しさ×0.65」の損失として数えるから、迷った場面だけ見て実力を上げることはできへんで。',
+  '推定実力は直近100回の判断で決まる。昔の失敗はだんだん消えていくから、今日からの打ち方しだいや。',
+  '推定実力の目安は、★3が最善率63%・平均損失2.2pt、★4が79%・1.2pt、★4.5が86%・0.8ptや。',
+  '★1〜2のAIは、セリフでつい本当の手を漏らす。★3はたまに、★4は決め台詞だけ、★5はセリフと手が関係ない。強い相手ほど読めへんで。',
+  '総合ランキングの配分は、推定実力35・BP30・連続最善20・バッジアタック15や。全部1位なら100点やで。',
+  'デイリートーナメントは1手30秒。出られるのは1日1部だけで、始まる前なら別の部に替えられるで。',
+  'デイリーの第1部（17:30）と第3部（19:30）は、予選が1セット5ゲームのじっくり型や。',
+  '式ハンターは3分だけでもええ。サッカーのリフティングと同じで、毎日の基礎練習が本番の速さになるんや。',
+  '観戦で★5の「引く場面」を見てみ。上手い人の試合を見るのが上達の早道や。',
+  // バッジ・冠・アバター
+  'バッジは銅・銀・金の3段や。金まで取ると、アバターのアイテムが使えるようになるもんが多いで。',
+  '冠は特別や。ひとつの系統のバッジを全部そろえるともらえて、500BP（ライバルの冠は300BP）と、アバターの特別なセットがまるごとついてくるんや。',
+  '冠のアバターセットは系統ごとにちがうで。パンダ・ライオン・ロボット…ドラゴンや虎までおる。どれが手に入るかは、冠を取ってのお楽しみや。',
+  '大会でAIの読みや待ったを1回でも使うと、その大会の決勝進出や優勝のバッジは対象外になるんや。ガチンコで取ったバッジは、ひと味ちがうで。'
+];
+function tipAt(i) { for (let k = 0; k < TIPS.length; k++) { const t = TIPS[(i + k) % TIPS.length], s = typeof t === 'function' ? t() : t; if (s) return s; } return ''; }
+// 日ごとに並びを変える（同じ日は同じ順）
+const tipOrder = () => { const d = Math.floor((Date.now() + 9 * 3600000) / 86400000); let x = d * 9301 + 49297; const o = TIPS.map((_, i) => i); for (let i = o.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
+const tipCache = {};
+function tipText(n) { const o = tipOrder(), i = o[((n % o.length) + o.length) % o.length]; const key = new Date().toDateString() + ':' + i; return tipCache[key] || (tipCache[key] = tipAt(i)); }
+const tipBoxHTML = (s, extra) => `<div class="tip-box"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>💡 マサの豆知識</small><p>${esc(s)}</p>${extra || ''}</div></div>`;
+// 待ち時間は25秒ごとに次の豆知識（描き直しても同じものが出る）
+const tipWaitHTML = () => tipBoxHTML(tipText(Math.floor(Date.now() / 25000)));
 function masaAdvice(more) {
   const g = G_(), nG = (g.games || []).length, nm = san(S.settings.name || 'あなた'), r = ratingOf(g.games || []), R = a => a[(Math.random() * a.length) | 0];
   const tips = [], add = (w, text, btn, bs) => tips.push({ w: w * (0.6 + Math.random() * 0.8), text, btn, bs });
@@ -576,7 +639,6 @@ function masaAdvice(more) {
   if (r.ok) { const nx = [3, 4, 4.5].find(t => !g.ach['rating:' + t]); if (nx && r.r >= nx && r.n < 40) add(3, `推定実力は★${r.r.toFixed(1)}、もう★${nx}に届いとる！「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」は判断が40回たまったら判定やから、あと${40 - r.n}回、このまま打ち続けよ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); else if (nx && r.r < nx && r.r >= nx - 0.6) add(3, `推定実力★${r.r.toFixed(1)}、★${nx}のバッジ「${(advB('rating', [3, 4, 4.5].indexOf(nx)) || {}).name}」まであと少しや！直近100手の最善率と損失で決まるから、AIの読みを見ずに自分で読み切る手を増やそ！`, { go: 'setup-practice', l: '練習へ' }, [advB('rating', [3, 4, 4.5].indexOf(nx))]); }
   // 大会
   if (nG >= 10 && !c.qualify) add(3, '練習でだいぶ打てとるな。そろそろ大会で決勝進出を狙ってみよか！予選は「決勝進出率」で手を選ぶんがコツや。', { go: 'setup-tour', l: '大会へ' });
-  { const tn = suT().nPlayers, m = tour4N(tn); if (nG >= 10 && m) add(3, `ええこと教えたるわ。大会練習モードの参加人数、いま${tn}人やろ？${m}人にしてみ。なんでか分かるか？……${m}人やと卓がぜんぶ4人卓になるんや。相手が1人減るぶん卓内1位が取りやすうなって、「セット優勝」やPP0の「パーフェクトセット」が近づくで！ポーカーでも少人数のテーブルのほうが勝ちやすいやろ？`, { a: 'tour4', l: `${m}人の大会へ` }); }
   if (c.qualify && !g.ach['qualify_strong:1']) add(2, '大会の相手を「強豪ぞろい」にして決勝に進むと、「猛者の切符」や。腕だめしにちょうどええで！', { go: 'setup-tour', l: '大会へ' }, [advB('qualify_strong', 0)]);
   if (CLOUD_ON && nG >= 3 && !rivalsOf().length) add(4, `${nm}、ライバルはまだおらんな？ランキングで実力が近い人をライバル視してみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！`, { go: 'ranking', l: 'ランキングで選ぶ' });
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
@@ -588,6 +650,7 @@ function masaAdvice(more) {
   const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
   advModal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><div><small>実況・ナニワのマサ</small><b>${esc(intro)}</b></div></div>
     <div class="adv-list">${pick.map((t, i) => `<div class="adv"><span class="adv-n">${i + 1}</span><div><p>${advText(t)}</p>${t.btn ? `<button class="btn sm" data-act="adv-go" ${t.btn.go ? `data-go="${t.btn.go}"` : `data-a="${t.btn.a}"`}>${esc(t.btn.l)} →</button>` : ''}</div></div>`).join('')}</div>
+    <div id="adv-tip">${tipBoxHTML(tipText(S.tipN || 0), '<button class="pm-link" data-act="tip-next">次の豆知識 ›</button>')}</div>
     <div class="row" style="gap:8px;flex-wrap:wrap;justify-content:flex-end">${CLOUD_ON ? '<button class="btn" data-act="masa-rival">⚔ ライバルと比較</button>' : ''}<button class="btn" data-act="masa-more">🔄 ほかには？</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 // ライバル：ランキングの人を5人まで（プレイヤーごと）。ランキングに ⚔ の印、プロフィールに「だれから指定されているか」
@@ -3318,7 +3381,6 @@ function suTourRefresh() {
   const c = Object.assign(suT(), readTourCfg()), sizes = KB.splitTables(c.nPlayers, 5), tb = $('#t-tables');
   if (tb) tb.innerHTML = `${sizes.map(n => `<span class="su-tb"><i>${'●'.repeat(n)}</i><small>${n}人</small></span>`).join('')}<small class="muted">${sizes.length}卓・席順は毎セット抽選・決勝は1セットで順位を決めます</small>`;
   [['tn', c.nPlayers, 5, 40], ['tsets', c.sets, 1, 8], ['tgames', c.games, 1, 10], ['tfin', c.finalists, 2, 5]].forEach(([su, v, mn, mx]) => { const m = $(`[data-su="${su}"][data-v="-1"]`), p = $(`[data-su="${su}"][data-v="1"]`); if (m) m.disabled = v <= mn; if (p) p.disabled = v >= mx; });
-  { const tp = $('#t-tip'); if (tp && tp.dataset.n !== String(c.nPlayers)) { tp.dataset.n = c.nPlayers; tp.innerHTML = tour4TipHTML(c.nPlayers); } }
   renderEst(); renderRuleBox();
 }
 // 設定画面のタップ
@@ -3345,7 +3407,6 @@ function suTap(d) {
     case 'games': c.games = +v; break;
     case 'gstep': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tn': c.nPlayers = Math.max(5, Math.min(40, c.nPlayers + (+v))); break;
-    case 'tnset': c.nPlayers = Math.max(5, Math.min(40, +v)); toast(`${c.nPlayers}人・4人卓×${c.nPlayers / 4}にしました`); break;
     case 'tsets': c.sets = Math.max(1, Math.min(8, c.sets + (+v))); break;
     case 'tgames': c.games = Math.max(1, Math.min(10, c.games + (+v))); break;
     case 'tfin': c.finalists = Math.max(2, Math.min(5, c.finalists + (+v))); break;
@@ -3391,15 +3452,6 @@ if (typeof document !== 'undefined') document.addEventListener('click', e => {
 }, true);
 const judgeAfter = () => (S.settings.judge || 'before') !== 'before';
 const foulN = () => S.settings.judge === 'after2' ? 2 : 3;
-// マサの豆知識：5人卓があるときは「4人卓にそろえる人数」をすすめる（16人なら4人卓×4。卓内1位・パーフェクトセットが取りやすい）
-const tour4N = n => { if (!KB.splitTables(n, 5).some(x => x >= 5)) return 0; const m = 4 * Math.ceil(n / 4); return m <= 16 ? m : 0; };
-function tour4TipHTML(n) {
-  const m = tour4N(n); if (!m) return '';
-  const k = m / 4;
-  return `<details class="su-tip"><summary><span class="cm-av">${KB.casterSVG('masa', 'happy')}</span><span><b>ええこと教えたるわ。</b>参加人数を${n}人やなくて${m}人にしてみ。なんでか分かるか？<em>答えを見る ›</em></span></summary>
-  <p>${m}人やと、${k}卓ぜんぶが<b>4人卓</b>になるんや。相手が1人減るぶん、卓内1位の確率はざっと1/5から1/4に上がる。せやから「セット優勝」「全セット優勝」や、ぜんぶのゲームで上がるPP0の「パーフェクトセット」が狙いやすうなるんや！ポーカーでも、人数の少ないテーブルのほうが勝ちやすいやろ？そのかわり決勝の枠をあらそう人は増えるから、そこは油断したらあかんで。</p>
-  <button class="btn sm" data-su="tnset" data-v="${m}">${m}人にする</button></details>`;
-}
 function setupTourHTML() {
   const c = suT(), sizes = KB.splitTables(c.nPlayers, 5);
   const step = (su, id, val, min, max, label) => `<div class="su-row"><div class="su-rl"><b>${label}</b></div><div class="su-step"><button class="su-pm" data-su="${su}" data-v="-1" ${val <= min ? 'disabled' : ''} aria-label="減らす">−</button><input id="${id}" type="number" min="${min}" max="${max}" value="${val}" inputmode="numeric" aria-label="${esc(label)}"><button class="su-pm" data-su="${su}" data-v="1" ${val >= max ? 'disabled' : ''} aria-label="増やす">＋</button></div></div>`;
@@ -3411,7 +3463,6 @@ function setupTourHTML() {
 ${suPresetHTML('tour')}
 <section class="su-block"><div class="su-bh"><span class="su-step-no">2</span><b>予選のセット数</b><small>決勝は1セット</small></div>
   <div class="su-step big"><button class="su-pm" data-su="tsets" data-v="-1" ${c.sets <= 1 ? 'disabled' : ''} aria-label="減らす">−</button><span class="su-val"><input id="t-sets" type="number" min="1" max="8" value="${c.sets}" inputmode="numeric" aria-label="予選のセット数"><small>セット</small></span><button class="su-pm" data-su="tsets" data-v="1" ${c.sets >= 8 ? 'disabled' : ''} aria-label="増やす">＋</button></div>
-  <div id="t-tip">${tour4TipHTML(c.nPlayers)}</div>
   <details class="est-box est-tg" id="t-est-wrap" ${S.estOpen ? 'open' : ''}><summary><b>決勝進出率の目安</b><span class="est-hint">押すと開く</span></summary><div id="t-est" aria-live="polite"></div></details></section>
 ${suStartHTML('start-tour', '大会を開始')}
 ${suCustomHTML('tour', size)}
@@ -6433,7 +6484,7 @@ function act(a, el) {
     case 'masa-more': masaAdvice(true); break;
     case 'adv-back': { const f = S.advBack; S.advBack = null; S.advBackLbl = null; if (f) f(); else closeModal(); break; }
     case 'masa-rival': rivalPick(); break;
-    case 'tour4': { const c = suT(), m = tour4N(c.nPlayers); if (m) { c.nPlayers = m; store.set('cfgTour', Object.assign({}, store.get('cfgTour', DEF_T), { nPlayers: m })); } go('setup-tour'); break; }
+    case 'tip-next': { S.tipN = (S.tipN || 0) + 1; const b = $('#adv-tip'); if (b) b.innerHTML = tipBoxHTML(tipText(S.tipN), '<button class="pm-link" data-act="tip-next">次の豆知識 ›</button>'); break; }
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
@@ -7244,9 +7295,9 @@ function otourHTML() {
   } else if (t.stand) {
     const isDone = t.phase === 'done';
     const W = t.wait, wLeft = W ? Math.max(0, Math.round(W.until - Date.now() / 1000)) : 0;
-    body += `${W ? `<div class="on-ready"><b>次は ${esc(W.label)}</b><span class="small">${W.need ? (W.ready ? `準備OK！ ほかの人を待っています（${W.nReady}/${W.n}人）` : 'そろったら始まります。準備ができたら押してください') : `出場する人の準備を待っています（${W.nReady}/${W.n}人）`}</span>${W.need && !W.ready ? '<button class="btn primary on-ready-btn" data-act="on-tour-ready">✋ 準備OK</button>' : ''}<span class="small muted" id="ot-wait" data-until="${W.until}">あと${Math.floor(wLeft / 60)}分${wLeft % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）</span></div>` : ''}${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : ''}
+    body += `${W ? `<div class="on-ready"><b>次は ${esc(W.label)}</b><span class="small">${W.need ? (W.ready ? `準備OK！ ほかの人を待っています（${W.nReady}/${W.n}人）` : 'そろったら始まります。準備ができたら押してください') : `出場する人の準備を待っています（${W.nReady}/${W.n}人）`}</span>${W.need && !W.ready ? '<button class="btn primary on-ready-btn" data-act="on-tour-ready">✋ 準備OK</button>' : ''}<span class="small muted" id="ot-wait" data-until="${W.until}">あと${Math.floor(wLeft / 60)}分${wLeft % 60}秒で、そろっていなくても始まります（来ていない人の席はAIが打ちます）</span></div>${tipWaitHTML()}` : ''}${t.myRoom ? `<button class="btn primary" data-act="on-room-open" data-id="${t.myRoom}">▶ 自分の卓へ</button>` : ''}
       ${(() => { const R = t.rooms || []; if (!(t.phase === 'prelim' || t.phase === 'final') || t.wait || !t.entered || t.myRoom || !R.length) return ''; const nd = R.filter(r => r.phase === 'done').length; const meFin = t.phase === 'final' && (t.stand || []).some(r => r.me && r.fin);
-        return nd < R.length ? (t.phase === 'final' && !meFin ? `<div class="on-waitall"><b>🏆 決勝の対局中です</b><span>決勝の卓が終わると、順位が決まります。下の「観戦する卓を選ぶ」から決勝を見られます。</span></div>` : `<div class="on-waitall"><b>⏳ ほかの卓が終わるのを待っています</b><span>終わった卓 ${nd}/${R.length}。全部の卓が終わると、このセットの成績が順位に入り、${t.phase === 'final' ? '決勝の順位が決まります' : '次へ進みます'}。</span></div>`) : ''; })()}
+        return nd < R.length ? (t.phase === 'final' && !meFin ? `<div class="on-waitall"><b>🏆 決勝の対局中です</b><span>決勝の卓が終わると、順位が決まります。下の「観戦する卓を選ぶ」から決勝を見られます。</span></div>` : `<div class="on-waitall"><b>⏳ ほかの卓が終わるのを待っています</b><span>終わった卓 ${nd}/${R.length}。全部の卓が終わると、このセットの成績が順位に入り、${t.phase === 'final' ? '決勝の順位が決まります' : '次へ進みます'}。</span></div>${tipWaitHTML()}`) : ''; })()}
       ${onStandHTML(t)}
       ${(t.phase === 'prelim' || t.phase === 'final') && !t.wait && (t.rooms || []).length ? `<div class="on-rooms"><b class="small">👀 観戦する卓を選ぶ</b>${t.rooms.map(r => `<button class="on-room" data-act="on-watch" data-id="${r.id}" ${r.id === t.myRoom ? 'disabled' : ''}><b>${esc(r.label)}</b>${r.res && r.seats ? `<span class="on-rres"><small>このセットの結果</small>${r.res.slice().sort((a, b) => a.pp - b.pp).map((x, k) => `<span><b>${k + 1}位</b>${esc(onName(r.seats[x.i]))}<i>${x.pp}PP</i></span>`).join('')}</span>` : `<span class="small muted">${r.phase === 'done' ? '終了' : '第' + r.gameNo + 'ゲーム'}・${(r.seats || r.names.map(x => ({ name: x }))).map(x => esc(onName(x))).join('・')}</span>`}</button>`).join('')}</div>` : ''}`;
   } else if (t.phase === 'cancel') body += `<p style="margin:0">${esc(t.note || '中止になりました')}</p>`;
@@ -7622,6 +7673,6 @@ async function onAct(act, extra) {
   catch (e) { toast(e.message || 'できませんでした'); }
 }
 
-window.KBAPP = { S, act, ON, famTest: { reportHTML: (x, g, pl, at) => famReportHTML(x, g, pl, at), limCheck: w => limCheck(w), bpTotal: g => bpTotal(g), catKeys: () => Object.keys(CAT_INFO), playToday: () => playToday(), playPut: () => playPut() }, rvAll: scope => ({ dialog: rvdMerge(rvDialog(scope)).map(x => (x.w === 'root' ? '博士：' : 'マサ：') + x.t).join('\n'), root: scope === 'set' ? rvSetSolo('root') : rvGameSolo('root'), masa: scope === 'set' ? rvSetSolo('masa') : rvGameSolo('masa') }), huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
+window.KBAPP = { S, act, ON, tipTest: { all: () => TIPS.map((t, i) => [0, 1, 2, 3, 4, 5].map(() => tipAt(i))), n: () => TIPS.length, wait: () => tipWaitHTML() }, famTest: { reportHTML: (x, g, pl, at) => famReportHTML(x, g, pl, at), limCheck: w => limCheck(w), bpTotal: g => bpTotal(g), catKeys: () => Object.keys(CAT_INFO), playToday: () => playToday(), playPut: () => playPut() }, rvAll: scope => ({ dialog: rvdMerge(rvDialog(scope)).map(x => (x.w === 'root' ? '博士：' : 'マサ：') + x.t).join('\n'), root: scope === 'set' ? rvSetSolo('root') : rvGameSolo('root'), masa: scope === 'set' ? rvSetSolo('masa') : rvGameSolo('masa') }), huntCaptureTest: (e, t, n, k) => huntCapture(e, t, n, k), onName: s => onName(s), onOpeningTest: v => onOpening(v), onAwardsSync: () => onAwardsSync(), G: () => G_(), aiMini: (k, lv, f) => aiMini(k, lv, f), aiFixAttack: () => aiFixAttack(), cloud: () => ({ CLOUD_ON, CLOUD, c: raw.get('kb.cloud', null), l: PID ? plLink(PID) : null }), plLink: id => plLink(id), cloudPush: () => cloudPush(), cloudStats: () => cloudStats(), tutStart: () => tutStart(), TUT_N: () => TUT.length, watchStart: () => watchStart(), watchInvite: n => watchInvite(n), chartOpen: () => chartOpen(), chartKey: t => chartKey(t), chartMen: () => chartMen(), CHART_ROWS, aimReward: (T, k) => aimReward(T, k), aimHandover: (n, k, t) => aimHandover(n, k, t), aimCount: () => aimCount(), migrateOut, migCollect, MIGRATE_ON, zukanList: () => ZUKAN, testAch: (k, n) => { const g = G_(); g.cnt[k] = n; checkAch(g, k); G_save(g); }, badgeElig: T => badgeElig(T), cutInFx: (a, b, c) => cutInFx(a, b, c), comboFx: (n, e) => comboFx(n, e), renderGame: () => renderGame(), go: v => go(v), setSummaryText: () => setSummaryText(), showSummary: () => showGameSummary(), summaryText: () => summaryText(), insights: d => insights(d), localReview: w => localReview(w) };
 render();
 })();

@@ -2735,11 +2735,9 @@ body.rewinding #home-fab{display:none}
 .pbc-em{display:flex;flex-direction:column;align-items:center;border:0;background:transparent;color:inherit;padding:0 0 2px;cursor:pointer}.pbc-em small{font-size:8.5px;color:var(--muted);line-height:1.1}
 .pbc-b{border:0;background:transparent;padding:0;cursor:pointer;line-height:0}.pbc-b:not(.got){opacity:.55}
 .fam-rep .fr-bars{height:auto;min-height:120px}.fam-rep .fr-bar{height:auto;min-height:120px}.fam-rep .fr-bar em{position:static;margin-bottom:2px;font-size:10px;color:#e9e3cf} /* 時間の文字は棒の上に（棒と重ならないように） */
-/* マサの豆知識（大会練習モードの人数） */
-.su-tip{margin-top:10px;border:2px dashed rgba(240,140,0,.6);border-radius:12px;padding:8px 10px;background:rgba(240,140,0,.08)}
-.su-tip summary{display:grid;grid-template-columns:40px minmax(0,1fr);gap:8px;align-items:center;cursor:pointer;list-style:none;font-size:.92em;line-height:1.5}
-.su-tip summary::-webkit-details-marker{display:none}
-.su-tip .cm-av svg{width:40px;height:40px;border-radius:10px}
-.su-tip summary em{display:block;font-style:normal;font-weight:700;color:#e8590c;font-size:.9em}
-.su-tip[open] summary em{display:none}
-.su-tip p{margin:8px 0;font-size:.92em;line-height:1.7}
+/* マサの豆知識 */
+.tip-box{display:grid;grid-template-columns:44px minmax(0,1fr);gap:10px;align-items:start;margin-top:10px;border:2px dashed rgba(240,140,0,.55);border-radius:12px;padding:10px;background:rgba(240,140,0,.08)}
+.tip-box .cm-av svg{width:44px;height:44px;border-radius:10px}
+.tip-box small{font-weight:800;color:#f08c00}
+.tip-box p{margin:2px 0 0;font-size:.92em;line-height:1.7}
+.tip-box .pm-link{margin-top:4px}
