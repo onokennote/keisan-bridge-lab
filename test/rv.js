@@ -20,10 +20,10 @@ const fs = require('fs');
   for (let step = 0; step < 4000; step++) {
     const st = await pg.evaluate(() => {
       const S = KBAPP.S; const wk = document.querySelector('[data-act="win-ok"]'); if (wk) { wk.click(); return 'modal'; } const m = document.querySelector('#modal');
-      if (m) { if (!window.__rvdone && m.querySelector('.rvd')) { const a = KBAPP.rvAll('game'); window.__rvlog = (window.__rvlog || []).concat(['--- game dialog（' + a.dialog.length + '字）:\n' + a.dialog, '--- game root: ' + a.root, '--- game masa: ' + a.masa]); window.__rvdone = 1; } const b = m.querySelector('[data-act="win-ok"],[data-act="next-game"],[data-act="start-final"],#tb-ok'); if (b) { b.click(); return 'modal'; } return 'modal-noop:' + m.innerText.slice(0, 80); }
+      if (m) { if (!window.__rvdone && !m.querySelector('.rvd') && (window.__rvw = (window.__rvw || 0) + 1) < 60) return 'wait-rv'; if (!window.__rvdone && m.querySelector('.rvd')) { const a = KBAPP.rvAll('game'); window.__rvlog = (window.__rvlog || []).concat(['--- game dialog（' + a.dialog.length + '字）:\n' + a.dialog, '--- game root: ' + a.root, '--- game masa: ' + a.masa]); window.__rvdone = 1; } const b = m.querySelector('[data-act="win-ok"],[data-act="next-game"],[data-act="start-final"],#tb-ok'); if (b) { b.click(); return 'modal'; } return 'modal-noop:' + m.innerText.slice(0, 80); }
       if (S.view === 'opening') { KBAPP.act('opening-start'); return 'o'; }
       if (S.view === 'entrance') { document.querySelector('[data-act="start-final"]').click(); return 'entrance'; }
-      if (S.view === 'set-end') { if (!window.__rvset && document.querySelector('.rvd')) { window.__rvset = 1; const a = KBAPP.rvAll('set'); window.__rvlog = (window.__rvlog || []).concat(['--- set dialog（' + a.dialog.length + '字）:\n' + a.dialog, '--- set root: ' + a.root, '--- set masa: ' + a.masa]); } const b = document.querySelector('[data-act="next-set"],[data-act="to-final"],[data-act="final-result"]'); if (b) { b.click(); return 'setend'; } return 'done-setend'; }
+      if (S.view === 'set-end') { if (!window.__rvset && !document.querySelector('.rvd') && (window.__rvs = (window.__rvs || 0) + 1) < 60) return 'wait-rv'; if (!window.__rvset && document.querySelector('.rvd')) { window.__rvset = 1; const a = KBAPP.rvAll('set'); window.__rvlog = (window.__rvlog || []).concat(['--- set dialog（' + a.dialog.length + '字）:\n' + a.dialog, '--- set root: ' + a.root, '--- set masa: ' + a.masa]); } const b = document.querySelector('[data-act="next-set"],[data-act="to-final"],[data-act="final-result"]'); if (b) { b.click(); return 'setend'; } return 'done-setend'; }
       if (S.view === 'result') return 'result';
       const g = S.game; if (!g || g.over) return 'wait';
       const p = g.current(); if (!g.players[p].human) return 'ai';
@@ -48,7 +48,7 @@ const fs = require('fs');
     if (st === 'modal' && shots === 1) { }
     if (st === 'result' || st === 'done-setend') { console.log('finished', st, 'step', step); break; }
     if (st.startsWith('modal-noop')) { console.log(st); break; }
-    await pg.waitForTimeout(st === 'ai' || st === 'wait' || st === 'busy' ? 60 : 20);
+    await pg.waitForTimeout(st === 'wait-rv' ? 250 : st === 'ai' || st === 'wait' || st === 'busy' ? 60 : 20);
     if (step % 400 === 0) console.log(step, st, await pg.evaluate(() => KBAPP.S.T && (KBAPP.S.T.phase + ' set' + KBAPP.S.T.set + ' g' + KBAPP.S.T.game)));
   }
   await pg.screenshot({ path: require('path').join(__dirname, 'out', 'end.png'), fullPage: true });
