@@ -4790,17 +4790,24 @@ function flyCard(fromEl, toEl, html, delay, dur, force) {
   const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
   const el = document.createElement('div'); el.className = 'flycard'; el.innerHTML = html || '';
   if (!html) el.classList.add('back');
+  const mj = !!(window.I18N && I18N.mjOn); // 中国語の麻雀牌：牌は回さず、すべらせて卓に打つ
+  if (mj) { el.classList.add('mj'); const sp = el.querySelector('span'), v = sp && ({ A: 1, J: 11, Q: 12, K: 13 }[sp.textContent.trim()] || +sp.textContent); if (v) el.innerHTML = I18N.mjFace(v); }
   document.body.appendChild(el);
   const w = 34, h = 48;
   const x0 = a.left + a.width / 2 - w / 2, y0 = a.top + a.height / 2 - h / 2;
   const x1 = b.left + Math.min(b.width / 2, 70) - w / 2, y1 = b.top + Math.min(b.height / 2, 60) - h / 2 + (b.height < 30 ? -12 : 0);
   el.style.left = x0 + 'px'; el.style.top = y0 + 'px';
   const dx = x1 - x0, dy = y1 - y0;
-  const anim = el.animate([
+  const anim = el.animate(mj ? [
+    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+    { transform: `translate(${dx * 0.55}px,${dy * 0.55 - 22}px) scale(1.12)`, opacity: 1, offset: 0.55 },
+    { transform: `translate(${dx}px,${dy}px) scale(1.06,.9)`, opacity: 1, offset: 0.88 },
+    { transform: `translate(${dx}px,${dy}px) scale(.9)`, opacity: 0.9 }
+  ] : [
     { transform: 'translate(0,0) rotate(0deg) scale(1)', opacity: 1 },
     { transform: `translate(${dx * 0.5}px,${dy * 0.5 - 50}px) rotate(200deg) scale(1.15)`, opacity: 1, offset: 0.5 },
     { transform: `translate(${dx}px,${dy}px) rotate(360deg) scale(.85)`, opacity: 0.9 }
-  ], { duration: dur || 520, delay: delay || 0, easing: 'cubic-bezier(.3,.7,.3,1)', fill: 'both' });
+  ], { duration: dur || 520, delay: delay || 0, easing: mj ? 'cubic-bezier(.5,0,.75,1)' : 'cubic-bezier(.3,.7,.3,1)', fill: 'both' });
   anim.onfinish = () => { el.remove(); toEl.classList.remove('catch'); void toEl.offsetWidth; toEl.classList.add('catch'); };
 }
 function flyDraw(pi) { KB.sfx('draw'); flyCard(document.querySelector('.deck'), document.querySelector(`[data-pi="${pi}"]`), null); }
@@ -4835,7 +4842,9 @@ function dealFieldAnim(f) {
   const red = f.s === 1 || f.s === 2;
   const el = document.createElement('div'); el.className = 'dealfly';
   el.style.left = t.left + 'px'; el.style.top = t.top + 'px'; el.style.width = t.width + 'px'; el.style.height = t.height + 'px';
-  el.innerHTML = `<div class="df-inner"><div class="df-face df-back"></div><div class="df-face df-front ${red ? 'red' : ''}"><span class="big">${KB.vname(f.v)}</span><span class="val">${KB.SUITS[f.s]} ${f.v}</span></div></div>`;
+  const mj = !!(window.I18N && I18N.mjOn); // 中国語の麻雀牌：牌を前へ倒すようにめくり、卓に打つ
+  if (mj) el.classList.add('mj');
+  el.innerHTML = `<div class="df-inner"><div class="df-face df-back"></div><div class="df-face df-front ${red ? 'red' : ''}"><span class="big">${mj ? I18N.mjFace(f.v) : KB.vname(f.v)}</span><span class="val">${mj ? f.v : `${KB.SUITS[f.s]} ${f.v}`}</span></div></div>`;
   document.body.appendChild(el);
   top.style.visibility = 'hidden';
   const dx0 = d.left + d.width / 2 - (t.left + t.width / 2), dy0 = d.top + d.height / 2 - (t.top + t.height / 2);
@@ -4847,14 +4856,16 @@ function dealFieldAnim(f) {
     { transform: `translate(${dx0}px,${dy0}px) scale(.45) rotate(-20deg)` },
     { transform: `translate(${dxc}px,${dyc}px) scale(${sc}) rotate(4deg)`, offset: 0.32 },
     { transform: `translate(${dxc}px,${dyc}px) scale(${sc * 1.05}) rotate(0deg)`, offset: 0.68 },
-    { transform: 'translate(0,0) scale(1.12) rotate(0deg)', offset: 0.9 },
+    { transform: mj ? 'translate(0,0) scale(1.1,.9) rotate(0deg)' : 'translate(0,0) scale(1.12) rotate(0deg)', offset: 0.9 },
     { transform: 'translate(0,0) scale(1) rotate(0deg)' }
   ], { duration: dur, easing: 'cubic-bezier(.3,.8,.3,1)', fill: 'both' });
+  const ax = mj ? 'rotateX' : 'rotateY';
   inner.animate([
-    { transform: 'rotateY(180deg)' }, { transform: 'rotateY(180deg)', offset: 0.34 },
-    { transform: 'rotateY(0deg)', offset: 0.56 }, { transform: 'rotateY(0deg)' }
+    { transform: `${ax}(180deg)` }, { transform: `${ax}(180deg)`, offset: 0.34 },
+    { transform: `${ax}(0deg)`, offset: 0.56 }, { transform: `${ax}(0deg)` }
   ], { duration: dur, easing: 'ease-in-out', fill: 'both' });
   KB.sfx('deal');
+  if (mj) { setTimeout(() => KB.sfx('mj_flip'), dur * 0.5); setTimeout(() => KB.sfx('play'), dur * 0.86); }
   { const rp = S.settings.speed === 'fast' ? 0.85 : S.settings.speed === 'slow' ? 1.5 : 1.15; setTimeout(() => KB.sfx('round'), rp * 1000); }
   const shade = document.createElement('div'); shade.className = 'dealshade'; document.body.appendChild(shade);
   shade.animate([{ opacity: 0 }, { opacity: 1, offset: 0.3 }, { opacity: 1, offset: 0.7 }, { opacity: 0 }], { duration: dur, fill: 'both' });

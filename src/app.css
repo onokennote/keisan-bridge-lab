@@ -2796,3 +2796,15 @@ html.mj .title .fan .card.flip{animation:mjFlip .5s ease-in-out}
 .mj-sw.on{background:#2f8f5b;color:#fff;border-color:#2f8f5b;font-weight:800}
 html.mj .hf-suits{gap:5px}
 html.mj .hf-suits span{width:24px;height:31px;display:inline-grid;place-items:center;border-radius:4px;font-size:16px;font-weight:900;font-family:"Noto Serif SC",serif;color:#1b2b4b;background:linear-gradient(180deg,#fffdf4,#efe6cc);box-shadow:inset 0 -3px 0 #9a6a3a,0 2px 0 #6b4422}
+/* 麻雀牌：飛ぶ牌（すべらせて打つ）・山から引く牌の裏・場の牌は寝た状態から起こす */
+.flycard.mj{border-radius:4px;background:linear-gradient(180deg,#fffdf4,#efe6cc);border:1px solid #d8cba6;box-shadow:inset 0 -4px 0 #9a6a3a,0 6px 12px rgba(0,0,0,.4);font-size:20px;color:#1b2b4b}
+.flycard.mj.back{background:linear-gradient(180deg,#c58a4a,#9a6a3a);border:1px solid #6b4422;box-shadow:inset 0 3px 0 #fffdf4,0 6px 12px rgba(0,0,0,.4)}
+html.mj .fieldcard.mj.top.deal{animation:mjDeal .62s cubic-bezier(.3,.8,.3,1) both;transform-origin:50% 100%}
+@keyframes mjDeal{0%{transform:translate(-150px,24px) scaleY(.22);opacity:.4}45%{transform:translate(0,24px) scaleY(.22);opacity:1}62%{transform:translate(0,0) scaleY(1.1)}80%{transform:translateY(0) scaleY(.96)}100%{transform:none}}
+.dealfly.mj .df-back{transform:rotateX(180deg);background:linear-gradient(180deg,#c58a4a,#9a6a3a);border:2px solid #6b4422;box-shadow:inset 0 6px 0 #fffdf4,0 18px 40px rgba(0,0,0,.55)}
+.dealfly.mj .df-front{background:linear-gradient(180deg,#fffdf4 0%,#f3ecd6 78%,#e7dcbc 100%);border-color:#d8cba6;box-shadow:inset 0 -8px 0 #9a6a3a,0 18px 40px rgba(0,0,0,.55);color:#1b2b4b}
+.dealfly.mj .df-front .val{color:#8a8270}
+/* 麻雀牌：山札と相手の手牌の裏も牌の裏（茶色に白の縁） */
+html.mj .deck i{border-radius:4px;background:linear-gradient(180deg,#c58a4a,#9a6a3a);border:1px solid #6b4422;box-shadow:inset 0 3px 0 #fffdf4,0 1px 2px rgba(0,0,0,.4)}
+html.mj .backs i{border-radius:2px;background:linear-gradient(180deg,#c58a4a,#9a6a3a);border:1px solid #6b4422;box-shadow:inset 0 2px 0 #fffdf4}
+html.mj .card.back{background:linear-gradient(180deg,#c58a4a,#9a6a3a);border-color:#6b4422;box-shadow:inset 0 5px 0 #fffdf4}

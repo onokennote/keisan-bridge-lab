@@ -169,6 +169,6 @@
   // いまのプレイヤーの名前（文の中の名前を @ として引けるように）
   function setMe(name) { build(); if (!name || name === 'あなた' || NAMES.some(r => r[0] === name)) return; NAMES.push([name, name, name]); NAMES.sort((a, b) => b[0].length - a[0].length); }
   function setMj(on) { try { localStorage.setItem('kb.mj', on ? '1' : '0'); } catch (e) {} location.reload(); }
-  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setMj, get mj() { return mjOn(); } };
+  G.I18N = { tr, start, set, on, setMe, LANGS, get lang() { return lang; }, walk, setMj, get mj() { return mjOn(); }, get mjOn() { return mjActive(); }, mjFace: v => mjFace(v, 0) };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })(typeof window !== 'undefined' ? window : globalThis);
