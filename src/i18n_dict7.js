@@ -76,5 +76,11 @@ AIの読みを見たので、このゲームは結果のバッジの対象外で
 損失pt＝最善手との総合評価の差（勝ち抜け率を#点満点とし、上がり率と期待PPを少し加味）。#pt以内は誤差として最善扱い。	Loss pt = difference in overall score from the best move (chance of advancing out of #, with a little weight on going out and expected PP). Within # pt counts as best (margin of error).	损失pt＝与最佳着法的综合评价差（晋级概率满分#分，稍加考虑出完概率和期望PP）。#pt以内视为误差，按最佳计。
 理由と候補	Reasons & options	理由与候选
 損失 #pt	Loss #pt	损失 #pt
+総合＝決勝進出率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）	Overall = chance of final (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (round #: within # pt)	综合＝进入决赛概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（第#巡在#pt以内）
+総合＝決勝進出率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）	Overall = chance of final (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (within # pt)	综合＝进入决赛概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（#pt以内）
+総合＝優勝率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#巡目は#pt以内）	Overall = chance of winning (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (round #: within # pt)	综合＝夺冠概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（第#巡在#pt以内）
+総合＝優勝率（%） ＋ 上がり（%）×# − 期待PP×#。「最善扱い」＝最善との差が誤差の範囲（#pt以内）	Overall = chance of winning (%) + going out (%) × # − expected PP × #. "Counted as best" = within the margin of error of the best (within # pt)	综合＝夺冠概率（%）＋ 出完（%）×# − 期望PP×#。「按最佳计」＝与最佳的差在误差范围内（#pt以内）
+この卓	This table	本桌
+・#枚残し。上がれるのは場が§のときだけ（約#%）ですが、手札の合計は#まで軽くなりました。	· Keeping # card. You go out only if the field is § (about #%), but your hand total dropped to #.	· 留#张。只有场数为§时才能出完（约#%），但手牌合计降到了#。
 総合評価	overall score	综合评价
 `.split('\n').filter(Boolean).map(l => l.split('\t')));

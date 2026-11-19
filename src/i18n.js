@@ -11,6 +11,9 @@
   function build() {
     if (ready) return; ready = true;
     (G.I18N_ROWS || []).forEach(r => { if (r && r[0] && !D.has(r[0])) D.set(r[0], { en: r[1], zh: r[2] }); });
+    // 実況の型も辞書に（数字の {m} などは #、名前の {n} は @。それ以外の入れ物がある型は入れない）
+    const NUMK = /^(m|bp|k|h|g|r|t|d|rk|pp|exp|pct|men|lo|hi|avg|s|tb|mypp)$/;
+    Object.entries(G.I18N_LINES || {}).forEach(([ja, tr2]) => { const ks = [...ja.matchAll(/\{(\w+)\}/g)].map(m => m[1]); if (!ks.every(k => NUMK.test(k) || k === 'n')) return; const nk = ks.filter(k => k !== 'n'); if (nk.length > 9 || new Set(nk).size !== nk.length) return; const key = ja.replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#'); const cv = x => x.replace(/#/g, '\u0002').replace(/\{(\w+)\}/g, (m, k) => k === 'n' ? '@' : '#' + (nk.indexOf(k) + 1)); if (!D.has(key)) D.set(key, { en: cv(tr2[0]), zh: cv(tr2[1]) }); });
     (G.I18N_NAMES || []).forEach(r => { NAMES.push(r); if (!D.has(r[0])) D.set(r[0], { en: r[1], zh: r[2] }); });
     NAMES.sort((a, b) => b[0].length - a[0].length);
   }
@@ -18,9 +21,9 @@
   // # は順に、#2 のように番号つきならその数（訳で数字を省くとき用）。@ は名前を順に
   // § は式・手札などのかたまり（そのまま入れる）
   let TOK = [];
-  function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)); }
+  function fill(tpl, nums, names) { let i = 0, j = 0, t = 0; return tpl.replace(/#([1-9])?|@|§/g, (c, k) => c === '@' ? (names[j++] ?? c) : c === '§' ? (TOK[t++] ?? c) : k ? (nums[+k - 1] ?? c) : (nums[i++] ?? c)).replace(/\u0002/g, '#'); }
   const CARD = '(?:[AJQK]|1[0-3]|[2-9])';
-  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
+  const TOK_RE = new RegExp(`\\[[^\\]]*\\]|\\(${CARD}(?:,${CARD})*\\)|${CARD}(?:・${CARD})+|${CARD}(?: ${CARD})+(?= を出す)|${CARD}(?= の\\d+つ)|[A-Z](?=卓)|[AJQK](?=のとき)|[(\\d][\\d\\s+\\-−×÷()]*[+\\-−×÷][\\d\\s+\\-−×÷()]*[\\d)]`, 'g');
   function tokens(core) { const L = []; const k = core.replace(TOK_RE, m => { L.push(m); return '§'; }); return { k, L }; }
   function look(key, nums, names) { const h = D.get(key); return h && h[lang] ? fill(h[lang], nums, names) : null; }
   function tr(s) {
@@ -44,9 +47,25 @@
       const tk = tokens(k3); if (tk.L.length) { nums.length = 0; TOK = tk.L; r = look(dig(tk.k), nums, nm); if (r != null) return r; TOK = []; }
     }
     // 末尾の「。」はなくても引く
-    if (core.endsWith('。') && core.length > 1) { const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : '.') : (/[。！？]$/.test(a) ? '' : '。')); }
+    if (/[。！]$/.test(core) && core.length > 1) { const ex = core.endsWith('！'); const a = trCore(core.slice(0, -1), depth + 1); if (a != null) return a + (lang === 'en' ? (/[.!?]$/.test(a) ? '' : ex ? '!' : '.') : (/[。！？]$/.test(a) ? '' : ex ? '！' : '。')); }
     // 文がつながっているとき：「。」で前後に分けて、両方訳せたらつなぐ（説明文のうしろに残り時間が付く など）
-    if (depth < 3) { const parts = core.split(/(?<=。)/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    if (depth < 3) { const parts = core.split(/(?<=[。！？])/); for (let i = parts.length - 1; i >= 1; i--) { const a = trCore(parts.slice(0, i).join(''), depth + 1); if (a == null) continue; const b = trCore(parts.slice(i).join('').trim(), depth + 1); if (b != null) return a + (lang === 'en' ? ' ' : '') + b; } }
+    // 「…」が入れ子になっているとき（条件の中に「強豪ぞろい」など）：いちばん外の「」ごとに訳す
+    if (/「[^」]*「/.test(core)) {
+      const segs = []; let dep = 0, st = -1;
+      for (let i = 0; i < core.length; i++) { if (core[i] === '「') { if (!dep) st = i; dep++; } else if (core[i] === '」' && dep) { dep--; if (!dep) segs.push([st, i + 1]); } }
+      const nm = []; let k6 = '', at = 0, ok = true;
+      for (const [a, b] of segs) { const t = trCore(core.slice(a + 1, b - 1), 9); if (t == null) { ok = false; break; } k6 += core.slice(at, a) + '「@」'; at = b; nm.push(t); }
+      if (ok && segs.length) { k6 += core.slice(at); nums.length = 0; TOK = []; r = look(dig(k6), nums, nm); if (r != null) return r; }
+    }
+    // 名前と「…」が両方あるとき：出てきた順に @ にして引く
+    if (pos.length && /「[^「」]+」/.test(core)) {
+      const sp = pos.map(([p, l, v]) => [p, l, v, 0]); const re = /「([^「」]+)」/g; let m;
+      while ((m = re.exec(core))) { const t = trCore(m[1], 9); if (t != null && !sp.some(([q, l]) => m.index < q + l && q < m.index + m[0].length)) sp.push([m.index, m[0].length, t, 1]); }
+      sp.sort((a, b) => a[0] - b[0]); let k5 = '', at = 0; const nm = [];
+      sp.forEach(([p, l, v, q]) => { if (p < at) return; k5 += core.slice(at, p) + (q ? '「@」' : '@'); at = p + l; nm.push(v); }); k5 += core.slice(at);
+      nums.length = 0; TOK = []; r = look(dig(k5), nums, nm); if (r != null) return r;
+    }
     // 「〜（まだ）」は中を訳して（not yet）を付ける
     if (core.endsWith('（まだ）') && core.length > 4) { const a = trCore(core.slice(0, -4), depth + 1); if (a != null) return a + (lang === 'en' ? ' (not yet)' : '（未获得）'); }
     // 「…」の中を先に訳して @ にする（「皆勤賞」→ "Perfect Attendance"）
@@ -59,7 +78,7 @@
       const inName = i => NAMES.some(([ja]) => { if (!ja.includes(sep)) return false; let p = core.indexOf(ja); while (p >= 0) { if (i > p && i < p + ja.length) return true; p = core.indexOf(ja, p + 1); } return false; });
       let i = core.indexOf(sep); while (i > 0 && inName(i)) i = core.indexOf(sep, i + 1);
       if (i > 0 && i < core.length - 1) {
-        const a = trCore(core.slice(0, i), depth + 1), b = trCore(core.slice(i + 1), depth + 1);
+        const a = trCore(core.slice(0, i).trim(), depth + 1), b = trCore(core.slice(i + 1).trim(), depth + 1);
         if (a != null && b != null) return a + (sep === '：' ? (lang === 'en' ? ': ' : '：') : sep === '・' ? (lang === 'en' ? ' · ' : '·') : sep === '／' ? ' / ' : sep) + b;
       }
     }

@@ -606,14 +606,14 @@ const TIPS = [
   '冠のアバターセットは系統ごとにちがうで。パンダ・ライオン・ロボット…ドラゴンや虎までおる。どれが手に入るかは、冠を取ってのお楽しみや。',
   '大会でAIの読みや待ったを1回でも使うと、その大会の決勝進出や優勝のバッジは対象外になるんや。ガチンコで取ったバッジは、ひと味ちがうで。'
 ];
-function tipAt(i) { for (let k = 0; k < TIPS.length; k++) { const t = TIPS[(i + k) % TIPS.length], s = typeof t === 'function' ? t() : t; if (s) return s; } return ''; }
+function tipAt(i) { const TT = window.I18N && I18N.lang !== 'ja' ? window.I18N_TIPS : null; for (let k = 0; k < TIPS.length; k++) { const j = (i + k) % TIPS.length, t = TT ? TT[j] : TIPS[j], s = TT ? (typeof t === 'function' ? t(I18N.lang, PLAY_STYLES) : t && t[I18N.lang === 'zh' ? 1 : 0]) : typeof t === 'function' ? t() : t; if (s) return s; } return ''; } // 英語・中国語は I18N_TIPS（同じ順）
 // 日ごとに並びを変える（同じ日は同じ順）
 const tipOrder = () => { const d = Math.floor((Date.now() + 9 * 3600000) / 86400000); let x = d * 9301 + 49297; const o = TIPS.map((_, i) => i); for (let i = o.length - 1; i > 0; i--) { x = (x * 9301 + 49297) % 233280; const j = Math.floor(x / 233280 * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } return o; };
 const tipCache = {};
 function tipText(n) { const o = tipOrder(), i = o[((n % o.length) + o.length) % o.length]; const key = new Date().toDateString() + ':' + i; return tipCache[key] || (tipCache[key] = tipAt(i)); }
 // アドバイスの下：1日1つ（端末ごとに完全ランダム。その日は同じ豆知識）
 function tipToday() {
-  const d = new Date().toDateString(); let o = null; try { o = JSON.parse(localStorage.getItem('kb.tipDay') || 'null'); } catch (e) { }
+  const d = new Date().toDateString() + (window.I18N ? I18N.lang : ''); let o = null; try { o = JSON.parse(localStorage.getItem('kb.tipDay') || 'null'); } catch (e) { }
   if (!o || o.d !== d || !o.s) { const i = (Math.random() * TIPS.length) | 0; o = { d, s: tipAt(i) }; try { localStorage.setItem('kb.tipDay', JSON.stringify(o)); } catch (e) { } }
   return o.s;
 }
@@ -651,8 +651,8 @@ function masaAdvice(more) {
   if (CLOUD_ON && nG >= 3 && !rivalsOf().length) add(4, `${nm}、ライバルはまだおらんな？ランキングで実力が近い人をライバル視してみ！ホームに相手の動きが届くし、おれが差の詰め方も教えたる。張り合いが出るで〜！サッカーもダービーマッチがいちばん燃えるんや！`, { go: 'ranking', l: 'ランキングで選ぶ' });
   const openT = (ON.tours || []).filter(t => t.phase === 'entry' && !t.entered && (t.entry !== 'invite' || t.invited));
   if (openT.length) add(4, `いま「${openT[0].name}」がエントリーできるで！オンライン大会で、人と打つ緊張感を味わってみ！`, null);
-  // 重みつきで3つ（押すたびに少し変わる）
-  const pick = []; const pool = tips.slice();
+  // 重みつきで3つ（押すたびに少し変わる）。英語・中国語は訳せるものだけ
+  const pick = []; const pool = window.I18N && I18N.lang !== 'ja' ? tips.filter(t => !KANA_RE.test(I18N.tr(t.text))) : tips.slice();
   while (pick.length < 3 && pool.length) { const tot = pool.reduce((a, t) => a + t.w, 0); let x = Math.random() * tot, i = 0; for (; i < pool.length; i++) { x -= pool[i].w; if (x <= 0) break; } pick.push(pool.splice(Math.min(i, pool.length - 1), 1)[0]); }
   if (!pick.length) pick.push({ text: `${nm}、もうほとんどやり尽くしとるやんけ！あとは推定実力を上げて、ランキングのてっぺんを狙うだけや！`, btn: { go: 'ranking', l: 'ランキングへ' } });
   const intro = more ? R(['ほな、別の角度からもう一個いこか！', 'まだあるで！', 'ほんならこれはどうや！']) : R([`${nm}、次の一手で迷っとるんか？任しとき！`, `よっしゃ、${nm}のデータ見たで！`, `${nm}、作戦会議や！`]);
@@ -2532,7 +2532,7 @@ function outsIntro(next) {
     goTitle: 'チャレンジ開始！', goLine: '1問目や、よう見てな！', onGo: () => { if (next) next(); }, onCancel: () => { } });
 }
 function attackIntro(then) {
-  const pick = arr => (arr[(Math.random() * arr.length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN);
+  const pick = arr => { const LT = window.I18N && I18N.lang !== 'ja' && window.I18N_LINES; const a = LT ? arr.filter(x => LT[x]) : arr; return ((a.length ? a : arr)[(Math.random() * (a.length ? a : arr).length) | 0] || '').replace(/\{m\}/g, ATTACK_MIN); };
   const bub = (w, t, d) => `<div class="wh-say" style="animation-delay:${d}s"><span class="cm-av">${KB.casterSVG(w, 'happy')}</span><span><small>${w === 'root' ? '解説・ルート博士' : '実況・ナニワのマサ'}</small>${esc(t)}</span></div>`;
   const el = document.createElement('div'); el.className = 'whistle-ov';
   el.innerHTML = `<div class="wh-box"><div class="wh-title">バッジアタック</div><div class="wh-sub">${ATTACK_MIN}分間で、どれだけバッジを取れるか</div>
@@ -6091,7 +6091,7 @@ function charProfile(id) {
   const say = c.lv >= 4 ? (c.idle || []).slice(0, 3) : c.idle ? c.idle.slice(0, 2) : [];
   modal(`<div class="stack club-prof"><div class="row" style="gap:12px;align-items:center"><span class="club-av big">${KB.avatarSVG(KB.charToCh(c), { mood: 'happy', level: showLv ? c.lv : 0, style: showSt ? c.st : null })}</span><div>${c.title && showLv ? `<small class="club-title">${esc(c.title)}</small>` : ''}<h3 style="margin:0">${esc(c.name)}</h3><div class="small">${showLv ? '★'.repeat(c.lv) + '☆'.repeat(Math.max(0, 5 - c.lv)) + '　' : ''}${esc(c.tag || '')}</div>${showSt ? `<span class="chip stchip" style="background:${esc(stl.color || '#888')}">${esc(stl.label || '')}</span>` : ''}</div></div>
     <p style="margin:0">${esc(c.prof || '')}</p>
-    ${say.length ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
+    ${say.length && !(window.I18N && I18N.lang !== 'ja') ? `<div class="small muted">口ぐせ：${say.map(x => '「' + esc(x) + '」').join(' ')}</div>` : ''}
     <div class="small muted">${!showLv ? '強さは対局が終わるまでのお楽しみ。' : c.lv >= 5 ? 'セリフから手の内はまったく読めない。' : c.lv === 4 ? 'セリフから手の内はほとんど読めない。' : c.lv === 3 ? 'ときどき本音が漏れる。' : '本音がセリフにそのまま出る。よく聞こう。'}</div>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
@@ -7691,7 +7691,7 @@ function onTableHTML(v) {
   const order = g.order, myPos = order.indexOf(pov), cur = g.cur, ordIn = i => order.indexOf(i) + 1;
   const bub = ON.bub || {};
   const seat = i => {
-    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null;
+    const s = v.seats[i], l = g.last[i], n2 = g.handN[i], b0 = bub[i] && Date.now() - bub[i].at < (bub[i].dur || 2600) ? bub[i] : null, bt0 = b0 && (b0.chat ? (window.I18N && I18N.lang !== 'ja' ? I18N.tr(b0.text) : b0.text) : bubT(b0.text)), b = b0 && bt0 ? Object.assign({}, b0, { text: bt0 }) : null; // 英語・中国語：AIのふきだしは訳せるものだけ（ひとことは訳せればそのまま訳す）
     let act;
     if (cur === i && v.phase === 'play') act = `<div class="act thinking">${s.ai || s.sub ? 'AIが考え中' : '考え中'}<span class="dots"><i></i><i></i><i></i></span></div>`;
     else if (l && l.type === 'play') act = `<div class="act">${esc(l.expr)} = ${g.played[i].length ? g.played[i][g.played[i].length - 1].t : ''}</div>`;
