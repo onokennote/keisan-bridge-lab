@@ -78,6 +78,7 @@ AIの手番の速さ	AI turn speed	AI回合速度
 🪷 ガンジファ	🪷 Ganjifa	🪷 甘吉法牌
 「各自の設定」は、それぞれが言語の切り替えの下で選んだ札。ほかを選ぶと、この大会の卓では全員がその札で打ちます	"Each player's choice" uses the cards each player picked under the language switch. Pick another and everyone plays with those cards at this tournament's tables	「各自的设置」使用每个人在语言切换下方选择的牌。选择其他样式时，本赛事的牌桌上所有人都用那种牌
 また、数学とトランプは国境を越え、人種や言語の壁を取り払い、文化をつなぐことができるのです！（後付け😅）	And math and playing cards cross borders, break down the walls of race and language, and connect cultures! (Added afterwards 😅)	而且，数学和扑克牌能跨越国界，打破种族和语言的隔阂，连接不同的文化！（事后补的😅）
+よろしくお願いしまーーす！	Pleeease, I'm counting on you!!	拜托啦——！
 コンボ終了	Combo over	连击结束
 図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
 ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？
