@@ -36,4 +36,8 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 🏠 ホームへ	🏠 To home	🏠 回主页
 続きから	Continue	继续
 ▶ 続きから	▶ Continue	▶ 继续
+・出すなら「§」でしたが、残り札で作れる場が#通り→#通りに減っていました。あえて引いて形を保つのが正解です。	· You could have played "§", but the fields your remaining cards can make would drop from # to #. Drawing on purpose to keep your shape is the right answer.	· 可以出「§」，但剩下的牌能凑出的场数会从#种减少到#种。故意摸牌保持牌型才是正解。
+・@が残り#枚。上がられる可能性が高い場面では、手札の合計を減らす「§」が優先でした（残り合計 #→#）。	· @ is down to # cards. When someone is likely to go out, "§", which cuts your hand total, came first (remaining total # → #).	· @只剩#张。在对手很可能出完的局面，应优先打出能减少手牌合计的「§」（剩余合计 #→#）。
+・#枚残しは場が#のときしか上がれず、確率は約#%。「§」なら残り#枚の#面待ちで、約#%でした。	· Keeping # card, you only go out if the field is # (about #%). With "§", your last # cards would wait on # fields, about #%.	· 留#张的话，只有场数是#时才能出完，概率约#%。打「§」的话，剩下#张是#面听牌，约#%。
+・#枚残しは場が§のときしか上がれず、確率は約#%。「§」なら残り#枚の#面待ちで、約#%でした。	· Keeping # card, you only go out if the field is § (about #%). With "§", your last # cards would wait on # fields, about #%.	· 留#张的话，只有场数是§时才能出完，概率约#%。打「§」的话，剩下#张是#面听牌，约#%。
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
