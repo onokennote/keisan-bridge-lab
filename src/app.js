@@ -1602,7 +1602,8 @@ function cloudDirty(k) {
   CLOUD.dirty = true; clearTimeout(CLOUD.timer); CLOUD.timer = setTimeout(cloudPush, 4000);
 }
 async function cloudReq(a, body, keep) {
-  const r = await fetch(CLOUD_API + '?a=' + a, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), keepalive: !!keep });
+  const ac = !keep && typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ac && setTimeout(() => ac.abort(), 20000); // 返事が来ないまま止まらないように（20秒で打ち切る）
+  let r; try { r = await fetch(CLOUD_API + '?a=' + a, Object.assign({ method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body || {}), keepalive: !!keep }, ac ? { signal: ac.signal } : {})); } catch (e) { throw new Error(e && e.name === 'AbortError' ? 'サーバーの返事がありません。少しあとでもう一度ためしてください' : '通信エラー'); } finally { if (tm) clearTimeout(tm); }
   const j = await r.json().catch(() => ({ ok: false, error: '通信エラー' }));
   if (!j.ok) { const e = new Error(j.error || '通信エラー'); e.status = r.status; e.conflict = !!j.conflict; throw e; }
   return j;
@@ -2613,7 +2614,8 @@ async function nameCheck(name, exceptPid) {
   if (profiles().some(p => p.id !== exceptPid && norm(p.name) === norm(name))) return 'この端末に、同じ名前のプレイヤーがもういます';
   if (!CLOUD_ON) return null;
   try {
-    const c = (exceptPid && plLink(exceptPid)) || raw.get('kb.cloud', null), j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''))).json();
+    const c = (exceptPid && plLink(exceptPid)) || raw.get('kb.cloud', null), ac = typeof AbortController !== 'undefined' ? new AbortController() : null, tm = ac && setTimeout(() => ac.abort(), 6000); // 返事が遅いときは6秒で打ち切って進む（前は待ちつづけて、はじめの画面が閉じなかった）
+    let j; try { j = await (await fetch(CLOUD_API + '?a=name&n=' + encodeURIComponent(name) + '&uid=' + encodeURIComponent((c && c.uid) || '') + '&pid=' + encodeURIComponent(exceptPid || ''), ac ? { signal: ac.signal } : {})).json(); } finally { if (tm) clearTimeout(tm); }
     if (j.ok && !j.free) return j.why === 'ng' ? 'その名前は使えません。ほかの名前にしてください' : 'その名前は、ほかのプレイヤーがもう使っています';
   } catch (e) { } // つながらないときは止めない（サーバー側でも重複は「研究員○○」になる）
   return null;
@@ -6387,7 +6389,8 @@ function act(a, el) {
     case 'rename-profile': modal(`<div class="upd-modal"><h2>名前を変更</h2><input id="ren-name" class="name-input" maxlength="10" value="${esc(S.settings.name)}"><p class="small name-err" id="name-err" hidden></p><button class="btn primary upd-go" data-act="rename-save">変更する</button><button class="btn ghost sm" data-act="profiles">戻る</button></div>`); setTimeout(() => { const i = $('#ren-name'); if (i) i.focus(); }, 50); break;
     case 'rename-save': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name === S.settings.name) { profileModal(); break; } if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, PID).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('rename-ok'); }); break; }
     case 'rename-ok': { const i = $('#ren-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (name) { S.settings.name = name; store.set('settings', S.settings); const L = profiles(), pr = L.find(x => x.id === PID); if (pr) { pr.name = name; raw.set('kb.profiles', L); } } profileModal(); render(); setTimeout(profileModal, 0); break; }
-    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (S.nameBusy) break; S.nameBusy = true; nameCheck(name, null).then(err => { S.nameBusy = false; if (err) { nameErr(err); return; } act('create-ok'); }); break; }
+    case 'create-profile': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10); if (S.nameBusy) break; S.nameBusy = true; const bt = $('#modal [data-act="create-profile"]'), lb = bt && bt.textContent; if (bt && CLOUD_ON) { bt.disabled = true; bt.textContent = '確かめています…'; } nameErr('');
+      nameCheck(name, null).catch(() => null).then(err => { S.nameBusy = false; if (bt) { bt.disabled = false; bt.textContent = lb; } if (err) { nameErr(err); return; } act('create-ok'); }); break; }
     case 'create-ok': { const i = $('#new-name'); const name = ((i && i.value) || '').trim().slice(0, 10) || 'あなた'; const id = createProfile(name); switchProfile(id); toast(`${name}さん、ようこそ！`); setTimeout(() => { if (!$('#modal') && S.view === 'home') tutInvite(name); }, 700); if (S.updatedNotice && !S.updShown) { S.updShown = true; setTimeout(showUpdateNotice, 300); } break; }
     case 'copy-export': { const t = $('#exp-text'); if (t) { t.select(); try { navigator.clipboard.writeText(t.value).then(() => toast('コピーしました'), () => { document.execCommand('copy'); toast('コピーしました'); }); } catch (e) { document.execCommand('copy'); toast('コピーしました'); } } break; }
     case 'growth-reset': if (!S.resetArm) { S.resetArm = true; render(); setTimeout(() => { S.resetArm = false; if (S.view === 'growth') render(); }, 4000); } else { S.resetArm = false; store.del('growth'); store.del('zukan'); toast('成長記録をリセットしました'); render(); } break;
