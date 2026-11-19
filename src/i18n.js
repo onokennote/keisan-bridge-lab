@@ -160,7 +160,7 @@
     en: { cls: 'dk-en', key: 'kb.deck.en', def: true, label: on => `🔤 Number words: ${on ? 'ON' : 'OFF'}`,
       face: (v, s, k) => k === 'mc' || k === 'fly' ? String(v) : `<span class="ewf"><b>${v}</b><i>${EW[v]}</i></span>`, val: null },
     ja: { cls: 'dk-hana', key: 'kb.deck.ja', def: false, label: on => `🎴 花札：${on ? 'オン' : 'オフ'}`,
-      face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${hmOf(v, s)[0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf">${hanaSvg(v, s)}<i>${hmOf(v, s)}</i></span>`, val: v => v <= 12 ? `${v}月` : '役札・13' },
+      face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${hmOf(v, s)[0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf">${hanaSvg(v, s)}<i>${hmOf(v, s)}</i></span>`, val: v => v <= 12 ? `${HM[v]}・${v}月` : '役札・13' },
     hi: { cls: 'dk-gj', key: 'kb.deck.hi', def: true, label: on => `🪷 गंजीफ़ा: ${on ? 'चालू' : 'बंद'}`,
       face: (v, s, k) => `<span class="gjf s${s}">${v >= 11 ? '<svg class="gjc" viewBox="0 0 20 10"><path d="M2 9L1 2L6 6L10 0L14 6L19 2L18 9Z" fill="#f5d77a"/></svg>' : ''}<b>${v}</b></span>`, val: null }
   };
