@@ -170,3 +170,24 @@ html.th-pop .combo-fx.l3 b{background:none;-webkit-background-clip:border-box;ba
 html.th-pop .combo-fx.l3{text-shadow:3px 3px 0 var(--pop-line);filter:none}
 html.th-pop .combo-fx small{-webkit-text-stroke:0;color:var(--pop-line)!important;text-shadow:none}
 html.th-pop .combo-fx.end{color:var(--muted);-webkit-text-stroke:0;text-shadow:none}
+/* 設定画面：数字の入力・卓の見本・切り替え（セグメント）・席・チップ・決勝進出率の目安 */
+html.th-pop .su-step input{background:var(--pop-sf)!important;color:var(--ink)!important;border:2px solid var(--pop-line)!important;-webkit-text-fill-color:var(--ink)}
+html.th-pop .su-tb{background:var(--pop-sf);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .su-tb i{color:#b5562f!important}html.th-pop .su-tb small{color:var(--ink)!important}
+html.th-pop .su-seg{background:var(--surface2);border:2px solid var(--pop-line)}
+html.th-pop .su-seg button{color:var(--muted)!important}
+html.th-pop .su-seg button.on{background:var(--pop-yel);color:var(--ink)!important;box-shadow:2px 2px 0 var(--pop-line);border:2px solid var(--pop-line)}
+html.th-pop .su-felt{background:radial-gradient(ellipse at 50% 40%,#d9cba8,#c8b78f 70%);border-color:var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .su-seat{background:var(--pop-sf);border-color:var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .su-seat .ss-face{color:#b5562f!important}html.th-pop .su-seat small{color:var(--ink)!important}
+html.th-pop .su-seat.on{background:var(--pop-cream);box-shadow:3px 3px 0 var(--warn)}
+html.th-pop .su-seated{background:var(--surface2);border:2px dashed var(--pop-line)}
+html.th-pop .su-chip{background:var(--pop-blue);color:var(--ink)!important;border:2px solid var(--pop-line)}
+html.th-pop .su-chip.on{background:var(--pop-yel);color:var(--ink)!important}
+html.th-pop .est-box{background:var(--surface2);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .est-box summary{color:#b5562f!important}
+html.th-pop .su-sw{border-color:var(--pop-line)}
+html.th-pop .su-sw{background:#cfc6b4;border:2px solid var(--pop-line)}
+html.th-pop .su-sw i{background:var(--pop-sf);box-shadow:1px 1px 0 var(--pop-line);border:1.5px solid var(--pop-line);top:2px;left:2px}
+html.th-pop .su-sw.on{background:#5aa96a;border-color:var(--pop-line);box-shadow:none}
+html.th-pop .su-sw.on i{left:26px}
