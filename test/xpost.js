@@ -15,8 +15,8 @@ xTourNew(['id' => 'OFFI0001', 'cfg' => ['name' => '第1回 公式大会', 'start
 xTourNew(['id' => 'INVT0001', 'cfg' => ['name' => '家族大会', 'startAt' => ${now + 3600}, 'entry' => 'invite', 'sets' => 2, 'games' => 3, 'official' => false]]);`);
 let L = q();
 const n1 = L.find(x => x.tag === 'new:ABCD1234'), o1 = L.find(x => x.tag === 'new:OFFI0001');
-ok(n1 && /オンライン大会のお知らせ/.test(n1.text) && /#t=ABCD1234/.test(n1.text) && /#計算ブリッジ/.test(n1.text), '大会の案内（リンク #t=大会のID・タグ）\n' + (n1 && n1.text));
-ok(o1 && /公式大会 開催決定/.test(o1.text) && o1.pri > n1.pri, '公式大会は目立つ見出し・先に投稿\n' + (o1 && o1.text));
+ok(n1 && /オンライン大会のお知らせ/.test(n1.text) && !/https?:/.test(n1.text) && /#計算ブリッジ/.test(n1.text), 'ふつうの大会の案内（URLなし＝Xの料金が安い・タグ）\n' + (n1 && n1.text));
+ok(o1 && /公式大会 開催決定/.test(o1.text) && /#t=OFFI0001/.test(o1.text) && o1.pri > n1.pri, '公式大会は目立つ見出し・先に投稿・大会の画面へのリンク\n' + (o1 && o1.text));
 ok(!L.some(x => x.tag === 'new:INVT0001'), '招待だけの大会は投稿しない');
 // 2. 大会の結果：上位3人（ランキングに出していない人は「研究員さん」・AI研究員の印）と結果ページへのリンク
 php(`db()->prepare("INSERT INTO ranks (uid, pid, name, shown, updated) VALUES ('u1', 'p1', 'ケン', 1, 1), ('u2', 'p2', 'ヒミツ', 0, 1)")->execute();
@@ -45,6 +45,7 @@ php(`xSeason('2026-11a', [['name' => 'ケン', 'pts' => 120, 'ai' => false], ['n
 L = q(); const se = L.find(x => x.kind === 'season');
 ok(se && /11月前半シーズン 最終結果/.test(se.text) && /🥇 ケン 120pt/.test(se.text), 'シーズンの結果\n' + (se && se.text));
 // 6. 文字数（Xは日本語2・URL23で280まで）と1日の上限
+{ const urls = q().filter(x => /https?:/.test(x.text)).map(x => x.tag); ok(urls.every(t => /OFFI/.test(t)), 'URL入りは公式大会の投稿だけ（' + urls.join('・') + '）'); }
 const lens = JSON.parse(php("echo json_encode(array_map(fn($r) => xLen($r['text']), db()->query('SELECT text FROM xq')->fetchAll()));"));
 ok(lens.every(n => n <= 280), '文字数はどれも280以内（' + lens.join('・') + '）');
 const long = php(`xPush('long', 'test', array_merge(['見出し'], array_fill(0, 30, 'とても長い行がここに入ります')), 0); echo xLen(db()->query("SELECT text FROM xq WHERE tag = 'long'")->fetchColumn());`);

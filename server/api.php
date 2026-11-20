@@ -640,14 +640,15 @@ function rankSorted(bool $withAi): array {
   return [$sorted, $all];
 }
 // ---------- Xへの投稿（@keisan_bridge_l。2026-11-21）----------
+// URLを入れるのは公式大会の投稿だけ（XのAPIはURL入りの投稿が文だけの約13倍の料金）。アプリへのリンクはXのプロフィールに置く
 // 文はサーバーが作って待ち行列 xq に入れ、GitHub Actions（x-post.yml・ai/xpost.js）が読んで投稿する（Xの鍵は GitHub の Secrets だけが持つ）
 // 名前はランキングに出している名前だけ（ランキングに出さない人は「研究員さん」）。招待だけの大会は投稿しない
 const X_SITE = 'https://keisan-bridge.lolipop-now.app', X_TAG = '#計算ブリッジ', X_DAY_MAX = 12;
 // Xの文字数（日本語は2・URLは23で数える。上限280）
 function xLen(string $s): int { $s = preg_replace('~https?://\S+~', str_repeat('a', 23), $s); $n = 0; foreach (preg_split('//u', $s, -1, PREG_SPLIT_NO_EMPTY) as $ch) { $c = mb_ord($ch); $n += ($c <= 0x10FF || ($c >= 0x2000 && $c <= 0x200D) || ($c >= 0x2010 && $c <= 0x201F) || ($c >= 0x2032 && $c <= 0x2037)) ? 1 : 2; } return $n; }
 // 文を待ち行列へ（同じ tag は1回だけ）。長すぎるときは、行を後ろから削ってから URL・タグを付ける
-function xPush(string $tag, string $kind, array $lines, int $pri = 0, string $link = ''): void { // link：URLのうしろに付ける（大会の画面は '#t=ID'）
-  $lines = array_values(array_filter($lines, fn($x) => $x !== '')); $tail = "\n" . X_SITE . '/' . $link . ' ' . X_TAG;
+function xPush(string $tag, string $kind, array $lines, int $pri = 0, ?string $link = null): void { // link：URLを付けるとき（大会の画面は '#t=ID'）。URL入りの投稿はXの料金が高いので、公式大会だけ（2026-11-21）
+  $lines = array_values(array_filter($lines, fn($x) => $x !== '')); $tail = "\n" . ($link !== null ? X_SITE . '/' . $link . ' ' : '') . X_TAG;
   while (count($lines) > 1 && xLen(implode("\n", $lines) . $tail) > 280) array_splice($lines, count($lines) - 1, 1);
   $text = implode("\n", $lines) . $tail; if (xLen($text) > 280) $text = mb_substr($text, 0, 120) . '…';
   db()->prepare('INSERT OR IGNORE INTO xq (tag, kind, pri, text, at) VALUES (?, ?, ?, ?, ?)')->execute([$tag, $kind, $pri, $text, time()]);
@@ -665,7 +666,7 @@ function xFmt(array $c): string { return '予選' . ($c['sets'] ?? 3) . 'セッ�
 // 大会をひらいたとき（誰でも出られる大会だけ。デイリーは毎朝のまとめで）
 function xTourNew(array $t): void {
   $c = $t['cfg']; if (!empty($c['test']) || !empty($c['daily']) || ($c['entry'] ?? 'open') !== 'open') return; $off = !empty($c['official']);
-  xPush('new:' . $t['id'], 'tour_new', [$off ? '🏆【公式大会 開催決定】🏆' : '📣【オンライン大会のお知らせ】', '「' . $c['name'] . '」', '🗓 ' . xWhen((int)$c['startAt']) . ' 開始（受付は15分前から）', '🃏 ' . xFmt($c), $off ? '上位入賞でバッジ・称号・総ポイント！' : '', 'エントリーはこちら👇'], $off ? 2 : 0, '#t=' . $t['id']);
+  xPush('new:' . $t['id'], 'tour_new', [$off ? '🏆【公式大会 開催決定】🏆' : '📣【オンライン大会のお知らせ】', '「' . $c['name'] . '」', '🗓 ' . xWhen((int)$c['startAt']) . ' 開始（受付は15分前から）', '🃏 ' . xFmt($c), $off ? '上位入賞でバッジ・称号・総ポイント！' : '', $off ? 'エントリーはこちら👇' : 'アプリの「オンライン」タブからエントリーできます'], $off ? 2 : 0, $off ? '#t=' . $t['id'] : null);
 }
 // 大会が終わったとき（誰でも出られる大会。公式は人が1人以上、ほかは2人以上のとき）
 function xTourDone(array $t): void {
@@ -673,7 +674,7 @@ function xTourDone(array $t): void {
   if ($nh < ($off ? 1 : 2)) return;
   $P = []; foreach ($t['players'] ?? [] as $p) $P[$p['key']] = $p; $md = ['🥇', '🥈', '🥉']; $L = [];
   foreach (array_slice($t['result'] ?? [], 0, 3) as $i => $k) if (isset($P[$k])) $L[] = $md[$i] . ' ' . xName($P[$k]);
-  xPush('done:' . $t['id'], 'tour_done', array_merge([$off ? '🏆【公式大会 結果】🏆' : '🏁【オンライン大会 結果】', '「' . $c['name'] . '」（参加' . $nh . '人）'], $L, ['おめでとうございます！結果はこちら👇']), $off ? 2 : 0, '#t=' . $t['id']);
+  xPush('done:' . $t['id'], 'tour_done', array_merge([$off ? '🏆【公式大会 結果】🏆' : '🏁【オンライン大会 結果】', '「' . $c['name'] . '」（参加' . $nh . '人）'], $L, [$off ? 'おめでとうございます！結果はこちら👇' : 'おめでとうございます！']), $off ? 2 : 0, $off ? '#t=' . $t['id'] : null);
 }
 // シーズンが締まったとき（AI研究員も入れた順位のまま）
 function xSeason(string $sk, array $top, int $n): void {
