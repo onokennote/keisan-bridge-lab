@@ -135,3 +135,11 @@ html.th-pop .ver-bar{background:var(--pop-sf);border:2.5px solid var(--pop-line)
 html.th-pop .ver-bar .ver-x{color:var(--ink)}
 /* 重ねて出す画面（#modal）の中も文字は黒に */
 html.th-pop #modal :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.cm-name):not(svg *):not(.road *){color:inherit}
+/* オンライン大会の一覧：1行ずつ枠で区切る */
+html.th-pop .ol-list{display:flex;flex-direction:column;gap:8px}
+html.th-pop .ol-row{background:var(--surface2);border:2px solid var(--pop-line);border-radius:12px;box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .ol-row.mine{background:#e4efd9;border-color:#3f7a4a;box-shadow:2px 2px 0 #3f7a4a}
+html.th-pop .ol-row.live{background:#f6dcd3;border-color:var(--pop-red);box-shadow:2px 2px 0 var(--pop-red)}
+html.th-pop .ol-season{background:var(--surface2);border:2px dashed var(--pop-line);border-radius:12px}
+html.th-pop .ol-tabs{border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .ol-season .btn{white-space:nowrap;flex:none}
