@@ -1955,7 +1955,7 @@ function titleModal() {
     <div class="ttl-list"><button class="ttl ${!cur ? 'on' : ''}" data-act="title-set" data-id="">つけない</button>${L.map(a => `<button class="ttl ${cur === a.tid ? 'on' : ''} ${+a.official ? 'off' : ''}" data-act="title-set" data-id="${esc(a.tid)}">${['👑', '🥈', '🥉'][a.place - 1]} ${ttlTag(a) ? `<em>${ttlTag(a)}</em>` : ''}${esc(a.tname)} ${placeJa(+a.place)}</button>`).join('')}</div>
     ${L.length ? '' : '<p class="small muted" style="margin:0">大会の称号：オンライン大会（人が10人以上）か、デイリートーナメントのシーズンで3位以内に入ると選べます。</p>'}
     ${(() => { const ach = G_().ach, D = btDefs(), got = D.filter(b => b.ok(ach)), no = D.filter(b => !b.ok(ach));
-      return `<div class="lbl" style="margin-top:4px">🏅 バッジ・冠の称号 <small class="muted">${got.length}/${D.length}</small></div>${got.length ? `<div class="ttl-list">${got.map(b => `<button class="ttl bt ${cur === b.id ? 'on' : ''}" data-act="title-set" data-id="${b.id}">🏅 ${esc(b.name)} <small>${b.kind}</small></button>`).join('')}</div>` : ''}
+      return `<div class="lbl" style="margin-top:4px">🏅 バッジ・冠の称号 <small class="muted">${got.length}/${D.length}</small></div>${got.length ? `<div class="ttl-list">${got.map(b => `<button class="ttl bt ${cur === b.id ? 'on' : ''}" data-act="title-set" data-id="${b.id}"><span>🏅 ${esc(b.name)} <small>${b.kind}</small></span><small class="bt-cond">${esc(b.cond)}</small></button>`).join('')}</div>` : ''}
       <details class="bt-more"><summary class="small">まだの称号（${no.length}）と条件</summary><div class="bt-no">${no.map(b => `<div><b>${esc(b.name)}</b><small>${esc(b.cond)}</small></div>`).join('')}</div></details>`; })()}
     <div class="row" style="justify-content:flex-end"><button class="btn" data-act="close">閉じる</button></div></div>`);
 }
