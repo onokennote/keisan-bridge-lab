@@ -2964,3 +2964,5 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .h-player .player-bar{margin:0;border:0;background:transparent;box-shadow:none;padding:0}
 .h-player .hb-row{margin:0}
 @media (max-width:380px){.htabs button{font-size:9.5px;letter-spacing:-.04em;padding-left:0;padding-right:0}}
+/* オンライン大会：ほかの卓を待つ間、順位表はうすく（結果が出るまで。2026-11-20） */
+.on-stand-dim{opacity:.28;filter:grayscale(1);transition:opacity .4s}
