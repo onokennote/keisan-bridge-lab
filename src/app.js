@@ -399,7 +399,10 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (S.xmBak && !['game', 'set-end'].includes(view)) xmRestore(); /* サンタのテストプレイを途中でやめても記録を戻す */ if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
 // テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
-function syncStg() { if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です'; document.body.appendChild(b); }
+// テーマ「ポップ」：テスト版だけ（はじめはオン。テスト版の帯を押すと切り替え kb.theme）
+const themePop = () => { let t = null; try { t = localStorage.getItem('kb.theme'); } catch (e) { } return t ? t === 'pop' : !!window.KB_STAGING; };
+function syncTheme() { document.documentElement.classList.toggle('th-pop', themePop()); }
+function syncStg() { syncTheme(); if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です（押すとデザインを切り替え）'; b.style.cursor = 'pointer'; b.onclick = () => { try { localStorage.setItem('kb.theme', themePop() ? 'old' : 'pop'); } catch (e) { } syncTheme(); toast(themePop() ? 'デザイン：ポップ' : 'デザイン：いまの緑'); }; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
