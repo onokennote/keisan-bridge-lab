@@ -21,7 +21,7 @@ async function tweet(text) {
   const url = 'https://api.x.com/2/tweets';
   const r = await fetch(url, { method: 'POST', headers: { Authorization: oauth('POST', url), 'Content-Type': 'application/json' }, body: JSON.stringify({ text }) });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok || !j.data) return { ok: false, res: r.status + ' ' + JSON.stringify(j).slice(0, 180), retry: r.status === 429 || r.status >= 500 };
+  if (!r.ok || !j.data) return { ok: false, res: r.status + ' ' + JSON.stringify(j).slice(0, 180), retry: r.status === 429 || r.status === 402 || r.status >= 500 }; // 402＝Xのクレジット切れ：文は残して、入ったら次の回に出す
   return { ok: true, res: j.data.id };
 }
 (async () => {
