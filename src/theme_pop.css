@@ -219,3 +219,5 @@ html.th-pop .pb-title:active{transform:translate(2px,2px);box-shadow:none}
 html.th-pop .pv-title{background:var(--pop-cream)!important;color:var(--pop-line)!important;border:2px solid var(--pop-line)!important}
 html.th-pop .pv-title.off{background:var(--pop-yel)!important}
 html.th-pop .pv-title.bt{background:#dde3ea!important}
+html.th-pop .hf-x{background:var(--pop-sf);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .hf-x-btn{background:#2b2622!important;color:#f5efe3!important;border:2px solid var(--pop-line)!important}

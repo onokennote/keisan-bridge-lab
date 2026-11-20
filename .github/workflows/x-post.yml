@@ -1,0 +1,29 @@
+# Xへの投稿（@keisan_bridge_l）：サーバーの待ち行列から文を受け取って投稿する（大会の案内・結果・毎朝のデイリーのまとめ・シーズンの結果・ランキングの1位交代）
+# 必要な Secrets：KB_ADMIN_KEY（AI研究員と同じ）、X_API_KEY・X_API_SECRET・X_ACCESS_TOKEN・X_ACCESS_SECRET（X の開発者ポータルの鍵。読み書きの権限）
+# Xの鍵がまだないときは、投稿する文をログに出すだけ
+name: Xに投稿する
+on:
+  schedule:
+    - cron: '7,27,47 * * * *' # 20分ごと（毎朝6時台のデイリーのまとめもここで出る）
+  workflow_dispatch:
+concurrency: x-post
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: claude/lucid-curie-k2el7s
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 投稿する
+        env:
+          KB_API: https://onoken-web.sakura.ne.jp/kb/api.php
+          KB_ADMIN_KEY: ${{ secrets.KB_ADMIN_KEY }}
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: node ai/xpost.js

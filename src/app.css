@@ -2990,3 +2990,9 @@ html.th-pop .sb-b em{color:#b5562f!important}html.th-pop .sb-b em.sb-max{color:#
 .bt-no b{font-size:13px}.bt-no small{font-size:11px;color:var(--muted)}
 .ttl.bt{display:flex;flex-direction:column;gap:2px}
 .ttl.bt .bt-cond{font-size:11px;margin:0;opacity:.75;font-weight:400}
+/* フッター：マサが研究所の X を紹介 */
+.hf-x{display:flex;gap:10px;align-items:flex-start;text-align:left;margin:4px auto 10px;max-width:420px;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
+.hf-x-av{flex:0 0 44px;width:44px;height:44px}.hf-x-av svg{width:100%;height:100%}
+.hf-x-b{display:flex;flex-direction:column;gap:6px;min-width:0}.hf-x-b p{margin:0;font-size:13px;line-height:1.5}
+.hf-x-btn{align-self:flex-start;text-decoration:none;background:#111;color:#fff;border-color:#111}
+.hf-x-b small{font-size:10px}

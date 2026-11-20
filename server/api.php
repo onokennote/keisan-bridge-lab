@@ -54,6 +54,8 @@ function db(): PDO {
   $pdo->exec('CREATE TABLE IF NOT EXISTS rivals (uid TEXT NOT NULL, pid TEXT NOT NULL, rid TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, rid))'); // ライバル指定（だれが・だれを）
   $tc = array_column($pdo->query('PRAGMA table_info(tokens)')->fetchAll(), 'name');
   if (!in_array('pid', $tc, true)) $pdo->exec('ALTER TABLE tokens ADD COLUMN pid TEXT');
+  $pdo->exec('CREATE TABLE IF NOT EXISTS xq (id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT NOT NULL UNIQUE, kind TEXT NOT NULL, pri INTEGER NOT NULL DEFAULT 0, text TEXT NOT NULL, at INTEGER NOT NULL, posted INTEGER NOT NULL DEFAULT 0, res TEXT)'); // Xに投稿する文の待ち行列（GitHub Actions が読んで投稿する）
+  $pdo->exec('CREATE TABLE IF NOT EXISTS xstate (k TEXT PRIMARY KEY, v TEXT NOT NULL)'); // Xの投稿の控え（ランキングの1位など）
   $pdo->exec('CREATE TABLE IF NOT EXISTS ai_data (cid TEXT PRIMARY KEY, data TEXT, updated INTEGER NOT NULL)'); // AI研究員の記録（毎日の自動対局で育てる）
   $pdo->exec('CREATE TABLE IF NOT EXISTS dpoints (uid TEXT NOT NULL, pid TEXT NOT NULL, season TEXT NOT NULL, tid TEXT NOT NULL, pts INTEGER NOT NULL, name TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, tid))'); // デイリートーナメントのポイント（シーズンポイントの元）
   $pdo->exec('CREATE TABLE IF NOT EXISTS tpoints (uid TEXT NOT NULL, pid TEXT NOT NULL, src TEXT NOT NULL, ref TEXT NOT NULL, pts INTEGER NOT NULL, name TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (uid, pid, src, ref))'); // 総ポイント（シーズンの順位・公式大会の入賞）
@@ -471,6 +473,7 @@ function obTourAward(array &$t): void {
   $daily = !empty($t['cfg']['daily']);
   if ($daily) dailyPoints($t);
   $t['awardOk'] = $daily || count($t['entrants']) >= OB_AWARD_MIN; $t['awards'] = [];
+  if (!$daily) xTourDone($t);
   if (!$t['awardOk']) return;
   $ent = []; foreach ($t['entrants'] as $e) $ent['u:' . $e['uid']] = $e;
   $podAi = $daily || !empty($t['cfg']['official']) || !array_key_exists('podAi', $t['cfg']) || !empty($t['cfg']['podAi']); // 公式大会はいつもAIも含めて数える // 表彰台にAIを含む（はじめ）：AIも順位に数え、AIの順位にはバッジなし。含まない：人だけで数え直す
@@ -601,7 +604,119 @@ function seasonClose(): void {
         noteAdd($r['uid'], $r['pid'], 'award', ['tid' => '', 'tname' => 'デイリー ' . seasonLabel($sk) . 'シーズン', 'place' => $i + 1, 'official' => false]); }
       $top[] = ['name' => $r['name'], 'rid' => rid($r['uid'], $r['pid']), 'pts' => (int)$r['pts'], 'n' => (int)$r['n'], 'bonus' => $b, 'ai' => $ai, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null];
     }
+    xSeason($sk, $top, $n);
     db()->prepare('INSERT OR REPLACE INTO seasons (season, closed, st) VALUES (?, ?, ?)')->execute([$sk, time(), json_encode(['label' => seasonLabel($sk), 'n' => $n, 'nHuman' => count(array_filter($L, fn($r) => $r['uid'] !== 'ai')), 'stand' => array_slice($top, 0, 50)], JSON_UNESCAPED_UNICODE)]);
+  }
+}
+// ランキングの並び（rankings と、Xの「1位交代」で使う）。$withAi=false でAI研究員の行を外す（点は全員で決めたまま）
+function rankSorted(bool $withAi): array {
+  $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1')->fetchAll(); // 総合の点はAI研究員も入れた全員で決め、ai=0 のときはそのあとでAIの行を外す（人だけの順位＝AI込みの並びからAIを抜いたもの）
+  foreach ($all as &$r) {
+    $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0;
+    // 連続最善の列ができる前に保存した人は、成績カードに入っている記録を使う
+    if ($r['card']) { $c = json_decode($r['card'], true); $r['streak'] = max($r['streak'], max(0, min(2000, (int)($c['streak'] ?? 0)))); }
+    unset($r['card']);
+  } unset($r);
+  $defs = [
+    'rating' => [fn($r) => $r['rating'] !== null, fn($a, $b) => $b['rating'] <=> $a['rating']],
+    'badges' => [fn($r) => $r['badges'] > 0, fn($a, $b) => [$b['badges'], $b['bp']] <=> [$a['badges'], $a['bp']]],
+    'bp' => [fn($r) => $r['bp'] > 0, fn($a, $b) => $b['bp'] <=> $a['bp']],
+    'streak' => [fn($r) => $r['streak'] > 0, fn($a, $b) => $b['streak'] <=> $a['streak']],
+    'attack' => [fn($r) => $r['atk'] > 0, fn($a, $b) => $b['atk'] <=> $a['atk']]];
+  // 総合：推定実力・BP・連続最善・バッジアタックそれぞれ「1位の成績を1とした比率」に重み（35・30・20・15）をかけて合計。全部1位なら100点
+  $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $COL = ['rating' => 'rating', 'bp' => 'bp', 'streak' => 'streak', 'attack' => 'atk']; $sorted = [];
+  foreach ($W as $type => $w) { $c = $COL[$type]; $top = 0.0; foreach ($all as $x) $top = max($top, (float)($x[$c] ?? 0)); if ($top > 0) foreach ($all as &$x) { $v = (float)($x[$c] ?? 0); if ($v > 0) $x['total'] += $w * min(1, $v / $top); } unset($x); } // 1位の成績は全員（AI研究員も）から
+  if (!$withAi) $all = array_values(array_filter($all, fn($r) => empty($r['ai'])));
+  foreach ($defs as $type => [$in, $cmp]) {
+    $l = array_values(array_filter($all, $in)); usort($l, fn($a, $b) => $cmp($a, $b) ?: $a['updated'] <=> $b['updated']);
+    $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmp($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1; // 同じ値は同じ順位
+    $sorted[$type] = [$l, $rk];
+  }
+  foreach ($all as &$r) $r['total'] = round($r['total'], 1); unset($r);
+  $l = array_values(array_filter($all, fn($r) => $r['total'] > 0)); $cmpT = fn($a, $b) => $b['total'] <=> $a['total'];
+  usort($l, fn($a, $b) => $cmpT($a, $b) ?: $a['updated'] <=> $b['updated']);
+  $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmpT($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1;
+  $sorted = ['total' => [$l, $rk]] + $sorted;
+  return [$sorted, $all];
+}
+// ---------- Xへの投稿（@keisan_bridge_l。2026-11-21）----------
+// 文はサーバーが作って待ち行列 xq に入れ、GitHub Actions（x-post.yml・ai/xpost.js）が読んで投稿する（Xの鍵は GitHub の Secrets だけが持つ）
+// 名前はランキングに出している名前だけ（ランキングに出さない人は「研究員さん」）。招待だけの大会は投稿しない
+const X_SITE = 'https://keisan-bridge.lolipop-now.app', X_TAG = '#計算ブリッジ', X_DAY_MAX = 12;
+// Xの文字数（日本語は2・URLは23で数える。上限280）
+function xLen(string $s): int { $s = preg_replace('~https?://\S+~', str_repeat('a', 23), $s); $n = 0; foreach (preg_split('//u', $s, -1, PREG_SPLIT_NO_EMPTY) as $ch) { $c = mb_ord($ch); $n += ($c <= 0x10FF || ($c >= 0x2000 && $c <= 0x200D) || ($c >= 0x2010 && $c <= 0x201F) || ($c >= 0x2032 && $c <= 0x2037)) ? 1 : 2; } return $n; }
+// 文を待ち行列へ（同じ tag は1回だけ）。長すぎるときは、行を後ろから削ってから URL・タグを付ける
+function xPush(string $tag, string $kind, array $lines, int $pri = 0, string $link = ''): void { // link：URLのうしろに付ける（大会の画面は '#t=ID'）
+  $lines = array_values(array_filter($lines, fn($x) => $x !== '')); $tail = "\n" . X_SITE . '/' . $link . ' ' . X_TAG;
+  while (count($lines) > 1 && xLen(implode("\n", $lines) . $tail) > 280) array_splice($lines, count($lines) - 1, 1);
+  $text = implode("\n", $lines) . $tail; if (xLen($text) > 280) $text = mb_substr($text, 0, 120) . '…';
+  db()->prepare('INSERT OR IGNORE INTO xq (tag, kind, pri, text, at) VALUES (?, ?, ?, ?, ?)')->execute([$tag, $kind, $pri, $text, time()]);
+}
+function xState(string $k, ?string $v = null): ?string { if ($v !== null) { db()->prepare('INSERT OR REPLACE INTO xstate (k, v) VALUES (?, ?)')->execute([$k, $v]); return $v; } $q = db()->prepare('SELECT v FROM xstate WHERE k = ?'); $q->execute([$k]); $r = $q->fetchColumn(); return $r === false ? null : (string)$r; }
+// 投稿に出す名前：人はランキングに出している名前（出していなければ「研究員さん」）、AI研究員は「（AI研究員）」、AI補充は「AI」
+function xName(array $p): string {
+  if (!empty($p['char'])) return $p['name'] . '（AI研究員）';
+  if (!empty($p['ai']) || empty($p['uid'])) return 'AI';
+  $q = db()->prepare('SELECT name, shown FROM ranks WHERE uid = ? AND pid = ?'); $q->execute([$p['uid'], $p['pid'] ?? '']); $r = $q->fetch();
+  return $r && (int)$r['shown'] === 1 ? $r['name'] : '研究員さん';
+}
+function xWhen(int $ts): string { $d = (new DateTime('@' . $ts))->setTimezone(jstTz()); return $d->format('n/j') . '(' . ['日', '月', '火', '水', '木', '金', '土'][(int)$d->format('w')] . ') ' . $d->format('G:i'); }
+function xFmt(array $c): string { return '予選' . ($c['sets'] ?? 3) . 'セット×' . ($c['games'] ?? 3) . 'ゲーム' . (($c['finalists'] ?? 0) > 0 ? '・上位' . $c['finalists'] . '人で決勝' : ''); }
+// 大会をひらいたとき（誰でも出られる大会だけ。デイリーは毎朝のまとめで）
+function xTourNew(array $t): void {
+  $c = $t['cfg']; if (!empty($c['test']) || !empty($c['daily']) || ($c['entry'] ?? 'open') !== 'open') return; $off = !empty($c['official']);
+  xPush('new:' . $t['id'], 'tour_new', [$off ? '🏆【公式大会 開催決定】🏆' : '📣【オンライン大会のお知らせ】', '「' . $c['name'] . '」', '🗓 ' . xWhen((int)$c['startAt']) . ' 開始（受付は15分前から）', '🃏 ' . xFmt($c), $off ? '上位入賞でバッジ・称号・総ポイント！' : '', 'エントリーはこちら👇'], $off ? 2 : 0, '#t=' . $t['id']);
+}
+// 大会が終わったとき（誰でも出られる大会。公式は人が1人以上、ほかは2人以上のとき）
+function xTourDone(array $t): void {
+  $c = $t['cfg']; if (!empty($c['test']) || ($c['entry'] ?? 'open') !== 'open') return; $off = !empty($c['official']); $nh = count($t['entrants']);
+  if ($nh < ($off ? 1 : 2)) return;
+  $P = []; foreach ($t['players'] ?? [] as $p) $P[$p['key']] = $p; $md = ['🥇', '🥈', '🥉']; $L = [];
+  foreach (array_slice($t['result'] ?? [], 0, 3) as $i => $k) if (isset($P[$k])) $L[] = $md[$i] . ' ' . xName($P[$k]);
+  xPush('done:' . $t['id'], 'tour_done', array_merge([$off ? '🏆【公式大会 結果】🏆' : '🏁【オンライン大会 結果】', '「' . $c['name'] . '」（参加' . $nh . '人）'], $L, ['おめでとうございます！結果はこちら👇']), $off ? 2 : 0, '#t=' . $t['id']);
+}
+// シーズンが締まったとき（AI研究員も入れた順位のまま）
+function xSeason(string $sk, array $top, int $n): void {
+  $md = ['🥇', '🥈', '🥉']; $L = []; foreach (array_slice($top, 0, 3) as $i => $r) $L[] = $md[$i] . ' ' . $r['name'] . ($r['ai'] ? '（AI研究員）' : '') . ' ' . $r['pts'] . 'pt';
+  xPush('season:' . $sk, 'season', array_merge(['🗓【デイリー ' . seasonLabel($sk) . 'シーズン 最終結果】', '参加' . $n . '人'], $L, ['次のシーズンも毎日6部（朝6:30〜夜20:30）で開催中！']), 1);
+}
+// 毎朝6時：きのうのデイリーの各部の優勝者と、きょうの案内
+function xDailyReport(): void {
+  $now = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$now->format('G') < DAILY_HOUR) return;
+  $y = (clone $now)->modify('-1 day'); $tag = 'daily:' . $y->format('Ymd'); $q = db()->prepare('SELECT 1 FROM xq WHERE tag = ?'); $q->execute([$tag]); if ($q->fetch()) return;
+  $W = [];
+  foreach (db()->query("SELECT st FROM tours WHERE id LIKE 'D" . $y->format('ymd') . "%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) {
+    $t = json_decode($raw, true); $c = $t['cfg'] ?? []; if (empty($c['daily']) || !empty($c['test']) || ($t['phase'] ?? '') !== 'done') continue;
+    $P = []; foreach ($t['players'] ?? [] as $p) $P[$p['key']] = $p; $k = ($t['result'] ?? [])[0] ?? null; if (!$k || !isset($P[$k])) continue;
+    $no = dailyNo((int)($c['part'] ?? 0)); $W[$no][] = xName($P[$k]) . (!empty($c['group']) ? '（' . $c['group'] . '）' : '');
+  }
+  if (!$W) return; ksort($W); $L = ['☀️ おはようございます！', '【きのう ' . $y->format('n/j') . ' のデイリー優勝者】'];
+  $tms = []; foreach (DAILY_PARTS as $pt => $hm) $tms[dailyNo($pt)] = ltrim($hm, '0');
+  foreach ($W as $no => $names) $L[] = ($tms[$no] ?? '') . ' ' . implode('・', $names);
+  $L[] = 'きょうも朝6:30・7:30／夜17:30〜20:30の6部！1日1部、気軽にどうぞ';
+  xPush($tag, 'daily', $L, 1);
+}
+// ランキングの1位が入れ替わったとき（部門ごと・1日1回まで）
+const X_RANK_NAME = ['total' => '総合', 'rating' => '推定実力', 'badges' => 'バッジ数', 'bp' => 'BP', 'streak' => '連続最善', 'attack' => 'バッジアタック'];
+function xRankTops(): void {
+  [$sorted] = rankSorted(true); $ch = []; $today = (new DateTime('@' . time()))->setTimezone(jstTz())->format('Ymd');
+  foreach ($sorted as $type => [$l]) {
+    if (!$l || !isset(X_RANK_NAME[$type])) continue; $r = $l[0]; $key = $r['uid'] . ':' . $r['pid']; $old = xState('top:' . $type); $prev = xState('topname:' . $type);
+    $nm = $r['name'] . (!empty($r['ai']) ? '（AI研究員）' : '');
+    if ($old === null) { xState('top:' . $type, $key); xState('topname:' . $type, $nm); continue; } // はじめは控えるだけ
+    if ($old === $key) continue; if (xState('topday:' . $type) === $today) continue; // 1日1回まで（その日の最初の交代だけ）
+    xState('top:' . $type, $key); xState('topname:' . $type, $nm); xState('topday:' . $type, $today);
+    $val = ['total' => fn($r) => round($r['total'], 1) . '点', 'rating' => fn($r) => '★' . round($r['rating'], 1), 'badges' => fn($r) => $r['badges'] . '個', 'bp' => fn($r) => $r['bp'] . 'BP', 'streak' => fn($r) => $r['streak'] . '回', 'attack' => fn($r) => $r['atk'] . 'BP'][$type]($r);
+    $ch[] = '・' . X_RANK_NAME[$type] . '：' . $nm . ' が ' . ($prev ?: '前の1位') . ' を抜いた（' . $val . '）';
+  }
+  if ($ch) xPush('rank:' . $today . ':' . implode(',', array_map(fn($x) => mb_substr($x, 1, 4), $ch)), 'rank', array_merge(['👑【ランキング 1位交代！】'], $ch), 0); // 同時に変わった部門は1つの投稿に
+}
+// 公式大会の受付開始（開始15分前）
+function xOfficialOpen(): void {
+  $now = time();
+  foreach (db()->query("SELECT st FROM tours WHERE st LIKE '%\"official\":true%' AND st LIKE '%\"phase\":\"entry\"%'")->fetchAll(PDO::FETCH_COLUMN) as $raw) {
+    $t = json_decode($raw, true); $c = $t['cfg']; if (!empty($c['test']) || ($c['entry'] ?? 'open') !== 'open') continue;
+    if ($now >= $c['startAt'] - 900 && $now < $c['startAt']) xPush('open:' . $t['id'], 'tour_open', ['🏆【公式大会 受付中！】', '「' . $c['name'] . '」', xWhen((int)$c['startAt']) . ' 開始。いまからエントリーできます👇'], 3, '#t=' . $t['id']);
   }
 }
 // 大会の設定を読む（ひらくときと、編集のときに使う）
@@ -925,33 +1040,7 @@ try {
     case 'rankings': { // 6つのランキングをまとめて返す（各上位20人（all=1 なら300人）＋それより下の自分の行）
       $uid = preg_replace('/[^a-f0-9]/', '', (string)($_GET['uid'] ?? '')); $lim = !empty($_GET['all']) ? 300 : 20; $res = []; // all=1：上位300人まで（画面で「自分のまわり」「ライバル」「もっと見る」に使う）
       $withAi = ($_GET['ai'] ?? '1') !== '0'; // ai=0 でAI研究員を外す
-      $all = db()->query('SELECT uid, pid, name, rating, badges, bp, atk, avatar, streak, card, updated, ai FROM ranks WHERE shown = 1')->fetchAll(); // 総合の点はAI研究員も入れた全員で決め、ai=0 のときはそのあとでAIの行を外す（人だけの順位＝AI込みの並びからAIを抜いたもの）
-      foreach ($all as &$r) {
-        $r['rating'] = $r['rating'] !== null ? (float)$r['rating'] : null; foreach (['badges', 'bp', 'atk', 'streak'] as $k) $r[$k] = (int)$r[$k]; $r['total'] = 0.0;
-        // 連続最善の列ができる前に保存した人は、成績カードに入っている記録を使う
-        if ($r['card']) { $c = json_decode($r['card'], true); $r['streak'] = max($r['streak'], max(0, min(2000, (int)($c['streak'] ?? 0)))); }
-        unset($r['card']);
-      } unset($r);
-      $defs = [
-        'rating' => [fn($r) => $r['rating'] !== null, fn($a, $b) => $b['rating'] <=> $a['rating']],
-        'badges' => [fn($r) => $r['badges'] > 0, fn($a, $b) => [$b['badges'], $b['bp']] <=> [$a['badges'], $a['bp']]],
-        'bp' => [fn($r) => $r['bp'] > 0, fn($a, $b) => $b['bp'] <=> $a['bp']],
-        'streak' => [fn($r) => $r['streak'] > 0, fn($a, $b) => $b['streak'] <=> $a['streak']],
-        'attack' => [fn($r) => $r['atk'] > 0, fn($a, $b) => $b['atk'] <=> $a['atk']]];
-      // 総合：推定実力・BP・連続最善・バッジアタックそれぞれ「1位の成績を1とした比率」に重み（35・30・20・15）をかけて合計。全部1位なら100点
-      $W = ['rating' => 35, 'bp' => 30, 'streak' => 20, 'attack' => 15]; $COL = ['rating' => 'rating', 'bp' => 'bp', 'streak' => 'streak', 'attack' => 'atk']; $sorted = [];
-      foreach ($W as $type => $w) { $c = $COL[$type]; $top = 0.0; foreach ($all as $x) $top = max($top, (float)($x[$c] ?? 0)); if ($top > 0) foreach ($all as &$x) { $v = (float)($x[$c] ?? 0); if ($v > 0) $x['total'] += $w * min(1, $v / $top); } unset($x); } // 1位の成績は全員（AI研究員も）から
-      if (!$withAi) $all = array_values(array_filter($all, fn($r) => empty($r['ai'])));
-      foreach ($defs as $type => [$in, $cmp]) {
-        $l = array_values(array_filter($all, $in)); usort($l, fn($a, $b) => $cmp($a, $b) ?: $a['updated'] <=> $b['updated']);
-        $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmp($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1; // 同じ値は同じ順位
-        $sorted[$type] = [$l, $rk];
-      }
-      foreach ($all as &$r) $r['total'] = round($r['total'], 1); unset($r);
-      $l = array_values(array_filter($all, fn($r) => $r['total'] > 0)); $cmpT = fn($a, $b) => $b['total'] <=> $a['total'];
-      usort($l, fn($a, $b) => $cmpT($a, $b) ?: $a['updated'] <=> $b['updated']);
-      $rk = []; foreach ($l as $i => $r) $rk[$i] = ($i > 0 && $cmpT($l[$i - 1], $r) === 0) ? $rk[$i - 1] : $i + 1;
-      $sorted = ['total' => [$l, $rk]] + $sorted;
+      [$sorted, $all] = rankSorted($withAi);
       $tot = []; foreach ($all as $r) $tot[$r['uid'] . ':' . $r['pid']] = $r['total'];
       $row = fn($r, $rank) => ['rank' => $rank, 'name' => $r['name'], 'rating' => $r['rating'] !== null ? round($r['rating'], 1) : null, 'badges' => $r['badges'], 'bp' => $r['bp'], 'atk' => $r['atk'], 'streak' => $r['streak'], 'total' => $tot[$r['uid'] . ':' . $r['pid']] ?? 0, 'avatar' => $r['avatar'] ? json_decode($r['avatar'], true) : null, 'rid' => rid($r['uid'], $r['pid']), 'me' => $uid !== '' && $r['uid'] === $uid, 'pid' => ($uid !== '' && $r['uid'] === $uid) ? $r['pid'] : null, 'ai' => !empty($r['ai'])]; // pid は自分の行だけ（今のプレイヤーを見分けるため）
       foreach ($sorted as $type => [$l, $rk]) {
@@ -967,6 +1056,23 @@ try {
       if ($n === '') out(['ok' => true, 'free' => false, 'why' => 'empty']);
       if (!nameOk($n)) out(['ok' => true, 'free' => false, 'why' => 'ng']);
       out(['ok' => true, 'free' => !nameTaken($n, $uid, $pid), 'why' => 'taken']);
+    }
+    case 'x_tick': { // Xの投稿：毎朝のまとめ・ランキングの1位交代・公式大会の受付開始を作り、まだ投稿していない文を返す（GitHub Actions だけ）
+      $b = body(); adminOk($b);
+      try { seasonClose(); } catch (Throwable $e) { } xDailyReport(); xRankTops(); xOfficialOpen();
+      $d0 = (new DateTime('today', jstTz()))->getTimestamp(); $q = db()->prepare('SELECT COUNT(*) FROM xq WHERE posted >= ?'); $q->execute([$d0]); $left = max(0, X_DAY_MAX - (int)$q->fetchColumn()); // 1日の上限
+      db()->exec('UPDATE xq SET posted = -1 WHERE posted = 0 AND at < ' . (time() - 86400 * 2)); // 2日たっても出せなかった文は捨てる（古い知らせを出さない）
+      $L = $left ? db()->query('SELECT id, kind, text FROM xq WHERE posted = 0 ORDER BY pri DESC, id LIMIT ' . min($left, (int)($b['max'] ?? 4)))->fetchAll() : [];
+      out(['ok' => true, 'posts' => $L, 'left' => $left]);
+    }
+    case 'x_done': { // 投稿した（または失敗した）文の印
+      $b = body(); adminOk($b);
+      foreach ((array)($b['done'] ?? []) as $x) db()->prepare('UPDATE xq SET posted = ?, res = ? WHERE id = ?')->execute([!empty($x['ok']) ? time() : -2, mb_substr((string)($x['res'] ?? ''), 0, 200), (int)($x['id'] ?? 0)]);
+      out(['ok' => true]);
+    }
+    case 'x_list': { // 最近の投稿の控え（確かめる用）
+      $b = body(); adminOk($b);
+      out(['ok' => true, 'posts' => db()->query('SELECT id, tag, kind, text, at, posted, res FROM xq ORDER BY id DESC LIMIT 50')->fetchAll()]);
     }
     case 'ai_list': { // AI研究員の一覧と記録（GitHub Actions の毎日の自動対局から）
       $b = body(); adminOk($b);
@@ -1154,6 +1260,7 @@ try {
       $t = ['id' => $id, 'host' => $u['uid'], 'hostName' => $hostName, 'cfg' => $cfg, 'phase' => 'entry', 'entrants' => [], 'set' => 0];
       db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, $u['uid'], json_encode($t, JSON_UNESCAPED_UNICODE), $cfg['startAt'], time(), time()]);
       if ($cfg['entry'] === 'invite') noteInvites($t, $cfg['invites'] ?? []);
+      xTourNew($t);
       out(['ok' => true, 'tour' => obTourView($t, $u['uid'], 1, true)]);
     }
     case 'on_tour': { // 大会の詳細（ここでも進める）
@@ -1170,7 +1277,7 @@ try {
         if (!$open) $err = 'エントリーは開始の15分前からです';
         elseif (!obInvited($t, $u['uid'])) $err = '招待された人だけが出られる大会です';
         elseif (count($t['entrants']) >= $c['max']) $err = '満員です';
-        elseif (!empty($c['daily']) && ($pp = dailyEnteredPart($t, $u['uid'], (string)obSeatInfo($b)['pid'])) !== null) $err = 'きょうは第' . $pp . '部に出ています（デイリーは1日1部だけ。始まる前なら、そちらを取り消すと出られます）';
+        elseif (!empty($c['daily']) && ($pp = dailyEnteredPart($t, $u['uid'], (string)obSeatInfo($b)['pid'])) !== null) $err = 'きょうは第' . dailyNo($pp) . '部に出ています（デイリーは1日1部だけ。始まる前なら、そちらを取り消すと出られます）';
         elseif (!in_array($u['uid'], array_column($t['entrants'], 'uid'), true)) $t['entrants'][] = array_merge(obSeatInfo($b), ['uid' => $u['uid']]);
       } elseif ($act === 'cancel') {
         if ($t['phase'] !== 'entry') $err = 'もう始まっています'; else $t['entrants'] = array_values(array_filter($t['entrants'], fn($e) => $e['uid'] !== $u['uid']));

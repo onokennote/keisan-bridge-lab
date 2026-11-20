@@ -110,4 +110,7 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 五冠の英雄	Hero of Five Crowns	五冠英雄
 すべてを極めし者	Master of All	极尽一切之人
 達人の域に至りし者	One Who Reached Mastery	抵达达人之境者
+研究所の X ができたで！大会の案内や結果、毎朝のデイリーの優勝者を流すから、フォローしてな！	Our lab is on X now! We post tournament news, results and each morning's daily winners — follow us!	研究所开通X啦！会发布比赛通知、结果和每天早上的每日赛冠军，记得关注！
+非公式のファン制作アカウントです	An unofficial fan-made account	非官方粉丝制作的账号
+@keisan_bridge_l をフォロー	Follow @keisan_bridge_l	关注 @keisan_bridge_l
 `.split('\n').filter(Boolean).map(l => l.split('\t')));

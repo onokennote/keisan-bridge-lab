@@ -1848,6 +1848,11 @@ function backupNag(force) {
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="close">あとで</button><button class="btn primary" data-act="bk-done">✅ 控えた</button></div>`);
 }
 // 呪文のリンク（#code=…）で開いたとき：呪文を入れる欄に入れておく
+// Xの投稿のリンク（#t=大会のID）で開いたら、その大会の画面（結果）を開く（2026-11-21）
+function tourHashOpen() {
+  const m = /^#t=([0-9A-Z]{4,12})$/.exec(location.hash || ''); if (!m) return; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
+  setTimeout(() => act('on-tour-open', { dataset: { id: m[1] } }), 400);
+}
 function codeHashCheck() {
   const m = /^#code=([0-9A-Za-z]{12})$/.exec(location.hash || ''); if (!m) return; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { }
   const c = m[1].toUpperCase().replace(/(.{4})(?=.)/g, '$1-');
@@ -3307,8 +3312,10 @@ function langSwHTML() {
   if (!window.I18N || !I18N.on()) return th;
   return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.deckLabel ? `<button class="mj-sw ${I18N.deckOn ? 'on' : ''}" data-act="mj-set" data-noi18n>${I18N.deckLabel()}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}` + th;
 }
+const X_URL = 'https://x.com/keisan_bridge_l'; // 研究所の X（非公式ファン制作。2026-11-21）
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
+    <div class="hf-x"><span class="hf-x-av">${KB.casterSVG('masa', 'happy')}</span><div class="hf-x-b"><p>研究所の X ができたで！大会の案内や結果、毎朝のデイリーの優勝者を流すから、フォローしてな！</p><a class="btn sm hf-x-btn" href="${X_URL}" target="_blank" rel="noopener">𝕏 @keisan_bridge_l をフォロー</a><small class="muted">非公式のファン制作アカウントです</small></div></div>
     <div class="hf-name">計算ブリッジ作戦研究所 <small>〜打倒OZ家への道〜</small></div>
     <div class="hf-by">produced by <b>onoken</b> <span class="muted">＆ 研究所のなかまたち（博士・マサ・AI研究員）</span></div>
     <div class="hf-note">非公式のファン制作アプリ・since 2026.10・<button class="linkish" data-act="about-scroll">このアプリについて</button></div></footer>`;
@@ -6487,6 +6494,7 @@ function bind() {
   }
   if (S.view === 'game') renderGame();
   if (CLOUD_ON && !S.codeHashDone) { S.codeHashDone = true; codeHashCheck(); }
+  if (ON_ENABLED() && S.view === 'home' && profiles().length && !S.deepDone && !$('#modal')) { S.deepDone = true; tourHashOpen(); }
   if (S.view === 'home' && !profiles().length && !S.askedName && !(window.KB_TEST && !localStorage.getItem('kb.testAskName'))) { S.askedName = true; askName(); }
   else if (S.view === 'home' && S.updatedNotice && !S.updShown) { S.updShown = true; showUpdateNotice(); }
 }
