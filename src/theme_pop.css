@@ -206,3 +206,10 @@ html.th-pop .ch-k:disabled{opacity:.35;box-shadow:none}
 html.th-pop .ch-dots{color:#c4691f!important}
 html.th-pop .ch-hintline{background:var(--pop-blue);color:var(--ink)!important}
 html.th-pop .ch-bar{background:#cfc6b4}
+/* 大会の開会・入場の舞台：明るい舞台に（説明の字が暗い地に沈んでいた） */
+html.th-pop .stage{background:radial-gradient(90% 70% at 50% 0%,#f6e6b8,#e9dcc0 75%);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .stage .spot{opacity:.35}
+html.th-pop .stage-sub{color:var(--ink)!important;font-weight:700}
+/* モードのカードの「🏅 このモードのバッジ」とその一覧 */
+html.th-pop .mb-pop{background:var(--surface2);border:2px solid var(--pop-line);color:var(--ink)!important;box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .mb-pop b{color:#b5562f!important}

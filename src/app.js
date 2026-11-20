@@ -5861,6 +5861,20 @@ function myStanding() {
   return `${i + 1}位（${T.points[0]}点、累計PP ${T.totPP[0]}）。決勝ライン${T.cfg.finalists}位の人：${s[T.cfg.finalists - 1] ? T.points[s[T.cfg.finalists - 1].id] + '点' : '-'}`;
 }
 
+// セットの終わり：このセットで取ったバッジの一覧（押すと説明。銅・銀は「次の段階」の条件も見せて、上を目指したくなるように。2026-11-20）
+function setBadgesHTML(T) {
+  const g = G_(), t0 = T.setT0 || 0, got = [];
+  ACH.forEach(a => a[2].forEach((t, i) => { const at = g.ach[a[0] + ':' + t]; if (at && at >= t0) got.push({ a, i, at }); }));
+  const cats = ACH_GROUPS.map((gr, gi) => ({ gi, at: g.ach['cat:' + gi] })).filter(x => x.at && x.at >= t0);
+  if (!got.length && !cats.length) return '';
+  got.sort((x, y) => y.i - x.i || x.at - y.at);
+  const tierOf = (a, i) => a[5] ? a[5][i] : a[2].length === 1 ? 2 : Math.min(i, 2), TN = ['銅', '銀', '金'];
+  const rows = got.map(({ a, i }) => { const tr = tierOf(a, i), nx = i + 1 < a[2].length ? i + 1 : -1;
+    return `<button class="sb-row t${tr}" data-bdg="${a[0]}:${i}">${badgeSVG(a, i, true, 34)}<span class="sb-b"><b>${esc(a[4][i])}</b><small>${esc(a[1])}・${TN[tr]}　${esc(a[3](a[2][i]))}</small>${nx >= 0 ? `<em>次は${TN[tierOf(a, nx)]}「${esc(a[4][nx])}」：${esc(a[3](a[2][nx]))}</em>` : '<em class="sb-max">この系統は制覇！</em>'}</span><i>›</i></button>`; }).join('');
+  const crown = cats.map(({ gi }) => `<button class="sb-row t3" data-emb="${gi}">${emblemSVG(gi, true, 34)}<span class="sb-b"><b>冠「${esc(CAT_SPECIAL[ACH_GROUPS[gi][0]])}」</b><small>${esc(ACH_GROUPS[gi][0])}のバッジをすべて集めた</small></span><i>›</i></button>`).join('');
+  const nb = got.filter(x => tierOf(x.a, x.i) === 0).length;
+  return `<div class="panel set-bdg"><div class="lbl">🏅 このセットで取ったバッジ（${got.length + cats.length}）</div>${crown}${rows}${nb ? `<p class="small muted" style="margin:6px 0 0">銅のバッジは、どんな系統があるかを知ってもらうための入り口。押すと説明、その下の「次は…」が上の段階の条件です。</p>` : ''}</div>`;
+}
 function setEndHTML() {
   const T = S.T; const h = T.setHist[T.setHist.length - 1];
   const tablesHTML = T.tables.map((t, ti) => {
@@ -5874,7 +5888,7 @@ function setEndHTML() {
   else if (T.phase === 'final') { title = '決勝 終了'; btn = '<button class="btn primary" data-act="final-result">最終結果へ</button>'; }
   else { title = `第${T.set}セット ${mine.rank}位（+${mine.pts}点）`; btn = T.set < T.cfg.sets ? '<button class="btn primary" data-act="next-set">次のセットへ（席替え）</button>' : '<button class="btn primary" data-act="to-final">予選結果と決勝進出者へ</button>'; }
   return `<div class="topbar"><div class="where">${esc(title)}</div><div></div></div>
-  <div class="stack">${mine ? setAnnounceHTML(T, mine) : ''}${tablesHTML.join('')}${T.cfg.kind === 'tournament' && T.phase === 'prelim' ? standingsHTML(T) : ''}${mine && (S.T.setLog || []).length ? `<div class="panel" id="review-wrap" data-scope="set">${reviewHTML('set')}</div>` : ''}<div class="row" style="justify-content:flex-end">${btn}</div></div>`;
+  <div class="stack">${mine ? setAnnounceHTML(T, mine) : ''}${mine ? setBadgesHTML(T) : ''}${tablesHTML.join('')}${T.cfg.kind === 'tournament' && T.phase === 'prelim' ? standingsHTML(T) : ''}${mine && (S.T.setLog || []).length ? `<div class="panel" id="review-wrap" data-scope="set">${reviewHTML('set')}</div>` : ''}<div class="row" style="justify-content:flex-end">${btn}</div></div>`;
 }
 // セットの結果発表（表の前）：大きな文字で順位とPP、博士が結果を読み上げ、マサが次にやることを案内（練習・予選・決勝で変える）
 function setAnnounceHTML(T, mine) {

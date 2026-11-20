@@ -2971,3 +2971,13 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 /* 文の中の式（ex-h）：式の色をそろえる */
 .ex-h{color:#9fd3ff;font-weight:700}
 .ch-keys{grid-template-columns:repeat(5,1fr)!important}.ch-k-sp{display:block}
+/* セットの終わり：このセットで取ったバッジ */
+.set-bdg{display:flex;flex-direction:column;gap:6px}
+.sb-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:8px 10px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.18);color:inherit;font:inherit;cursor:pointer}
+.sb-row .bdg{flex:none}.sb-row i{margin-left:auto;font-style:normal;opacity:.6}
+.sb-b{display:flex;flex-direction:column;gap:1px;min-width:0}.sb-b b{font-size:15px}.sb-b small{font-size:11.5px;color:var(--muted)}
+.sb-b em{font-style:normal;font-size:11.5px;color:#ffc95c}.sb-b em.sb-max{color:#8ce99a}
+.sb-row.t1{border-color:#c0c8d0}.sb-row.t2{border-color:#f2b632}.sb-row.t3{border-color:#d9a4ff}
+html.th-pop .sb-row{background:var(--surface2);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .sb-row.t2{background:#f6e7c1}html.th-pop .sb-row.t3{background:#ece0f6}
+html.th-pop .sb-b em{color:#b5562f!important}html.th-pop .sb-b em.sb-max{color:#2f8a46!important}html.th-pop .sb-b small{color:var(--muted)!important}
