@@ -2941,3 +2941,14 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:-10px;left:-9px;font-size:15px}
 .title .fan .card.dk-hana .hnf .hcn{top:-7px;left:-6px}
 .card.mini.tiny.dk-hana .hnf .hcn{top:-5px;left:-4px;font-size:8px;padding:0 2px;border-width:1px}
+/* 花札：月は枠なしで上端ぎりぎり（白いふちどり）。絵は大きくして下へ、名前と少し重なる（2026-11-20） */
+.hnf .hcn,.title .fan .hnf .hcn{background:transparent;border:0;box-shadow:none;padding:0;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0,0 0 3px #fffaf0,0 0 5px rgba(255,250,240,.9)}
+.card.dk-hana .hnf .hcn{top:-1px;left:2px;font-size:12px}
+.fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:0;left:4px;font-size:16px}
+.title .fan .card.dk-hana .hnf .hcn{top:1px;left:4px}
+.card.mini.tiny.dk-hana .hnf .hcn{top:0;left:1px;font-size:8px}
+.card.dk-hana .hnf{justify-content:flex-end;padding-bottom:2px}
+.card.dk-hana .hnf svg{width:96%;max-height:86%;margin-bottom:-5px}
+.card.dk-hana .hnf i{position:relative;z-index:1;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0,0 0 3px #fffaf0,0 0 5px rgba(255,250,240,.9)}
+.fieldcard.dk-hana .big .hnf svg,.dealfly.dk-hana .big .hnf svg{transform:translateY(13%) scale(1.04)}
+.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{z-index:2}
