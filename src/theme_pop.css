@@ -143,3 +143,6 @@ html.th-pop .ol-row.live{background:#f6dcd3;border-color:var(--pop-red);box-shad
 html.th-pop .ol-season{background:var(--surface2);border:2px dashed var(--pop-line);border-radius:12px}
 html.th-pop .ol-tabs{border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
 html.th-pop .ol-season .btn{white-space:nowrap;flex:none}
+/* プレイヤーの画面：新しいプレイヤー・呪文の欄 */
+html.th-pop .pm-add{background:var(--pop-yel)!important;color:var(--ink)!important;border:2px solid var(--pop-line)!important;box-shadow:2px 2px 0 var(--pop-line);font-weight:800}
+html.th-pop .cl-code,html.th-pop .pm-code .name-input{background:#fff!important;color:var(--ink)!important;border:2px solid var(--pop-line)!important}
