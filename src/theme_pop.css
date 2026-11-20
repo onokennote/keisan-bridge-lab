@@ -1,18 +1,18 @@
 /* ===== テーマ「ポップ」（案C。テスト版だけ html.th-pop。2026-11-20）：黒い太線・ずらした影・はっきりした色 ===== */
 html.th-pop{
-  --pop-line:#4a4038; --pop-sf:#fbf4e6;
-  --bg:#efe4cc; --bg2:#e8dabb; --surface:#fbf4e6; --surface2:#f7eedb; --ink:#3d352e; --muted:#7a6e60; --line:var(--pop-line);
+  --pop-line:#574c43; --pop-sf:#f5efe3;
+  --bg:#ddd5c5; --bg2:#d3cab8; --surface:#f5efe3; --surface2:#efe8da; --ink:#3d352e; --muted:#7a6e60; --line:var(--pop-line);
   --trim:var(--pop-line); --trim-soft:var(--pop-line);
   --felt:#fbf4e6; --felt2:#fff8e6; --felt-ink:var(--pop-line); --felt-muted:#5b554c;
-  --card:#fffaf0; --card-ink:var(--pop-line); --card-red:#cf4a3c; --card-line:var(--pop-line);
-  --accent:#f0c35a; --accent-ink:var(--pop-line); --sel:#f0c35a;
+  --card:#fbf7ee; --card-ink:var(--pop-line); --card-red:#cf4a3c; --card-line:var(--pop-line);
+  --accent:#e8c46e; --accent-ink:var(--pop-line); --sel:#e8c46e;
   --good:#4c9a5c; --warn:#d9853b; --bad:#cf4a3c; --info:#1f78c8;
-  --pop-red:#d9614c; --pop-yel:#f0c35a; --pop-blue:#cfe2ea; --pop-sky:#a8cbd9; --pop-cream:#f8e2ad;
+  --pop-red:#cf6a55; --pop-yel:#e8c46e; --pop-blue:#cfe2ea; --pop-sky:#a8cbd9; --pop-cream:#f1e0b8;
   --shadow:3px 3px 0 var(--pop-line);
   --f-body:"M PLUS Rounded 1c","Zen Kaku Gothic New","Hiragino Sans",system-ui,sans-serif;
   color-scheme:light;
 }
-html.th-pop body{background:var(--bg) radial-gradient(#e2d3b2 1.1px,transparent 1.2px) 0 0/20px 20px;color:var(--ink)}
+html.th-pop body{background:var(--bg) radial-gradient(#d2c9b7 1px,transparent 1.1px) 0 0/22px 22px;color:var(--ink)}
 /* 文字の色：金色の見出しは黒＋黄色の影に */
 html.th-pop h1,html.th-pop h2,html.th-pop h3{color:var(--ink)}
 html.th-pop .muted,html.th-pop .lbl{color:var(--muted)}
