@@ -77,11 +77,36 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 まだの称号（#）と条件	Titles not yet earned (#) and how to get them	尚未获得的称号（#）及条件
 金バッジ	Gold badge	金徽章
 組み合わせ	Combo	组合
-ミニゲーム制覇	Mini-game master	小游戏全制霸
-三冠	Triple crown	三冠
-五冠	Five crowns	五冠
-全冠制覇	All crowns	全冠制霸
 冠を#つ	# crowns	#个王冠
 冠を全部（#つ）	All crowns (#)	全部王冠（#个）
 大会の称号：オンライン大会（人が10人以上）か、デイリートーナメントのシーズンで3位以内に入ると選べます。	Tournament titles: finish in the top 3 of an online tournament (10+ people) or a Daily Tournament season.	大赛称号：在在线大赛（10人以上）或每日锦标赛赛季中进入前三名即可选择。
+終わりなき対局者	The Endless Player	永不停歇的对局者
+勝利を呼ぶ者	Summoner of Victory	召唤胜利之人
+最善の伝道師	Evangelist of the Best Move	最佳着法的传道者
+数式を統べる者	Ruler of Equations	统御算式之人
+確率を見通す眼	Eye That Sees Probability	看透概率之眼
+神速の撃ち手	Godspeed Gunner	神速射手
+時を駆けるアタッカー	Time-Racing Attacker	穿越时间的进攻者
+数式コレクター	Equation Collector	算式收藏家
+頂に立つ者	One Who Stands at the Summit	站在顶点之人
+宿命に導かれし者	Guided by Destiny	被宿命引导之人
+日輪を背負う者	Bearer of the Sun	背负太阳之人
+王座の支配者	Master of the Throne	王座的支配者
+無敗の覇王	Undefeated Overlord	不败霸王
+達人を超えし者	Beyond the Masters	超越达人之人
+透視を破りし者	Breaker of Clairvoyance	打破透视之人
+無双の読み手	Peerless Reader	无双的读局者
+最善の求道者	Seeker of the Best	最佳的求道者
+鉄壁の守護者	Iron Wall Guardian	铁壁守护者
+奇跡を起こす者	Miracle Maker	创造奇迹之人
+雷光の計算者	Lightning Calculator	雷光计算者
+神業の早撃ち	Divine Quick-Draw	神技快枪
+アウツの伝道師	Evangelist of Outs	听牌数的传道者
+バッジハンター	Badge Hunter	徽章猎人
+全場を制す者	Conqueror of Every Field	制霸所有场数之人
+早見表マイスター	Chart Meister	速查表大师
+特訓を極めし者	Master of Training	练到极致之人
+トリプルクラウナー	Triple Crowner	三冠王者
+五冠の英雄	Hero of Five Crowns	五冠英雄
+すべてを極めし者	Master of All	极尽一切之人
 `.split('\n').filter(Boolean).map(l => l.split('\t')));

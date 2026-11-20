@@ -1092,17 +1092,20 @@ const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', 
 // id は 'B' から始まる英数字（大会の称号の id と同じ欄 title に入る。サーバーの safeCard は [0-9A-Z]{12}）。判定はカードの ach（"key:段階"）から
 const BT_GOLD = ['champion', 'all_sets', 'champion_strong', 'toushi', 'streak10', 'perfect_set', 'set_low', 'miracle', 'quick3', 'quickdraw', 'outs5', 'atk_bp', 'zukan_cat', 'chart'];
 const BT_MINI = ['アウツチャレンジ', 'バッジアタック', '式の図鑑'];
+// 称号の名前：子ども向けに、ちょっとかっこいい（中二っぽい）名前に（2026-11-20）
+const BT_CAT_NAME = { '対局・継続': '終わりなき対局者', '勝利': '勝利を呼ぶ者', '判断の質': '最善の伝道師', '手と計算': '数式を統べる者', 'アウツチャレンジ': '確率を見通す眼', '早撃ち': '神速の撃ち手', 'バッジアタック': '時を駆けるアタッカー', '式の図鑑': '数式コレクター', 'オンライン大会': '頂に立つ者', 'ライバル': '宿命に導かれし者', 'デイリー': '日輪を背負う者' };
+const BT_GOLD_NAME = { champion: '王座の支配者', all_sets: '無敗の覇王', champion_strong: '達人を超えし者', toushi: '透視を破りし者', streak10: '無双の読み手', perfect_set: '最善の求道者', set_low: '鉄壁の守護者', miracle: '奇跡を起こす者', quick3: '雷光の計算者', quickdraw: '神業の早撃ち', outs5: 'アウツの伝道師', atk_bp: 'バッジハンター', zukan_cat: '全場を制す者', chart: '早見表マイスター' };
 let BT_CACHE = null;
 function btDefs() {
   if (BT_CACHE) return BT_CACHE;
   const L = [], cats = ach => ACH_GROUPS.filter((g, gi) => ach['cat:' + gi]).map(g => g[0]), gix = n => ACH_GROUPS.findIndex(g => g[0] === n);
-  ACH_GROUPS.forEach(([gn], gi) => L.push({ id: 'BC' + gi, name: CAT_SPECIAL[gn], kind: '冠', cond: `冠「${CAT_SPECIAL[gn]}」（「${gn}」のバッジを全部）`, ok: ach => !!ach['cat:' + gi], gi }));
+  ACH_GROUPS.forEach(([gn], gi) => L.push({ id: 'BC' + gi, name: BT_CAT_NAME[gn] || CAT_SPECIAL[gn], kind: '冠', cond: `冠「${CAT_SPECIAL[gn]}」（「${gn}」のバッジを全部）`, ok: ach => !!ach['cat:' + gi], gi }));
   BT_GOLD.forEach((k, n) => { const a = ACH.find(x => x[0] === k); if (!a) return; const i = a[2].length - 1, t = a[2][i];
-    L.push({ id: 'BG' + n, name: a[4][i], kind: '金バッジ', cond: `「${a[4][i]}」（${a[1]}のいちばん上）：${a[3](t)}`, ok: ach => !!ach[k + ':' + t], k, i }); });
-  L.push({ id: 'BX1', name: 'ミニゲーム制覇', kind: '組み合わせ', cond: `特訓の冠を3つ（${BT_MINI.map(n => CAT_SPECIAL[n]).join('・')}）`, ok: ach => BT_MINI.every(n => ach['cat:' + gix(n)]) });
-  L.push({ id: 'BX2', name: '三冠', kind: '組み合わせ', cond: '冠を3つ', ok: ach => cats(ach).length >= 3 });
-  L.push({ id: 'BX3', name: '五冠', kind: '組み合わせ', cond: '冠を5つ', ok: ach => cats(ach).length >= 5 });
-  L.push({ id: 'BX4', name: '全冠制覇', kind: '組み合わせ', cond: `冠を全部（${ACH_GROUPS.length}つ）`, ok: ach => cats(ach).length >= ACH_GROUPS.length });
+    L.push({ id: 'BG' + n, name: BT_GOLD_NAME[k] || a[4][i], kind: '金バッジ', cond: `「${a[4][i]}」（${a[1]}のいちばん上）：${a[3](t)}`, ok: ach => !!ach[k + ':' + t], k, i }); });
+  L.push({ id: 'BX1', name: '特訓を極めし者', kind: '組み合わせ', cond: `特訓の冠を3つ（${BT_MINI.map(n => CAT_SPECIAL[n]).join('・')}）`, ok: ach => BT_MINI.every(n => ach['cat:' + gix(n)]) });
+  L.push({ id: 'BX2', name: 'トリプルクラウナー', kind: '組み合わせ', cond: '冠を3つ', ok: ach => cats(ach).length >= 3 });
+  L.push({ id: 'BX3', name: '五冠の英雄', kind: '組み合わせ', cond: '冠を5つ', ok: ach => cats(ach).length >= 5 });
+  L.push({ id: 'BX4', name: 'すべてを極めし者', kind: '組み合わせ', cond: `冠を全部（${ACH_GROUPS.length}つ）`, ok: ach => cats(ach).length >= ACH_GROUPS.length });
   return (BT_CACHE = L);
 }
 const btOf = id => btDefs().find(b => b.id === id);
