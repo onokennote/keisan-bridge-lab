@@ -163,4 +163,4 @@ html.th-pop .t-mine{background:var(--pop-yel)!important;color:var(--ink)!importa
 html.th-pop .t-weak{background:var(--pop-red)!important;color:#fff!important}
 html.th-pop .cand .rk,html.th-pop .cand .top em{font-weight:900}
 /* 式・手札の文字は紺色にして、ふつうの文と見分ける */
-html.th-pop #app .seat .act:not(.draw),html.th-pop #app .expr,html.th-pop #modal .expr,html.th-pop #app .dr-moves b,html.th-pop #modal .dr-moves b,html.th-pop #app .dr-moves .mono,html.th-pop #modal .dr-moves .mono,html.th-pop #app .log .mono{color:#2563b8!important}
+html.th-pop .ex-h,html.th-pop #app .seat .act:not(.draw),html.th-pop #app .expr,html.th-pop #modal .expr,html.th-pop #app .dr-moves b,html.th-pop #modal .dr-moves b,html.th-pop #app .dr-moves .mono,html.th-pop #modal .dr-moves .mono,html.th-pop #app .log .mono{color:#2563b8!important}

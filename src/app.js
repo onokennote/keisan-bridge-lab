@@ -402,8 +402,25 @@ function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (S.xmB
 // デザイン：はじめは「ポップ」。ホームの「🎨 デザイン」ボタン（テスト版は帯も）で「クラシック」（いまの緑）と切り替え（端末ごと kb.theme＝pop／old）
 const themePop = () => { let t = null; try { t = localStorage.getItem('kb.theme'); } catch (e) { } return t !== 'old'; };
 function themeToggle() { try { localStorage.setItem('kb.theme', themePop() ? 'old' : 'pop'); } catch (e) { } syncTheme(); }
+// 式の色をそろえる：実況・解説・総評・記録・理由などの文の中の式（「11 − 13 ÷ 13」「(5 − 4) × 9 = 9」など）を <span class="ex-h"> で包む（2026-11-20）
+const EXH_SEL = '.cm-text, .op-bubble, .rvd, .review, .rv-text, .reasons, .log, .dr-moves, .tl-note, .wh-say, .bubble, .seat .act, .prev-modal p, .hint-head + p, .ms-list, .sa-sub';
+const EXH_RE = /(?<![\d.A-Za-z])\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?(?:\s*[+\-−×÷]\s*\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?)+(?:\s*[=＝]\s*(?:1[0-3]|[1-9]))?(?![\d.%A-Za-z])/g;
+function exhNode(n) {
+  const pe = n.parentElement; if (!pe || pe.closest('.ex-h, .card, .fieldcard, .mc, .expr, input, textarea, script, style') || !pe.closest(EXH_SEL)) return;
+  const t = n.nodeValue; if (!/[+\-−×÷]/.test(t)) return; EXH_RE.lastIndex = 0; if (!EXH_RE.test(t)) return; EXH_RE.lastIndex = 0;
+  const f = document.createDocumentFragment(); let last = 0, m;
+  while ((m = EXH_RE.exec(t))) { const a = m.index + (m[0].length - m[0].trimStart().length), str = m[0].trim(); if (a > last) f.appendChild(document.createTextNode(t.slice(last, a))); const sp = document.createElement('span'); sp.className = 'ex-h'; sp.textContent = str; f.appendChild(sp); last = a + str.length; }
+  if (last < t.length) f.appendChild(document.createTextNode(t.slice(last)));
+  pe.replaceChild(f, n);
+}
+function exhWalk(root) {
+  if (!root) return; if (root.nodeType === 3) return exhNode(root); if (root.nodeType !== 1) return;
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), ns = []; let n; while ((n = w.nextNode())) ns.push(n); ns.forEach(exhNode);
+}
+let exhObs = null;
+function exhStart() { if (exhObs || typeof MutationObserver === 'undefined' || !document.body) return; exhWalk(document.body); exhObs = new MutationObserver(ms => { for (const m of ms) { if (m.type === 'childList') m.addedNodes.forEach(exhWalk); else exhNode(m.target); } }); exhObs.observe(document.body, { childList: true, subtree: true, characterData: true }); }
 function syncTheme() { document.documentElement.classList.toggle('th-pop', themePop()); }
-function syncStg() { syncTheme(); if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です（押すとデザインを切り替え）'; b.style.cursor = 'pointer'; b.onclick = () => { themeToggle(); toast(themePop() ? 'デザイン：ポップ' : 'デザイン：クラシック'); }; document.body.appendChild(b); }
+function syncStg() { syncTheme(); exhStart(); if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です（押すとデザインを切り替え）'; b.style.cursor = 'pointer'; b.onclick = () => { themeToggle(); toast(themePop() ? 'デザイン：ポップ' : 'デザイン：クラシック'); }; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
