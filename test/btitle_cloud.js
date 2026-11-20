@@ -21,7 +21,7 @@ let fail = 0; const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if 
     await p.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); return p; };
   const pa = await open('ケン'), pb = await open('ハナ');
   // 前の版：端末全体の kb.title に入っていた → 読み込み直すとプレイヤーに移る
-  await pa.evaluate(() => { const K = KBAPP; K.testAch('outs3', 10); K.testAch('outs4', 10); K.testAch('outs5', 6); });
+  await pa.evaluate(() => { const K = KBAPP; K.testAch('outs3', 10); K.testAch('outs4', 10); K.testAch('outs5', 6); K.testAch('rating', 4.6); });
   await pa.evaluate(() => KBAPP.cloudPush(false, true)); await pa.waitForTimeout(1500); await pa.evaluate(() => localStorage.setItem('kb.title', '"BC5"'));
   await pa.waitForTimeout(500); await pa.reload(); await pa.waitForTimeout(1500);
   const mv = await pa.evaluate(() => { const id = JSON.parse(localStorage.getItem('kb.profile')); return [localStorage.getItem('kb.title'), localStorage.getItem('kb.p.' + id + '.title')]; });
@@ -33,12 +33,12 @@ let fail = 0; const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if 
   const shown = await pb.evaluate(() => { const e = document.querySelector('#modal .pv-title'); return e ? e.textContent : 'none:' + (document.querySelector('#modal') || {}).innerText.slice(0, 120); }); console.log('rid', t);
   ok(/確率を見通す眼/.test(shown), 'ほかの人が開いたプロフィールの名前の上に称号：' + shown);
   // 選び直し：称号を選ぶ → すぐサーバーへ
-  await pa.evaluate(async () => { KBAPP.act('title-open'); await new Promise(r => setTimeout(r, 200)); const bs = [...document.querySelectorAll('#modal .ttl.bt')]; bs[bs.length - 1].click(); });
+  await pa.evaluate(async () => { KBAPP.act('title-open'); await new Promise(r => setTimeout(r, 200)); const bs = [...document.querySelectorAll('#modal .ttl.bt')]; bs.find(x => /達人の域/.test(x.textContent)).click(); });
   await pa.waitForTimeout(300); await pa.evaluate(() => KBAPP.cloudPush()); await pa.waitForTimeout(1200);
   await pb.evaluate(() => document.querySelectorAll('#modal').forEach(e => e.remove()));
   await pb.evaluate(rid => { const e = document.createElement('button'); e.dataset.rid = rid; document.body.appendChild(e); KBAPP.act('rank-card', e); }, t); await pb.waitForTimeout(1500);
   const s2 = await pb.evaluate(() => (document.querySelector('#modal .pv-title') || {}).textContent || '');
-  ok(/早見表マイスター|アウツの伝道師/.test(s2) || s2.length > 0, '選び直した称号も出る：' + s2);
+  ok(/達人の域に至りし者/.test(s2), '選び直した称号も出る：' + s2);
   await pb.screenshot({ path: path.join(__dirname, 'out', 'btitle_prof.png') });
   ok(!errs.length, 'エラーなし ' + errs.join(' / '));
   await b.close(); srv.close(); php.kill(); process.exit(fail ? 1 : 0);

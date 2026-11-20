@@ -1092,11 +1092,11 @@ function badgeSVG(a, i, got, size) {
 const CAT_SPECIAL = { '対局・継続': '皆勤賞', '勝利': '常勝の冠', '判断の質': '精密の極み', '手と計算': '計算の匠', 'アウツチャレンジ': '確率の賢者', '早撃ち': '神速', 'バッジアタック': '時の覇者', '式の図鑑': '式の宝庫', 'オンライン大会': '頂点の証', 'ライバル': '宿命の好敵手', 'デイリー': '日輪の覇者' };
 // バッジ・冠の称号（2026-11-20）：冠（系統の制覇）・むずかしい金バッジ・冠の組み合わせ。名前はシンプルに（冠とバッジの名前をそのまま）
 // id は 'B' から始まる英数字（大会の称号の id と同じ欄 title に入る。サーバーの safeCard は [0-9A-Z]{12}）。判定はカードの ach（"key:段階"）から
-const BT_GOLD = ['champion', 'all_sets', 'champion_strong', 'toushi', 'streak10', 'perfect_set', 'set_low', 'miracle', 'quick3', 'quickdraw', 'outs5', 'atk_bp', 'zukan_cat', 'chart'];
+const BT_GOLD = ['champion', 'all_sets', 'champion_strong', 'toushi', 'streak10', 'perfect_set', 'set_low', 'miracle', 'quick3', 'quickdraw', 'outs5', 'atk_bp', 'zukan_cat', 'chart', 'rating'];
 const BT_MINI = ['アウツチャレンジ', 'バッジアタック', '式の図鑑'];
 // 称号の名前：子ども向けに、ちょっとかっこいい（中二っぽい）名前に（2026-11-20）
 const BT_CAT_NAME = { '対局・継続': '終わりなき対局者', '勝利': '勝利を呼ぶ者', '判断の質': '最善の伝道師', '手と計算': '数式を統べる者', 'アウツチャレンジ': '確率を見通す眼', '早撃ち': '神速の撃ち手', 'バッジアタック': '時を駆けるアタッカー', '式の図鑑': '数式コレクター', 'オンライン大会': '頂に立つ者', 'ライバル': '宿命に導かれし者', 'デイリー': '日輪を背負う者' };
-const BT_GOLD_NAME = { champion: '王座の支配者', all_sets: '無敗の覇王', champion_strong: '達人を超えし者', toushi: '透視を破りし者', streak10: '無双の読み手', perfect_set: '最善の求道者', set_low: '鉄壁の守護者', miracle: '奇跡を起こす者', quick3: '雷光の計算者', quickdraw: '神業の早撃ち', outs5: 'アウツの伝道師', atk_bp: 'バッジハンター', zukan_cat: '全場を制す者', chart: '早見表マイスター' };
+const BT_GOLD_NAME = { champion: '王座の支配者', all_sets: '無敗の覇王', champion_strong: '達人を超えし者', toushi: '透視を破りし者', streak10: '無双の読み手', perfect_set: '最善の求道者', set_low: '鉄壁の守護者', miracle: '奇跡を起こす者', quick3: '雷光の計算者', quickdraw: '神業の早撃ち', outs5: 'アウツの伝道師', atk_bp: 'バッジハンター', zukan_cat: '全場を制す者', chart: '早見表マイスター', rating: '達人の域に至りし者' };
 let BT_CACHE = null;
 function btDefs() {
   if (BT_CACHE) return BT_CACHE;
@@ -1934,7 +1934,7 @@ function rankJumpDo(y) { rkFit(); if (S.rankJump) { S.rankJumpT = { id: S.rankJu
 // 称号（自分で選んだオンライン大会の成績）：プロフィールの名前の上に出す
 const placeJa = p => ['', '優勝', '準優勝', '3位'][p] || '';
 function pvTitle(D) {
-  if (D.title && /^B/.test(D.title)) { const b = btOf(D.title); return b && b.ok(D.ach || {}) ? `<div class="pv-title bt">🏅 ${esc(b.name)}</div>` : ''; }
+  if (D.title && /^B/.test(D.title)) { const b = btOf(D.title), ach = Object.assign({}, D.ach || {}, (D.rateBest || 0) >= 4.5 ? { 'rating:4.5': 1 } : {}); return b && b.ok(ach) ? `<div class="pv-title bt">🏅 ${esc(b.name)}</div>` : ''; }
   let t = D.titleShow; if (!t && D.title && D.awards) { const a = D.awards.find(x => x.tid === D.title && +x.official !== 2); if (a) t = { text: `${a.tname} ${placeJa(+a.place)}`, official: +a.official, place: +a.place }; }
   return t ? `<div class="pv-title ${t.official ? 'off' : ''} p${t.place}">${t.place === 1 ? '👑' : t.place === 2 ? '🥈' : '🥉'} ${t.official === 3 ? '<em>シーズン</em>' : t.official ? '<em>公式</em>' : ''}${esc(t.text)}</div>` : '';
 }

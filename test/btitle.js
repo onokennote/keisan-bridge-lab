@@ -8,7 +8,7 @@ const { chromium } = require('playwright'); const path = require('path');
   await pg.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pg.waitForTimeout(300);
   const r = await pg.evaluate(async () => {
     const K = KBAPP; const out = {};
-    K.testAch('champion', 9); K.testAch('quick3', 19); K.testAch('chart', 37); K.testAch('outs3', 10); K.testAch('outs4', 10); K.testAch('outs5', 6);
+    K.testAch('champion', 9); K.testAch('quick3', 19); K.testAch('rating', 4.6); K.testAch('chart', 37); K.testAch('outs3', 10); K.testAch('outs4', 10); K.testAch('outs5', 6);
     await new Promise(r => setTimeout(r, 300));
     const g = K.G(); out.cat = Object.keys(g.ach).filter(k => k.startsWith('cat:'));
     K.act('title-open'); await new Promise(r => setTimeout(r, 300));
@@ -23,6 +23,6 @@ const { chromium } = require('playwright'); const path = require('path');
   await pg.evaluate(() => KBAPP.act('title-open')); await pg.waitForTimeout(300);
   await pg.evaluate(() => { const d = document.querySelector('.bt-more'); if (d) d.open = true; });
   await pg.screenshot({ path: path.join(__dirname, 'out', 'btitle.png') });
-  const ok = r.list.length >= 3 && /🏅/.test(r.home || '') && r.adv.length > 0;
+  const ok = r.list.some(x => /達人の域に至りし者/.test(x)) && r.list.length >= 4 && /🏅/.test(r.home || '') && r.adv.length > 0;
   console.log(ok && !errs.length ? 'OK' : 'NG', errs); await b.close(); process.exit(ok && !errs.length ? 0 : 1);
 })();

@@ -109,4 +109,5 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 トリプルクラウナー	Triple Crowner	三冠王者
 五冠の英雄	Hero of Five Crowns	五冠英雄
 すべてを極めし者	Master of All	极尽一切之人
+達人の域に至りし者	One Who Reached Mastery	抵达达人之境者
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
