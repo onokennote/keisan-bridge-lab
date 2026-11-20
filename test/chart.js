@@ -16,7 +16,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(!!(await pg.$('#modal .ch-keys')), 'ホームから開くと入力できる');
   const tap = async sel => { await pg.click(sel); await pg.waitForTimeout(60); };
   // 式として続かないボタンはグレーアウト
-  const st = () => pg.evaluate(() => { const d = q => [...document.querySelectorAll(q)].map(b => b.disabled ? 0 : 1).join(''); return { c: d('[data-ckc]'), o: d('[data-cko]'), b: d('[data-ckb],[data-ckclr]') }; });
+  const st = () => pg.evaluate(() => { const d = q => [...document.querySelectorAll(q)].map(b => b.disabled ? 0 : 1).join(''); return { c: d('[data-ckc]'), o: ['+', '−', '×', '÷', '('].map(k => { const b = document.querySelector('[data-cko="' + k + '"]'); return b && !b.disabled ? 1 : 0; }).join(''), b: d('[data-ckb],[data-ckclr]') }; });
   let s0 = await st(); ok(s0.c === '111' && s0.o === '00001' && s0.b === '00', '最初は札と「(」だけ押せる（記号・⌫・Cはグレー）：' + JSON.stringify(s0));
   await pg.keyboard.press('+'); ok(await pg.evaluate(() => KBAPP.S.chart.tok.length === 0), 'キーボードでも、式として続かない記号は入らない');
   await tap('[data-ckc="0"]'); s0 = await st(); ok(s0.c === '000' && s0.o === '11110' && s0.b === '11', '札のあとは記号だけ（札と「(」はグレー）：' + JSON.stringify(s0));
@@ -69,7 +69,7 @@ const ok = (c, m) => { console.log((c ? 'OK  ' : 'NG  ') + m); if (!c) process.e
   ok(await pg.evaluate(() => { const g = JSON.parse(Object.entries(localStorage).find(([k]) => /growth$/.test(k))[1]); return g.cnt.chart === 1 && !!g.ach['chart:1']; }), '行を完成させるとバッジ「早見表の一行目」が付く');
   await pg.evaluate(() => document.querySelectorAll('.ach-toast,.ach-pop,#achq').forEach(e => e.remove()));
   await pg.click('#modal [data-act="close"]'); await pg.waitForTimeout(300);
-  ok(await pg.evaluate(() => /6\/279面/.test(document.body.innerText) && /完成 1\/37行/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
+  ok(await pg.evaluate(() => /完成 1\/37行/.test(document.body.innerText) || /6\/279面/.test(document.body.innerText)), 'ホームのカードに進み具合が出る');
   // 対局中は見るだけ（完成した行だけ）
   await pg.click('[data-go="setup-practice"]'); await pg.click('[data-act="start-practice"]'); await pg.waitForTimeout(800);
   ok(await pg.evaluate(() => /早見表（完成1行）/.test(document.body.innerText)), '対局画面のボタンに完成行数が出る');

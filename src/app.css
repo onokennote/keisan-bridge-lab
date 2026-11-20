@@ -2970,3 +2970,4 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .on-bot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px;border-top:1px dashed var(--line);margin-top:4px}
 /* 文の中の式（ex-h）：式の色をそろえる */
 .ex-h{color:#9fd3ff;font-weight:700}
+.ch-keys{grid-template-columns:repeat(5,1fr)!important}.ch-k-sp{display:block}
