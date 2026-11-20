@@ -116,3 +116,7 @@ html.th-pop .pb-fold summary{background:var(--surface2);border:2px solid var(--p
 html.th-pop .rvc{background:var(--pop-blue);border:2px solid var(--pop-line);color:var(--ink);box-shadow:2px 2px 0 var(--pop-line)}
 html.th-pop .rvc.mu{background:var(--pop-cream)}
 html.th-pop .su{grid-template-columns:minmax(0,1fr)}html.th-pop .su>*,html.th-pop .su-presets>*{min-width:0}html.th-pop .su-block,html.th-pop .su-preset{box-sizing:border-box}
+/* オンラインの「第N巡」の帯 */
+html.th-pop .on-round{background:var(--pop-sf);border:2.5px solid var(--pop-line);box-shadow:4px 4px 0 var(--pop-line)}
+html.th-pop .on-round>b{color:var(--ink);text-shadow:3px 3px 0 var(--pop-yel)}
+html.th-pop .on-round .fieldcard .tag{background:var(--pop-yel);color:var(--ink)}

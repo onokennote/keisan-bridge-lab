@@ -4173,7 +4173,8 @@ function renderHint() {
   const me = g.players.findIndex(p => p.human);
   const myTurn = g.current() === me && !g.over;
   let body = '';
-  if (S.attack) { el.innerHTML = '<div class="stack"><div class="hint-head"><h3>AIの読み</h3></div><p class="small muted" style="margin:0">バッジアタック中は、AIの読みは使えません。自分の読みで勝負！</p></div>'; return; }
+  // AIの読みを見ていないとき（自分の番でない・まだ押していない・バッジアタック中）は、この欄ごと出さない（2026-11-20）
+  el.hidden = !!S.attack || !myTurn || !H || H.key !== stateKey(g); if (el.hidden) { el.innerHTML = ''; return; }
   if (!myTurn) body = `<p class="muted small" style="margin:0">あなたの番になったら「AIの読み」で、最善手・次善手とその理由を確認できます。予選中は「決勝進出率」、決勝では「優勝率」で手を比べます。</p>`;
   else if (!H || H.key !== stateKey(g)) body = `<p class="muted small" style="margin:0">まず自分で考えてから、上の「🤖 AIの読み」（使うと評価の対象外）を押すのがおすすめです。選んだカードの評価も一緒にここに出ます。</p>${S.T && !S.tiebreak && !badgeElig(S.T).game ? `<p class="small muted hint-note" style="margin:0">この卓はバッジの条件（${ELIG.table}人以上・相手の平均★${ELIG.oppAvg}以上）を満たしていないので、結果のバッジは数えません。</p>` : ''}<p class="small muted hint-note" style="margin:0">${S.gameHinted ? 'このゲームはAIの読みを見たので、判断の評価と結果のバッジの対象外です。' : '※見た手は判断の評価に入らず、そのゲーム・セット・大会は結果のバッジ（上がり・セット優勝など）の対象外になります。'}</p>`;
   else if (H.busy) body = `<p class="muted">シミュレーション中…（相手の手札を何千通りも想定して最後まで打ち切っています）</p>`;
