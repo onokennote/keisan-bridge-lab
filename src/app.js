@@ -8,7 +8,7 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1, missed: 1 };
+const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1, missed: 1, resetAt: 1, dailyBase: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
@@ -1637,6 +1637,21 @@ function plApply(pid, data, at) {
   } catch (e) { return false; }
   return true;
 }
+// 記録のリセット（最初からやり直す）：名前・自己紹介・端末の設定・クラウドの鍵・ライバル・おうちの人まわりは残し、ほかの記録を消す。
+// オンライン大会の表彰台（サーバーの awards）は消さないが、リセットより前のものはバッジに数えない（resetAt・dailyBase）
+const RESET_KEEP = { settings: 1, bio: 1, link: 1, cloudAt: 1, playSec: 1, limShown: 1, rivals: 1, famSeen: 1, rankHide: 1 };
+async function plReset() {
+  const pid = PID; if (!pid) return;
+  let dailyBase = 0; if (ON_ENABLED()) { try { const j = await onReq('on_awards'); dailyBase = j.daily || 0; } catch (e) { } }
+  try {
+    const pre = 'kb.p.' + pid + '.', ks = [];
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && k.startsWith(pre) && !RESET_KEEP[k.slice(pre.length)]) ks.push(k); }
+    ks.forEach(k => localStorage.removeItem(k));
+  } catch (e) { }
+  store.set('resetAt', Math.floor(Date.now() / 1000)); store.set('dailyBase', dailyBase);
+  if (CLOUD_ON) { CLOUD.dirtyP.add(pid); await cloudPush(false, false); }
+  toast('記録をリセットしました。最初からがんばろう！'); setTimeout(() => location.reload(), 700);
+}
 // ランキング用の数字（プレイヤーごと）：推定実力・バッジ数とBP・バッジアタックの自己ベスト
 function statsOf(p) {
   const g = raw.get('kb.p.' + p.id + '.growth', null) || { games: [], ach: {} }, r = g.games ? ratingOf(g.games) : { ok: false };
@@ -2687,6 +2702,7 @@ function profileModal() {
         <p class="small muted pm-p">そのプレイヤーが、この端末に加わります（いまいるプレイヤーはそのまま）。</p></details>` : ''}
     </section>
     ${L.length > 1 ? `<details class="pm-more"><summary>プレイヤーを削除する</summary><div class="pm-list">${L.map(p => `<div class="pm-drow"><span>${esc(p.name)}${p.id === PID ? '<small>（いま遊んでいる人）</small>' : ''}</span><button class="btn sm ghost pf-del" data-pfdel="${p.id}">${S.delArm === p.id ? 'もう一度押すと削除' : '削除'}</button></div>`).join('')}</div><p class="small muted pm-p">${CLOUD_ON ? 'この端末で作ったプレイヤーは、記録・ランキング・復活の呪文も消えます。別の端末から入れたプレイヤーは、この端末から外すだけです（記録は残ります）。' : '削除した記録は元に戻せません。'}</p></details>` : ''}
+    <details class="pm-more pm-reset"><summary>記録をリセットして最初からやり直す</summary><div class="stack" style="gap:8px;margin-top:8px"><p class="small" style="margin:0">「${esc(S.settings.name)}」の記録（ゲーム数・推定実力・バッジ・BP・冠・連続最善・図鑑・早見表・ミニゲームの自己ベスト・アバター・続きから など）を消して、はじめからにします。<b>名前・自己紹介・復活の呪文・Googleでまもる・ライバルはそのまま</b>です。元には戻せません。${CLOUD_ON ? 'ほかの端末の同じプレイヤーもリセットされます。オンライン大会の表彰台や称号はサーバーに残ります（リセット後のバッジには数えません）。' : ''}</p><button class="btn ${S.plResetArm ? 'primary' : ''}" data-act="pl-reset">${S.plResetArm ? '本当にリセットする（もう一度押す）' : '🔄 記録をリセットする'}</button></div></details>
     ${CLOUD_ON ? '' : '<p class="small muted pm-p">この版では、記録はこの端末のこのブラウザの中だけに保存されます。ブラウザのデータを消すと記録も消えます。</p>'}
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div>
   </div>`);
@@ -6594,6 +6610,7 @@ function act(a, el) {
     case 'lang-set': if (window.I18N) I18N.set(el.dataset.l); break;
     case 'mj-set': if (window.I18N) I18N.setDeck(!I18N.deckOn); break;
     case 'theme-set': themeToggle(); render(); break;
+    case 'pl-reset': if (!S.plResetArm) { S.plResetArm = true; profileModal(); const m = $('#modal .pm-reset'); if (m) { m.open = true; m.scrollIntoView({ block: 'center' }); } setTimeout(() => { S.plResetArm = false; }, 5000); break; } S.plResetArm = false; plReset(); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
@@ -7243,10 +7260,10 @@ async function dailyGamesHTML() {
 // 自分の上位3位をサーバーから読み、いまのプレイヤーのバッジに反映（公式と非公式は別のバッジ）
 async function onAwardsSync() {
   try { const j = await onReq('on_awards'); ON.myAwards = j.awards || [];
-    const mine = ON.myAwards.filter(a => a.pid === PID), best = kind => Math.max(0, ...mine.filter(a => (+a.official || 0) === kind).map(a => 4 - a.place)); // official：0 オンライン・1 公式・2 デイリー・3 シーズン
+    const rAt = store.get('resetAt', 0) || 0, mine = ON.myAwards.filter(a => a.pid === PID && (+a.at || 0) >= rAt), best = kind => Math.max(0, ...mine.filter(a => (+a.official || 0) === kind).map(a => 4 - a.place)); // official：0 オンライン・1 公式・2 デイリー・3 シーズン
     [['on_podium', 0], ['off_podium', 1], ['season_podium', 3]].forEach(([k, kind]) => { const b = best(kind); if (b) setMax(k, b); });
     [['daily_win', 1], ['daily_2nd', 2], ['daily_3rd', 3]].forEach(([k, pl]) => { const n = mine.filter(a => +a.official === 2 && +a.place === pl).length; if (n) setMax(k, n); }); // デイリー：順位ごとの回数
-    if (j.daily) setMax('daily_play', j.daily);
+    const dn = (j.daily || 0) - (store.get('dailyBase', 0) || 0); if (dn > 0) setMax('daily_play', dn);
   } catch (e) { }
 }
 async function onArchiveOpen() { go('oarch'); try { const j = await onReq('on_tours_archive'); ON.arch = j.tours; } catch (e) { ON.arch = []; toast('読み込めませんでした'); } if (S.view === 'oarch') render(); }
