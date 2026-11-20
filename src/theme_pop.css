@@ -191,3 +191,18 @@ html.th-pop .su-sw{background:#cfc6b4;border:2px solid var(--pop-line)}
 html.th-pop .su-sw i{background:var(--pop-sf);box-shadow:1px 1px 0 var(--pop-line);border:1.5px solid var(--pop-line);top:2px;left:2px}
 html.th-pop .su-sw.on{background:#5aa96a;border-color:var(--pop-line);box-shadow:none}
 html.th-pop .su-sw.on i{left:26px}
+/* 早見表：表の見出し・計算の欄・キー */
+html.th-pop .ch-table th{background:var(--pop-yel);color:var(--ink)!important;border-bottom:2px solid var(--pop-line)}
+html.th-pop .ch-table .ch-sec td{background:#cfc6b4;color:var(--ink)!important}
+html.th-pop .ch-table td+td,html.th-pop .ch-table th+th{border-left:1px solid rgba(87,76,67,.18)}
+html.th-pop .ch-wrap{border:2px solid var(--pop-line);background:var(--pop-sf)}
+html.th-pop .ch-input{background:var(--surface2);border:2px solid var(--pop-line)}
+html.th-pop .ch-expr{background:var(--pop-sf);border:2px solid var(--pop-line);color:var(--ink)!important}
+html.th-pop .ch-expr *{color:inherit}
+html.th-pop .ch-k{background:var(--pop-blue);color:var(--ink)!important;border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .ch-k.card-k{background:var(--pop-sf)}
+html.th-pop .ch-k.ch-clr{background:#f0d0c8;color:#a83a2a!important}
+html.th-pop .ch-k:disabled{opacity:.35;box-shadow:none}
+html.th-pop .ch-dots{color:#c4691f!important}
+html.th-pop .ch-hintline{background:var(--pop-blue);color:var(--ink)!important}
+html.th-pop .ch-bar{background:#cfc6b4}
