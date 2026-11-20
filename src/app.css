@@ -2898,3 +2898,5 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .htabs+.htab-stack:not(.ht-all)>.mode{border-top-left-radius:0;border-top-right-radius:0}
 .htabs{background:transparent;padding-top:0}
 .htabs button:not(.on){background:#0f211b}
+#h-about .about-nav{margin:0;gap:8px;flex-wrap:wrap}
+#h-about .about-box{border:0;background:transparent;box-shadow:none;padding:12px 0 0;margin:0;border-top:1px solid var(--line);border-radius:0}

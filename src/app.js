@@ -3285,8 +3285,8 @@ ${onlineHomeHTML()}
     <button class="btn primary" data-go="setup-tour">大会をはじめる</button></div>
   ${miniHTML()}
 
-<div id="h-about" ${htHide('h-about')}>
-<div class="row" style="margin-top:14px">
+<div class="mode" id="h-about" ${htHide('h-about')}>
+<div class="row about-nav">
   <button class="btn" data-go="strategy">AIたちの戦略図鑑</button>
   <button class="btn" data-go="rules">ルールと前提</button>
 </div>
