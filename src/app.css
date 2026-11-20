@@ -2900,3 +2900,7 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .htabs button:not(.on){background:#0f211b}
 #h-about .about-nav{margin:0;gap:8px;flex-wrap:wrap}
 #h-about .about-box{border:0;background:transparent;box-shadow:none;padding:12px 0 0;margin:0;border-top:1px solid var(--line);border-radius:0}
+/* 花札の隅の数字を読みやすく（2026-11-20） */
+.card.dk-hana .mjn,.card.dk-hana .cn{font-size:12.5px;color:#1a1208;top:2px;left:2px;padding:1px 3px;border-radius:4px;background:#fffaf0;box-shadow:0 0 0 1px rgba(0,0,0,.35);font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-weight:400}
+.card.dk-hana.hk .mjn,.card.dk-hana.hk .cn{background:rgba(255,250,240,.92);color:#1a1208}
+.mc.dk-hana sub{font-size:.78em;color:#2a2418;font-weight:800;margin-left:2px}
