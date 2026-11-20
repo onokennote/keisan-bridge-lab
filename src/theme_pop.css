@@ -65,10 +65,10 @@ html.th-pop .topbar{padding:6px 10px}
 /* テスト版の帯 */
 html.th-pop #stg-band{background:var(--pop-yel);color:var(--pop-line);border:2px solid var(--pop-line)}
 /* 文字色は基本「黒（親の色）」にそろえる（暗い地のための明るい文字・金色をまとめて直す）。札・ボタン・チップはそれぞれの色 */
-html.th-pop #app :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.dbtn *):not(.ai-chip):not(svg *){color:inherit}
+html.th-pop #app :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.dbtn *):not(.ai-chip):not(svg *):not(.road *):not(.story-hero *){color:inherit}
 html.th-pop #app .muted,html.th-pop #app .small.muted,html.th-pop #app .lbl{color:var(--muted)}
 html.th-pop #app .cm-name{color:var(--warn)!important}
-html.th-pop .op-bubble,html.th-pop .su-block,html.th-pop .su-pi,html.th-pop .su-g,html.th-pop .badge-rule,html.th-pop .su-custom,html.th-pop .hint-head,html.th-pop .tl-g,html.th-pop .su-preset{background:var(--pop-sf);border:2px solid var(--pop-line);border-radius:14px;box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
+html.th-pop .op-bubble,html.th-pop .su-block,html.th-pop .su-pi,html.th-pop .su-g,html.th-pop .badge-rule,html.th-pop .su-custom,html.th-pop .tl-g,html.th-pop .su-preset{background:var(--pop-sf);border:2px solid var(--pop-line);border-radius:14px;box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
 html.th-pop .su-preset.on{background:var(--pop-cream);box-shadow:3px 3px 0 var(--warn)}
 html.th-pop .su-pi,html.th-pop .su-g{box-shadow:none;border-width:2px}
 html.th-pop .su-pm{background:var(--pop-yel);color:var(--pop-line);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
@@ -95,3 +95,24 @@ html.th-pop .hf-suits{color:var(--pop-line)}.html.th-pop .hf-suits .r{color:var(
 /* 札は地より少しだけ明るく（真っ白にはしない） */
 html.th-pop .card,html.th-pop .fieldcard,html.th-pop .mc{background:var(--card)}
 html.th-pop .card.sel{background:var(--pop-cream)}
+
+/* 表彰式の舞台：明るい舞台に */
+html.th-pop .ceremony-stage{background:radial-gradient(90% 70% at 50% 10%,#f6e6b8,#e9dcc0 75%);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .ceremony-stage h2,html.th-pop .ceremony-stage .cer-title{color:var(--ink);text-shadow:2px 2px 0 var(--pop-yel)}
+html.th-pop .pod-block{border:2px solid var(--pop-line)}
+
+/* 数字で見る・アドバイスの項目：明るい札に */
+html.th-pop .num-card,html.th-pop .adv{background:var(--pop-sf);border:2px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .num-card .nc-n b{color:var(--ink);text-shadow:2px 2px 0 var(--pop-yel)}
+html.th-pop .adv-b{color:#b5562f}
+/* 物語・数字の見出しの絵と、日本一への道の山の絵はそのまま（暗い絵の上の明るい字） */
+html.th-pop .story-hero,html.th-pop .rd-hero{border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+/* プロフィール欄・リンク */
+html.th-pop .h-player .player-bar{border:0;box-shadow:none;background:transparent;padding:0}
+html.th-pop .pb-bio{background:var(--surface2);border:2px dashed var(--pop-line);color:var(--ink)}
+html.th-pop .pb-bio.empty{color:var(--muted)}
+html.th-pop #app a,html.th-pop #app .linkish,html.th-pop .unofficial a{color:#b5562f}
+html.th-pop .pb-fold summary{background:var(--surface2);border:2px solid var(--pop-line);border-radius:12px}
+html.th-pop .rvc{background:var(--pop-blue);border:2px solid var(--pop-line);color:var(--ink);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .rvc.mu{background:var(--pop-cream)}
+html.th-pop .su{grid-template-columns:minmax(0,1fr)}html.th-pop .su>*,html.th-pop .su-presets>*{min-width:0}html.th-pop .su-block,html.th-pop .su-preset{box-sizing:border-box}

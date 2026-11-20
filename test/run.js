@@ -7,6 +7,7 @@ const fs = require('fs');
   const pg = await b.newPage({ viewport: { width: 390, height: 844 } });
   const errs = [];
   if (process.env.KB_LANG) await pg.addInitScript(l => localStorage.setItem('kb.lang', l), process.env.KB_LANG); // 英語・中国語で通すとき
+  if (process.env.KB_THEME) await pg.addInitScript(t => localStorage.setItem('kb.theme', t), process.env.KB_THEME); // デザインを指定して通すとき（pop／old）
   pg.on('pageerror', e => errs.push(e.message)); pg.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
   await pg.goto('file://' + require('path').join(__dirname, 'page.html'));
   await pg.waitForTimeout(500);

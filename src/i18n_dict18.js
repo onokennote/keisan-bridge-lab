@@ -83,4 +83,8 @@ AIの手番の速さ	AI turn speed	AI回合速度
 図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
 ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？
 ほな、大会の準備や！どんな相手がおるか楽しみやな！	Time to get the tournament ready! Can't wait to see who's in it!	来，准备比赛吧！真期待会遇到什么对手！
+🎨 デザイン：ポップ	🎨 Design: Pop	🎨 设计：波普
+🎨 デザイン：クラシック	🎨 Design: Classic	🎨 设计：经典
+デザイン：ポップ	Design: Pop	设计：波普
+デザイン：クラシック	Design: Classic	设计：经典
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
