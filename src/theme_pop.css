@@ -120,3 +120,6 @@ html.th-pop .su{grid-template-columns:minmax(0,1fr)}html.th-pop .su>*,html.th-po
 html.th-pop .on-round{background:var(--pop-sf);border:2.5px solid var(--pop-line);box-shadow:4px 4px 0 var(--pop-line)}
 html.th-pop .on-round>b{color:var(--ink);text-shadow:3px 3px 0 var(--pop-yel)}
 html.th-pop .on-round .fieldcard .tag{background:var(--pop-yel);color:var(--ink)}
+/* 巡のはじめの大きな「第N巡」・大会の見出し：白抜きの字に茶色のふち＋ずらした影（暗い影でにじまないように） */
+html.th-pop .round-pop{color:var(--pop-yel)!important;-webkit-text-stroke:2.5px var(--pop-line);paint-order:stroke fill;text-shadow:4px 4px 0 var(--pop-line)}
+html.th-pop .bb-title,html.th-pop .stage-title{color:var(--pop-yel)!important;-webkit-text-stroke:2px var(--pop-line);paint-order:stroke fill;text-shadow:3px 3px 0 var(--pop-line)}
