@@ -403,11 +403,11 @@ function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (S.xmB
 const themePop = () => { let t = null; try { t = localStorage.getItem('kb.theme'); } catch (e) { } return t !== 'old'; };
 function themeToggle() { try { localStorage.setItem('kb.theme', themePop() ? 'old' : 'pop'); } catch (e) { } syncTheme(); }
 // 式の色をそろえる：実況・解説・総評・記録・理由などの文の中の式（「11 − 13 ÷ 13」「(5 − 4) × 9 = 9」など）を <span class="ex-h"> で包む（2026-11-20）
-const EXH_SEL = '.cm-text, .op-bubble, .rvd, .review, .rv-text, .reasons, .log, .dr-moves, .tl-note, .wh-say, .bubble, .seat .act, .prev-modal p, .hint-head + p, .ms-list, .sa-sub';
-const EXH_RE = /(?<![\d.A-Za-z])\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?(?:\s*[+\-−×÷]\s*\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?)+(?:\s*[=＝]\s*(?:1[0-3]|[1-9]))?(?![\d.%A-Za-z])/g;
+const EXH_SEL = '#modal p, #hintpanel p, .dec-detail, .cm-text, .op-bubble, .rvd, .review, .rv-text, .reasons, .log, .dr-moves, .tl-note, .wh-say, .bubble, .seat .act, .prev-modal p, .hint-head + p, .ms-list, .sa-sub';
+const EXH_RE = /\[(?:\s*(?:1[0-3]|[1-9]|[AJQK])(?=[\s\]]))+\s*\]|(?<![\d.A-Za-z])\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?(?:\s*[+\-−×÷]\s*\(?\s*(?:1[0-3]|[1-9]|[AJQK])\s*\)?)+(?:\s*[=＝]\s*(?:1[0-3]|[1-9]))?(?![\d.%A-Za-z])/g;
 function exhNode(n) {
   const pe = n.parentElement; if (!pe || pe.closest('.ex-h, .card, .fieldcard, .mc, .expr, input, textarea, script, style') || !pe.closest(EXH_SEL)) return;
-  const t = n.nodeValue; if (!/[+\-−×÷]/.test(t)) return; EXH_RE.lastIndex = 0; if (!EXH_RE.test(t)) return; EXH_RE.lastIndex = 0;
+  const t = n.nodeValue; if (!/[+\-−×÷\[]/.test(t)) return; EXH_RE.lastIndex = 0; if (!EXH_RE.test(t)) return; EXH_RE.lastIndex = 0;
   const f = document.createDocumentFragment(); let last = 0, m;
   while ((m = EXH_RE.exec(t))) { const a = m.index + (m[0].length - m[0].trimStart().length), str = m[0].trim(); if (a > last) f.appendChild(document.createTextNode(t.slice(last, a))); const sp = document.createElement('span'); sp.className = 'ex-h'; sp.textContent = str; f.appendChild(sp); last = a + str.length; }
   if (last < t.length) f.appendChild(document.createTextNode(t.slice(last)));

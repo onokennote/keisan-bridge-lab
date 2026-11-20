@@ -164,3 +164,9 @@ html.th-pop .t-weak{background:var(--pop-red)!important;color:#fff!important}
 html.th-pop .cand .rk,html.th-pop .cand .top em{font-weight:900}
 /* 式・手札の文字は紺色にして、ふつうの文と見分ける */
 html.th-pop .ex-h,html.th-pop #app .seat .act:not(.draw),html.th-pop #app .expr,html.th-pop #modal .expr,html.th-pop #app .dr-moves b,html.th-pop #modal .dr-moves b,html.th-pop #app .dr-moves .mono,html.th-pop #modal .dr-moves .mono,html.th-pop #app .log .mono{color:#2563b8!important}
+/* 連続最善の COMBO：明るい地でも読めるように、オレンジの字に茶色のふちとずらした影 */
+html.th-pop .combo-fx,html.th-pop .combo-fx.l2,html.th-pop .combo-fx b{color:#e8862e!important;-webkit-text-stroke:1.5px var(--pop-line);paint-order:stroke fill;text-shadow:2px 2px 0 var(--pop-line);filter:none}
+html.th-pop .combo-fx.l3 b{background:none;-webkit-background-clip:border-box;background-clip:border-box;color:#d9482f!important;-webkit-text-stroke:2px var(--pop-line)}
+html.th-pop .combo-fx.l3{text-shadow:3px 3px 0 var(--pop-line);filter:none}
+html.th-pop .combo-fx small{-webkit-text-stroke:0;color:var(--pop-line)!important;text-shadow:none}
+html.th-pop .combo-fx.end{color:var(--muted);-webkit-text-stroke:0;text-shadow:none}
