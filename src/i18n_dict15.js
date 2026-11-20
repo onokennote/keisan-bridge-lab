@@ -73,4 +73,15 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 → ライバル視する	→ Mark as rival	→ 视为对手
 ⇄ 宿敵になる	⇄ Become nemeses	⇄ 成为宿敌
 ライバル視をやめる	Stop rivaling	不再视为对手
+🏅 バッジ・冠の称号	🏅 Badge & crown titles	🏅 徽章·王冠称号
+まだの称号（#）と条件	Titles not yet earned (#) and how to get them	尚未获得的称号（#）及条件
+金バッジ	Gold badge	金徽章
+組み合わせ	Combo	组合
+ミニゲーム制覇	Mini-game master	小游戏全制霸
+三冠	Triple crown	三冠
+五冠	Five crowns	五冠
+全冠制覇	All crowns	全冠制霸
+冠を#つ	# crowns	#个王冠
+冠を全部（#つ）	All crowns (#)	全部王冠（#个）
+大会の称号：オンライン大会（人が10人以上）か、デイリートーナメントのシーズンで3位以内に入ると選べます。	Tournament titles: finish in the top 3 of an online tournament (10+ people) or a Daily Tournament season.	大赛称号：在在线大赛（10人以上）或每日锦标赛赛季中进入前三名即可选择。
 `.split('\n').filter(Boolean).map(l => l.split('\t')));

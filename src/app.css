@@ -2981,3 +2981,10 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 html.th-pop .sb-row{background:var(--surface2);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
 html.th-pop .sb-row.t2{background:#f6e7c1}html.th-pop .sb-row.t3{background:#ece0f6}
 html.th-pop .sb-b em{color:#b5562f!important}html.th-pop .sb-b em.sb-max{color:#2f8a46!important}html.th-pop .sb-b small{color:var(--muted)!important}
+/* バッジ・冠の称号 */
+.pv-title.bt{background:linear-gradient(90deg,#e6ebf2,#b9c4d3);color:#1d2633;border-color:#f4f7fb}
+.ttl.bt small{font-size:10px;margin-left:6px;opacity:.7}
+.bt-more summary{cursor:pointer;color:var(--muted)}
+.bt-no{display:flex;flex-direction:column;gap:6px;margin-top:6px;max-height:40vh;overflow:auto}
+.bt-no div{display:flex;flex-direction:column;padding:6px 10px;border-radius:8px;border:1px dashed var(--line);opacity:.8}
+.bt-no b{font-size:13px}.bt-no small{font-size:11px;color:var(--muted)}
