@@ -123,3 +123,15 @@ html.th-pop .on-round .fieldcard .tag{background:var(--pop-yel);color:var(--ink)
 /* 巡のはじめの大きな「第N巡」・大会の見出し：白抜きの字に茶色のふち＋ずらした影（暗い影でにじまないように） */
 html.th-pop .round-pop{color:var(--pop-yel)!important;-webkit-text-stroke:2.5px var(--pop-line);paint-order:stroke fill;text-shadow:4px 4px 0 var(--pop-line)}
 html.th-pop .bb-title,html.th-pop .stage-title{color:var(--pop-yel)!important;-webkit-text-stroke:2px var(--pop-line);paint-order:stroke fill;text-shadow:3px 3px 0 var(--pop-line)}
+/* ミニゲームの入り口（説明の重ね画面）・新しい版の帯・ページの外側 */
+html.th-pop{background:var(--bg)}
+html.th-pop .wh-box{background:var(--pop-sf)!important;border:2.5px solid var(--pop-line)!important;box-shadow:4px 4px 0 var(--pop-line)!important;color:var(--ink)}
+html.th-pop .wh-title{color:var(--ink)!important;text-shadow:3px 3px 0 var(--pop-yel)}
+html.th-pop .wh-sub{color:var(--muted)!important}
+html.th-pop .wh-say{background:var(--surface2)!important;border:2px solid var(--pop-line)!important;color:var(--ink)!important}
+html.th-pop .wh-say *:not(.cm-name){color:inherit}
+html.th-pop .wh-say .cm-name{color:var(--warn)!important}
+html.th-pop .ver-bar{background:var(--pop-sf);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line);color:var(--ink)}
+html.th-pop .ver-bar .ver-x{color:var(--ink)}
+/* 重ねて出す画面（#modal）の中も文字は黒に */
+html.th-pop #modal :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.cm-name):not(svg *):not(.road *){color:inherit}
