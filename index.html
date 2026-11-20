@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="5e376f7 2026-11-20 17:40"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="33b4c4e820da"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="c7ae4aa 2026-11-20 17:43"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="61405077dbe2"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=Noto+Serif+SC:wght@900&family=Fredoka:wght@500;700&family=ZCOOL+QingKe+HuangYou&family=Baloo+2:wght@500;800&family=Noto+Sans+Devanagari:wght@400;700&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -2973,19 +2973,19 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .on-bot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px;border-top:1px dashed var(--line);margin-top:4px}
 /* ===== テーマ「ポップ」（案C。テスト版だけ html.th-pop。2026-11-20）：黒い太線・ずらした影・はっきりした色 ===== */
 html.th-pop{
-  --pop-line:#4a4038; --pop-sf:#fbf4e6;
-  --bg:#efe4cc; --bg2:#e8dabb; --surface:#fbf4e6; --surface2:#f7eedb; --ink:#3d352e; --muted:#7a6e60; --line:var(--pop-line);
+  --pop-line:#574c43; --pop-sf:#f5efe3;
+  --bg:#ddd5c5; --bg2:#d3cab8; --surface:#f5efe3; --surface2:#efe8da; --ink:#3d352e; --muted:#7a6e60; --line:var(--pop-line);
   --trim:var(--pop-line); --trim-soft:var(--pop-line);
   --felt:#fbf4e6; --felt2:#fff8e6; --felt-ink:var(--pop-line); --felt-muted:#5b554c;
-  --card:#fffaf0; --card-ink:var(--pop-line); --card-red:#cf4a3c; --card-line:var(--pop-line);
-  --accent:#f0c35a; --accent-ink:var(--pop-line); --sel:#f0c35a;
+  --card:#fbf7ee; --card-ink:var(--pop-line); --card-red:#cf4a3c; --card-line:var(--pop-line);
+  --accent:#e8c46e; --accent-ink:var(--pop-line); --sel:#e8c46e;
   --good:#4c9a5c; --warn:#d9853b; --bad:#cf4a3c; --info:#1f78c8;
-  --pop-red:#d9614c; --pop-yel:#f0c35a; --pop-blue:#cfe2ea; --pop-sky:#a8cbd9; --pop-cream:#f8e2ad;
+  --pop-red:#cf6a55; --pop-yel:#e8c46e; --pop-blue:#cfe2ea; --pop-sky:#a8cbd9; --pop-cream:#f1e0b8;
   --shadow:3px 3px 0 var(--pop-line);
   --f-body:"M PLUS Rounded 1c","Zen Kaku Gothic New","Hiragino Sans",system-ui,sans-serif;
   color-scheme:light;
 }
-html.th-pop body{background:var(--bg) radial-gradient(#e2d3b2 1.1px,transparent 1.2px) 0 0/20px 20px;color:var(--ink)}
+html.th-pop body{background:var(--bg) radial-gradient(#d2c9b7 1px,transparent 1.1px) 0 0/22px 22px;color:var(--ink)}
 /* 文字の色：金色の見出しは黒＋黄色の影に */
 html.th-pop h1,html.th-pop h2,html.th-pop h3{color:var(--ink)}
 html.th-pop .muted,html.th-pop .lbl{color:var(--muted)}
@@ -3071,7 +3071,7 @@ html.th-pop .card.sel{background:var(--pop-cream)}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='7da86b7b9a';
+window.KB_BUILD='4624b964aa';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
