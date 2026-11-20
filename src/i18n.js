@@ -150,6 +150,27 @@
   };
 
   const hanaSvg = (v, s) => `<svg viewBox="0 0 60 80" preserveAspectRatio="xMidYMid meet">${HP2[v] ? HP2[v](s) : ''}${(s === 1 || s === 2) && v !== 13 ? ribbon(s === 1 ? '#c8213a' : '#2a4fa8') : ''}</svg>`;
+  // ガンジファ（花と動物）：丸い札・地の色・金の縁。数の札は組の印を数だけ輪に並べ、まん中に大きなデーヴァナーガリー数字。絵札は 11＝クジャク・12＝ゾウ・13＝トラ（絵はオリジナル。人物・神さまは描かない）
+  const GO = 'stroke="#2a1606" stroke-width="1" stroke-linejoin="round"';
+  const GJC = ['#f2c230', '#ff9a3c', '#fff0a8', '#8fd27a'];
+  const GJS = [ // ♠ペイズリー（ブータ）・♥マリーゴールド・♦太陽・♣マンゴーの葉
+    c => `<path d="M0 7Q-7 2 -3 -4Q0 -8 4 -4Q6 0 2 2Q-1 3 0 7Z" fill="${c}" ${GO}/><circle cx="1" cy="-2" r="1.3" fill="#2a1606" opacity=".5"/>`,
+    c => `${[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => `<ellipse cy="-4.4" rx="1.9" ry="3" transform="rotate(${i * 36})" fill="${c}" stroke="#2a1606" stroke-width=".5"/>`).join('')}<circle r="2" fill="#7a2a0a"/>`,
+    c => `<circle r="3.6" fill="${c}" ${GO}/>${[0, 1, 2, 3, 4, 5, 6, 7].map(i => `<path transform="rotate(${i * 45})" d="M0 -5L1.2 -7.4L0 -9L-1.2 -7.4Z" fill="${c}"/>`).join('')}`,
+    c => `<path d="M0 7Q-6 1 0 -7Q6 1 0 7Z" fill="${c}" ${GO}/><path d="M0 6V-5M0 -1L-2.5 -3M0 2L2.5 0" stroke="#2a1606" stroke-width=".6"/>`];
+  const GJA = {
+    11: () => `${[0, 1, 2, 3, 4, 5, 6, 7, 8].map(i => { const a = (-70 + i * 17.5) * Math.PI / 180; return `<path d="M50 54L${(50 + 34 * Math.sin(a)).toFixed(1)} ${(54 - 34 * Math.cos(a)).toFixed(1)}" stroke="#2f8a5a" stroke-width="1.3"/><circle cx="${(50 + 34 * Math.sin(a)).toFixed(1)}" cy="${(54 - 34 * Math.cos(a)).toFixed(1)}" r="3.4" fill="#1e5fa8" stroke="#f2c230" stroke-width="1.1"/>`; }).join('')}<path d="M46 60Q44 46 50 44Q56 46 54 60Z" fill="#1e5fa8" ${GO}/><circle cx="50" cy="40" r="3.4" fill="#1e5fa8" ${GO}/><path d="M48.6 34l1.4-2l1.4 2" stroke="#f2c230" stroke-width=".9" fill="none"/>`,
+    12: () => `<path d="M24 54Q24 32 48 32Q66 32 68 44Q72 48 72 60Q68 62 66 56Q64 58 62 58H34Q24 60 24 54Z" fill="#9aa3ad" ${GO}/><path d="M34 36Q48 30 56 38L54 50Q44 52 34 48Z" fill="#c8213a" ${GO}/><path d="M36 39H54" stroke="#f5d77a" stroke-width="1.2" stroke-dasharray="2 1.5"/><circle cx="64" cy="41" r="1.3" fill="#111"/><path d="M31 58v9M41 58v9M54 58v9M62 58v9" stroke="#2a1606" stroke-width="2.8"/>`,
+    13: () => `<path d="M22 54Q22 38 38 38H60Q72 38 74 48Q74 58 64 58H32Q24 58 22 54Z" fill="#e8952a" ${GO}/>${[28, 36, 44, 52, 60, 68].map(x => `<path d="M${x} 39q2 9 0 18" stroke="#2a1606" stroke-width="1.6" fill="none"/>`).join('')}<circle cx="73" cy="42" r="7" fill="#e8952a" ${GO}/><circle cx="75" cy="40" r="1" fill="#111"/><path d="M68 36l2-3 2 3M76 36l2-3 1 4" fill="#e8952a" ${GO}/><path d="M28 58v9M38 58v9M56 58v9M64 58v9" stroke="#2a1606" stroke-width="2.6"/><path d="M22 50Q12 46 16 36" stroke="#e8952a" stroke-width="2.4" fill="none"/>`
+  };
+  const gjArt = (v, s) => {
+    if (v >= 11) return `<g opacity=".95" transform="translate(50 30) scale(.8) translate(-50 -50)">${GJA[v]()}</g>`;
+    const sym = GJS[s] || GJS[0], c = GJC[s] || GJC[0];
+    if (v === 1) return `<g transform="translate(50 50) scale(3.6)" opacity=".55">${sym(c)}</g>`;
+    const R = 35, k = v > 7 ? 1.05 : 1.25;
+    return Array.from({ length: v }, (_, i) => { const a = (-90 + i * 360 / v) * Math.PI / 180; return `<g transform="translate(${(50 + R * Math.cos(a)).toFixed(1)} ${(50 + R * Math.sin(a)).toFixed(1)}) scale(${k})">${sym(c)}</g>`; }).join('');
+  };
+  const gjFace = (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="gjf s${s}"><b>${v}</b></span>` : `<span class="gjf s${s}${v >= 11 ? ' ct' : ''}"><svg class="gja" viewBox="0 0 100 100">${gjArt(v, s)}</svg><b>${v}</b></span>`;
   const DECKS = {
     zh: { cls: 'mj', key: 'kb.mj', def: true, label: on => `🀄 麻将牌：${on ? '开' : '关'}`,
       face(v, s, k) {
@@ -165,7 +186,7 @@
     ja: { cls: 'dk-hana', key: 'kb.deck.ja', def: false, label: on => `🎴 花札：${on ? 'オン' : 'オフ'}`,
       face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${hmOf(v, s)[0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf">${hanaSvg(v, s)}<i>${hmOf(v, s)}</i></span>`, val: v => v <= 12 ? `${HM[v]}・${v}月` : '役札・13' },
     hi: { cls: 'dk-gj', key: 'kb.deck.hi', def: true, label: on => `🪷 गंजीफ़ा: ${on ? 'चालू' : 'बंद'}`,
-      face: (v, s, k) => `<span class="gjf s${s}">${v >= 11 ? '<svg class="gjc" viewBox="0 0 20 10"><path d="M2 9L1 2L6 6L10 0L14 6L19 2L18 9Z" fill="#f5d77a"/></svg>' : ''}<b>${v}</b></span>`, val: null }
+      face: gjFace, val: null }
   };
   const deckOn = l => { const d = DECKS[l || lang]; if (!d) return false; try { const x = localStorage.getItem(d.key); return x == null ? d.def : x !== '0'; } catch (e) { return d.def; } };
   // 大会をひらく人が札の形式を決めた大会の卓では、言語にかかわらずその札（forced：'normal'＝トランプ・hana・mj・en・gj。null＝各自の設定）

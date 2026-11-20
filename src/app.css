@@ -2853,9 +2853,9 @@ html.dk-hana .backs i{background:#b3261e;border-color:#1a1a1a}
 .gjf::before{content:"";position:absolute;inset:14%;border-radius:50%;border:1.5px dotted rgba(245,215,122,.7)}
 .gjf.s0{background:radial-gradient(circle at 40% 35%,#2f7a4c,#14402a)}.gjf.s1{background:radial-gradient(circle at 40% 35%,#b5302a,#6e1512)}
 .gjf.s2{background:radial-gradient(circle at 40% 35%,#d48a2a,#8a5210)}.gjf.s3{background:radial-gradient(circle at 40% 35%,#3a4f9a,#1b2756)}
-.gjf b{font-size:.8em;position:relative;margin-top:.1em}
-.gjf .gjc{position:absolute;top:16%;width:34%;height:auto}
-.gjf .gjc+b{margin-top:.35em;font-size:.68em}
+.gjf .gja{position:absolute;inset:0;width:100%;height:100%}
+.gjf b{font-size:1em;position:relative;margin-top:.1em;color:#fff6d8;text-shadow:0 0 .08em #2a1606,0 0 .08em #2a1606,0 .06em 0 #2a1606,0 0 .3em rgba(0,0,0,.55)}
+.gjf.ct b{margin-top:.75em;font-size:.88em;color:#ffe48a}
 .fieldcard.dk-gj{background:transparent;border:0;box-shadow:none}
 .fieldcard.dk-gj .big{width:100%;display:flex}
 .fieldcard.dk-gj .val,.dealfly.dk-gj .df-front .val{display:none}
@@ -2864,7 +2864,7 @@ html.dk-hana .backs i{background:#b3261e;border-color:#1a1a1a}
 .dealfly.dk-gj .df-back{border-radius:50%;background:radial-gradient(circle,#6e1512,#2a0806);border:3px solid #d4a83a;height:auto;aspect-ratio:1;top:15%}
 .mc.dk-gj{background:transparent;padding:0;min-width:20px;height:20px}
 .mc.dk-gj .gjf{width:20px;box-shadow:0 0 0 1px #d4a83a;font-size:12px}
-.mc.dk-gj .gjf::before,.mc.dk-gj .gjc{display:none}
+.mc.dk-gj .gjf::before,.mc.dk-gj .gja{display:none}
 .mc.dk-gj .gjf b{font-size:.8em;margin:0}
 .flycard.dk-gj{background:transparent;border:0;box-shadow:none;border-radius:50%}
 .flycard.dk-gj .gjf{width:34px;font-size:22px}
