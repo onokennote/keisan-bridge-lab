@@ -8,13 +8,15 @@ const pct = x => Math.round(x * 100) + '%';
 const fx1 = x => (Math.round(x * 10) / 10).toFixed(1);
 const BUILD = (typeof window !== 'undefined' && window.KB_BUILD) || 'dev'; // アプリのビルド番号（更新の検知用）
 // プレイヤーごとに分けて保存するデータ（成長記録・続きから・中断の検知）
-const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1, missed: 1, resetAt: 1, dailyBase: 1 };
+const PROFILE_KEYS = { notes: 1, noteMark: 1, notesSeen: 1, rivals: 1, watched: 1, chart: 1, growth: 1, session: 1, active: 1, attackBest: 1, zukan: 1, huntBest: 1, avatar: 1, huntT: 1, bio: 1, chartMark: 1, playSec: 1, limShown: 1, missed: 1, resetAt: 1, dailyBase: 1, title: 1, btSeen: 1 };
 const raw = {
   get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); },
   del(k) { try { localStorage.removeItem(k); } catch (e) { } if (typeof cloudDirty === 'function') cloudDirty(k); }
 };
 let PID = raw.get('kb.profile', null);
+// 称号は前は端末全体（kb.title）に保存していて、プロフィール（kb.p.<pid>.title）に出なかった（2026-11-20）。いまのプレイヤーへ移す
+try { if (PID) ['title', 'btSeen'].forEach(k => { const v = localStorage.getItem('kb.' + k); if (v == null) return; if (localStorage.getItem('kb.p.' + PID + '.' + k) == null) localStorage.setItem('kb.p.' + PID + '.' + k, v); localStorage.removeItem('kb.' + k); if (k === 'title') window.__ttlMig = 1; }); } catch (e) { }
 const keyOf = k => PROFILE_KEYS[k] && PID ? 'kb.p.' + PID + '.' + k : 'kb.' + k;
 const store = {
   get(k, d) { return raw.get(keyOf(k), d); },
@@ -1634,6 +1636,7 @@ const CLOUD_API = (typeof window !== 'undefined' && window.KB_CLOUD_API) || '';
 const CLOUD_ON = !IS_ARTIFACT && !!CLOUD_API;
 const CLOUD_KEEP = { 'kb.cloud': 1, 'kb.cloudAt': 1, 'kb.migDone': 1 }; // 同期しない・消さないもの
 const CLOUD = { busy: false, timer: null, status: '', err: '', dirty: false, dirtyP: new Set() };
+if (window.__ttlMig && PID) CLOUD.dirtyP.add(PID); // 移した称号をランキングのカードにも送る
 // 記録はプレイヤーごとにクラウドへ保存する（復活の呪文もプレイヤーごと）。端末の鍵（kb.cloud）は、この端末で作ったプレイヤーの保存に使う。
 // 復活の呪文で別の端末から入れたプレイヤーは、そのプレイヤーだけの鍵（kb.p.<pid>.link の token）で保存する
 const PL_LOCAL = { link: 1, cloudAt: 1, playSec: 1, limShown: 1 }; // プレイヤーの鍵と、最後にクラウドとそろえた時刻（クラウドには送らない）

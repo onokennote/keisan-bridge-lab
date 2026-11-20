@@ -213,3 +213,9 @@ html.th-pop .stage-sub{color:var(--ink)!important;font-weight:700}
 /* モードのカードの「🏅 このモードのバッジ」とその一覧 */
 html.th-pop .mb-pop{background:var(--surface2);border:2px solid var(--pop-line);color:var(--ink)!important;box-shadow:2px 2px 0 var(--pop-line)}
 html.th-pop .mb-pop b{color:#b5562f!important}
+/* 称号のボタン・プロフィールの称号 */
+html.th-pop .pb-title{background:var(--pop-yel)!important;color:var(--pop-line)!important;border:2px solid var(--pop-line)!important;box-shadow:2px 2px 0 var(--pop-line);font-size:13px;padding:4px 14px}
+html.th-pop .pb-title:active{transform:translate(2px,2px);box-shadow:none}
+html.th-pop .pv-title{background:var(--pop-cream)!important;color:var(--pop-line)!important;border:2px solid var(--pop-line)!important}
+html.th-pop .pv-title.off{background:var(--pop-yel)!important}
+html.th-pop .pv-title.bt{background:#dde3ea!important}
