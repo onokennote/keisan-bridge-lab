@@ -2955,3 +2955,7 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .card.dk-hana .hnf .hcn{top:-3px;left:2px;font-size:10.5px;line-height:1}
 .fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:-3px;left:4px;font-size:14px;line-height:1}
 .title .fan .card.dk-hana .hnf .hcn{top:-2px}
+/* ランキング・日本一への道はタイトルだけ（2026-11-20） */
+.hb-row .rank-banner{flex-direction:row;align-items:center;gap:8px;padding:12px}
+.hb-row .rank-banner small,.hb-row .rank-banner .rb-go{display:none}
+.hb-row .rank-banner b{font-size:17px;white-space:nowrap}
