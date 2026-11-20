@@ -33,7 +33,7 @@ php(`foreach ([5 => 'u:u1', 1 => 'r:zero', 3 => 'ai:0'] as $pt => $w) { $t = ['i
  db()->prepare('INSERT INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, 0, 0, 0)')->execute([$t['id'], 'system', json_encode($t, JSON_UNESCAPED_UNICODE)]); }
 $h = (int)(new DateTime('now', jstTz()))->format('G'); if ($h >= DAILY_HOUR) xDailyReport(); else echo 'early';`);
 L = q(); const dr = L.find(x => x.kind === 'daily');
-if (dr) ok(/デイリー優勝者/.test(dr.text) && dr.text.indexOf('6:30 ケン') >= 0 && dr.text.indexOf('6:30') < dr.text.indexOf('17:30 ゼロ') && /19:30 AI/.test(dr.text), '毎朝のまとめ（各部の優勝者・時刻の順・朝晩の案内）\n' + dr.text);
+if (dr) ok(/デイリー優勝者/.test(dr.text) && dr.text.indexOf('6:30 ケン') >= 0 && dr.text.indexOf('6:30') < dr.text.indexOf('17:30 ゼロ') && /19:30 AI補充/.test(dr.text), '毎朝のまとめ（各部の優勝者・時刻の順・朝晩の案内）\n' + dr.text);
 else console.log('--  毎朝のまとめは日本時間6時より前なので確かめない');
 // 4. ランキングの1位交代：はじめは控えるだけ、入れ替わったら1回
 php(`db()->prepare("UPDATE ranks SET rating = 3.5, bp = 500 WHERE uid = 'u1'")->execute(); xRankTops();

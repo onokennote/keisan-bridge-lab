@@ -653,10 +653,10 @@ function xPush(string $tag, string $kind, array $lines, int $pri = 0, string $li
   db()->prepare('INSERT OR IGNORE INTO xq (tag, kind, pri, text, at) VALUES (?, ?, ?, ?, ?)')->execute([$tag, $kind, $pri, $text, time()]);
 }
 function xState(string $k, ?string $v = null): ?string { if ($v !== null) { db()->prepare('INSERT OR REPLACE INTO xstate (k, v) VALUES (?, ?)')->execute([$k, $v]); return $v; } $q = db()->prepare('SELECT v FROM xstate WHERE k = ?'); $q->execute([$k]); $r = $q->fetchColumn(); return $r === false ? null : (string)$r; }
-// 投稿に出す名前：人はランキングに出している名前（出していなければ「研究員さん」）、AI研究員は「（AI研究員）」、AI補充は「AI」
+// 投稿に出す名前：人はランキングに出している名前（出していなければ「研究員さん」）、AI研究員は「（AI研究員）」、AI補充は「AI補充」
 function xName(array $p): string {
   if (!empty($p['char'])) return $p['name'] . '（AI研究員）';
-  if (!empty($p['ai']) || empty($p['uid'])) return 'AI';
+  if (!empty($p['ai']) || empty($p['uid'])) return 'AI補充';
   $q = db()->prepare('SELECT name, shown FROM ranks WHERE uid = ? AND pid = ?'); $q->execute([$p['uid'], $p['pid'] ?? '']); $r = $q->fetch();
   return $r && (int)$r['shown'] === 1 ? $r['name'] : '研究員さん';
 }
