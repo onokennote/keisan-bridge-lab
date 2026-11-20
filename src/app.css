@@ -2930,3 +2930,7 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{font-size:16px;top:4px;left:5px}
 .fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:12px;left:0;right:0}
 .title .fan .card.dk-hana .cn,.title .fan .card.dk-hana .mjn{display:none!important}
+/* 花札：左上の月をもう少し上に・場の札の「場・第n巡」も上へ（2026-11-20） */
+.card.dk-hana .hnf .hcn{top:0;left:2px}
+.fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:1px;left:4px}
+.fieldcard .tag,.fieldcard.dk-hana .tag{top:-17px}
