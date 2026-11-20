@@ -2921,3 +2921,5 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .card.dk-hana .hnf i b{font-size:1.4em;margin:0 0 0 1px;letter-spacing:-.06em}
 .fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{white-space:nowrap;letter-spacing:-.02em}
 .fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:10px;left:-2px;right:-2px}
+/* 札の下の名前に白いふちどり（地の色のある札でも読めるように） */
+.card.dk-hana .hnf i,.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val,.card.dk-hana.hk .hnf i,.fieldcard.dk-hana.hk .val{color:#1a1208;opacity:1;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0,0 0 3px #fffaf0,0 0 5px rgba(255,250,240,.9)}
