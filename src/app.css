@@ -2959,3 +2959,8 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .hb-row .rank-banner{flex-direction:row;align-items:center;gap:8px;padding:12px}
 .hb-row .rank-banner small,.hb-row .rank-banner .rb-go{display:none}
 .hb-row .rank-banner b{font-size:17px;white-space:nowrap}
+/* プレイヤーのタブ（プロフィール欄・ランキング・日本一への道。2026-11-20） */
+.h-player{gap:12px}
+.h-player .player-bar{margin:0;border:0;background:transparent;box-shadow:none;padding:0}
+.h-player .hb-row{margin:0}
+@media (max-width:380px){.htabs button{font-size:9.5px;letter-spacing:-.04em;padding-left:0;padding-right:0}}
