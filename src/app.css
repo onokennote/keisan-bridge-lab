@@ -2911,3 +2911,13 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .hnf .hcn small{font-family:"Zen Kaku Gothic New",serif;font-weight:900;font-size:.68em;margin-left:1px}
 .fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{font-size:15px;top:3px;left:4px}
 .card.mini.tiny.dk-hana .hnf .hcn{font-size:9px;top:1px;left:1px}
+/* 札の下に「紅葉・10月」（数字を少し大きく）。隅の数字は重なるタイトルの札だけ（2026-11-20） */
+.hnf .hcn{display:none}
+.title .fan .hnf .hcn{display:block}
+.hnf i b,.fieldcard.dk-hana .val b,.dealfly.dk-hana .val b{font-family:"Dela Gothic One","Hiragino Sans",sans-serif;font-weight:400;font-size:1.45em;line-height:.8;margin:0 1px;vertical-align:-.05em}
+.card.dk-hana .hnf i{font-size:9.5px;color:#1a1208;white-space:nowrap}
+.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:11px;color:#1a1208}
+.card.dk-hana .hnf i{font-size:8px;letter-spacing:-.04em;max-width:100%;overflow:visible}
+.card.dk-hana .hnf i b{font-size:1.4em;margin:0 0 0 1px;letter-spacing:-.06em}
+.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{white-space:nowrap;letter-spacing:-.02em}
+.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:10px;left:-2px;right:-2px}

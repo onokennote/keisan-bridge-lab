@@ -111,6 +111,7 @@
   const HM = ['', '松', '梅', '桜', '藤', '菖蒲', '牡丹', '萩', '芒', '菊', '紅葉', '柳', '桐', '猪鹿蝶'];
   const HM13 = ['月見', '猪', '鹿', '蝶']; // 13（K）は役の札：♠＝月見（芒に月と菊の盃）、♥＝猪・♦＝鹿・♣＝蝶
   const hmOf = (v, s) => v === 13 ? HM13[s] || HM13[0] : HM[v];
+  const hmLbl = (v, s) => `${hmOf(v, s)}<b>${v}</b>${v <= 12 ? '月' : ''}`; // 札の下の名前：紅葉・10月（数字を少し大きく）
   // 花札の絵（viewBox 60×80。黒い輪郭・光札は赤い空と光の絵柄（1 鶴と日・3 幕・8 満月・9 盃・11 燕・12 鳳凰など））。s：0＝光（赤い空と光の絵柄）・1＝赤短・2＝青短・3＝カス
   const O = 'stroke="#1a1a1a" stroke-width=".7" stroke-linejoin="round"';
   const R = (n, f) => Array.from({ length: n }, (_, i) => f(i)).join('');
@@ -184,7 +185,7 @@
     en: { cls: 'dk-en', key: 'kb.deck.en', def: true, label: on => `🔤 Number words: ${on ? 'ON' : 'OFF'}`,
       face: (v, s, k) => k === 'mc' || k === 'fly' ? String(v) : `<span class="ewf"><b>${v}</b><i>${EW[v]}</i></span>`, val: null },
     ja: { cls: 'dk-hana', key: 'kb.deck.ja', def: false, label: on => `🎴 花札：${on ? 'オン' : 'オフ'}`,
-      face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${hmOf(v, s)[0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf"><em class="hcn">${v}${v <= 12 ? '<small>月</small>' : ''}</em>${hanaSvg(v, s)}<i>${hmOf(v, s)}</i></span>`, val: v => v <= 12 ? `${HM[v]}・${v}月` : '役札・13' },
+      face: (v, s, k) => k === 'mc' || k === 'fly' ? `<span class="hnc">${hmOf(v, s)[0]}</span>${k === 'mc' ? `<sub>${v}</sub>` : ''}` : `<span class="hnf"><em class="hcn">${v}${v <= 12 ? '<small>月</small>' : ''}</em>${hanaSvg(v, s)}<i>${hmLbl(v, s)}</i></span>`, val: v => v <= 12 ? `${HM[v]}・<b>${v}</b>月` : '役札・<b>13</b>', valHtml: true },
     hi: { cls: 'dk-gj', key: 'kb.deck.hi', def: true, label: on => `🪷 गंजीफ़ा: ${on ? 'चालू' : 'बंद'}`,
       face: gjFace, val: null }
   };
@@ -209,7 +210,7 @@
     } else if (el.matches('.fieldcard')) {
       const be = el.querySelector(':scope > .big'), v = be && deckVal(be.textContent); if (!v) return;
       const va = el.querySelector(':scope > .val'), m = va && va.textContent.match(/[♠♥♦♣]/), s = m ? SU.indexOf(m[0]) : 0;
-      el.dataset.mj = '1'; el.classList.add(d.cls); be.innerHTML = d.face(v, s, 'field'); if (d.cls === 'dk-hana' && v === 13) el.classList.add('hk', 'hk' + s); if (va && d.val) va.textContent = d.val(v);
+      el.dataset.mj = '1'; el.classList.add(d.cls); be.innerHTML = d.face(v, s, 'field'); if (d.cls === 'dk-hana' && v === 13) el.classList.add('hk', 'hk' + s); if (va && d.val) { if (d.valHtml) va.innerHTML = d.val(v); else va.textContent = d.val(v); }
     } else if (el.matches('.mc')) {
       const v = deckVal(el.textContent); if (!v) return;
       el.dataset.mj = '1'; el.classList.add(d.cls); el.innerHTML = d.face(v, +el.dataset.s || 0, 'mc');
