@@ -5428,7 +5428,7 @@ const RV_PHASE = { early: '序盤', mid: '中盤', late: '終盤' };
 // 1ゲームの総評（博士・マサそれぞれの語り口で）
 function rvGameSolo(who) {
   const f = S.lastFacts || rvGameFacts(), L = [], rt = who === 'root', nmY = rvName();
-  let sec = 'result'; const B = (r, m) => { let t = rt ? r : m; if (Array.isArray(t)) t = RVP(t); if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t) L.push({ sec, t, neta: !rt }); };
+  let sec = 'result'; const B = (r, m) => { let t = rt ? r : m; if (Array.isArray(t)) t = RVP(t); if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t && !L.some(x => t.split(/(?<=[！。])/).some(u => u.length > 6 && x.t.includes(u)))) L.push({ sec, t, neta: !rt }); }; // 同じ文が重ならないように
   // 1. 結果
   // 結果と判断は分けて評価する（大事なのは確率に基づいて選べたか）
   let q = rvQual(f.nDec, f.nBest, f.nGood); if ((f.fouls || []).length && q === 'good') q = 'mid'; // お手つきがあれば「確率どおり」とは言わない
@@ -5557,7 +5557,7 @@ function rvWhy(w, who) {
 // セットの総評（博士・マサそれぞれの語り口で）
 function rvSetSolo(who) {
   const c = setContext(), Lg = S.T.setLog || [], L = [], rt = who === 'root', nmY = rvName();
-  let sec = 'result'; const B = (r, m) => { let t = rt ? r : m; if (Array.isArray(t)) t = RVP(t); if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t) L.push({ sec, t, neta: !rt }); };
+  let sec = 'result'; const B = (r, m) => { let t = rt ? r : m; if (Array.isArray(t)) t = RVP(t); if (t) L.push({ sec, t }); }, N = k => { const t = rvNeta(who, k); if (t && !L.some(x => t.split(/(?<=[！。])/).some(u => u.length > 6 && x.t.includes(u)))) L.push({ sec, t, neta: !rt }); }; // 同じ文が重ならないように
   const F = Lg.map(x => x.rv);
   const nHintS = Lg.reduce((s, x) => s + (x.nHint || 0), 0), nDec = Lg.reduce((s, x) => s + (x.nDec || 0), 0), nBest = Lg.reduce((s, x) => s + (x.nBest || 0), 0), nGood = Lg.reduce((s, x) => s + (x.nGood || 0), 0), wins = Lg.filter(x => x.won).length;
   // 1. 結果
