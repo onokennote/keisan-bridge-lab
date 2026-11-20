@@ -2966,3 +2966,5 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 @media (max-width:380px){.htabs button{font-size:9.5px;letter-spacing:-.04em;padding-left:0;padding-right:0}}
 /* オンライン大会：ほかの卓を待つ間、順位表はうすく（結果が出るまで。2026-11-20） */
 .on-stand-dim{opacity:.28;filter:grayscale(1);transition:opacity .4s}
+/* オンライン大会の画面：下にも準備OK・エントリーのボタン（2026-11-20） */
+.on-bot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;padding:10px;border-top:1px dashed var(--line);margin-top:4px}
