@@ -1,4 +1,4 @@
-<!doctype html><html lang="ja"><head><meta name="kb-version" content="c7ae4aa 2026-11-20 17:43"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="61405077dbe2"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!doctype html><html lang="ja"><head><meta name="kb-version" content="993a8aa 2026-11-20 17:56"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>計算ブリッジ作戦研究所</title><meta name="description" content="カードの数字で式を作って出し切る「計算ブリッジ」を、AIの最善手と突き合わせながら練習できる作戦研究アプリ（非公式ファン制作）。"><meta property="og:title" content="計算ブリッジ作戦研究所"><meta property="og:description" content="AIたちと本番そっくりの卓を囲み、自分の手とAIの最善手を突き合わせて、勝ち抜く打ち方を見つけよう。（非公式ファン制作）"><meta property="og:type" content="website"><meta property="og:url" content="https://keisan-bridge.lolipop-now.app/"><meta property="og:site_name" content="計算ブリッジ作戦研究所（非公式ファン制作）"><meta property="og:locale" content="ja_JP"><meta property="og:image" content="https://keisan-bridge.lolipop-now.app/og.png"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:image:alt" content="計算ブリッジ作戦研究所：AIと対戦して、自分の手とAIの最善手をくらべる練習アプリ（非公式ファン制作）"><meta name="twitter:card" content="summary_large_image"><link rel="canonical" href="https://keisan-bridge.lolipop-now.app/"><meta name="theme-color" content="#0b1a14"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2064%2064%22%3E%3Crect%20x%3D%228%22%20y%3D%224%22%20width%3D%2248%22%20height%3D%2256%22%20rx%3D%228%22%20fill%3D%22%23fbf3dc%22%20stroke%3D%22%23f2b632%22%20stroke-width%3D%224%22%2F%3E%3Ctext%20x%3D%2232%22%20y%3D%2244%22%20text-anchor%3D%22middle%22%20font-size%3D%2232%22%20font-weight%3D%22900%22%20font-family%3D%22sans-serif%22%20fill%3D%22%230b3d2e%22%3E7%3C%2Ftext%3E%3C%2Fsvg%3E"><style>html,body{margin:0;background:#0b1a14}</style></head><body><script>window.KB_CLOUD_API="https://onoken-web.sakura.ne.jp/kb/api.php"</script><script>window.KB_GOOGLE_CLIENT_ID="769381686727-qobbdpictds21fl24d6sdcmbs92acp9v.apps.googleusercontent.com"</script><script>window.KB_BUILD="56d475ff43ac"</script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=M+PLUS+Rounded+1c:wght@500;800&family=JetBrains+Mono:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&family=Noto+Serif+SC:wght@900&family=Fredoka:wght@500;700&family=ZCOOL+QingKe+HuangYou&family=Baloo+2:wght@500;800&family=Noto+Sans+Devanagari:wght@400;700&display=swap">
 <style>
 /* Layout: one-column game table (phone first). Opponents strip on top, field in the middle, hand at the bottom. */
@@ -3038,10 +3038,10 @@ html.th-pop .topbar{padding:6px 10px}
 /* テスト版の帯 */
 html.th-pop #stg-band{background:var(--pop-yel);color:var(--pop-line);border:2px solid var(--pop-line)}
 /* 文字色は基本「黒（親の色）」にそろえる（暗い地のための明るい文字・金色をまとめて直す）。札・ボタン・チップはそれぞれの色 */
-html.th-pop #app :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.dbtn *):not(.ai-chip):not(svg *){color:inherit}
+html.th-pop #app :is(b,strong,small,span,em,i,h2,h3,h4,p,summary,label,div,td,th,li):not(.card *):not(.fieldcard *):not(.mc):not(.mc *):not(.chip):not(.chip *):not(.btn.primary *):not(.dbtn *):not(.ai-chip):not(svg *):not(.road *):not(.story-hero *){color:inherit}
 html.th-pop #app .muted,html.th-pop #app .small.muted,html.th-pop #app .lbl{color:var(--muted)}
 html.th-pop #app .cm-name{color:var(--warn)!important}
-html.th-pop .op-bubble,html.th-pop .su-block,html.th-pop .su-pi,html.th-pop .su-g,html.th-pop .badge-rule,html.th-pop .su-custom,html.th-pop .hint-head,html.th-pop .tl-g,html.th-pop .su-preset{background:var(--pop-sf);border:2px solid var(--pop-line);border-radius:14px;box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
+html.th-pop .op-bubble,html.th-pop .su-block,html.th-pop .su-pi,html.th-pop .su-g,html.th-pop .badge-rule,html.th-pop .su-custom,html.th-pop .tl-g,html.th-pop .su-preset{background:var(--pop-sf);border:2px solid var(--pop-line);border-radius:14px;box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
 html.th-pop .su-preset.on{background:var(--pop-cream);box-shadow:3px 3px 0 var(--warn)}
 html.th-pop .su-pi,html.th-pop .su-g{box-shadow:none;border-width:2px}
 html.th-pop .su-pm{background:var(--pop-yel);color:var(--pop-line);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
@@ -3068,10 +3068,31 @@ html.th-pop .hf-suits{color:var(--pop-line)}.html.th-pop .hf-suits .r{color:var(
 /* 札は地より少しだけ明るく（真っ白にはしない） */
 html.th-pop .card,html.th-pop .fieldcard,html.th-pop .mc{background:var(--card)}
 html.th-pop .card.sel{background:var(--pop-cream)}
+
+/* 表彰式の舞台：明るい舞台に */
+html.th-pop .ceremony-stage{background:radial-gradient(90% 70% at 50% 10%,#f6e6b8,#e9dcc0 75%);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .ceremony-stage h2,html.th-pop .ceremony-stage .cer-title{color:var(--ink);text-shadow:2px 2px 0 var(--pop-yel)}
+html.th-pop .pod-block{border:2px solid var(--pop-line)}
+
+/* 数字で見る・アドバイスの項目：明るい札に */
+html.th-pop .num-card,html.th-pop .adv{background:var(--pop-sf);border:2px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop .num-card .nc-n b{color:var(--ink);text-shadow:2px 2px 0 var(--pop-yel)}
+html.th-pop .adv-b{color:#b5562f}
+/* 物語・数字の見出しの絵と、日本一への道の山の絵はそのまま（暗い絵の上の明るい字） */
+html.th-pop .story-hero,html.th-pop .rd-hero{border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
+/* プロフィール欄・リンク */
+html.th-pop .h-player .player-bar{border:0;box-shadow:none;background:transparent;padding:0}
+html.th-pop .pb-bio{background:var(--surface2);border:2px dashed var(--pop-line);color:var(--ink)}
+html.th-pop .pb-bio.empty{color:var(--muted)}
+html.th-pop #app a,html.th-pop #app .linkish,html.th-pop .unofficial a{color:#b5562f}
+html.th-pop .pb-fold summary{background:var(--surface2);border:2px solid var(--pop-line);border-radius:12px}
+html.th-pop .rvc{background:var(--pop-blue);border:2px solid var(--pop-line);color:var(--ink);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop .rvc.mu{background:var(--pop-cream)}
+html.th-pop .su{grid-template-columns:minmax(0,1fr)}html.th-pop .su>*,html.th-pop .su-presets>*{min-width:0}html.th-pop .su-block,html.th-pop .su-preset{box-sizing:border-box}
 </style>
 <div id="app"></div>
 <script>
-window.KB_BUILD='4624b964aa';
+window.KB_BUILD='9bbd2a46f3';
 // ===== 計算ブリッジ エンジン =====
 (function (G) {
 'use strict';
@@ -8854,6 +8875,10 @@ AIの手番の速さ	AI turn speed	AI回合速度
 図鑑に登録（#/#）	Added to collection (#/#)	登入图鉴（#/#）
 ほな、卓をつくろか！今日はどの相手と打つ？	Let's set up a table! Who are you playing today?	来，开一桌吧！今天想和谁打？
 ほな、大会の準備や！どんな相手がおるか楽しみやな！	Time to get the tournament ready! Can't wait to see who's in it!	来，准备比赛吧！真期待会遇到什么对手！
+🎨 デザイン：ポップ	🎨 Design: Pop	🎨 设计：波普
+🎨 デザイン：クラシック	🎨 Design: Classic	🎨 设计：经典
+デザイン：ポップ	Design: Pop	设计：波普
+デザイン：クラシック	Design: Classic	设计：经典
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
 
 // 実況・解説のセリフ（型）の英語・中国語。日本語の型 → [英語, 中文]。ない型は英語・中国語では出さない
@@ -11204,10 +11229,11 @@ function markActive(view) { try { if (PLAY_VIEWS[view] && S.T && !S.spectate) st
 function go(view) { if (view !== 'game' && S.spectate) watchEnd(true); if (S.xmBak && !['game', 'set-end'].includes(view)) xmRestore(); /* サンタのテストプレイを途中でやめても記録を戻す */ if (view === 'home' && CLOUD.pendingPull) { CLOUD.pendingPull = false; setTimeout(cloudPull, 200); } S.view = view; markActive(view); render(); window.scrollTo(0, 0); }
 // どの画面でも右下に浮かぶ 🏠（ホームでは出さない）。ゲーム中は確認してから中断と同じ動き
 // テスト版（staging）の印：画面の上に小さな帯（本番と取り違えないように）
-// テーマ「ポップ」：テスト版だけ（はじめはオン。テスト版の帯を押すと切り替え kb.theme）
-const themePop = () => { let t = null; try { t = localStorage.getItem('kb.theme'); } catch (e) { } return t ? t === 'pop' : !!window.KB_STAGING; };
+// デザイン：はじめは「ポップ」。ホームの「🎨 デザイン」ボタン（テスト版は帯も）で「クラシック」（いまの緑）と切り替え（端末ごと kb.theme＝pop／old）
+const themePop = () => { let t = null; try { t = localStorage.getItem('kb.theme'); } catch (e) { } return t !== 'old'; };
+function themeToggle() { try { localStorage.setItem('kb.theme', themePop() ? 'old' : 'pop'); } catch (e) { } syncTheme(); }
 function syncTheme() { document.documentElement.classList.toggle('th-pop', themePop()); }
-function syncStg() { syncTheme(); if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です（押すとデザインを切り替え）'; b.style.cursor = 'pointer'; b.onclick = () => { try { localStorage.setItem('kb.theme', themePop() ? 'old' : 'pop'); } catch (e) { } syncTheme(); toast(themePop() ? 'デザイン：ポップ' : 'デザイン：いまの緑'); }; document.body.appendChild(b); }
+function syncStg() { syncTheme(); if (!window.KB_STAGING || document.getElementById('stg-band')) return; const b = document.createElement('div'); b.id = 'stg-band'; b.textContent = '🧪 テスト版'; b.title = '記録は本番と別です（押すとデザインを切り替え）'; b.style.cursor = 'pointer'; b.onclick = () => { themeToggle(); toast(themePop() ? 'デザイン：ポップ' : 'デザイン：クラシック'); }; document.body.appendChild(b); }
 function syncFab() {
   let b = document.getElementById('home-fab'); const show = !ARTIFACT_CLOSED && S.view !== 'home';
   if (!show) { if (b) b.remove(); document.body.classList.remove('has-fab'); return; }
@@ -14035,8 +14061,9 @@ const htHide = id => htAuto() || homeTab() === id ? '' : 'data-off inert';
 const FOOT_LINES = [['masa', 'おのけん、また夜ふかしして研究所いじっとるで…'], ['root', 'このアプリは、悔しさから生まれました。'], ['masa', '打倒OZ家！合言葉はこれや！'], ['root', '確率は裏切りません。ただし、ときどき運が裏切ります。'], ['masa', '♠も♥も♦も♣も、数字は数字や！'], ['root', '最善手を選んでも負けることはあります。それが計算ブリッジの奥深さです。'], ['masa', 'サッカーもポーカーも計算ブリッジも、最後は場数や！']];
 // 言語の切り替え（日本語／English／中文）。できあがるまではテスト版だけ（I18N.on）
 function langSwHTML() {
-  if (!window.I18N || !I18N.on()) return '';
-  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.deckLabel ? `<button class="mj-sw ${I18N.deckOn ? 'on' : ''}" data-act="mj-set" data-noi18n>${I18N.deckLabel()}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}`;
+  const th = `<button class="mj-sw th-sw" data-act="theme-set">${themePop() ? '🎨 デザイン：ポップ' : '🎨 デザイン：クラシック'}</button>`;
+  if (!window.I18N || !I18N.on()) return th;
+  return `<div class="lang-sw" role="group" aria-label="🌐 言語"><span>🌐</span>${Object.entries(I18N.LANGS).map(([k, v]) => `<button class="${I18N.lang === k ? 'on' : ''}" data-act="lang-set" data-l="${k}" data-noi18n>${v}</button>`).join('')}</div>${I18N.deckLabel ? `<button class="mj-sw ${I18N.deckOn ? 'on' : ''}" data-act="mj-set" data-noi18n>${I18N.deckLabel()}</button>` : ''}${I18N.lang !== 'ja' ? '<p class="small muted lang-note">翻訳は少しずつ増やしています。</p>' : ''}` + th;
 }
 function homeFooterHTML() {
   return `<footer class="hfoot"><button class="hf-suits" data-act="foot-egg" aria-label="研究所のなかまのひと言"><span>♠</span><span class="r">♥</span><span class="r">♦</span><span>♣</span></button>
@@ -17395,6 +17422,7 @@ function act(a, el) {
     case 'masa-rival': rivalPick(); break;
     case 'lang-set': if (window.I18N) I18N.set(el.dataset.l); break;
     case 'mj-set': if (window.I18N) I18N.setDeck(!I18N.deckOn); break;
+    case 'theme-set': themeToggle(); render(); break;
     case 'adv-go': { const g = el.dataset.go, a2 = el.dataset.a; closeModal(); if (g) go(g); else if (a2) act(a2); break; }
     case 'rival-cmp': rivalCompare(el.dataset.rid, el.dataset.name); break;
     case 'rival-toggle': rivalToggle(el.dataset.rid, el.dataset.name); break;
