@@ -620,7 +620,7 @@ const TIPS = [
   '★1〜2のAIは、セリフでつい本当の手を漏らす。★3はたまに、★4は決め台詞だけ、★5はセリフと手が関係ない。強い相手ほど読めへんで。',
   '総合ランキングの配分は、推定実力35・BP30・連続最善20・バッジアタック15や。全部1位なら100点やで。',
   'デイリートーナメントは1手30秒。出られるのは1日1部だけで、始まる前なら別の部に替えられるで。',
-  'デイリーの第1部（17:30）と第3部（19:30）は、予選が1セット5ゲームのじっくり型や。',
+  'デイリーの17:30と19:30の部は、予選が1セット5ゲームのじっくり型や。',
   '式ハンターは3分だけでもええ。サッカーのリフティングと同じで、毎日の基礎練習が本番の速さになるんや。',
   '観戦で★5の「引く場面」を見てみ。上手い人の試合を見るのが上達の早道や。',
   // バッジ・冠・アバター
@@ -701,7 +701,7 @@ function noteText(n) {
   const me = san(S.settings.name || 'あなた'), A = (k, i) => { const a = ACH.find(x => x[0] === k); return a ? a : null; };
   const bn = key => { const [k, t] = String(key).split(':'), a = A(k); if (!a) return key; const i = a[2].indexOf(+t); return i >= 0 ? a[4][i] : key; };
   switch (n.kind) {
-    case 'rival': return n.back ? ['⇄', `${san(n.who)}と宿敵になりました（お互いにライバル視）`] : ['←', `${san(n.who)}に${me}がライバル視されています`];
+    case 'rival': return n.back ? ['⇄', `${san(n.who)}と宿敵になりました（お互いにライバル視）`] : ['→', `${san(n.who)}に${me}がライバル視されています`];
     case 'rv_badge': return ['🏅', `ライバル視している${san(n.who)}が「${bn((n.ach || [])[0])}」${n.n > 1 ? `ほか${n.n - 1}個` : ''}を取りました`];
     case 'rv_bp': return ['📈', `ライバル視している${san(n.who)}が、BPで${me}を抜きました（${n.bp}BP）`];
     case 'invite': return ['✉', `${n.host ? san(n.host) + 'から' : ''}オンライン大会「${n.tname}」に招待されました`];
@@ -741,7 +741,7 @@ function noteGo(i) {
   if (n.kind === 'btitle') { titleModal(); return; }
   if (n.kind === 'cat' || n.kind === 'rating' || n.kind === 'streak') { closeModal(); go('growth'); return; }
 }
-// ライバル視の数を矢印で（重なりなし）：→ ライバル視している（片方）・← ライバル視されている（片方）・⇄ 宿敵（お互い）。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
+// ライバル視の数を矢印で（重なりなし）：← ライバル視している（片方）・→ ライバル視されている（片方）（2026-11-21 に向きを入れ替え）・⇄ 宿敵（お互い）。フォロー・フォロワーのように、押すと一覧（名前を押すとプロフィール）
 const rvByMine = () => S.rvByPid === PID ? (S.rvBy || []) : [];
 // ライバル系のバッジ：ライバル視・被ライバル・宿敵の数（いままでの最高）
 function rivalBadges() { try { if (S.attack || !PID) return; const R = rivalsOf(), B = rvByMine(), mu = R.filter(x => x.rid && B.some(y => y.rid === x.rid)).length; setMax('rival_out', R.length); if (S.rvByPid === PID) { setMax('rival_in', B.length); setMax('rival_mu', mu); } } catch (e) { } }
@@ -754,7 +754,7 @@ function rvcHTML(rivals, by, name) {
   if (!S.rvSets || Object.keys(S.rvSets).length > 60) S.rvSets = {}; const id = 'r' + Object.keys(S.rvSets).length; S.rvSets[id] = { rivals, by, name };
   // ライバル視・被ライバルの数には宿敵も含める（宿敵はその中で ⇄。宿敵の数は別にも出す）
   const isMu = x => x.rid && by.some(y => y.rid === x.rid), mu = rivals.filter(isMu).length, out = rivals.length, inn = by.length;
-  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>→</i>ライバル視<b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>←</i>被ライバル<b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i>宿敵<b>${mu}</b></button></span>`;
+  return `<span class="pv-rvc"><button class="rvc" data-act="rv-list" data-k="${id}:r" title="ライバル視している"><i>←</i>ライバル視<b>${out}</b></button><button class="rvc" data-act="rv-list" data-k="${id}:b" title="ライバル視されている"><i>→</i>被ライバル<b>${inn}</b></button><button class="rvc mu" data-act="rv-list" data-k="${id}:m" title="宿敵（お互いにライバル視）"><i>⇄</i>宿敵<b>${mu}</b></button></span>`;
 }
 function rvListModal(key) {
   const [id, tab] = String(key).split(':'), d = (S.rvSets || {})[id]; if (!d) return;
@@ -764,7 +764,7 @@ function rvListModal(key) {
   const sec = (h, L, empty) => `<div class="rv-sec"><b>${h}（${L.length}人）</b>${L.length ? L.map(row).join('') : `<small class="muted">${empty}</small>`}</div>`;
   // ライバル視・被ライバルの一覧にも宿敵を入れ、宿敵を上に（⇄ の印）
   const muFirst = L => L.filter(isMu).concat(L.filter(x => !isMu(x))), one = muFirst(d.rivals), oneBy = muFirst(d.by), both = d.rivals.filter(isMu);
-  const A = sec(`→ ${esc(san(d.name))}がライバル視している`, one, 'いません'), B = sec(`← ${esc(san(d.name))}をライバル視している`, oneBy, 'いません'), M = sec('⇄ 宿敵（お互いにライバル視）', both, 'まだいません');
+  const A = sec(`← ${esc(san(d.name))}がライバル視している`, one, 'いません'), B = sec(`→ ${esc(san(d.name))}をライバル視している`, oneBy, 'いません'), M = sec('⇄ 宿敵（お互いにライバル視）', both, 'まだいません');
   modal(`<div class="stack rv-lm">${tab === 'm' ? M : tab === 'b' ? B : A}<p class="small muted" style="margin:0">名前を押すとプロフィールが開きます。</p>
     <div class="row" style="justify-content:flex-end"><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
@@ -774,18 +774,18 @@ async function rivalToggle(rid, name) {
   const l = PID && plLink(PID);
   try { if (l) await cloudReq('rival_set', { token: l.token, pid: PID, rid, on: on ? 1 : 0 }); } catch (e) { toast(e.message || 'できませんでした'); return; }
   store.set('rivals', on ? L.concat([{ rid, name }]) : L.filter(x => x.rid !== rid)); rivalBadges();
-  toast(on ? (rvByMine().some(x => x.rid === rid) ? `⇄ ${name}と宿敵になりました！` : `→ ${name}をライバル視しました`) : `${name}のライバル視をやめました`); KB.sfx('select');
+  toast(on ? (rvByMine().some(x => x.rid === rid) ? `⇄ ${name}と宿敵になりました！` : `← ${name}をライバル視しました`) : `${name}のライバル視をやめました`); KB.sfx('select');
   const b = $('#modal [data-act="rival-toggle"]'); if (b) { b.outerHTML = rivalBtnHTML(rid, name); bindModalActs(); }
   // 開いているプロフィールのライバル視の数も新しくする
   if ($('#modal .pv-rvc')) fetch(CLOUD_API + '?a=card&rid=' + encodeURIComponent(rid)).then(r => r.json()).then(j => { const bx = $('#modal .pv-rvc'); if (!j.ok || !bx) return; bx.outerHTML = rvcHTML(j.card.rivals || [], j.card.rivalBy || [], j.card.name || name); bindModalActs(); }).catch(() => { });
   S.rvByAt = 0; // ホームの数も読み直す
   if (S.view === 'ranking') render();
 }
-const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid), back = rvByMine().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバル視をやめる' : back ? '⇄ 宿敵になる' : '→ ライバル視する'}</button>`; };
+const rivalBtnHTML = (rid, name) => { const on = rivalsOf().some(x => x.rid === rid), back = rvByMine().some(x => x.rid === rid); return `<button class="btn ${on ? '' : 'primary'} sm" data-act="rival-toggle" data-rid="${esc(rid)}" data-name="${esc(name)}">${on ? 'ライバル視をやめる' : back ? '⇄ 宿敵になる' : '← ライバル視する'}</button>`; };
 function rivalPick() {
   const L = rivalsOf();
   modal(`<div class="stack host-m"><div class="host-mh masa"><span class="cm-av">${KB.casterSVG('masa', 'smug')}</span><div><small>実況・ナニワのマサ</small><b>${L.length ? 'どのライバルと比べる？' : 'ライバルがまだおらんな！'}</b></div></div>
-    ${L.length ? `<div class="rv-pick">${L.map(x => `<button class="btn" data-act="rival-cmp" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}">⚔ ${esc(x.name)}</button>`).join('')}</div>` : '<p class="small" style="margin:0">ランキングで気になる人を押して、プロフィールの「→ ライバル視する」を押してな。5人まで登録できるで！</p>'}
+    ${L.length ? `<div class="rv-pick">${L.map(x => `<button class="btn" data-act="rival-cmp" data-rid="${esc(x.rid)}" data-name="${esc(x.name)}">⚔ ${esc(x.name)}</button>`).join('')}</div>` : '<p class="small" style="margin:0">ランキングで気になる人を押して、プロフィールの「← ライバル視する」を押してな。5人まで登録できるで！</p>'}
     <div class="row" style="gap:8px;justify-content:flex-end"><button class="btn" data-act="adv-go" data-go="ranking">ランキングで選ぶ</button><button class="btn primary" data-act="close">閉じる</button></div></div>`);
 }
 async function rivalCompare(rid, name) {
@@ -1179,7 +1179,7 @@ function badgeTalk(key, i) {
   else if (key === 'atk_bp' || key === 'atk_badges') text += c ? `これまでのベストは${c}${key === 'atk_bp' ? 'BP' : '個'}や！あと${Math.max(0, t - c)}${key === 'atk_bp' ? 'BP' : '個'}で届くで！` : 'まずはバッジアタックを最後までやり切ってみよか！';
   else if (key === 'sutemi' && t > 10) text += (g.cnt.sutemi1 || 0) >= 1 ? '捨て身はもう決めとるで！' : R(['回数やなくて、1回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！', '上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！']);
   else if (key === 'on_podium' || key === 'off_podium') text += R(['ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！', '人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！']);
-  else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！デイリートーナメントは毎日17:30・18:30・19:30・20:30の4部から、都合のええ1部に出られるで。ホームの「オンライン大会」の上のカードからや！` : key === 'season_podium' ? 'シーズンは毎月前半（1〜15日）と後半や。デイリートーナメントで貯めたポイントで、シーズンの最終順位が3位以内で銅、2位以内で銀、1位で金や！毎日4部のうち1部、コツコツ出るのが近道や！' : 'ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日17:30・18:30・19:30・20:30の4部から1部選んで出られる。決勝の順位で決まるんや！';
+  else if (key === 'daily_play' || /^daily_(win|2nd|3rd)$/.test(key) || key === 'season_podium') text += key === 'daily_play' ? `いまは${c}回、あと${Math.max(0, t - c)}回や！デイリートーナメントは毎日${DL_TIMES}の6部から、都合のええ1部に出られるで。ホームの「オンライン大会」の上のカードからや！` : key === 'season_podium' ? 'シーズンは毎月前半（1〜15日）と後半や。デイリートーナメントで貯めたポイントで、シーズンの最終順位が3位以内で銅、2位以内で銀、1位で金や！毎日6部のうち1部、コツコツ出るのが近道や！' : 'ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日${DL_TIMES}の6部から1部選んで出られる。決勝の順位で決まるんや！';
   else if (/^rival_/.test(key)) text += `いまの最高は${c}人、あと${Math.max(0, t - c)}人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！`;
   else if (key === 'zukan_cat' || key === 'chart') { const u = key === 'chart' ? '行' : 'つ'; text += c ? `いまは${c}${u}、あと${Math.max(0, t - c)}${u}やで！がんばりや！` : `まずは1${u}、そろえてみよか！`; }
   else if (key === 'rating') { // 目安：直近100手の最善率と、1手の平均損失（RATE_BEST・RATE_LOSS から）
@@ -1862,7 +1862,7 @@ const rankMe = x => !!x.me && (x.pid == null || x.pid === PID);
 function rankingHTML() {
   const R = S.rank && S.rank.rankings, hide = !!raw.get('kb.p.' + PID + '.rankHide', false);
   const val = (k, x) => k === 'season' ? `${x.pts}pt<small>${x.n}回</small>` : k === 'tpoints' ? `${x.pts}pt` : k === 'total' ? `${(x.total || 0).toFixed(1)}点` : k === 'streak' ? `${x.streak}回` : k === 'rating' ? `★${x.rating.toFixed(1)}` : k === 'badges' ? `${x.badges}個<small>${x.bp}BP</small>` : k === 'bp' ? `${x.bp}BP<small>${x.badges}個</small>` : `${x.atk}BP`;
-  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip ai-res" title="倶楽部のAI研究員">AI研究員</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? (rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip mu" title="宿敵（お互いにライバル視）">⇄</em>' : '<em class="rv-chip" title="ライバル視している">→</em>') : (x.rid && rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip in" title="ライバル視されている">←</em>' : '')}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
+  const rowH = (k, x) => `<div class="rk-row ${rankMe(x) ? 'me' : ''}" data-act="rank-card" data-rid="${esc(x.rid || '')}" data-me="${rankMe(x) ? 1 : ''}" role="button" tabindex="0" aria-label="${esc(x.name)}のプロフィールを見る"><b class="rk-n">${x.rank}</b><span class="rk-av">${KB.avatarSVG(Object.assign({ name: x.name }, x.avatar || AVATAR_DEF), { mood: 'happy' })}</span><span class="rk-nm">${esc(x.name)}${x.ai ? '<em class="ai-chip ai-res" title="倶楽部のAI研究員">AI研究員</em>' : ''}${x.rid && rivalsOf().some(r => r.rid === x.rid) ? (rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip mu" title="宿敵（お互いにライバル視）">⇄</em>' : '<em class="rv-chip" title="ライバル視している">←</em>') : (x.rid && rvByMine().some(r => r.rid === x.rid) ? '<em class="rv-chip in" title="ライバル視されている">→</em>' : '')}${rankMe(x) ? '<small>あなた</small>' : ''}</span><span class="rk-v">${val(k, x)}</span></div>`;
   const sec = ([k, label, note]) => { const d = R && R[k]; return `<section class="panel stack rk-sec" id="rk-sec-${k}"><div class="rk-h"><h2>${label}</h2>${d ? `<small>全${d.total}人</small>` : ''}${RK_NAV}</div><p class="small muted" style="margin:0">${note}</p>
     ${R && d ? rkTabs(k) : ''}<div class="rk-list">${!R ? '<p class="small muted">読み込み中…</p>' : !d ? '<p class="small muted">サーバーの更新後に表示されます。</p>' : rkRows(k, d.list.concat(d.mine.filter(rankMe)), x => rowH(k, x), d.total)}</div></section>`; };
   const withAi = rankWithAi();
@@ -1888,7 +1888,7 @@ function rkRows(k, L, rowF, total) {
   if (!L.length) return '';
   const box = (rows, center) => `<div class="rk-scroll"${center ? ' data-center="1"' : ''}>${rows.map(rowF).join('')}</div>`; // 10人分の高さで、中をスクロール（rkFit）
   if (m === 'near') return mi < 0 ? empty('まだこのランキングに載っていません。') : box(L, true);
-  if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? box(R) : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「→ ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
+  if (m === 'rival') { const rv = rivalsOf(), by = rvByMine(), R = L.filter(x => rankMe(x) || (x.rid && (rv.some(r => r.rid === x.rid) || by.some(r => r.rid === x.rid)))); return R.length > (mi >= 0 ? 1 : 0) ? box(R) : empty('ライバル視している人・ライバル視されている人が、このランキングにいません。プロフィールの「← ライバル視する」で登録できます（「自分のまわり」が相手さがしにおすすめ）。'); }
   return box(L) + (mi >= 10 ? gap + rowF(L[mi]) : '') + (total > L.length ? `<p class="small muted" style="margin:0;text-align:center">上位${L.length}人まで表示しています</p>` : '');
 }
 // ランキングの枠を10人分の高さにして、「自分のまわり」は自分が真ん中に来るようにスクロール。枠の端まで来たら画面全体がそのままスクロールする（overscroll を止めない）
@@ -2014,7 +2014,7 @@ async function rankCardOpen(rid, me, el) {
     }
     const ai = isAi || !!d.ai, b = $('#modal .pv-box'); if (!b) return;
     b.innerHTML = profHTML(d, { ai, me }); pvInfoBind(b, d.name || 'プレイヤー', me);
-    // ライバル視：ほかの人は「→ ライバル視する／⇄ 宿敵になる」
+    // ライバル視：ほかの人は「← ライバル視する／⇄ 宿敵になる」
     if (CLOUD_ON && PID && !me && rid) { const cl = $('#modal .rk-card > .row'); if (cl) { cl.insertAdjacentHTML('afterbegin', rivalBtnHTML(rid, d.name || 'プレイヤー')); bindModalActs(); } }
     if (CLOUD_ON && PID && me) rvByFetch(true).then(() => { const bx = $('#modal .pv-rvc'); if (bx) { bx.outerHTML = rvcHTML(rivalsOf(), rvByMine(), S.settings.name); bindModalActs(); } });
     // 総合の順位（AI込み・人だけ。AI研究員は人だけの順位なし）
@@ -6894,7 +6894,7 @@ function onlineHomeHTML() {
 function olTodayHTML(D, L2) {
   const parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
   const live = v => v.phase === 'prelim' || v.phase === 'final', alive = v => v.phase === 'entry' || live(v);
-  const dl = Object.keys(parts).sort().map(k => { const L = parts[k]; const v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0]; return Object.assign({}, v, { n: L.reduce((a, x) => a + (x.n || 0), 0), _label: `デイリー 第${k}部` }); }).filter(alive);
+  const dl = Object.keys(parts).sort((a, b) => dlNo(a) - dlNo(b)).map(k => { const L = parts[k]; const v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0]; return Object.assign({}, v, { n: L.reduce((a, x) => a + (x.n || 0), 0), _label: `デイリー 第${dlNo(k)}部` }); }).filter(alive);
   const off = L2.filter(v => v.official && alive(v)), un = L2.filter(v => !v.official && alive(v));
   const tabs = [['daily', '📅 デイリー', dl], ['off', '🏅 公式', off], ['un', '🌐 非公式', un]];
   if (!S.olTab) S.olTab = (tabs.find(t => t[2].some(v => v.entered || live(v))) || tabs.find(t => t[2].length) || tabs[0])[0];
@@ -6907,31 +6907,34 @@ function olTodayHTML(D, L2) {
   const di = ON.dinfo, me = di && di.me, dm = ON.dailyMine;
   const season = cur[0] === 'daily' && di ? `<div class="ol-season"><span>🗓 ${esc(di.label)}シーズン ${me ? `<b>${me.rank}位</b>・${me.pts}pt（${me.n}回）` : 'まだポイントなし'}</span><button class="btn sm" data-act="daily-rank">📊 ランキング</button></div>` : '';
   const ent = dl.find(v => v.entered), myPart = ent ? ent.part : dm && dm.part, ph = ent ? ent.phase : dm && dm.phase;
-  const mineDay = cur[0] === 'daily' && myPart ? `<div class="ol-note"><span>✅ きょうは<b>第${myPart}部</b>に${ph === 'done' ? '参加しました' : ph === 'prelim' || ph === 'final' ? '参加中です' : 'エントリーしています'}（1日1部だけ）</span>${ph === 'done' && dm && dm.id ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : '';
+  const mineDay = cur[0] === 'daily' && myPart ? `<div class="ol-note"><span>✅ きょうは<b>第${dlNo(myPart)}部</b>に${ph === 'done' ? '参加しました' : ph === 'prelim' || ph === 'final' ? '参加中です' : 'エントリーしています'}（1日1部だけ）</span>${ph === 'done' && dm && dm.id ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : '';
   return `<div class="ol-today"><div class="ol-tabs">${tabs.map(([k, l, a]) => `<button class="${k === cur[0] ? 'on' : ''}" data-act="ol-tab" data-k="${k}">${l}<small>${a.length}</small></button>`).join('')}</div>
     ${mineDay}<div class="ol-list">${L.length ? L.map(row).join('') : `<p class="small muted" style="margin:6px 2px">いまエントリーできる${cur[1].slice(2)}の大会はありません${cur[0] === 'daily' ? '（あしたの部は朝6時に出ます）' : ''}</p>`}</div>${season}</div>`;
 }
 // 開始までの残り時間（すべての大会で同じ書き方）。画面の [data-cd] は30秒ごとに書きかえる
 function cdText(ts) { const s = Math.max(0, Math.round(ts - Date.now() / 1000)); if (!s) return 'まもなく開始'; const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.ceil(s % 3600 / 60); return '開始まで あと' + (d ? d + '日' : '') + (d || h ? h + '時間' : '') + (m === 60 ? '59分' : m + '分'); }
 setInterval(() => document.querySelectorAll('[data-cd]').forEach(e => { e.textContent = cdText(+e.dataset.cd); }), 30000);
-// ---- デイリートーナメント（毎日4部 17:30・18:30・19:30・20:30・サーバーが朝6時に作る）とシーズン（毎月前半・後半） ----
+// ---- デイリートーナメント（毎日6部 6:30・7:30・17:30・18:30・19:30・20:30・サーバーが朝6時に作る）とシーズン（毎月前半・後半） ----
+// 部の番号：id の最後の数字（part）は 1〜4＝17:30〜20:30・5＝6:30・6＝7:30（朝の部は 2026-11-21 に追加）。画面の「第N部」は時刻の順
+const DL_TIMES = '6:30・7:30・17:30・18:30・19:30・20:30';
 // デイリーの部の形式：5ゲームの予選は「じっくり」と目立たせる
+function dlNo(p) { return ({ 5: 1, 6: 2, 1: 3, 2: 4, 3: 5, 4: 6 })[+p] || +p; }
 const dlFmt = v => { const g = v.games || 3; return `<em class="dl-fmt ${g >= 5 ? 'g5' : 'g3'}">${g >= 5 ? '🐢' : '⚡'} 予選${g}ゲーム×${v.sets || 3}セット</em>`; }; // 5ゲームと3ゲームは同じ重みで見せる
 function dailyCardHTML(D) {
-  // 1日4部（17:30・18:30・19:30・20:30）。出られるのはどれか1部だけ。グループに分かれた部は、自分の入ったグループ（なければA）を代表に
+  // 1日6部（6:30・7:30・17:30・18:30・19:30・20:30）。出られるのはどれか1部だけ。グループに分かれた部は、自分の入ったグループ（なければA）を代表に
   const di = ON.dinfo, parts = {}; D.forEach(v => { const k = v.part || 1; (parts[k] = parts[k] || []).push(v); });
   const dm = ON.dailyMine, myPart = Object.keys(parts).find(k => parts[k].some(v => v.entered)) || (dm && String(dm.part)); // 終わった部はここに出ないので、サーバーの「今日出た部」も見る
   const rowOf = k => { const L = parts[k], v = L.find(x => x.entered) || L.find(x => x.group === 'A') || L[0], d = new Date(v.startAt * 1000), hm = `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
     const live = v.phase === 'prelim' || v.phase === 'final', n = L.reduce((a, x) => a + x.n, 0);
     const pre = v.phase === 'entry' && Date.now() / 1000 < v.entryAt, eAt = new Date(v.entryAt * 1000), eHm = `${eAt.getHours()}:${String(eAt.getMinutes()).padStart(2, '0')}`;
     const st = v.phase === 'entry' ? `<b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${pre ? `エントリーは${eHm}から` : `${n}人エントリー`}</small>` : live ? `<em class="on-st live">開催中</em>${L.length > 1 ? `<small>${L.length}グループ</small>` : ''}` : v.phase === 'cancel' ? '<small class="muted">中止（参加者なし）</small>' : '<small class="muted">終了</small>';
-    if (v.phase === 'entry' && myPart && !v.entered) return `<div class="dl-part done-day">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps"><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small></span><span class="dl-joined">✅ きょうは参加済み</span></div>`; // 1日1部：出た人にはエントリーを出さない
+    if (v.phase === 'entry' && myPart && !v.entered) return `<div class="dl-part done-day">${dlFmt(v)}<b class="dl-pn">第${dlNo(k)}部<small>${hm}</small></b><span class="dl-ps"><b class="on-cd" data-cd="${v.startAt}">${cdText(v.startAt)}</b><small>${n}人エントリー</small></span><span class="dl-joined">✅ きょうは参加済み</span></div>`; // 1日1部：出た人にはエントリーを出さない
     const lbl = v.phase === 'entry' ? (v.entered ? '大会の画面へ' : pre ? '見る' : 'エントリー') : live ? (v.entered ? '自分の卓へ' : '観戦') : '結果';
-    return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}">${dlFmt(v)}<b class="dl-pn">第${k}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`.replace(`btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}`, `btn sm ${v.phase === 'entry' && !myPart && !pre ? 'primary' : ''}`); };
-  const rows = Object.keys(parts).sort().map(rowOf).join('') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（17:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
+    return `<div class="dl-part ${v.entered ? 'mine' : ''} ${live ? 'live' : ''}">${dlFmt(v)}<b class="dl-pn">第${dlNo(k)}部<small>${hm}</small></b><span class="dl-ps">${st}</span><button class="btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}" data-act="on-tour-open" data-id="${v.id}">${lbl}</button></div>`.replace(`btn sm ${v.phase === 'entry' && !myPart ? 'primary' : ''}`, `btn sm ${v.phase === 'entry' && !myPart && !pre ? 'primary' : ''}`); };
+  const rows = Object.keys(parts).sort((a, b) => dlNo(a) - dlNo(b)).map(rowOf).join('') || `<p class="small muted" style="margin:0">${new Date(Date.now() + 9 * 3600000).getUTCHours() >= 6 ? 'きょうのデイリーは全部終わりました。次は明日の朝6時に出ます（6:30の部から・エントリーは各部の開始15分前から）' : 'きょうのデイリーは朝6時に出ます（エントリーは各部の開始15分前から）'}</p>`;
   const me = di && di.me, sl = di ? `<div class="dl-season"><b>🗓 ${esc(di.label)}シーズン</b><span>${me ? `${esc(san(S.settings.name))}は <b>${me.rank}位</b>・<b>${me.pts}pt</b>（${me.n}回）` : 'まだポイントはありません'}</span><small class="muted">シーズン終了まで ${cdText(di.ends).replace('開始まで ', '')}</small></div>` : '';
-  return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日4部（17:30・18:30・19:30・20:30）から1日1部だけ・エントリーは15分前から。15人・予選は17:30・19:30が5ゲーム×3セット、18:30・20:30が3ゲーム×3セット・上位5人で決勝（5ゲーム）・空きはAI</small></div></div>
-    <div class="dl-parts">${rows}</div>${myPart ? `<div class="dl-mine"><span>✅ きょうは<b class="on-in">第${myPart}部</b>に${dm && (dm.phase === 'done') ? '参加しました' : dm && (dm.phase === 'prelim' || dm.phase === 'final') ? '参加中です' : 'エントリーしています'}（1日1部まで）</span>${dm && dm.phase === 'done' && !parts[myPart] ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : ''}
+  return `<div class="dl-card"><div class="dl-h"><span class="dl-ic" aria-hidden="true">📅</span><div><b>デイリートーナメント</b><small>毎日6部（${DL_TIMES}）から1日1部だけ・エントリーは15分前から。15人・予選は17:30・19:30が5ゲーム×3セット、ほかの部（朝の部も）は3ゲーム×3セット・上位5人で決勝（5ゲーム）・空きはAI</small></div></div>
+    <div class="dl-parts">${rows}</div>${myPart ? `<div class="dl-mine"><span>✅ きょうは<b class="on-in">第${dlNo(myPart)}部</b>に${dm && (dm.phase === 'done') ? '参加しました' : dm && (dm.phase === 'prelim' || dm.phase === 'final') ? '参加中です' : 'エントリーしています'}（1日1部まで）</span>${dm && dm.phase === 'done' && !parts[myPart] ? `<button class="btn sm" data-act="on-tour-open" data-id="${dm.id}">結果を見る</button>` : ''}</div>` : ''}
     <div class="row"><button class="btn sm" data-act="daily-rank">📊 ランキング</button></div>
     ${sl}</div>`;
 }
@@ -7518,7 +7521,7 @@ function otInfoHTML(t) {
   if (t.daily) return `<div class="ot-quick"><span>🃏 予選 ${t.sets}セット×${t.games}ゲーム</span><span>🏆 上位${t.finalists}人で決勝</span><span>⏱️ 1手${lim}</span></div>
     <details class="hf ot-dl" data-fold="dlAbout" ${foldOpen('dlAbout') ? 'open' : ''}><summary><span>📖 デイリートーナメントとは（ルール・ポイント）</span></summary>
     <div class="ot-dlbody">
-      <section><h4>🗓 しくみ</h4><ul class="ot-ul"><li>毎日4部：17:30・18:30・19:30・20:30</li><li>出られるのは <b>1日1部だけ</b></li><li>エントリーは <b>開始の15分前</b> から</li><li><b>15人ずつ</b> のグループ（空きはAI研究員・AI）</li></ul></section>
+      <section><h4>🗓 しくみ</h4><ul class="ot-ul"><li>毎日6部：${DL_TIMES}</li><li>出られるのは <b>1日1部だけ</b></li><li>エントリーは <b>開始の15分前</b> から</li><li><b>15人ずつ</b> のグループ（空きはAI研究員・AI）</li></ul></section>
       <section><h4>🃏 試合の流れ</h4><div class="ot-grid">
         ${I('🃏', '予選', `${t.sets}セット×${t.games}ゲーム`)}${I('🏆', '決勝', `上位${t.finalists}人・${t.finalGames || t.games}ゲーム`)}
         ${I('⏱️', '1手の時間', lim)}${I('☕', 'セットの合間', `最大${t.waitMin || 5}分`)}</div></section>

@@ -46,7 +46,7 @@ AIで補充	Fill with AI	由AI补位
 きょうのデイリーは全部終わりました。次は明日の朝#時に出ます（#:#の部から・エントリーは各部の開始#分前から）	Today's daily tournaments are all done. The next ones appear tomorrow at # a.m. (from the #:# session; entry opens # min before each session)	今天的每日赛全部结束了。下一批明天早上#点公布（从#:#场开始；每场开始前#分钟可报名）
 きょうのデイリーは朝#時に出ます（エントリーは各部の開始#分前から）	Today's daily tournaments appear at # a.m. (entry opens # min before each session)	今天的每日赛早上#点公布（每场开始前#分钟可报名）
 （あしたの部は朝#時に出ます）	(tomorrow's sessions appear at # a.m.)	（明天的场次早上#点公布）
-毎日#部：#:#・#:#・#:#・#:#	# sessions daily: #:# · #:# · #:# · #:#	每天#场：#:#·#:#·#:#·#:#
+毎日#部：#:#・#:#・#:#・#:#・#:#・#:#	# sessions daily: #:# · #:# · #:# · #:# · #:# · #:#	每天#场：#:#·#:#·#:#·#:#·#:#·#:#
 📖 デイリートーナメントとは（ルール・ポイント）	📖 What is the daily tournament? (rules · points)	📖 什么是每日赛（规则·积分）
 🗓 しくみ	🗓 How it works	🗓 机制
 🃏 試合の流れ	🃏 How a tournament runs	🃏 比赛流程

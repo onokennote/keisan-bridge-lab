@@ -38,7 +38,7 @@ window.I18N_TIPS = [
   ['★1–2 AIs give away their hands in what they say. ★3 sometimes, ★4 only catchphrases, and ★5\'s words have nothing to do with their hand. Stronger opponents are harder to read!', '★1～2的AI会在台词里不小心透露真实手牌。★3偶尔会，★4只说口头禅，★5的台词和手牌毫无关系。越强越难读懂！'],
   ['Overall ranking weights: estimated skill 35, BP 30, best streak 20, Badge Attack 15. First in everything is 100 points!', '综合排行榜的权重：推定实力35、BP30、连续最佳20、徽章冲刺15。全部第一就是100分！'],
   ['Daily tournaments are 30 seconds per move. You can enter only one session a day, and you can switch sessions before it starts.', '每日赛每手限时30秒。每天只能参加一场，开始前可以换到别的场次。'],
-  ['Daily sessions 1 (17:30) and 3 (19:30) are the slow kind: 5 games per qualifier set.', '每日赛第1场（17:30）和第3场（19:30）是慢节奏型：预选赛每盘5局。'],
+  ['The 17:30 and 19:30 daily sessions are the slow kind: 5 games per qualifier set.', '每日赛17:30和19:30场是慢节奏型：预选赛每盘5局。'],
   ['Even 3 minutes of Formula Hunter helps. Like juggling a soccer ball, daily basics become speed in real games!', '算式猎人只玩3分钟也好。就像足球的颠球，每天的基本功会变成实战的速度！'],
   ['Watch when a ★5 chooses to draw. Watching good players is the fastest way to improve!', '观战时看看★5在什么时候选择摸牌。看高手比赛是进步的捷径！'],
   ['More badges unlock more avatar items. Faces, outfits, items, pets, backgrounds… so many combos that you won\'t look like anyone else. Build your own researcher!', '徽章越多，头像能用的道具也越多。脸、衣服、手持物、宠物、背景……组合多到不会和别人撞衫。打造你独一无二的研究员吧！'],

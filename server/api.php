@@ -487,8 +487,11 @@ function obTourAward(array &$t): void {
       if ($tp[$j] > 0) db()->prepare('INSERT OR REPLACE INTO tpoints (uid, pid, src, ref, pts, name, at) VALUES (?, ?, ?, ?, ?, ?, ?)')->execute([$e['uid'], $e['pid'] ?? '', 'official', $t['id'], $tp[$j], $e['name'], time()]); }
   }
 }
-// ---------- デイリートーナメント（毎朝6時に作る。17:30・18:30・19:30・20:30の4部）とシーズン（毎月前半・後半） ----------
-const DAILY_HOUR = 6, DAILY_PARTS = ['17:30', '18:30', '19:30', '20:30'], DAILY_GROUP = 15; // 1日4部。出られるのはどれか1部だけ
+// ---------- デイリートーナメント（毎朝6時に作る。6:30・7:30・17:30・18:30・19:30・20:30の6部）とシーズン（毎月前半・後半） ----------
+// 1日6部。出られるのはどれか1部だけ。キー＝部の番号（大会の id の最後）。朝の部（2026-11-21に追加）は前からの id とぶつからないよう 5・6。画面の「第N部」は時刻の順（dailyNo）
+const DAILY_HOUR = 6, DAILY_PARTS = [5 => '06:30', 6 => '07:30', 1 => '17:30', 2 => '18:30', 3 => '19:30', 4 => '20:30'], DAILY_GROUP = 15;
+function dailyNo(int $part): int { return [5 => 1, 6 => 2, 1 => 3, 2 => 4, 3 => 5, 4 => 6][$part] ?? $part; }
+function dailyTimes(): string { return implode('・', array_map(fn($x) => ltrim($x, '0'), array_values(DAILY_PARTS))); }
 const DAILY_FIN = [60, 40, 30, 20, 10];      // 決勝の順位で足すポイント（予選は「16−グループ内の順位」）
 const SEASON_BONUS = [100, 70, 50, 40, 20];  // シーズンの順位でもらえる総ポイント
 const SEASON_HALF = 10;                      // 参加者の上位半分まで
@@ -497,24 +500,26 @@ function jstTz(): DateTimeZone { return new DateTimeZone('Asia/Tokyo'); }
 function seasonKey(int $ts): string { $d = (new DateTime('@' . $ts))->setTimezone(jstTz()); return $d->format('Y-m') . ((int)$d->format('j') <= 15 ? 'a' : 'b'); }
 function seasonLabel(string $k): string { return (int)substr($k, 5, 2) . '月' . (substr($k, -1) === 'a' ? '前半' : '後半'); }
 function seasonEnd(string $k): int { $y = (int)substr($k, 0, 4); $m = (int)substr($k, 5, 2); return substr($k, -1) === 'a' ? (new DateTime(sprintf('%04d-%02d-16 00:00', $y, $m), jstTz()))->getTimestamp() : (new DateTime(sprintf('%04d-%02d-01 00:00', $y, $m), jstTz()))->modify('+1 month')->getTimestamp(); }
-// 予選のゲーム数：第1部（17:30）と第3部（19:30）は5ゲームのじっくり予選（運の波がならされる）、第2部・第4部は3ゲーム（2026-11-17から）
+// 予選のゲーム数：17:30（part 1）と19:30（part 3）は5ゲームのじっくり予選（運の波がならされる）、ほかは3ゲーム（2026-11-17から。朝の部も3ゲーム）
 function dailyGames(int $part): int { return in_array($part, [1, 3], true) ? 5 : 3; }
 function dailyCfg(DateTime $d, int $part, int $start): array {
   $sk = seasonKey($start);
-  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . $part . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . implode('・', DAILY_PARTS) . ' の4部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×' . dailyGames($part) . 'ゲーム（第1部・第3部は5ゲームのじっくり予選、第2部・第4部は3ゲーム）・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります',
+  return ['name' => 'デイリートーナメント ' . $d->format('n/j') . ' 第' . dailyNo($part) . '部（' . (new DateTime('@' . $start))->setTimezone(jstTz())->format('G:i') . '）', 'desc' => '研究所のデイリートーナメント（毎日 ' . dailyTimes() . ' の' . count(DAILY_PARTS) . '部。出られるのは1日1部だけ。エントリーは各部の開始15分前から）。15人（5人卓×3）・予選3セット×' . dailyGames($part) . 'ゲーム（17:30・19:30の部は5ゲームのじっくり予選、ほかの部は3ゲーム）・上位5人で決勝（5ゲーム）。空いた席は「まんべんなく」のAIが入ります。順位でシーズンポイント（' . seasonLabel($sk) . '）がたまります',
     'startAt' => $start, 'limit' => 30, 'judge' => 'after3', 'min' => DAILY_GROUP, 'max' => 300, 'aiFill' => true, 'aiLv' => 2, 'aiMix' => 'even', 'entry' => 'open', 'invites' => [], 'official' => false,
     'sets' => 3, 'games' => dailyGames($part), 'finalGames' => 5, 'finalists' => 5, 'waitMin' => 5, 'points' => [10, 8, 5, 2, 0], 'daily' => 1, 'part' => $part, 'season' => $sk, 'date' => $d->format('Y-m-d')];
 }
 function dailyEnsure(): void {
   $d = (new DateTime('@' . time()))->setTimezone(jstTz()); if ((int)$d->format('G') < DAILY_HOUR) return;
-  foreach (DAILY_PARTS as $i => $hm) {
-    $id = 'D' . $d->format('ymd') . ($i + 1); $q = db()->prepare('SELECT st FROM tours WHERE id = ?'); $q->execute([$id]); $old = $q->fetchColumn();
+  foreach (DAILY_PARTS as $pt => $hm) {
+    $id = 'D' . $d->format('ymd') . $pt; $q = db()->prepare('SELECT st FROM tours WHERE id = ?'); $q->execute([$id]); $old = $q->fetchColumn();
     if ($old) { $o = json_decode($old, true); if (($o['phase'] ?? '') === 'entry' && empty($o['cfg']['test']) && (($o['cfg']['sets'] ?? 0) !== 3 || empty($o['cfg']['finalGames']))) { // 形式を変えた日：まだ始まっていない部を新しい形式に
-        $nc = dailyCfg($d, $i + 1, (int)$o['cfg']['startAt']); $o['cfg'] = array_merge($o['cfg'], ['sets' => $nc['sets'], 'games' => $nc['games'], 'finalGames' => $nc['finalGames'], 'waitMin' => 5, 'desc' => $nc['desc']]);
+        $nc = dailyCfg($d, $pt, (int)$o['cfg']['startAt']); $o['cfg'] = array_merge($o['cfg'], ['sets' => $nc['sets'], 'games' => $nc['games'], 'finalGames' => $nc['finalGames'], 'waitMin' => 5, 'desc' => $nc['desc']]);
         db()->prepare('UPDATE tours SET st = ?, updated = ? WHERE id = ?')->execute([json_encode($o, JSON_UNESCAPED_UNICODE), time(), $id]); }
+      elseif ($old && ($o['phase'] ?? '') === 'entry' && empty($o['cfg']['test']) && empty($o['cfg']['group'])) { $nc = dailyCfg($d, $pt, (int)$o['cfg']['startAt']); if (($o['cfg']['name'] ?? '') !== $nc['name']) { $o['cfg']['name'] = $nc['name']; $o['cfg']['desc'] = $nc['desc']; // 朝の部を足した日：部の番号（時刻の順）を付け直す
+        db()->prepare('UPDATE tours SET st = ?, updated = ? WHERE id = ?')->execute([json_encode($o, JSON_UNESCAPED_UNICODE), time(), $id]); } }
       continue; }
     $start = (new DateTime($d->format('Y-m-d') . ' ' . $hm, jstTz()))->getTimestamp();
-    $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => dailyCfg($d, $i + 1, $start), 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
+    $t = ['id' => $id, 'host' => 'system', 'hostName' => '研究所', 'cfg' => dailyCfg($d, $pt, $start), 'phase' => 'entry', 'entrants' => [], 'set' => 0, 'openAt' => time()];
     db()->prepare('INSERT OR IGNORE INTO tours (id, host, st, ver, start_at, updated, created) VALUES (?, ?, ?, 1, ?, ?, ?)')->execute([$id, 'system', json_encode($t, JSON_UNESCAPED_UNICODE), $start, time(), time()]);
   }
 }
@@ -523,7 +528,7 @@ function dailyMineToday(string $uid, string $tpid, string $bpid): ?array {
   $d = (new DateTime('@' . time()))->setTimezone(jstTz()); $date = $d->format('Y-m-d'); $pid = $tpid !== '' ? $tpid : $bpid;
   foreach (db()->query("SELECT id, st FROM tours WHERE id LIKE 'D" . $d->format('ymd') . "%'")->fetchAll() as $r) {
     $x = json_decode($r['st'], true); if (empty($x['cfg']['daily']) || ($x['cfg']['date'] ?? '') !== $date || ($x['phase'] ?? '') === 'cancel') continue;
-    foreach ($x['entrants'] as $e) if ($e['uid'] === $uid && ($pid === '' || (string)($e['pid'] ?? '') === $pid)) return ['part' => (int)($x['cfg']['part'] ?? 0), 'id' => $r['id'], 'phase' => $x['phase']];
+    foreach ($x['entrants'] as $e) if ($e['uid'] === $uid && ($pid === '' || (string)($e['pid'] ?? '') === $pid)) return ['part' => (int)($x['cfg']['part'] ?? 0), 'no' => dailyNo((int)($x['cfg']['part'] ?? 0)), 'id' => $r['id'], 'phase' => $x['phase']];
   }
   return null;
 }
@@ -547,7 +552,7 @@ function dailyPoints(array $t): void {
 const DAILY_AI_FROM = 1794562200; // AI研究員がデイリーに出はじめる日時（2026-11-13 18:30 日本時間）
 const DAILY_AI_RATE = 0.5;         // AI研究員がその日のデイリーに出る確率（出る部は dailyAiPart で前もって1つ決まる）（空席があるときだけ）
 // AI研究員がその日に出る部（0＝出ない）。日付とキャラで決まるので、朝の時点で決まっていて、1日に1部だけ（DAILY_AI_RATE の確率で出る）
-function dailyAiPart(string $date, string $pid): int { $h = crc32('daily|' . $date . '|' . $pid); if (($h % 1000) / 1000 >= DAILY_AI_RATE) return 0; return 1 + intdiv($h, 1000) % count(DAILY_PARTS); }
+function dailyAiPart(string $date, string $pid): int { $h = crc32('daily|' . $date . '|' . $pid); if (($h % 1000) / 1000 >= DAILY_AI_RATE) return 0; $ks = array_keys(DAILY_PARTS); sort($ks); return $ks[intdiv($h, 1000) % count($ks)]; }
 function dailyResearchers(array $t, int $room): array {
   $c = $t['cfg']; if ($room <= 0 || ($c['startAt'] < DAILY_AI_FROM && empty($c['aiTest']))) return []; $rate = isset($c['aiTest']) ? (float)$c['aiTest'] : DAILY_AI_RATE;
   $used = []; // 今日すでにどこかの部（グループ）に出たAI研究員
@@ -656,7 +661,7 @@ function obCanOfficial(array $u, array $b = []): bool {
 function obTourView(array $t, string $uid, int $ver, bool $full): array {
   $c = $t['cfg']; $me = 'u:' . $uid; $now = microtime(true);
   $v = ['id' => $t['id'], 'ver' => $ver, 'aiAvoid' => $t['aiAvoid'] ?? [], 'name' => $c['name'], 'desc' => $c['desc'], 'hostName' => $t['hostName'], 'mine' => $t['host'] === $uid, 'official' => !empty($c['official']),
-    'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
+    'startAt' => $c['startAt'], 'entryAt' => $c['startAt'] - 900, 'daily' => !empty($c['daily']), 'season' => $c['season'] ?? null, 'group' => $c['group'] ?? null, 'part' => $c['part'] ?? null, 'no' => isset($c['part']) ? dailyNo((int)$c['part']) : null, 'phase' => $t['phase'], 'entry' => $c['entry'], 'invited' => obInvited($t, $uid), 'entered' => in_array($uid, array_column($t['entrants'], 'uid'), true),
     'n' => count($t['entrants']), 'invites' => $t['host'] === $uid ? ($c['invites'] ?? []) : [], 'min' => $c['min'], 'max' => $c['max'], 'sets' => $c['sets'], 'games' => $c['games'], 'finalGames' => $c['finalGames'] ?? null, 'waitMin' => intdiv(obWaitSec($c), 60), 'finalists' => $c['finalists'], 'limit' => $c['limit'], 'judge' => $c['judge'] ?? 'after3', 'aiFill' => !empty($c['aiFill']), 'aiLv' => $c['aiLv'], 'aiMix' => $c['aiMix'] ?? null, 'aiRes' => !empty($c['aiRes']), 'podAi' => !array_key_exists('podAi', $c) || !empty($c['podAi']), 'deck' => $c['deck'] ?? 'own', 'now' => $now, 'note' => $t['note'] ?? null, 'wait' => isset($t['wait']) ? ['label' => $t['wait']['label'], 'until' => $t['wait']['until'], 'need' => in_array($me, $t['wait']['keys'], true), 'ready' => isset(($t['ready'] ?? [])[$me]), 'nReady' => count(array_intersect($t['wait']['keys'], array_keys($t['ready'] ?? []))), 'n' => count($t['wait']['keys'])] : null, 'awardMin' => OB_AWARD_MIN, 'awardOk' => $t['awardOk'] ?? null, 'awards' => $t['awards'] ?? []];
   if ($full) {
     $v['entrants'] = array_map(fn($e) => ['name' => $e['name'], 'avatar' => $e['avatar'] ?? null], $t['entrants']); $v['points'] = $c['points']; $v['set'] = $t['set'] ?? 0;
@@ -1089,7 +1094,7 @@ try {
     }
     case 'daily_test': { // テストだけ：今日のデイリーを、すぐ始まる・短い設定で作り直す（season で過去のシーズンにもできる）
       if (empty($CFG['test'])) fail('使えません', 403);
-      $b = body(); $d = (new DateTime('@' . time()))->setTimezone(jstTz()); $part = max(1, min(4, (int)($b['part'] ?? 1))); $id = 'D' . $d->format('ymd') . $part;
+      $b = body(); $d = (new DateTime('@' . time()))->setTimezone(jstTz()); $part = max(1, min(6, (int)($b['part'] ?? 1))); $id = 'D' . $d->format('ymd') . $part;
       if (!empty($b['all'])) { db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute(['D' . $d->format('ymd') . '%']); }
       db()->prepare('DELETE FROM tours WHERE id LIKE ?')->execute([$id . '%']);
       $start = time() + (int)($b['startIn'] ?? 30); $cfg = dailyCfg($d, $part, $start); if (!empty($b['season'])) $cfg['season'] = (string)$b['season'];
@@ -1108,7 +1113,7 @@ try {
         $wk = $t['result'][0] ?? null; $w = $wk && isset($by[$wk]) ? array_intersect_key($by[$wk], array_flip(['name', 'ai', 'lv', 'slot', 'char'])) : null;
         $mine = null; foreach ($t['result'] ?? [] as $i => $k) if ($k === 'u:' . $u['uid']) $mine = $i + 1;
         $d = new DateTime('@' . (int)$c['startAt']); $d->setTimezone(jstTz());
-        $G[$sk][] = ['id' => $t['id'], 'short' => $d->format('n/j') . ' 第' . ($c['part'] ?? '?') . '部' . (!empty($c['group']) ? '・' . $c['group'] : ''), 'phase' => $t['phase'] ?? '', 'n' => count($t['entrants'] ?? []), 'win' => $w, 'mine' => $mine];
+        $G[$sk][] = ['id' => $t['id'], 'short' => $d->format('n/j') . ' 第' . (isset($c['part']) ? dailyNo((int)$c['part']) : '?') . '部' . (!empty($c['group']) ? '・' . $c['group'] : ''), 'phase' => $t['phase'] ?? '', 'n' => count($t['entrants'] ?? []), 'win' => $w, 'mine' => $mine];
       }
       krsort($G); $out = []; foreach ($G as $sk => $L) $out[] = ['season' => $sk, 'label' => seasonLabel($sk), 'cur' => $sk === $cur, 'tours' => $L];
       out(['ok' => true, 'seasons' => array_slice($out, 0, 12), 'aiAvoid' => db()->query("SELECT pid FROM ranks WHERE uid = 'ai'")->fetchAll(PDO::FETCH_COLUMN)]);

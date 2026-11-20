@@ -68,9 +68,9 @@ window.I18N_ROWS = (window.I18N_ROWS || []).concat(`
 ときどき本音が漏れる。	Sometimes lets the truth slip.	偶尔会说漏真心话。
 本音がセリフにそのまま出る。よく聞こう。	Says exactly what's in their hand. Listen closely.	真心话直接写在台词里。仔细听吧。
 ライバルがまだおらんな！	No rivals yet!	还没有对手呢！
-ランキングで気になる人を押して、プロフィールの「→ ライバル視する」を押してな。#人まで登録できるで！	Tap someone in the rankings, then "→ Mark as rival" on their profile. You can add up to #!	在排行榜上点你在意的人，再点资料里的「→ 视为对手」。最多可以登记#人！
+ランキングで気になる人を押して、プロフィールの「← ライバル視する」を押してな。#人まで登録できるで！	Tap someone in the rankings, then "← Mark as rival" on their profile. You can add up to #!	在排行榜上点你在意的人，再点资料里的「← 视为对手」。最多可以登记#人！
 ランキングで選ぶ	Pick in the rankings	去排行榜选
-→ ライバル視する	→ Mark as rival	→ 视为对手
+← ライバル視する	← Mark as rival	← 视为对手
 ⇄ 宿敵になる	⇄ Become nemeses	⇄ 成为宿敌
 ライバル視をやめる	Stop rivaling	不再视为对手
 🏅 バッジ・冠の称号	🏅 Badge & crown titles	🏅 徽章·王冠称号

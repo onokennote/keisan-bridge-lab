@@ -33,7 +33,7 @@ AIの読みを見た手は連続に数えへんで（途切れもせえへん）
 まずはバッジアタックを最後までやり切ってみよか！	First, try finishing a whole Badge Attack!	先试着把徽章冲刺坚持到最后吧！
 シーズンは毎月前半（#〜#日）と後半や。デイリートーナメントで貯めたポイントで、シーズンの最終順位が#位以内で銅、#位以内で銀、#位で金や！毎日#部のうち#部、コツコツ出るのが近道や！	Seasons run for the first half (days #–#) and second half of each month. With points from daily tournaments, finishing the season in the top # is bronze, top # silver, #st gold! Playing one of the # daily sessions steadily is the shortcut!	赛季分每月上半月（#～#日）和下半月。用每日赛积累的积分，赛季最终排名前#名铜、前#名银、第#名金！每天#场里坚持参加#场是捷径！
 ホームの「オンライン大会」から参加できるで。表彰台、狙っていこ！	Join from "Online tournaments" on the home screen. Go for the podium!	从主页的「在线比赛」参加。冲击领奖台吧！
-ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日#:#・#:#・#:#・#:#の#部から#部選んで出られる。決勝の順位で決まるんや！	Go for it in the daily tournament above "Online tournaments" on the home screen. Pick # of the # daily sessions (#:#, #:#, #:#, #:#). It's decided by your rank in the final!	在主页「在线比赛」上方的每日赛冲击。每天从#:#·#:#·#:#·#:#这#场中选#场参加。按决赛名次决定！
+ホームの「オンライン大会」の上のデイリートーナメントから狙えるで。毎日#:#・#:#・#:#・#:#・#:#・#:#の#部から#部選んで出られる。決勝の順位で決まるんや！	Go for it in the daily tournament above "Online tournaments" on the home screen. Pick # of the # daily sessions (#:#, #:#, #:#, #:#, #:#, #:#). It's decided by your rank in the final!	在主页「在线比赛」上方的每日赛冲击。每天从#:#·#:#·#:#·#:#·#:#·#:#这#场中选#场参加。按决赛名次决定！
 上がれるのにあえて上がらん、これが一番の勝負手や。AIの読みで捨て身が最善と出たら、思い切って見送ってみ！	Holding back when you could go out is the boldest move. When the AI reading says a sacrifice is best, go for it and hold back!	能出完却故意不出，这是最大的胜负手。AI分析显示舍身最佳时，大胆地放弃出完吧！
 人の集まる大会で上位に入ったらもらえるで。ホームの「オンライン大会」をのぞいてみ！	You get it by placing high in a tournament with lots of people. Check "Online tournaments" on the home screen!	在人多的比赛中进入前几名就能拿到。看看主页的「在线比赛」吧！
 回数やなくて、#回決めたらもらえるバッジや！AIの読みで「あえて上がらない」が最善と出る場面は、セットの最後のほうや決勝で出やすいで。そのときは勇気出して見送ってみ！	It's not about count: pull it off once and it's yours! Spots where the AI says "don't go out on purpose" tend to come late in a set or in the final. When it does, be brave and hold back!	不看次数，成功一次就能拿到！AI分析显示「故意不出完」最佳的场面，常出现在盘局后段或决赛。那时就鼓起勇气放弃出完吧！
@@ -49,7 +49,7 @@ AIの読みを見た手は連続に数えへんで（途切れもせえへん）
 目安は、直近#手で最善（最善扱いも入れて）が#%！これが最低ラインや！#手の損失の平均も#pt以内にしときたい。	The guide: #% best moves (including "counted as best") over your last # moves! That's the minimum! You also want an average loss of # pt or less per # move.	标准是最近#手中最佳（含按最佳计）达到#%！这是最低线！每#手的平均损失也最好在#pt以内。
 いまの推定実力は最善率#%・平均損失#ptや。	Your current estimated skill: #% best moves, # pt average loss.	你现在的推定实力：最佳率#%，平均损失#pt。
 いまの最高は#人、あと#人や！ランキングで気になる人をライバル視してみ。張り合いが出るで！	Your best so far is #, # more to go! Mark someone in the rankings as a rival. It makes it more fun!	目前最高是#人，还差#人！在排行榜上把在意的人视为对手吧。更有动力！
-いまは#回、あと#回や！デイリートーナメントは毎日#:#・#:#・#:#・#:#の#部から、都合のええ#部に出られるで。ホームの「オンライン大会」の上のカードからや！	You're at #, # more! The daily tournament runs # sessions a day (#:#, #:#, #:#, #:#); join whichever # suits you, from the card above "Online tournaments" on the home screen!	现在#次，还差#次！每日赛每天有#:#·#:#·#:#·#:#共#场，选方便的#场参加。从主页「在线比赛」上方的卡片进入！
+いまは#回、あと#回や！デイリートーナメントは毎日#:#・#:#・#:#・#:#・#:#・#:#の#部から、都合のええ#部に出られるで。ホームの「オンライン大会」の上のカードからや！	You're at #, # more! The daily tournament runs # sessions a day (#:#, #:#, #:#, #:#, #:#, #:#); join whichever # suits you, from the card above "Online tournaments" on the home screen!	现在#次，还差#次！每日赛每天有#:#·#:#·#:#·#:#·#:#·#:#共#场，选方便的#场参加。从主页「在线比赛」上方的卡片进入！
 まずは#つ、そろえてみよか！	Start by completing one!	先集齐一个看看吧！
 まずは#行、そろえてみよか！	Start by completing one row!	先完成一行看看吧！
 対局	Games	对局

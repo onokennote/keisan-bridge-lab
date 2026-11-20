@@ -50,7 +50,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   // 第1部・第3部は5ゲームのじっくり予選（テストの大会は短いので、ゲーム数だけ本番の値にして描き直す）
   ok(await pa.evaluate(() => { (KBAPP.ON.tours || []).forEach(v => { if (v.daily) { v.games = [1, 3].includes(+v.part) ? 5 : 3; v.sets = 3; } }); KBAPP.go('home'); return true; }), 'ゲーム数を本番の値に');
   await pa.waitForTimeout(400); await pa.evaluate(() => document.querySelector('.ol-today').scrollIntoView());
-  ok(await pa.evaluate(() => { const R = [...document.querySelectorAll('.ol-today .ol-row')]; return R.length > 0 && R.every(r => /第[13]部/.test(r.innerText) ? /🐢/.test(r.innerText) && /予選5G×3/.test(r.innerText) : /⚡/.test(r.innerText) && /予選3G×3/.test(r.innerText)); }), '部ごとに 🐢（予選5ゲーム×3セット）・⚡（予選3ゲーム×3セット）');
+  ok(await pa.evaluate(() => { const R = [...document.querySelectorAll('.ol-today .ol-row')]; return R.length > 0 && R.every(r => /第[35]部/.test(r.innerText) ? /🐢/.test(r.innerText) && /予選5G×3/.test(r.innerText) : /⚡/.test(r.innerText) && /予選3G×3/.test(r.innerText)); }), '部ごとに 🐢（予選5ゲーム×3セット）・⚡（予選3ゲーム×3セット）');
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_card5.png') });
   for (const p of [pa, pb]) { await p.evaluate(id => document.querySelector(`.ol-row[data-id="${id}"]`).click(), j.id); await p.waitForTimeout(1000); await p.click('[data-act="on-tour-entry"]'); await p.waitForTimeout(800); }
   ok(await pa.evaluate(() => KBAPP.ON.t && KBAPP.ON.t.entered && KBAPP.ON.t.daily), 'デイリーにエントリーできる（作られたときから受付）');
@@ -85,7 +85,7 @@ const api = async (a, body) => (await fetch('http://localhost:8099/api.php?a=' +
   await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_total.png') });
   await api('daily_test', { startIn: 3000, part: 4 }); // まだ受付前の別の部
   await pa.evaluate(() => { document.querySelectorAll('#modal,.whistle-ov').forEach(e => e.remove()); KBAPP.ON.toursAt = 0; KBAPP.go('home'); }); await pa.waitForTimeout(2500);
-  const dc = await pa.evaluate(() => { const c = document.querySelector('.ol-today'); return { joined: /きょうは第3部.{0,3}に参加しました/.test(c.innerText), noEntry: ![...c.querySelectorAll('button')].some(b => b.textContent.trim() === 'エントリー'), result: !!c.querySelector('.ol-note [data-act="on-tour-open"]') }; });
+  const dc = await pa.evaluate(() => { const c = document.querySelector('.ol-today'); return { joined: /きょうは第5部.{0,3}に参加しました/.test(c.innerText), noEntry: ![...c.querySelectorAll('button')].some(b => b.textContent.trim() === 'エントリー'), result: !!c.querySelector('.ol-note [data-act="on-tour-open"]') }; });
   ok(dc.joined && dc.noEntry && dc.result, `その日に出た人には、ほかの部のエントリーを出さず「参加済み」と結果のボタン（${JSON.stringify(dc)}）`);
   await pa.evaluate(() => document.querySelector('.ol-today').scrollIntoView()); await pa.screenshot({ path: path.join(__dirname, 'out', 'daily_joined.png') });
   await pa.evaluate(() => { document.querySelectorAll('#modal').forEach(e => e.remove()); KBAPP.go('home'); }); await pa.waitForTimeout(1500);
