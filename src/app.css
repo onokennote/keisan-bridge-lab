@@ -2923,3 +2923,10 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:10px;left:-2px;right:-2px}
 /* 札の下の名前に白いふちどり（地の色のある札でも読めるように） */
 .card.dk-hana .hnf i,.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val,.card.dk-hana.hk .hnf i,.fieldcard.dk-hana.hk .val{color:#1a1208;opacity:1;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0,0 0 3px #fffaf0,0 0 5px rgba(255,250,240,.9)}
+/* 花札のデザインを統一：左上に月（n月・13）、下に花・絵の名前。どちらも白いふちどり（2026-11-20） */
+.hnf .hcn,.title .fan .hnf .hcn{display:block;color:#1a1208;text-shadow:0 0 2px #fffaf0,0 0 2px #fffaf0,0 0 3px #fffaf0,0 0 5px rgba(255,250,240,.9)}
+.card.dk-hana .hnf .hcn{font-size:12px;top:2px;left:3px}
+.card.dk-hana .hnf i{font-size:9.5px;letter-spacing:.02em}
+.fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{font-size:16px;top:4px;left:5px}
+.fieldcard.dk-hana .val,.dealfly.dk-hana .df-front .val{font-size:12px;left:0;right:0}
+.title .fan .card.dk-hana .cn,.title .fan .card.dk-hana .mjn{display:none!important}
