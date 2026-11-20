@@ -44,14 +44,14 @@ html.th-pop .seat{padding:8px}
 html.th-pop .seat.turn{background:var(--pop-cream);box-shadow:4px 4px 0 var(--warn)}
 html.th-pop .seat .nm,html.th-pop .seat .stats,html.th-pop .seat .played{color:var(--pop-line)}
 html.th-pop .seat .av,html.th-pop .me-av{border:2px solid var(--pop-line);background:var(--pop-sky)}
-html.th-pop .handcount .backs i,html.th-pop .backs i{background:var(--pop-red);border:1.5px solid var(--pop-line)}
-html.th-pop .card:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en),html.th-pop .fieldcard:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en),html.th-pop .mc:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en){background:var(--pop-sf);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
-html.th-pop .card:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en).red,html.th-pop .fieldcard:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en).red{color:var(--pop-red)}
-html.th-pop .card:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en).sel{background:var(--pop-cream);box-shadow:3px 3px 0 var(--warn)}
-html.th-pop .mc:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en){border-width:1.5px;box-shadow:none}
-html.th-pop .fieldcard:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en){box-shadow:3px 3px 0 var(--pop-line)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .handcount .backs i,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .backs i{background:var(--pop-red);border:1.5px solid var(--pop-line)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .fieldcard,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .mc{background:var(--pop-sf);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line);color:var(--pop-line)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card.red,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .fieldcard.red{color:var(--pop-red)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card.sel{background:var(--pop-cream);box-shadow:3px 3px 0 var(--warn)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .mc{border-width:1.5px;box-shadow:none}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .fieldcard{box-shadow:3px 3px 0 var(--pop-line)}
 html.th-pop .fieldcard .tag{background:var(--pop-yel);color:var(--pop-line);border:2px solid var(--pop-line)}
-html.th-pop .deck i,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj) .card.back{background:var(--pop-red);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .deck i,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card.back{background:var(--pop-red);border:2px solid var(--pop-line);box-shadow:2px 2px 0 var(--pop-line)}
 html.th-pop .deck b{color:#fff;text-shadow:1px 1px 0 var(--pop-line)}
 html.th-pop .commentary .cm-name{color:var(--warn)}
 html.th-pop .commentary .cm-text{color:var(--pop-line)}
@@ -93,8 +93,8 @@ html.th-pop .host-r .host-tag{background:var(--pop-red);color:#fff}
 html.th-pop .host-av{border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
 html.th-pop .hf-suits{color:var(--pop-line)}.html.th-pop .hf-suits .r{color:var(--pop-red)}
 /* 札は地より少しだけ明るく（真っ白にはしない） */
-html.th-pop .card:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en),html.th-pop .fieldcard:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en),html.th-pop .mc:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en){background:var(--card)}
-html.th-pop .card:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en).sel{background:var(--pop-cream)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .fieldcard,html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .mc{background:var(--card)}
+html.th-pop:not(.mj):not(.dk-hana):not(.dk-gj):not(.dk-en) .card.sel{background:var(--pop-cream)}
 
 /* 表彰式の舞台：明るい舞台に */
 html.th-pop .ceremony-stage{background:radial-gradient(90% 70% at 50% 10%,#f6e6b8,#e9dcc0 75%);border:2.5px solid var(--pop-line);box-shadow:3px 3px 0 var(--pop-line)}
