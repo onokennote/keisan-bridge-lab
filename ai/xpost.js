@@ -27,7 +27,7 @@ async function tweet(text) {
 (async () => {
   if (!KEY) { console.log('KB_ADMIN_KEY がありません'); process.exit(1); }
   if (process.argv[2] === 'list') { const j = await api('x_list'); j.posts.forEach(p => console.log(`#${p.id} [${p.kind}] posted=${p.posted} ${p.res || ''}\n${p.text}\n`)); return; }
-  const j = await api('x_tick', { max: 4 });
+  const j = await api('x_tick', { max: 4, redo: process.env.X_REDO || '' }); // X_REDO：まだ出していない文を作り直す（例 daily:20261120）
   console.log(`投稿待ち ${j.posts.length}件（きょうの残り ${j.left}件）${hasX ? '' : '・Xの鍵がないので表示だけ'}`);
   const done = [];
   for (const p of j.posts) {

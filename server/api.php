@@ -1059,6 +1059,7 @@ try {
     }
     case 'x_tick': { // Xの投稿：毎朝のまとめ・ランキングの1位交代・公式大会の受付開始を作り、まだ投稿していない文を返す（GitHub Actions だけ）
       $b = body(); adminOk($b);
+      if (!empty($b['redo'])) db()->prepare('DELETE FROM xq WHERE tag = ? AND posted <= 0')->execute([(string)$b['redo']]); // まだ出していない文を作り直す（例 daily:20261120）
       try { seasonClose(); } catch (Throwable $e) { } xDailyReport(); xRankTops(); xOfficialOpen();
       $d0 = (new DateTime('today', jstTz()))->getTimestamp(); $q = db()->prepare('SELECT COUNT(*) FROM xq WHERE posted >= ?'); $q->execute([$d0]); $left = max(0, X_DAY_MAX - (int)$q->fetchColumn()); // 1日の上限
       db()->exec('UPDATE xq SET posted = -1 WHERE posted = 0 AND at < ' . (time() - 86400 * 2)); // 2日たっても出せなかった文は捨てる（古い知らせを出さない）

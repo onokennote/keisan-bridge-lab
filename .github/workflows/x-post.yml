@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '7,27,47 * * * *' # 20分ごと（毎朝6時台のデイリーのまとめもここで出る）
   workflow_dispatch:
+    inputs:
+      redo:
+        description: 'まだ出していない文を作り直す（例 daily:20261120。ふだんは空）'
+        required: false
+        default: ''
 concurrency: x-post
 jobs:
   post:
@@ -26,4 +31,5 @@ jobs:
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_REDO: ${{ github.event.inputs.redo || '' }}
         run: node ai/xpost.js
