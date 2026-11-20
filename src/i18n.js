@@ -175,7 +175,7 @@
   const DECKS = {
     zh: { cls: 'mj', key: 'kb.mj', def: true, label: on => `🀄 麻将牌：${on ? '开' : '关'}`,
       face(v, s, k) {
-        if (k === 'mc') return this.face(v, s).replace('<i>萬</i>', '') + (v >= 10 ? `<sub>${v}</sub>` : ''); // 捨て札は漢数字だけ
+        if (k === 'mc') return this.face(v, s).replace('<i>萬</i>', ''); // 捨て札は牌の字だけ（算用数字なし）
         if (v >= 1 && v <= 9) return `<span class="mjf"><b>${MJN[v - 1]}</b><i>萬</i></span>`;
         if (v === 10) return `<span class="mjf hz fl"><b>${MJF[s] || '東'}</b></span>`;
         if (v === 11) return '<span class="mjf hz bai"><b></b></span>';
