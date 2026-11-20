@@ -2036,7 +2036,7 @@ function bioEdit(from) {
     <div class="row" style="justify-content:flex-end;gap:8px"><button class="btn" data-act="${S.bioFrom === 'home' ? 'close' : 'profiles'}">戻る</button><button class="btn primary" data-act="bio-save">保存する</button></div></div>`);
   const t = $('#bio-text'); if (t) { t.oninput = () => { const n = $('#bio-n'); if (n) n.textContent = [...t.value].length + '/140'; }; setTimeout(() => t.focus(), 50); }
 }
-const SHARE_TAGS = ['計算ブリッジ', '作戦研究所'];
+const SHARE_TAGS = ['計算ブリッジ作戦研究所']; // 公式のハッシュタグ #計算ブリッジ は使わない（2026-11-21）
 // 自慢ポイント：すごい順に並べる（点数が高いほど上）
 function shareBoasts() {
   const g = G_(), c = g.cnt || {}, r = ratingOf(g.games), out = [];

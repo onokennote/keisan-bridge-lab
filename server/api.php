@@ -643,7 +643,7 @@ function rankSorted(bool $withAi): array {
 // URLを入れるのは公式大会の投稿だけ（XのAPIはURL入りの投稿が文だけの約13倍の料金）。アプリへのリンクはXのプロフィールに置く
 // 文はサーバーが作って待ち行列 xq に入れ、GitHub Actions（x-post.yml・ai/xpost.js）が読んで投稿する（Xの鍵は GitHub の Secrets だけが持つ）
 // 名前はランキングに出している名前だけ（ランキングに出さない人は「研究員さん」）。招待だけの大会は投稿しない
-const X_SITE = 'https://keisan-bridge.lolipop-now.app', X_TAG = '#計算ブリッジ', X_DAY_MAX = 12;
+const X_SITE = 'https://keisan-bridge.lolipop-now.app', X_TAG = '#計算ブリッジ作戦研究所', X_DAY_MAX = 12;
 // Xの文字数（日本語は2・URLは23で数える。上限280）
 function xLen(string $s): int { $s = preg_replace('~https?://\S+~', str_repeat('a', 23), $s); $n = 0; foreach (preg_split('//u', $s, -1, PREG_SPLIT_NO_EMPTY) as $ch) { $c = mb_ord($ch); $n += ($c <= 0x10FF || ($c >= 0x2000 && $c <= 0x200D) || ($c >= 0x2010 && $c <= 0x201F) || ($c >= 0x2032 && $c <= 0x2037)) ? 1 : 2; } return $n; }
 // 文を待ち行列へ（同じ tag は1回だけ）。長すぎるときは、行を後ろから削ってから URL・タグを付ける

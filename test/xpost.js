@@ -15,7 +15,7 @@ xTourNew(['id' => 'OFFI0001', 'cfg' => ['name' => '第1回 公式大会', 'start
 xTourNew(['id' => 'INVT0001', 'cfg' => ['name' => '家族大会', 'startAt' => ${now + 3600}, 'entry' => 'invite', 'sets' => 2, 'games' => 3, 'official' => false]]);`);
 let L = q();
 const n1 = L.find(x => x.tag === 'new:ABCD1234'), o1 = L.find(x => x.tag === 'new:OFFI0001');
-ok(n1 && /オンライン大会のお知らせ/.test(n1.text) && !/https?:/.test(n1.text) && /#計算ブリッジ/.test(n1.text), 'ふつうの大会の案内（URLなし＝Xの料金が安い・タグ）\n' + (n1 && n1.text));
+ok(n1 && /オンライン大会のお知らせ/.test(n1.text) && !/https?:/.test(n1.text) && /#計算ブリッジ作戦研究所/.test(n1.text), 'ふつうの大会の案内（URLなし＝Xの料金が安い・タグ）\n' + (n1 && n1.text));
 ok(o1 && /公式大会 開催決定/.test(o1.text) && /#t=OFFI0001/.test(o1.text) && o1.pri > n1.pri, '公式大会は目立つ見出し・先に投稿・大会の画面へのリンク\n' + (o1 && o1.text));
 ok(!L.some(x => x.tag === 'new:INVT0001'), '招待だけの大会は投稿しない');
 // 2. 大会の結果：上位3人（ランキングに出していない人は「研究員さん」・AI研究員の印）と結果ページへのリンク
