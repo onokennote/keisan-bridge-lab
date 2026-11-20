@@ -146,3 +146,21 @@ html.th-pop .ol-season .btn{white-space:nowrap;flex:none}
 /* プレイヤーの画面：新しいプレイヤー・呪文の欄 */
 html.th-pop .pm-add{background:var(--pop-yel)!important;color:var(--ink)!important;border:2px solid var(--pop-line)!important;box-shadow:2px 2px 0 var(--pop-line);font-weight:800}
 html.th-pop .cl-code,html.th-pop .pm-code .name-input{background:#fff!important;color:var(--ink)!important;border:2px solid var(--pop-line)!important}
+/* バッジ・図鑑のお知らせ（暗い帯の上の暗い字だった） */
+html.th-pop .ach-toast{background:var(--pop-sf)!important;border:2.5px solid var(--pop-line)!important;box-shadow:3px 3px 0 var(--pop-line)!important;color:var(--ink)!important}
+html.th-pop .ach-toast b{color:var(--ink)!important}
+html.th-pop .ach-toast small{color:#b5562f!important}
+html.th-pop .ach-toast em{color:var(--muted)!important}
+html.th-pop .toast{background:var(--pop-line);color:#fffaf0;border:2px solid var(--pop-line)}
+/* 判定の色（最善・好手・疑問手・悪手）は一括の黒より優先 */
+html.th-pop #app .v-best,html.th-pop #modal .v-best{color:#2f8a46!important}
+html.th-pop #app .v-ok,html.th-pop #modal .v-ok{color:#2c6fb3!important}
+html.th-pop #app .v-meh,html.th-pop #modal .v-meh{color:#c4691f!important}
+html.th-pop #app .v-bad,html.th-pop #modal .v-bad{color:#c2412f!important}
+html.th-pop .t-best,html.th-pop .t-good{background:#3f9a56!important;color:#fff!important;border:1.5px solid var(--pop-line)}
+html.th-pop .t-near{background:#dcefdc!important;color:#2f7a42!important;border:1.5px solid #2f7a42!important}
+html.th-pop .t-mine{background:var(--pop-yel)!important;color:var(--ink)!important;border:1.5px solid var(--pop-line)}
+html.th-pop .t-weak{background:var(--pop-red)!important;color:#fff!important}
+html.th-pop .cand .rk,html.th-pop .cand .top em{font-weight:900}
+/* 式・手札の文字は紺色にして、ふつうの文と見分ける */
+html.th-pop #app .seat .act:not(.draw),html.th-pop #app .expr,html.th-pop #modal .expr,html.th-pop #app .dr-moves b,html.th-pop #modal .dr-moves b,html.th-pop #app .dr-moves .mono,html.th-pop #modal .dr-moves .mono,html.th-pop #app .log .mono{color:#2563b8!important}
