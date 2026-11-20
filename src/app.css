@@ -2934,3 +2934,10 @@ html.dk-gj .title .fan .card .gjf{width:62px;height:62px}
 .card.dk-hana .hnf .hcn{top:0;left:2px}
 .fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:1px;left:4px}
 .fieldcard .tag,.fieldcard.dk-hana .tag{top:-17px}
+/* 花札の月：枠つきの札にして、カードの左上から少しはみ出させる（絵柄とかぶらないように。2026-11-20） */
+.card.dk-hana,.card.dk-hana .v,.fieldcard.dk-hana,.fieldcard.dk-hana .big,.dealfly.dk-hana .df-front,.dealfly.dk-hana .big{overflow:visible}
+.hnf .hcn,.title .fan .hnf .hcn{background:#fffaf0;border:1.5px solid #1a1208;border-radius:6px;padding:2px 4px 1px;text-shadow:none;box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.card.dk-hana .hnf .hcn{top:-9px;left:-7px;font-size:11.5px}
+.fieldcard.dk-hana .hnf .hcn,.dealfly.dk-hana .hnf .hcn{top:-10px;left:-9px;font-size:15px}
+.title .fan .card.dk-hana .hnf .hcn{top:-7px;left:-6px}
+.card.mini.tiny.dk-hana .hnf .hcn{top:-5px;left:-4px;font-size:8px;padding:0 2px;border-width:1px}
