@@ -87,4 +87,6 @@ AIの手番の速さ	AI turn speed	AI回合速度
 🎨 デザイン：クラシック	🎨 Design: Classic	🎨 设计：经典
 デザイン：ポップ	Design: Pop	设计：波普
 デザイン：クラシック	Design: Classic	设计：经典
+大三元や！	Big Three Dragons!	大三元！
+デーヴァナーガリーはまかせとき！	Leave the Devanagari to me!	天城文就交给我吧！
 `.split('\n').filter(Boolean).map(l => l.split('\t')));
